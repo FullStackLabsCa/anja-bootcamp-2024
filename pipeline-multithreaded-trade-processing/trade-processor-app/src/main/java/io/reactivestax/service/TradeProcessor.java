@@ -4,7 +4,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.reactivestax.model.JournalEntry;
 import io.reactivestax.model.Position;
 import io.reactivestax.repository.TradeRepository;
-import io.reactivestax.utility.MaintainStaticCounts;
+import io.reactivestax.utility.MaintainStaticValues;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -30,7 +30,7 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
     @Override
     public void run() {
         count++;
-        while (count < MaintainStaticCounts.getRowsPerFile() + MaintainStaticCounts.getNumberOfChunks()) {
+        while (count < MaintainStaticValues.getRowsPerFile() + MaintainStaticValues.getNumberOfChunks()) {
             try {
                 processTrade(this.tradeDeque.take());
             } catch (InterruptedException | SQLException e) {
@@ -97,9 +97,8 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
 
     @Override
     public void retryTransaction(String tradeId) throws InterruptedException {
-        int maxRetries = 3;
         int retryCount = this.retryCountMap.getOrDefault(tradeId, 0) + 1;
-        if (retryCount >= maxRetries) {
+        if (retryCount >= MaintainStaticValues.getMaxRetryCount()) {
             QueueDistributor.deadLetterTransactionDeque.putLast(tradeId);
             this.retryCountMap.remove(tradeId);
         } else {

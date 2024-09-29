@@ -8,10 +8,10 @@ public class DatabaseConnection {
     }
 
     // Configure HikariCP connection pool
-    public static HikariDataSource configureHikariCP(String port, String databaseName, String password) {
+    public static HikariDataSource configureHikariCP(String port, String databaseName, String username, String password) {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl("jdbc:mysql://localhost:" + port + "/" + databaseName);
-        config.setUsername("root");
+        config.setUsername(username);
         config.setPassword(password);
 
         // Optional HikariCP settings

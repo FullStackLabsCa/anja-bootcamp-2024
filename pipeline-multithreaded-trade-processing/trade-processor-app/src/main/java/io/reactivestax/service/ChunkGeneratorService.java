@@ -2,12 +2,13 @@ package io.reactivestax.service;
 
 import com.zaxxer.hikari.HikariDataSource;
 import io.reactivestax.database.DatabaseConnection;
-import io.reactivestax.utility.MaintainStaticCounts;
+import io.reactivestax.utility.MaintainStaticValues;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
@@ -16,16 +17,43 @@ public class ChunkGeneratorService implements ChunkGenerator, Submittable<ChunkP
     private final ExecutorService chunkGeneratorExecutorService = Executors.newFixedThreadPool(10);
     private HikariDataSource hikariDataSource;
 
-    public void setupDataSourceAndStartGeneratorAndProcessor(String path) {
+    public void setupDataSourceAndStartGeneratorAndProcessor() {
         try {
+            setStaticValues();
+            String path = MaintainStaticValues.getFilePath();
             long numOfLines = fileLineCounter(path);
-            MaintainStaticCounts.setRowsPerFile(numOfLines);
-            hikariDataSource = DatabaseConnection.configureHikariCP("3306", "trade_processor", "password123");
+            MaintainStaticValues.setRowsPerFile(numOfLines);
+            hikariDataSource = DatabaseConnection.configureHikariCP(MaintainStaticValues.getPortNumber(),
+                    MaintainStaticValues.getDbName(),
+                    MaintainStaticValues.getUsername(),
+                    MaintainStaticValues.getPassword());
             generateChunks(numOfLines, path);
             TradeProcessorService tradeProcessorService = new TradeProcessorService();
             tradeProcessorService.submitTrade(hikariDataSource);
         } catch (IOException e) {
             System.out.println("File parsing failed...");
+        }
+    }
+
+    public void setStaticValues() {
+        Properties properties = new Properties();
+        try (InputStream input = ChunkGeneratorService.class.getClassLoader().getResourceAsStream("application.properties")) {
+            if (input == null) {
+                System.out.println("Sorry, unable to find application.properties");
+                System.exit(1);
+            }
+            properties.load(input);
+            MaintainStaticValues.setFilePath(properties.getProperty("file.path"));
+            MaintainStaticValues.setChunkFilePath(properties.getProperty("chunk.file.path"));
+            MaintainStaticValues.setDbName(properties.getProperty("db.name"));
+            MaintainStaticValues.setUsername(properties.getProperty("username"));
+            MaintainStaticValues.setPassword(properties.getProperty("password"));
+            MaintainStaticValues.setPortNumber(properties.getProperty("port"));
+            MaintainStaticValues.setNumberOfChunks(Integer.parseInt(properties.getProperty("number.of.chunks")));
+            MaintainStaticValues.setMaxRetryCount(Integer.parseInt(properties.getProperty("max.retry.count")));
+        } catch (IOException e) {
+            System.out.println("File not found Exception.");
+            System.exit(1);
         }
     }
 
@@ -39,10 +67,9 @@ public class ChunkGeneratorService implements ChunkGenerator, Submittable<ChunkP
 
     @Override
     public void generateChunks(long numOfLines, String path) throws IOException {
-        int chunksCount = 10;
+        int chunksCount = MaintainStaticValues.getNumberOfChunks();
         int tempChunkCount = 1;
         long tempLineCount = 0;
-        MaintainStaticCounts.setNumberOfChunks(chunksCount);
         long linesCountPerFile = numOfLines / chunksCount;
         String chunkFilePath = buildFilePath(tempChunkCount);
         BufferedWriter writer = new BufferedWriter(new FileWriter(chunkFilePath));
@@ -69,8 +96,7 @@ public class ChunkGeneratorService implements ChunkGenerator, Submittable<ChunkP
     }
 
     public String buildFilePath(int chunkNumber) {
-        return "/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade" +
-                "-processor-app/src/main/java/io/reactivestax/assets/chunks/trade_records_chunk" + chunkNumber + ".csv";
+        return MaintainStaticValues.getChunkFilePath() + chunkNumber + ".csv";
     }
 
     @Override
