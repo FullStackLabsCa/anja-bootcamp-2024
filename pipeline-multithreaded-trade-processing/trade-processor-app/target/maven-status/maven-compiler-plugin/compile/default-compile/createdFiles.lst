@@ -1,0 +1,15 @@
+io/reactivestax/database/DatabaseConnection.class
+io/reactivestax/service/ChunkGeneratorService.class
+io/reactivestax/service/QueueDistributor.class
+io/reactivestax/service/TradeProcessorService.class
+io/reactivestax/service/ErrorLogging.class
+io/reactivestax/utility/MaintainStaticCounts.class
+io/reactivestax/model/RawPayload.class
+io/reactivestax/repository/TradeRepository.class
+io/reactivestax/service/SubmitTaskInterface.class
+io/reactivestax/model/JournalEntry.class
+io/reactivestax/service/ChunkGeneratorInterface.class
+io/reactivestax/model/Position.class
+io/reactivestax/TradeProcessorRunner.class
+io/reactivestax/service/ChunkProcessor.class
+io/reactivestax/service/TradeProcessor.class

@@ -1,12 +1,10 @@
 package io.reactivestax.repository;
 
 import io.reactivestax.model.JournalEntry;
+import io.reactivestax.model.Position;
 import io.reactivestax.model.RawPayload;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class TradeRepository {
 
@@ -20,6 +18,7 @@ public class TradeRepository {
             preparedStatement.setString(4, rawPayload.getPayload());
             preparedStatement.execute();
             connection.commit();
+            connection.setAutoCommit(true);
         }
     }
 
@@ -29,49 +28,65 @@ public class TradeRepository {
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, tradeId);
             ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
+            if (resultSet.next()) {
                 payload = resultSet.getString("payload");
             }
         }
+
         return payload;
     }
 
-    public void lookupSecurities(String cusip, Connection connection) throws SQLException {
+    public boolean lookupSecurities(String cusip, Connection connection) throws SQLException {
+        boolean validSecurity = false;
         String query = "Select 1 from securities_reference where cusip = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, cusip);
             ResultSet resultSet = preparedStatement.executeQuery();
+            if(resultSet.next()) validSecurity=true;
         }
+
+        return  validSecurity;
     }
 
     public void insertIntoJournalEntry(JournalEntry journalEntry, Connection connection) throws SQLException {
         String query = "Insert into journal_entry (account_number, security_cusip, direction, quantity, " +
                 "posted_status, transaction_time) values(?, ?, ?, ?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-
+            connection.setAutoCommit(false);
+            preparedStatement.setString(1, journalEntry.getAccountNumber());
+            preparedStatement.setString(2, journalEntry.getSecurityCusip());
+            preparedStatement.setString(3, journalEntry.getDirection());
+            preparedStatement.setInt(4, journalEntry.getQuantity());
+            preparedStatement.setString(5, journalEntry.getPostedStatus());
+            preparedStatement.setTimestamp(6, Timestamp.valueOf(journalEntry.getTransactionTime()));
+            preparedStatement.execute();
         }
     }
 
-    public void lookupPositions(Connection connection) throws SQLException {
-        String query = "Select * from positions where account_number = ?";
+    public int lookupPositions(Position position, Connection connection) throws SQLException {
+        String query = "Select quantity from positions where account_number = ? and security_cusip = ?";
+        int quantity = 0;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-
+            preparedStatement.setString(1, position.getAccountNumber());
+            preparedStatement.setString(2, position.getSecurityCusip());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                quantity = resultSet.getInt("quantity");
+            }
         }
+        return quantity;
     }
 
-    public void insertIntoPositons(Connection connection) throws SQLException {
-        String query = "Insert into positions (account_number, security_cusip, quantity) values(?, ?, ?)";
+    public void upsertIntoPositions(Position position, Connection connection) throws SQLException {
+        String query = "Insert into positions (account_number, security_cusip, quantity) values(?, ?, ?) on duplicate" +
+                " key update quantity = values(quantity)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-
-        }
-    }
-
-    public void updateEntryInPositions(String direction, Connection connection) throws SQLException {
-        String addPositonQuery = "Update positions set position = position + ? where ";
-        String subtractPositonQuery = "Update positions set position = position - ?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(direction.equals("buy") ?
-                addPositonQuery : subtractPositonQuery)) {
-
+            preparedStatement.setString(1, position.getAccountNumber());
+            preparedStatement.setString(2, position.getSecurityCusip());
+            preparedStatement.setInt(3, position.getQuantity());
+            preparedStatement.execute();
+            connection.commit();
+            connection.setAutoCommit(true);
         }
     }
 }

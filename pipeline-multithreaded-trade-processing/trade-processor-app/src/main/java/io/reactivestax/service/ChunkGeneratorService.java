@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
-public class ChunkProcessorService implements ChunkGeneratorInterface, SubmitTaskInterface<ChunkProcessor> {
+public class ChunkGeneratorService implements ChunkGeneratorInterface, SubmitTaskInterface<ChunkProcessor> {
     private final ExecutorService chunkGeneratorExecutorService = Executors.newFixedThreadPool(10);
     private HikariDataSource hikariDataSource;
 
@@ -45,7 +45,7 @@ public class ChunkProcessorService implements ChunkGeneratorInterface, SubmitTas
         MaintainStaticCounts.setNumberOfChunks(chunksCount);
         long linesCountPerFile = numOfLines / chunksCount;
         String chunkFilePath = buildFilePath(tempChunkCount);
-        BufferedWriter writer = new BufferedWriter(new FileWriter(chunkFilePath, true));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(chunkFilePath));
         try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
             String line = reader.readLine();
             while ((line = reader.readLine()) != null) {
@@ -58,7 +58,7 @@ public class ChunkProcessorService implements ChunkGeneratorInterface, SubmitTas
                     writer.close();
                     submitTask(new ChunkProcessor(chunkFilePath, hikariDataSource));
                     chunkFilePath = buildFilePath(tempChunkCount);
-                    writer = new BufferedWriter(new FileWriter(chunkFilePath, true));
+                    writer = new BufferedWriter(new FileWriter(chunkFilePath));
                 }
             }
             submitTask(new ChunkProcessor(chunkFilePath, hikariDataSource));
@@ -69,8 +69,8 @@ public class ChunkProcessorService implements ChunkGeneratorInterface, SubmitTas
     }
 
     public String buildFilePath(int chunkNumber) {
-        return "/Users/Anant.Jain/source/student/boca-bc24-java-core-problems/src" +
-                "/problems/jdbc/tradeprocessor/assets/chunks/trade_records_chunk" + chunkNumber + ".csv";
+        return "/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade" +
+                "-processor-app/src/main/java/io/reactivestax/assets/chunks/trade_records_chunk" + chunkNumber + ".csv";
     }
 
     @Override

@@ -1,60 +1,46 @@
 package io.reactivestax.model;
 
-import java.util.Date;
+
+import java.time.LocalDateTime;
 
 public class JournalEntry {
-    private String accountNumber;
-    private String securityCusip;
-    private String direction;
-    private int quantity;
-    private String postedStatus;
-    private Date transactionTime;
+    private final String accountNumber;
+    private final String securityCusip;
+    private final String direction;
+    private final int quantity;
+    private final String postedStatus;
+    private final LocalDateTime transactionTime;
+
+    public JournalEntry(String accountNumber, String securityCusip, String direction, int quantity, String postedStatus, LocalDateTime transactionTime) {
+        this.accountNumber = accountNumber;
+        this.securityCusip = securityCusip;
+        this.direction = direction;
+        this.quantity = quantity;
+        this.postedStatus = postedStatus;
+        this.transactionTime = transactionTime;
+    }
 
     public String getAccountNumber() {
         return accountNumber;
-    }
-
-    public void setAccountNumber(String accountNumber) {
-        this.accountNumber = accountNumber;
     }
 
     public String getSecurityCusip() {
         return securityCusip;
     }
 
-    public void setSecurityCusip(String securityCusip) {
-        this.securityCusip = securityCusip;
-    }
-
     public String getDirection() {
         return direction;
-    }
-
-    public void setDirection(String direction) {
-        this.direction = direction;
     }
 
     public int getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
     public String getPostedStatus() {
         return postedStatus;
     }
 
-    public void setPostedStatus(String postedStatus) {
-        this.postedStatus = postedStatus;
-    }
-
-    public Date getTransactionTime() {
+    public LocalDateTime getTransactionTime() {
         return transactionTime;
-    }
-
-    public void setTransactionTime(Date transactionTime) {
-        this.transactionTime = transactionTime;
     }
 }

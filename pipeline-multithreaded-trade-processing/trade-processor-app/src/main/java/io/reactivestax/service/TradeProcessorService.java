@@ -12,9 +12,9 @@ public class TradeProcessorService implements SubmitTaskInterface<TradeProcessor
 
     public void submitTrade(HikariDataSource hikariDataSource) {
         this.hikariDataSource = hikariDataSource;
-        submitTask(new TradeProcessor(QueueDistributor.transactionQueueOne, hikariDataSource));
-        submitTask(new TradeProcessor(QueueDistributor.transactionQueueTwo, hikariDataSource));
-        submitTask(new TradeProcessor(QueueDistributor.transactionQueueThree, hikariDataSource));
+        submitTask(new TradeProcessor(QueueDistributor.transactionDequeOne, hikariDataSource));
+        submitTask(new TradeProcessor(QueueDistributor.transactionDequeTwo, hikariDataSource));
+        submitTask(new TradeProcessor(QueueDistributor.transactionDequeThree, hikariDataSource));
     }
 
     @Override

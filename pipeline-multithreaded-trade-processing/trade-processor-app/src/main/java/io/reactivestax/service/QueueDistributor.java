@@ -6,9 +6,10 @@ public class QueueDistributor {
     static final ConcurrentMap<String, Integer> concurrentQueueDistributorMap = new ConcurrentHashMap<>();
     static int queueNumber = 1;
 
-    static LinkedBlockingQueue<String> transactionQueueOne = new LinkedBlockingQueue<>();
-    static LinkedBlockingQueue<String> transactionQueueTwo = new LinkedBlockingQueue<>();
-    static LinkedBlockingQueue<String> transactionQueueThree = new LinkedBlockingQueue<>();
+    static LinkedBlockingDeque<String> transactionDequeOne = new LinkedBlockingDeque<>();
+    static LinkedBlockingDeque<String> transactionDequeTwo = new LinkedBlockingDeque<>();
+    static LinkedBlockingDeque<String> transactionDequeThree = new LinkedBlockingDeque<>();
+    static BlockingDeque<String> deadLetterTransactionDeque = new LinkedBlockingDeque<>();
 
     private QueueDistributor() {
     }
@@ -32,13 +33,13 @@ public class QueueDistributor {
     public static void giveToQueue(String tradeId, int queueNumber) throws InterruptedException {
         switch (queueNumber) {
             case 1:
-                transactionQueueOne.put(tradeId);
+                transactionDequeOne.put(tradeId);
                 break;
             case 2:
-                transactionQueueTwo.put(tradeId);
+                transactionDequeTwo.put(tradeId);
                 break;
             case 3:
-                transactionQueueThree.put(tradeId);
+                transactionDequeThree.put(tradeId);
                 break;
             default:
         }

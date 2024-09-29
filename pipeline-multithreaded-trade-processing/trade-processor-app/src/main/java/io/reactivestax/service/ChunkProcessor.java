@@ -24,9 +24,8 @@ public class ChunkProcessor implements Runnable {
         try {
             processChunk();
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Something went wrong while establishing database connection.");
         }
-
     }
 
     public void processChunk() throws SQLException {
@@ -61,6 +60,8 @@ public class ChunkProcessor implements Runnable {
             connection.rollback();
             connection.setAutoCommit(true);
             e.printStackTrace();
+        } finally {
+            connection.close();
         }
     }
 }
