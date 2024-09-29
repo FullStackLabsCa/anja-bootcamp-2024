@@ -5,7 +5,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class TradeProcessorService implements SubmitTaskInterface<TradeProcessor> {
+public class TradeProcessorService implements Submittable<TradeProcessor> {
 
     ExecutorService tradeProcessorExecutorService = Executors.newFixedThreadPool(3);
     HikariDataSource hikariDataSource;

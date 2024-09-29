@@ -4,6 +4,7 @@ package io.reactivestax.model;
 import java.time.LocalDateTime;
 
 public class JournalEntry {
+    private final String tradeId;
     private final String accountNumber;
     private final String securityCusip;
     private final String direction;
@@ -11,13 +12,19 @@ public class JournalEntry {
     private final String postedStatus;
     private final LocalDateTime transactionTime;
 
-    public JournalEntry(String accountNumber, String securityCusip, String direction, int quantity, String postedStatus, LocalDateTime transactionTime) {
+    public JournalEntry(String tradeId, String accountNumber, String securityCusip, String direction, int quantity,
+                        String postedStatus, LocalDateTime transactionTime) {
+        this.tradeId = tradeId;
         this.accountNumber = accountNumber;
         this.securityCusip = securityCusip;
         this.direction = direction;
         this.quantity = quantity;
         this.postedStatus = postedStatus;
         this.transactionTime = transactionTime;
+    }
+
+    public String getTradeId(){
+        return this.tradeId;
     }
 
     public String getAccountNumber() {

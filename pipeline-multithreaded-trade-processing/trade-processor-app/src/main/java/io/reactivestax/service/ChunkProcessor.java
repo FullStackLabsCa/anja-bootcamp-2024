@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class ChunkProcessor implements Runnable {
+public class ChunkProcessor implements Runnable, ProcessChunk {
     private final String filePath;
     HikariDataSource hikariDataSource;
 
@@ -28,6 +28,7 @@ public class ChunkProcessor implements Runnable {
         }
     }
 
+    @Override
     public void processChunk() throws SQLException {
         Connection connection = hikariDataSource.getConnection();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {

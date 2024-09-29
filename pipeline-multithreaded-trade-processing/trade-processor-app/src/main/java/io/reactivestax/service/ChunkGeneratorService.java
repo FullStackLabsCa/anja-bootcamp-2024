@@ -12,16 +12,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
-public class ChunkGeneratorService implements ChunkGeneratorInterface, SubmitTaskInterface<ChunkProcessor> {
+public class ChunkGeneratorService implements ChunkGenerator, Submittable<ChunkProcessor> {
     private final ExecutorService chunkGeneratorExecutorService = Executors.newFixedThreadPool(10);
     private HikariDataSource hikariDataSource;
 
-    public void processTrade(String path) {
+    public void setupDataSourceAndStartGeneratorAndProcessor(String path) {
         try {
             long numOfLines = fileLineCounter(path);
             MaintainStaticCounts.setRowsPerFile(numOfLines);
             hikariDataSource = DatabaseConnection.configureHikariCP("3306", "trade_processor", "password123");
-            chunkGenerator(numOfLines, path);
+            generateChunks(numOfLines, path);
             TradeProcessorService tradeProcessorService = new TradeProcessorService();
             tradeProcessorService.submitTrade(hikariDataSource);
         } catch (IOException e) {
@@ -38,7 +38,7 @@ public class ChunkGeneratorService implements ChunkGeneratorInterface, SubmitTas
     }
 
     @Override
-    public void chunkGenerator(long numOfLines, String path) throws IOException {
+    public void generateChunks(long numOfLines, String path) throws IOException {
         int chunksCount = 10;
         int tempChunkCount = 1;
         long tempLineCount = 0;

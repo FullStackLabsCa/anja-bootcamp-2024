@@ -1,6 +1,5 @@
 package io.reactivestax.service;
 
-
 import com.zaxxer.hikari.HikariDataSource;
 import io.reactivestax.model.JournalEntry;
 import io.reactivestax.model.Position;
@@ -15,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
 
-public class TradeProcessor implements Runnable {
+public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTransaction, RetryTransaction {
 
     LinkedBlockingDeque<String> tradeDeque;
     int count = 0;
@@ -41,6 +40,7 @@ public class TradeProcessor implements Runnable {
         }
     }
 
+    @Override
     public void processTrade(String tradeId) throws SQLException, InterruptedException {
         TradeRepository tradeRepository = new TradeRepository();
         Connection connection = hikariDataSource.getConnection();
@@ -54,6 +54,7 @@ public class TradeProcessor implements Runnable {
                 positionTransaction(journalEntry, tradeRepository, connection);
             }
         } catch (SQLException e) {
+            e.printStackTrace();
             connection.rollback();
             retryTransaction(tradeId);
         } finally {
@@ -62,9 +63,11 @@ public class TradeProcessor implements Runnable {
         }
     }
 
+    @Override
     public JournalEntry journalEntryTransaction(String[] payloadArr, String cusip, TradeRepository tradeRepository,
-                                        Connection connection) throws SQLException{
+                                                Connection connection) throws SQLException {
         JournalEntry journalEntry = new JournalEntry(
+                payloadArr[0],
                 payloadArr[2],
                 cusip,
                 payloadArr[4],
@@ -76,18 +79,24 @@ public class TradeProcessor implements Runnable {
         return journalEntry;
     }
 
+    @Override
     public void positionTransaction(JournalEntry journalEntry, TradeRepository tradeRepository,
-                                    Connection connection) throws SQLException{
+                                    Connection connection) throws SQLException {
         Position position = new Position(journalEntry.getAccountNumber(), journalEntry.getSecurityCusip(),
-                journalEntry.getQuantity());
-        int quantity = tradeRepository.lookupPositions(position, connection);
+                journalEntry.getQuantity(), 0);
+        int[] positionsAndVersion = tradeRepository.lookupPositions(position, connection);
+        position.setVersion(positionsAndVersion[1]);
         if (journalEntry.getDirection().equalsIgnoreCase("BUY")) {
-            position.setQuantity(quantity + journalEntry.getQuantity());
-        } else position.setQuantity(quantity - journalEntry.getQuantity());
-        tradeRepository.upsertIntoPositions(position, connection);
+            position.setPositions(positionsAndVersion[0] + journalEntry.getQuantity());
+        } else position.setPositions(positionsAndVersion[0] - journalEntry.getQuantity());
+        if (position.getVersion() == 0) {
+            tradeRepository.insertIntoPositions(position, connection);
+        } else tradeRepository.updatePositions(position, connection);
+        tradeRepository.updateJournalEntryStatus(journalEntry.getTradeId(), connection);
     }
 
-    public void retryTransaction(String tradeId) throws InterruptedException{
+    @Override
+    public void retryTransaction(String tradeId) throws InterruptedException {
         int maxRetries = 3;
         int retryCount = this.retryCountMap.getOrDefault(tradeId, 0) + 1;
         if (retryCount >= maxRetries) {

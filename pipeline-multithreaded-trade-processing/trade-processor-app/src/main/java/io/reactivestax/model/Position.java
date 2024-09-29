@@ -3,12 +3,14 @@ package io.reactivestax.model;
 public class Position {
     private final String accountNumber;
     private final String securityCusip;
-    private int quantity;
+    private int positions;
+    private int version;
 
-    public Position(String accountNumber, String securityCusip, int quantity) {
+    public Position(String accountNumber, String securityCusip, int positions, int version) {
         this.accountNumber = accountNumber;
         this.securityCusip = securityCusip;
-        this.quantity = quantity;
+        this.positions = positions;
+        this.version = version;
     }
 
     public String getAccountNumber() {
@@ -19,11 +21,19 @@ public class Position {
         return securityCusip;
     }
 
-    public int getQuantity() {
-        return quantity;
+    public int getPositions() {
+        return positions;
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
+    public void setPositions(int positions) {
+        this.positions = positions;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
     }
 }

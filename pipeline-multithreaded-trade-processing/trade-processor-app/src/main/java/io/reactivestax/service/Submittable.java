@@ -1,5 +1,5 @@
 package io.reactivestax.service;
 
-public interface SubmitTaskInterface<T> {
+public interface Submittable<T> {
     void submitTask(T processor);
 }
