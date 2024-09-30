@@ -19,7 +19,6 @@ public class ChunkGeneratorService implements ChunkGenerator, Submittable<ChunkP
 
     public void setupDataSourceAndStartGeneratorAndProcessor() {
         try {
-            setStaticValues();
             String path = MaintainStaticValues.getFilePath();
             long numOfLines = fileLineCounter(path);
             MaintainStaticValues.setRowsPerFile(numOfLines);

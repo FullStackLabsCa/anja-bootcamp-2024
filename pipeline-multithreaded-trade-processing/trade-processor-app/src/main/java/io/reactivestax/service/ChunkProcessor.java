@@ -60,7 +60,6 @@ public class ChunkProcessor implements Runnable, ProcessChunk {
         } catch (SQLException e) {
             connection.rollback();
             connection.setAutoCommit(true);
-            e.printStackTrace();
         } finally {
             connection.close();
         }

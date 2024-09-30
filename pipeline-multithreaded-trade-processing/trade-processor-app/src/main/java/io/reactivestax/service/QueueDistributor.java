@@ -3,7 +3,7 @@ package io.reactivestax.service;
 import java.util.concurrent.*;
 
 public class QueueDistributor {
-    static final ConcurrentMap<String, Integer> concurrentQueueDistributorMap = new ConcurrentHashMap<>();
+    static ConcurrentMap<String, Integer> concurrentQueueDistributorMap = new ConcurrentHashMap<>();
     static int queueNumber = 1;
 
     static LinkedBlockingDeque<String> transactionDequeOne = new LinkedBlockingDeque<>();
@@ -12,6 +12,34 @@ public class QueueDistributor {
     static BlockingDeque<String> deadLetterTransactionDeque = new LinkedBlockingDeque<>();
 
     private QueueDistributor() {
+    }
+
+    public static ConcurrentMap<String, Integer> getConcurrentQueueDistributorMap() {
+        return concurrentQueueDistributorMap;
+    }
+
+    public static void setQueueNumber(int queueNumber) {
+        QueueDistributor.queueNumber = queueNumber;
+    }
+
+    public static void setConcurrentQueueDistributorMap(ConcurrentMap<String, Integer> concurrentQueueDistributorMap) {
+        QueueDistributor.concurrentQueueDistributorMap = concurrentQueueDistributorMap;
+    }
+
+    public static LinkedBlockingDeque<String> getTransactionDequeOne() {
+        return transactionDequeOne;
+    }
+
+    public static void setTransactionDequeOne(LinkedBlockingDeque<String> transactionDequeOne) {
+        QueueDistributor.transactionDequeOne = transactionDequeOne;
+    }
+
+    public static void setTransactionDequeTwo(LinkedBlockingDeque<String> transactionDequeTwo) {
+        QueueDistributor.transactionDequeTwo = transactionDequeTwo;
+    }
+
+    public static void setTransactionDequeThree(LinkedBlockingDeque<String> transactionDequeThree) {
+        QueueDistributor.transactionDequeThree = transactionDequeThree;
     }
 
     public static int getQueueNumber(String account) {

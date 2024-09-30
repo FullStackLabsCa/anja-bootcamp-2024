@@ -27,6 +27,22 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
         this.retryCountMap = new HashMap<>();
     }
 
+    public LinkedBlockingDeque<String> getTradeDeque() {
+        return this.tradeDeque;
+    }
+
+    public void setTradeDeque(LinkedBlockingDeque<String> tradeDeque) {
+        this.tradeDeque = tradeDeque;
+    }
+
+    public void setRetryCountMap(String key, Integer value) {
+         this.retryCountMap.put(key, value);
+    }
+
+    public Map<String, Integer> getRetryCountMap() {
+        return this.retryCountMap;
+    }
+
     @Override
     public void run() {
         count++;
@@ -103,7 +119,7 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
             this.retryCountMap.remove(tradeId);
         } else {
             this.tradeDeque.putFirst(tradeId);
-            this.retryCountMap.put(tradeId, retryCount);
+           setRetryCountMap(tradeId, retryCount);
         }
     }
 }
