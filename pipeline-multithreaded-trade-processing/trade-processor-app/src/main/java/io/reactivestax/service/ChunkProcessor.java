@@ -48,7 +48,7 @@ public class ChunkProcessor implements Runnable, ProcessChunk {
                 tradeRepository.insertTradeRawPayload(rawPayload, connection);
                 // inserts to concurrent hash map and get the queue number
                 if (rawPayload.getStatus().equals("valid")) {
-                    int queueNumber = QueueDistributor.getQueueNumber(transaction[2]);
+                    int queueNumber = QueueDistributor.getQueueNumber();
                     // inserts to the queue number found in above step
                     QueueDistributor.giveToQueue(rawPayload.getTradeId(), queueNumber);
                 }

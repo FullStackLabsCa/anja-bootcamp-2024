@@ -14,6 +14,9 @@ public class MaintainStaticValues {
     static String portNumber = "";
     static String username = "";
     static String password = "";
+    static int chunkProcessorThreadCount = 0;
+    static int tradeProcessorQueueCount = 0;
+    static int tradeProcessorThreadCount = 0;
 
     public static long getRowsPerFile() {
         return rowsPerFile;
@@ -85,5 +88,29 @@ public class MaintainStaticValues {
 
     public static void setPassword(String password) {
         MaintainStaticValues.password = password;
+    }
+
+    public static int getChunkProcessorThreadCount() {
+        return chunkProcessorThreadCount;
+    }
+
+    public static void setChunkProcessorThreadCount(int chunkProcessorThreadCount) {
+        MaintainStaticValues.chunkProcessorThreadCount = chunkProcessorThreadCount;
+    }
+
+    public static int getTradeProcessorQueueCount() {
+        return tradeProcessorQueueCount;
+    }
+
+    public static void setTradeProcessorQueueCount(int tradeProcessorQueueCount) {
+        MaintainStaticValues.tradeProcessorQueueCount = tradeProcessorQueueCount;
+    }
+
+    public static int getTradeProcessorThreadCount() {
+        return tradeProcessorThreadCount;
+    }
+
+    public static void setTradeProcessorThreadCount(int tradeProcessorThreadCount) {
+        MaintainStaticValues.tradeProcessorThreadCount = tradeProcessorThreadCount;
     }
 }

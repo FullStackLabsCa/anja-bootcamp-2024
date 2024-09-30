@@ -31,10 +31,6 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
         return this.tradeDeque;
     }
 
-    public void setTradeDeque(LinkedBlockingDeque<String> tradeDeque) {
-        this.tradeDeque = tradeDeque;
-    }
-
     public void setRetryCountMap(String key, Integer value) {
          this.retryCountMap.put(key, value);
     }

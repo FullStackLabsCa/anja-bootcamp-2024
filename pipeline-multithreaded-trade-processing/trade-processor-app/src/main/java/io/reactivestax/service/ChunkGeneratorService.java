@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 public class ChunkGeneratorService implements ChunkGenerator, Submittable<ChunkProcessor> {
-    private final ExecutorService chunkGeneratorExecutorService = Executors.newFixedThreadPool(10);
+    private ExecutorService chunkGeneratorExecutorService;
     private HikariDataSource hikariDataSource;
 
     public void setupDataSourceAndStartGeneratorAndProcessor() {
@@ -28,6 +28,7 @@ public class ChunkGeneratorService implements ChunkGenerator, Submittable<ChunkP
                     MaintainStaticValues.getUsername(),
                     MaintainStaticValues.getPassword());
             generateChunks(numOfLines, path);
+            QueueDistributor.initializeQueue();
             TradeProcessorService tradeProcessorService = new TradeProcessorService();
             tradeProcessorService.submitTrade(hikariDataSource);
         } catch (IOException e) {
@@ -51,8 +52,11 @@ public class ChunkGeneratorService implements ChunkGenerator, Submittable<ChunkP
             MaintainStaticValues.setUsername(properties.getProperty("username"));
             MaintainStaticValues.setPassword(properties.getProperty("password"));
             MaintainStaticValues.setPortNumber(properties.getProperty("port"));
-            MaintainStaticValues.setNumberOfChunks(Integer.parseInt(properties.getProperty("number.of.chunks")));
+            MaintainStaticValues.setNumberOfChunks(Integer.parseInt(properties.getProperty("chunks.count")));
             MaintainStaticValues.setMaxRetryCount(Integer.parseInt(properties.getProperty("max.retry.count")));
+            MaintainStaticValues.setChunkProcessorThreadCount(Integer.parseInt(properties.getProperty("chunk.processor.thread.count")));
+            MaintainStaticValues.setTradeProcessorQueueCount(Integer.parseInt(properties.getProperty("queue.count")));
+            MaintainStaticValues.setTradeProcessorThreadCount(Integer.parseInt(properties.getProperty("trade.processor.thread.count")));
         } catch (IOException e) {
             System.out.println("File not found Exception.");
             System.exit(1);
@@ -69,6 +73,7 @@ public class ChunkGeneratorService implements ChunkGenerator, Submittable<ChunkP
 
     @Override
     public void generateChunks(long numOfLines, String path) throws IOException, InterruptedException {
+        chunkGeneratorExecutorService = Executors.newFixedThreadPool(MaintainStaticValues.getChunkProcessorThreadCount());
         int chunksCount = MaintainStaticValues.getNumberOfChunks();
         int tempChunkCount = 1;
         long tempLineCount = 0;
@@ -94,8 +99,8 @@ public class ChunkGeneratorService implements ChunkGenerator, Submittable<ChunkP
         } finally {
             writer.close();
             chunkGeneratorExecutorService.shutdown();
-            boolean termination = chunkGeneratorExecutorService.awaitTermination(30, TimeUnit.SECONDS);
-            if(!termination) chunkGeneratorExecutorService.shutdownNow();
+//            boolean termination = chunkGeneratorExecutorService.awaitTermination(30, TimeUnit.SECONDS);
+//            if(!termination) chunkGeneratorExecutorService.shutdownNow();
         }
     }
 

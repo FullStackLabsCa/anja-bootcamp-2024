@@ -29,6 +29,7 @@ public class TradeProcessorTest {
     public void setUp() {
         ChunkGeneratorService chunkGeneratorService = new ChunkGeneratorService();
         chunkGeneratorService.setStaticValues();
+        QueueDistributor.initializeQueue();
         MaintainStaticValues.setPortNumber("3308");
         MaintainStaticValues.setFilePath("/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/trades.csv");
         MaintainStaticValues.setChunkFilePath("/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/chunks/trade_records_chunk");
@@ -43,11 +44,7 @@ public class TradeProcessorTest {
 
     @After
     public void cleanUp() throws SQLException {
-        QueueDistributor.setConcurrentQueueDistributorMap(new ConcurrentHashMap<>());
-        QueueDistributor.setTransactionDequeOne(new LinkedBlockingDeque<>());
-        QueueDistributor.setTransactionDequeTwo(new LinkedBlockingDeque<>());
-        QueueDistributor.setTransactionDequeThree(new LinkedBlockingDeque<>());
-        QueueDistributor.setQueueNumber(1);
+        QueueDistributor.initializeQueue();
 
         String deleteFromTradePayload = "Delete from trade_payloads";
         String deleteFromJournalEntry = "Delete from journal_entry";
@@ -125,14 +122,15 @@ public class TradeProcessorTest {
     public void testChunkProcessorForQueueSize() throws SQLException {
         ChunkProcessor chunkProcessor = new ChunkProcessor("/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/chunks/trade_records_chunk2.csv", dataSource);
         chunkProcessor.processChunk();
-        assertFalse(QueueDistributor.getTransactionDequeOne().isEmpty());
+        assertFalse(QueueDistributor.getTransactionDeque(1).isEmpty());
     }
 
     @Test
-    public void testChunkProcessorForConcurrentMap() throws SQLException{
+    public void testChunkProcessorForQueueNumber() throws SQLException{
         ChunkProcessor chunkProcessor = new ChunkProcessor("/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/chunks/trade_records_chunk2.csv", dataSource);
         chunkProcessor.processChunk();
-        assertEquals(2, QueueDistributor.getQueueNumber("TDB_CUST_9580313"));
+        int queueNumber = QueueDistributor.getQueueNumber();
+        assertTrue(queueNumber > 0 && queueNumber <= MaintainStaticValues.getTradeProcessorQueueCount());
     }
 
     @Test
@@ -163,28 +161,21 @@ public class TradeProcessorTest {
 
     @Test
     public void testQueueDistributorGetQueueNumber(){
-        int queueNumber = QueueDistributor.getQueueNumber("Account_ID_123445");
-        assertEquals(1, queueNumber);
-    }
-
-    @Test
-    public void testQueueDistributorConcurrentMapSize(){
-        QueueDistributor.getQueueNumber("Account_ID_123445");
-        int size = QueueDistributor.getConcurrentQueueDistributorMap().size();
-        assertEquals(1, size);
+        int queueNumber = QueueDistributor.getQueueNumber();
+        assertTrue(queueNumber > 0 && queueNumber <= MaintainStaticValues.getTradeProcessorQueueCount());
     }
 
     @Test
     public void testQueueDistributorGiveToQueue() throws InterruptedException {
         QueueDistributor.giveToQueue("TID_1234", 1);
-        assertFalse(QueueDistributor.getTransactionDequeOne().isEmpty());
+        assertFalse(QueueDistributor.getTransactionDeque(1).isEmpty());
     }
 
     @Test
     public void testTradeProcessorProcessWithCorrectTradeIdForJournalEntry() throws SQLException, InterruptedException {
         ChunkProcessor chunkProcessor = new ChunkProcessor("/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/chunks/trade_records_chunk2.csv", dataSource);
         chunkProcessor.processChunk();
-        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDequeOne(), dataSource);
+        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(1), dataSource);
         tradeProcessor.processTrade("TDB_00001000");
         String query = "Select account_number from journal_entry where trade_id = 'TDB_00001000'";
         String accountNumber = "";
@@ -199,7 +190,7 @@ public class TradeProcessorTest {
     public void testTradeProcessorProcessWithCorrectTradeIdForPositionsEntryInsert() throws SQLException, InterruptedException {
         ChunkProcessor chunkProcessor = new ChunkProcessor("/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/chunks/trade_records_chunk2.csv", dataSource);
         chunkProcessor.processChunk();
-        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDequeOne(), dataSource);
+        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(1), dataSource);
         tradeProcessor.processTrade("TDB_00001000");
         String query = "Select positions from positions where account_number='TDB_CUST_6635059' and security_cusip='NFLX'";
         int positions = 0;
@@ -214,7 +205,7 @@ public class TradeProcessorTest {
     public void testTradeProcessorProcessWithCorrectTradeIdForPositionsEntryUpdate() throws SQLException, InterruptedException {
         ChunkProcessor chunkProcessor = new ChunkProcessor("/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/chunks/trade_records_chunk2.csv", dataSource);
         chunkProcessor.processChunk();
-        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDequeOne(), dataSource);
+        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(1), dataSource);
         tradeProcessor.processTrade("TDB_00001000");
         tradeProcessor.processTrade("TDB_00001001");
         String query = "Select version from positions where account_number='TDB_CUST_6635059' and security_cusip='NFLX'";
@@ -228,7 +219,7 @@ public class TradeProcessorTest {
 
     @Test
     public void testTradeProcessorRetryTransactionDeadLetterQueue() throws InterruptedException {
-        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDequeOne(), dataSource);
+        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(1), dataSource);
         tradeProcessor.retryTransaction("TDB_00001000");
         tradeProcessor.retryTransaction("TDB_00001000");
         tradeProcessor.retryTransaction("TDB_00001000");
@@ -238,7 +229,7 @@ public class TradeProcessorTest {
 
     @Test
     public void testTradeProcessorRetryTransactionRetryCountMap() throws InterruptedException {
-        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDequeOne(), dataSource);
+        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(1), dataSource);
         tradeProcessor.retryTransaction("TDB_00001000");
         tradeProcessor.retryTransaction("TDB_00001000");
         assertEquals(1, tradeProcessor.getRetryCountMap().size());
