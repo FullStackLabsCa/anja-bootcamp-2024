@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 public class ChunkGeneratorService implements ChunkGenerator, Submittable<ChunkProcessor> {
@@ -31,6 +32,8 @@ public class ChunkGeneratorService implements ChunkGenerator, Submittable<ChunkP
             tradeProcessorService.submitTrade(hikariDataSource);
         } catch (IOException e) {
             System.out.println("File parsing failed...");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -65,7 +68,7 @@ public class ChunkGeneratorService implements ChunkGenerator, Submittable<ChunkP
     }
 
     @Override
-    public void generateChunks(long numOfLines, String path) throws IOException {
+    public void generateChunks(long numOfLines, String path) throws IOException, InterruptedException {
         int chunksCount = MaintainStaticValues.getNumberOfChunks();
         int tempChunkCount = 1;
         long tempLineCount = 0;
@@ -91,6 +94,8 @@ public class ChunkGeneratorService implements ChunkGenerator, Submittable<ChunkP
         } finally {
             writer.close();
             chunkGeneratorExecutorService.shutdown();
+            boolean termination = chunkGeneratorExecutorService.awaitTermination(30, TimeUnit.SECONDS);
+            if(!termination) chunkGeneratorExecutorService.shutdownNow();
         }
     }
 

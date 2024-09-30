@@ -83,7 +83,7 @@ public class TradeProcessorTest {
     }
 
     @Test
-    public void testGenerateChunksWithCorrectFilePath() throws IOException {
+    public void testGenerateChunksWithCorrectFilePath() throws IOException, InterruptedException {
         ChunkGeneratorService chunkGeneratorService = new ChunkGeneratorService();
         chunkGeneratorService.generateChunks(10000, MaintainStaticValues.getFilePath());
         String directoryPath = "/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/chunks";
@@ -101,7 +101,7 @@ public class TradeProcessorTest {
     }
 
     @Test(expected = IOException.class)
-    public void testGenerateChunksWithIncorrectFilePath() throws IOException {
+    public void testGenerateChunksWithIncorrectFilePath() throws IOException, InterruptedException {
         ChunkGeneratorService chunkGeneratorService = new ChunkGeneratorService();
         chunkGeneratorService.generateChunks(10000, "wrong_file_path");
     }

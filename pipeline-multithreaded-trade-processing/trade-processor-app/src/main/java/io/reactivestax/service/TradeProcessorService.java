@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class TradeProcessorService implements Submittable<TradeProcessor> {
 
@@ -15,6 +16,13 @@ public class TradeProcessorService implements Submittable<TradeProcessor> {
         submitTask(new TradeProcessor(QueueDistributor.transactionDequeOne, hikariDataSource));
         submitTask(new TradeProcessor(QueueDistributor.transactionDequeTwo, hikariDataSource));
         submitTask(new TradeProcessor(QueueDistributor.transactionDequeThree, hikariDataSource));
+        tradeProcessorExecutorService.shutdown();
+        try{
+            boolean termination = tradeProcessorExecutorService.awaitTermination(30, TimeUnit.SECONDS);
+            if(!termination) tradeProcessorExecutorService.shutdownNow();
+        } catch (InterruptedException e){
+            Thread.currentThread().interrupt();
+        }
     }
 
     @Override
