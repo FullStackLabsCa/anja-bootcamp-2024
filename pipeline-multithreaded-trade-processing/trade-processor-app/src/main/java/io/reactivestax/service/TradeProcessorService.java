@@ -5,7 +5,6 @@ import io.reactivestax.utility.MaintainStaticValues;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 public class TradeProcessorService implements Submittable<TradeProcessor> {
 
@@ -19,17 +18,10 @@ public class TradeProcessorService implements Submittable<TradeProcessor> {
             if(queueNumber == MaintainStaticValues.getTradeProcessorQueueCount()){
                 queueNumber = 0;
             }
-            System.out.println(queueNumber);
             submitTask(new TradeProcessor(QueueDistributor.getTransactionDeque(queueNumber), hikariDataSource));
             queueNumber++;
         }
         tradeProcessorExecutorService.shutdown();
-//        try {
-//            boolean termination = tradeProcessorExecutorService.awaitTermination(30, TimeUnit.SECONDS);
-//            if (!termination) tradeProcessorExecutorService.shutdownNow();
-//        } catch (InterruptedException e) {
-//            Thread.currentThread().interrupt();
-//        }
     }
 
     @Override

@@ -99,8 +99,6 @@ public class ChunkGeneratorService implements ChunkGenerator, Submittable<ChunkP
         } finally {
             writer.close();
             chunkGeneratorExecutorService.shutdown();
-//            boolean termination = chunkGeneratorExecutorService.awaitTermination(30, TimeUnit.SECONDS);
-//            if(!termination) chunkGeneratorExecutorService.shutdownNow();
         }
     }
 
