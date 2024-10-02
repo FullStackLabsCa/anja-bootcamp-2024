@@ -121,6 +121,5 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
             this.tradeDeque.putFirst(tradeId);
            setRetryCountMap(tradeId, retryCount);
         }
-        System.out.println(this.tradeDeque.toString());
     }
 }
