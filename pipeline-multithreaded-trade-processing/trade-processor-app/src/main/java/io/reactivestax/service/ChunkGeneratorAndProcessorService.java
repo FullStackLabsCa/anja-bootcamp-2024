@@ -62,7 +62,8 @@ public class ChunkGeneratorAndProcessorService implements Submittable<ChunkProce
             }
             properties.load(input);
             MaintainStaticValues.setFilePath(properties.getProperty("file.path"));
-            MaintainStaticValues.setChunkFilePath(properties.getProperty("chunk.file.path"));
+            MaintainStaticValues.setChunkDirectoryPath(properties.getProperty("chunk.directory.path"));
+            MaintainStaticValues.setChunkFilePathWithName(properties.getProperty("chunk.file.path"));
             MaintainStaticValues.setDbName(properties.getProperty("db.name"));
             MaintainStaticValues.setUsername(properties.getProperty("username"));
             MaintainStaticValues.setPassword(properties.getProperty("password"));
@@ -88,7 +89,7 @@ public class ChunkGeneratorAndProcessorService implements Submittable<ChunkProce
     }
 
     public String buildFilePath(int chunkNumber) {
-        return MaintainStaticValues.getChunkFilePath() + chunkNumber + ".csv";
+        return MaintainStaticValues.getChunkFilePathWithName() + chunkNumber + ".csv";
     }
 
     @Override

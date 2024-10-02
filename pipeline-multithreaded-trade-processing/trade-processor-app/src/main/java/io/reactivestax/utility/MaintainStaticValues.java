@@ -8,7 +8,8 @@ public class MaintainStaticValues {
     static long rowsPerFile = 0;
     static int numberOfChunks = 0;
     static String filePath = "";
-    static String chunkFilePath = "";
+    static String chunkDirectoryPath = "";
+    static String chunkFilePathWithName = "";
     static int maxRetryCount = 0;
     static String dbName = "";
     static String portNumber = "";
@@ -43,12 +44,20 @@ public class MaintainStaticValues {
         MaintainStaticValues.filePath = filePath;
     }
 
-    public static String getChunkFilePath() {
-        return chunkFilePath;
+    public static String getChunkDirectoryPath() {
+        return chunkDirectoryPath;
     }
 
-    public static void setChunkFilePath(String chunkFilePath) {
-        MaintainStaticValues.chunkFilePath = chunkFilePath;
+    public static void setChunkDirectoryPath(String chunkDirectoryPath) {
+        MaintainStaticValues.chunkDirectoryPath = chunkDirectoryPath;
+    }
+
+    public static String getChunkFilePathWithName() {
+        return chunkFilePathWithName;
+    }
+
+    public static void setChunkFilePathWithName(String chunkFilePathWithName) {
+        MaintainStaticValues.chunkFilePathWithName = chunkFilePathWithName;
     }
 
     public static int getMaxRetryCount() {
