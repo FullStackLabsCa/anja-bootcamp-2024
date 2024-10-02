@@ -11,38 +11,53 @@ import java.nio.file.Path;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-public class ChunkGeneratorService implements ChunkGenerator, Submittable<ChunkProcessor> {
-    private ExecutorService chunkGeneratorExecutorService;
-    private HikariDataSource hikariDataSource;
+public class ChunkGeneratorAndProcessorService implements Submittable<ChunkProcessor> {
+    private ExecutorService chunkProcessorExecutorService;
+    Logger logger = Logger.getLogger(ChunkGeneratorAndProcessorService.class.getName());
 
-    public void setupDataSourceAndStartGeneratorAndProcessor() {
+    public void setupDataSourceAndStartGeneratorsAndProcessors() {
+        logger.info("Setting up database and project dependencies.");
+        ExecutorService chunkGeneratorExecutorService;
         try {
             String path = MaintainStaticValues.getFilePath();
+            logger.info("Counting total number of lines in the file");
             long numOfLines = fileLineCounter(path);
             MaintainStaticValues.setRowsPerFile(numOfLines);
-            hikariDataSource = DatabaseConnection.configureHikariCP(MaintainStaticValues.getPortNumber(),
+            HikariDataSource hikariDataSource = DatabaseConnection.configureHikariCP(
+                    MaintainStaticValues.getPortNumber(),
                     MaintainStaticValues.getDbName(),
                     MaintainStaticValues.getUsername(),
-                    MaintainStaticValues.getPassword());
-            generateChunks(numOfLines, path);
+                    MaintainStaticValues.getPassword()
+            );
             QueueDistributor.initializeQueue();
+            chunkGeneratorExecutorService = Executors.newSingleThreadExecutor();
+            chunkProcessorExecutorService =
+                    Executors.newFixedThreadPool(MaintainStaticValues.getChunkProcessorThreadCount());
+            chunkGeneratorExecutorService.submit(new ChunkGeneratorRunnable());
+            logger.info("Stated chunk generator.");
+            for (int i = 0; i < MaintainStaticValues.getNumberOfChunks(); i++) {
+                submitTask(new ChunkProcessor(hikariDataSource));
+            }
+            logger.info("Started chunk processor.");
             TradeProcessorService tradeProcessorService = new TradeProcessorService();
             tradeProcessorService.submitTrade(hikariDataSource);
+            logger.info("Started trade processor.");
         } catch (IOException e) {
-            System.out.println("File parsing failed...");
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+            logger.warning("File parsing failed...");
+        }finally {
+            chunkProcessorExecutorService.shutdown();
+            chunkProcessorExecutorService.shutdown();
         }
     }
 
     public void setStaticValues() {
         Properties properties = new Properties();
-        try (InputStream input = ChunkGeneratorService.class.getClassLoader().getResourceAsStream("application.properties")) {
+        try (InputStream input = ChunkGeneratorAndProcessorService.class.getClassLoader().getResourceAsStream("application.properties")) {
             if (input == null) {
-                System.out.println("Sorry, unable to find application.properties");
+                logger.warning("Sorry, unable to find application.properties");
                 System.exit(1);
             }
             properties.load(input);
@@ -58,7 +73,7 @@ public class ChunkGeneratorService implements ChunkGenerator, Submittable<ChunkP
             MaintainStaticValues.setTradeProcessorQueueCount(Integer.parseInt(properties.getProperty("queue.count")));
             MaintainStaticValues.setTradeProcessorThreadCount(Integer.parseInt(properties.getProperty("trade.processor.thread.count")));
         } catch (IOException e) {
-            System.out.println("File not found Exception.");
+            logger.warning("File not found Exception.");
             System.exit(1);
         }
     }
@@ -71,43 +86,12 @@ public class ChunkGeneratorService implements ChunkGenerator, Submittable<ChunkP
         return lineCount - 1;
     }
 
-    @Override
-    public void generateChunks(long numOfLines, String path) throws IOException, InterruptedException {
-        chunkGeneratorExecutorService = Executors.newFixedThreadPool(MaintainStaticValues.getChunkProcessorThreadCount());
-        int chunksCount = MaintainStaticValues.getNumberOfChunks();
-        int tempChunkCount = 1;
-        long tempLineCount = 0;
-        long linesCountPerFile = numOfLines / chunksCount;
-        String chunkFilePath = buildFilePath(tempChunkCount);
-        BufferedWriter writer = new BufferedWriter(new FileWriter(chunkFilePath));
-        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
-            String line = reader.readLine();
-            while ((line = reader.readLine()) != null) {
-                writer.write(line);
-                writer.newLine();
-                tempLineCount++;
-                if (tempLineCount == linesCountPerFile && tempChunkCount != chunksCount) {
-                    tempChunkCount++;
-                    tempLineCount = 0;
-                    writer.close();
-                    submitTask(new ChunkProcessor(chunkFilePath, hikariDataSource));
-                    chunkFilePath = buildFilePath(tempChunkCount);
-                    writer = new BufferedWriter(new FileWriter(chunkFilePath));
-                }
-            }
-            submitTask(new ChunkProcessor(chunkFilePath, hikariDataSource));
-        } finally {
-            writer.close();
-            chunkGeneratorExecutorService.shutdown();
-        }
-    }
-
     public String buildFilePath(int chunkNumber) {
         return MaintainStaticValues.getChunkFilePath() + chunkNumber + ".csv";
     }
 
     @Override
     public void submitTask(ChunkProcessor chunkProcessor) {
-        chunkGeneratorExecutorService.submit(chunkProcessor);
+        chunkProcessorExecutorService.submit(chunkProcessor);
     }
 }

@@ -13,9 +13,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.logging.Logger;
 
 public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTransaction, RetryTransaction {
-
+    Logger logger = Logger.getLogger(TradeProcessor.class.getName());
     LinkedBlockingDeque<String> tradeDeque;
     int count = 0;
     HikariDataSource hikariDataSource;
@@ -47,7 +48,7 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
                 processTrade(this.tradeDeque.take());
             } catch (InterruptedException | SQLException e) {
                 Thread.currentThread().interrupt();
-                System.out.println("Thread was interrupted");
+                logger.warning("Thread was interrupted");
             }
         }
     }
@@ -66,6 +67,7 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
                 positionTransaction(journalEntry, tradeRepository, connection);
             }
         } catch (SQLException e) {
+            logger.info("Exception in SQL.");
             connection.rollback();
             retryTransaction(tradeId);
         } finally {
@@ -93,17 +95,17 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
     @Override
     public void positionTransaction(JournalEntry journalEntry, TradeRepository tradeRepository,
                                     Connection connection) throws SQLException {
-        Position position = new Position(journalEntry.getAccountNumber(), journalEntry.getSecurityCusip(),
-                journalEntry.getQuantity(), 0);
+        Position position = new Position(journalEntry.accountNumber(), journalEntry.securityCusip(),
+                journalEntry.quantity(), 0);
         int[] positionsAndVersion = tradeRepository.lookupPositions(position, connection);
         position.setVersion(positionsAndVersion[1]);
-        if (journalEntry.getDirection().equalsIgnoreCase("BUY")) {
-            position.setPositions(positionsAndVersion[0] + journalEntry.getQuantity());
-        } else position.setPositions(positionsAndVersion[0] - journalEntry.getQuantity());
+        if (journalEntry.direction().equalsIgnoreCase("BUY")) {
+            position.setPositions(positionsAndVersion[0] + journalEntry.quantity());
+        } else position.setPositions(positionsAndVersion[0] - journalEntry.quantity());
         if (position.getVersion() == 0) {
             tradeRepository.insertIntoPositions(position, connection);
         } else tradeRepository.updatePositions(position, connection);
-        tradeRepository.updateJournalEntryStatus(journalEntry.getTradeId(), connection);
+        tradeRepository.updateJournalEntryStatus(journalEntry.tradeId(), connection);
     }
 
     @Override

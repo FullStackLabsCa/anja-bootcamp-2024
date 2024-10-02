@@ -57,13 +57,13 @@ public class TradeRepository implements ReadAndWriteTradePayload, LookupSecuriti
                 "posted_status, transaction_time) values(?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
-            preparedStatement.setString(1, journalEntry.getTradeId());
-            preparedStatement.setString(2, journalEntry.getAccountNumber());
-            preparedStatement.setString(3, journalEntry.getSecurityCusip());
-            preparedStatement.setString(4, journalEntry.getDirection());
-            preparedStatement.setInt(5, journalEntry.getQuantity());
-            preparedStatement.setString(6, journalEntry.getPostedStatus());
-            preparedStatement.setTimestamp(7, Timestamp.valueOf(journalEntry.getTransactionTime()));
+            preparedStatement.setString(1, journalEntry.tradeId());
+            preparedStatement.setString(2, journalEntry.accountNumber());
+            preparedStatement.setString(3, journalEntry.securityCusip());
+            preparedStatement.setString(4, journalEntry.direction());
+            preparedStatement.setInt(5, journalEntry.quantity());
+            preparedStatement.setString(6, journalEntry.postedStatus());
+            preparedStatement.setTimestamp(7, Timestamp.valueOf(journalEntry.transactionTime()));
             preparedStatement.execute();
         }
     }

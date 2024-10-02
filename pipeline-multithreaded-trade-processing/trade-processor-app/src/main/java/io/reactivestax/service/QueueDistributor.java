@@ -4,11 +4,14 @@ import io.reactivestax.utility.MaintainStaticValues;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.*;
 
 public class QueueDistributor {
-    static Random random = new Random();
+    static ConcurrentMap<String, Integer> concurrentQueueDistributorMap = new ConcurrentHashMap<>();
+
+    static int queueNumber = 1;
+
+    static LinkedBlockingQueue<String> chunkQueue = new LinkedBlockingQueue<>();
 
     static List<LinkedBlockingDeque<String>> transactionDeque = new ArrayList<>();
 
@@ -21,6 +24,22 @@ public class QueueDistributor {
         return transactionDeque.get(index);
     }
 
+    public static int figureOutTheNextQueue(String value) {
+        int queue = 0;
+        if (concurrentQueueDistributorMap.containsKey(value)) {
+            queue = concurrentQueueDistributorMap.get(value);
+        } else {
+            concurrentQueueDistributorMap.put(value, queueNumber);
+            queue = queueNumber;
+            queueNumber++;
+            if (queueNumber > 3) {
+                queueNumber = 1;
+            }
+        }
+
+        return queue;
+    }
+
     public static void initializeQueue() {
         int count = MaintainStaticValues.getTradeProcessorQueueCount();
         while (count-- != 0) {
@@ -28,11 +47,7 @@ public class QueueDistributor {
         }
     }
 
-    public static int getQueueNumber() {
-        return random.nextInt(MaintainStaticValues.getTradeProcessorQueueCount());
-    }
-
-    public static void giveToQueue(String tradeId, int queueNumber) throws InterruptedException {
+    public static void giveToTradeQueue(String tradeId, int queueNumber) throws InterruptedException {
         LinkedBlockingDeque<String> linkedBlockingDeque = transactionDeque.get(queueNumber);
         linkedBlockingDeque.put(tradeId);
         transactionDeque.set(queueNumber, linkedBlockingDeque);

@@ -17,6 +17,7 @@ public class MaintainStaticValues {
     static int chunkProcessorThreadCount = 0;
     static int tradeProcessorQueueCount = 0;
     static int tradeProcessorThreadCount = 0;
+    static String tradeDistributionCriteria = "";
 
     public static long getRowsPerFile() {
         return rowsPerFile;
@@ -112,5 +113,13 @@ public class MaintainStaticValues {
 
     public static void setTradeProcessorThreadCount(int tradeProcessorThreadCount) {
         MaintainStaticValues.tradeProcessorThreadCount = tradeProcessorThreadCount;
+    }
+
+    public static String getTradeDistributionCriteria() {
+        return tradeDistributionCriteria;
+    }
+
+    public static void setTradeDistributionCriteria(String tradeDistributionCriteria) {
+        MaintainStaticValues.tradeDistributionCriteria = tradeDistributionCriteria;
     }
 }

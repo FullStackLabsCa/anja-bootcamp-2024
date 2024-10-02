@@ -3,33 +3,43 @@ package io.reactivestax.service;
 import com.zaxxer.hikari.HikariDataSource;
 import io.reactivestax.model.RawPayload;
 import io.reactivestax.repository.TradeRepository;
+import io.reactivestax.utility.MaintainStaticValues;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Logger;
 
 public class ChunkProcessor implements Runnable, ProcessChunk {
-    private final String filePath;
+    Logger logger = Logger.getLogger(ChunkProcessor.class.getName());
+    LinkedBlockingQueue<String> chunkQueue = QueueDistributor.chunkQueue;
     HikariDataSource hikariDataSource;
+    int count = 0;
 
-    public ChunkProcessor(String filePath, HikariDataSource hikariDataSource) {
-        this.filePath = filePath;
+    public ChunkProcessor(HikariDataSource hikariDataSource) {
         this.hikariDataSource = hikariDataSource;
+        this.count = 0;
     }
 
     @Override
     public void run() {
         try {
-            processChunk();
+            while(this.count == 0) {
+                String filePath = this.chunkQueue.take();
+                processChunk(filePath);
+            }
+        }catch (InterruptedException e){
+            Thread.currentThread().interrupt();
         } catch (SQLException e) {
-            System.out.println("Something went wrong while establishing database connection.");
+            logger.warning("Something went wrong while establishing database connection.");
         }
     }
 
     @Override
-    public void processChunk() throws SQLException {
+    public void processChunk(String filePath) throws SQLException {
         Connection connection = hikariDataSource.getConnection();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             RawPayload rawPayload = new RawPayload();
@@ -48,15 +58,15 @@ public class ChunkProcessor implements Runnable, ProcessChunk {
                 tradeRepository.insertTradeRawPayload(rawPayload, connection);
                 // inserts to concurrent hash map and get the queue number
                 if (rawPayload.getStatus().equals("valid")) {
-                    int queueNumber = QueueDistributor.getQueueNumber();
+                    int queueNumber = QueueDistributor.figureOutTheNextQueue(MaintainStaticValues.getTradeDistributionCriteria().equals("accountNumber")?transaction[2]:rawPayload.getTradeId());
                     // inserts to the queue number found in above step
-                    QueueDistributor.giveToQueue(rawPayload.getTradeId(), queueNumber);
+                    QueueDistributor.giveToTradeQueue(rawPayload.getTradeId(), queueNumber);
                 }
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (IOException e) {
-            System.out.println("File not found.");
+            logger.warning("File not found.");
         } catch (SQLException e) {
             connection.rollback();
             connection.setAutoCommit(true);
