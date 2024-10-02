@@ -10,16 +10,11 @@ public class TradeProcessorService implements Submittable<TradeProcessor> {
 
     ExecutorService tradeProcessorExecutorService = Executors.newFixedThreadPool(MaintainStaticValues.getTradeProcessorThreadCount());
     HikariDataSource hikariDataSource;
-    int queueNumber = 0;
 
     public void submitTrade(HikariDataSource hikariDataSource) {
         this.hikariDataSource = hikariDataSource;
-        for (int i = 0; i < MaintainStaticValues.getTradeProcessorThreadCount(); i++) {
-            if(queueNumber == MaintainStaticValues.getTradeProcessorQueueCount()){
-                queueNumber = 0;
-            }
-            submitTask(new TradeProcessor(QueueDistributor.getTransactionDeque(queueNumber), hikariDataSource));
-            queueNumber++;
+        for (int i = 0; i < MaintainStaticValues.getTradeProcessorQueueCount(); i++) {
+            submitTask(new TradeProcessor(QueueDistributor.getTransactionDeque(i), hikariDataSource));
         }
         tradeProcessorExecutorService.shutdown();
     }

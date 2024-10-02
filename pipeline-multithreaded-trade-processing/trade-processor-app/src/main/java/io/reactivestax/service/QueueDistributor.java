@@ -24,7 +24,7 @@ public class QueueDistributor {
         return transactionDeque.get(index);
     }
 
-    public static int figureOutTheNextQueue(String value) {
+    public static synchronized int figureOutTheNextQueue(String value) {
         int queue = 0;
         if (concurrentQueueDistributorMap.containsKey(value)) {
             queue = concurrentQueueDistributorMap.get(value);

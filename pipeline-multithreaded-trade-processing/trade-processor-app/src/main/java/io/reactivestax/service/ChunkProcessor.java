@@ -28,10 +28,8 @@ public class ChunkProcessor implements Runnable, ProcessChunk {
     public void run() {
         try {
             while (this.count == 0) {
-                System.out.println(this.chunkQueue.toString());
                 String filePath = this.chunkQueue.take();
                 if (!filePath.isEmpty()) {
-                    System.out.println(filePath);
                     processChunk(filePath);
                     count++;
                 }
@@ -39,7 +37,6 @@ public class ChunkProcessor implements Runnable, ProcessChunk {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (SQLException e) {
-            System.out.println(e);
             logger.warning("Something went wrong while establishing database connection.");
         }
     }
@@ -73,10 +70,10 @@ public class ChunkProcessor implements Runnable, ProcessChunk {
             Thread.currentThread().interrupt();
         } catch (IOException e) {
             logger.warning("File not found.");
-//        } catch (SQLException e) {
-//            System.out.println(e);
-//            connection.rollback();
-//            connection.setAutoCommit(true);
+        } catch (SQLException e) {
+            System.out.println(e);
+            connection.rollback();
+            connection.setAutoCommit(true);
         } finally {
             connection.close();
         }

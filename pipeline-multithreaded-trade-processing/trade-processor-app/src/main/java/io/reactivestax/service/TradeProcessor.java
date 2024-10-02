@@ -13,6 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTransaction, RetryTransaction {
@@ -45,7 +46,9 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
         count++;
         while (count < MaintainStaticValues.getRowsPerFile() + MaintainStaticValues.getNumberOfChunks()) {
             try {
-                processTrade(this.tradeDeque.take());
+                String tradeId = this.tradeDeque.poll(500, TimeUnit.MILLISECONDS);
+                if(tradeId==null) break;
+                 else processTrade(tradeId);
             } catch (InterruptedException | SQLException e) {
                 Thread.currentThread().interrupt();
                 logger.warning("Thread was interrupted");
@@ -118,5 +121,6 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
             this.tradeDeque.putFirst(tradeId);
            setRetryCountMap(tradeId, retryCount);
         }
+        System.out.println(this.tradeDeque.toString());
     }
 }
