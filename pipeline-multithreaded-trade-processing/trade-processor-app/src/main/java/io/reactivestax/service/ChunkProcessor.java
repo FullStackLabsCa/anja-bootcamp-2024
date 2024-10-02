@@ -27,13 +27,19 @@ public class ChunkProcessor implements Runnable, ProcessChunk {
     @Override
     public void run() {
         try {
-            while(this.count == 0) {
+            while (this.count == 0) {
+                System.out.println(this.chunkQueue.toString());
                 String filePath = this.chunkQueue.take();
-                processChunk(filePath);
+                if (!filePath.isEmpty()) {
+                    System.out.println(filePath);
+                    processChunk(filePath);
+                    count++;
+                }
             }
-        }catch (InterruptedException e){
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (SQLException e) {
+            System.out.println(e);
             logger.warning("Something went wrong while establishing database connection.");
         }
     }
@@ -58,7 +64,7 @@ public class ChunkProcessor implements Runnable, ProcessChunk {
                 tradeRepository.insertTradeRawPayload(rawPayload, connection);
                 // inserts to concurrent hash map and get the queue number
                 if (rawPayload.getStatus().equals("valid")) {
-                    int queueNumber = QueueDistributor.figureOutTheNextQueue(MaintainStaticValues.getTradeDistributionCriteria().equals("accountNumber")?transaction[2]:rawPayload.getTradeId());
+                    int queueNumber = QueueDistributor.figureOutTheNextQueue(MaintainStaticValues.getTradeDistributionCriteria().equals("accountNumber") ? transaction[2] : rawPayload.getTradeId());
                     // inserts to the queue number found in above step
                     QueueDistributor.giveToTradeQueue(rawPayload.getTradeId(), queueNumber);
                 }
@@ -67,9 +73,10 @@ public class ChunkProcessor implements Runnable, ProcessChunk {
             Thread.currentThread().interrupt();
         } catch (IOException e) {
             logger.warning("File not found.");
-        } catch (SQLException e) {
-            connection.rollback();
-            connection.setAutoCommit(true);
+//        } catch (SQLException e) {
+//            System.out.println(e);
+//            connection.rollback();
+//            connection.setAutoCommit(true);
         } finally {
             connection.close();
         }

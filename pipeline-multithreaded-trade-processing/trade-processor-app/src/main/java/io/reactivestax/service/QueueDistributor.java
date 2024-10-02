@@ -9,7 +9,7 @@ import java.util.concurrent.*;
 public class QueueDistributor {
     static ConcurrentMap<String, Integer> concurrentQueueDistributorMap = new ConcurrentHashMap<>();
 
-    static int queueNumber = 1;
+    static int queueNumber = 0;
 
     static LinkedBlockingQueue<String> chunkQueue = new LinkedBlockingQueue<>();
 
@@ -32,8 +32,8 @@ public class QueueDistributor {
             concurrentQueueDistributorMap.put(value, queueNumber);
             queue = queueNumber;
             queueNumber++;
-            if (queueNumber > 3) {
-                queueNumber = 1;
+            if (queueNumber >= MaintainStaticValues.getTradeProcessorQueueCount()) {
+                queueNumber = 0;
             }
         }
 
