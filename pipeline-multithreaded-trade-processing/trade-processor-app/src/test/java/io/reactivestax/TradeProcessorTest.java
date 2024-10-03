@@ -35,6 +35,10 @@ public class TradeProcessorTest {
         MaintainStaticValues.setFilePath("/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/trades.csv");
         MaintainStaticValues.setChunkFilePathWithName("/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/chunks/trade_records_chunk");
         MaintainStaticValues.setChunkDirectoryPath("/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/chunks");
+        MaintainStaticValues.setNumberOfChunks(10);
+        MaintainStaticValues.setChunkProcessorThreadCount(10);
+        MaintainStaticValues.setTradeProcessorQueueCount(2);
+        MaintainStaticValues.setChunkProcessorThreadCount(5);
         Files.createDirectories(Paths.get(MaintainStaticValues.getChunkDirectoryPath()));
         dataSource = DatabaseConnection.configureHikariCP(MaintainStaticValues.getPortNumber(),
                 MaintainStaticValues.getDbName(), MaintainStaticValues.getUsername(), MaintainStaticValues.getPassword());
@@ -102,7 +106,7 @@ public class TradeProcessorTest {
                     fileCount++;
                 }
             }
-            assertEquals(1, fileCount);
+            assertEquals(10, fileCount);
         }
     }
 
@@ -122,7 +126,7 @@ public class TradeProcessorTest {
 
     @Test
     public void testSetStaticValues() {
-        assertEquals(1, MaintainStaticValues.getNumberOfChunks());
+        assertEquals(10, MaintainStaticValues.getNumberOfChunks());
     }
 
     @Test
@@ -138,7 +142,7 @@ public class TradeProcessorTest {
         QueueDistributor.figureOutTheNextQueue("TID_000001");
         QueueDistributor.figureOutTheNextQueue("TID_000002");
         int queueNumber = QueueDistributor.figureOutTheNextQueue("TID_000003");
-        assertEquals(0, queueNumber);
+        assertEquals(1, queueNumber);
     }
 
     @Test
@@ -153,7 +157,7 @@ public class TradeProcessorTest {
         if (resultSet.next()) {
             count = resultSet.getInt("count");
         }
-        assertEquals(10000, count);
+        assertEquals(1000, count);
     }
 
 
@@ -176,14 +180,14 @@ public class TradeProcessorTest {
         ChunkProcessor chunkProcessor = new ChunkProcessor(dataSource);
         chunkProcessor.processChunk(MaintainStaticValues.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
         TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0), dataSource);
-        tradeProcessor.processTrade("TDB_00001000");
-        String query = "Select account_number from journal_entry where trade_id = 'TDB_00001000'";
+        tradeProcessor.processTrade("TDB_00000995");
+        String query = "Select account_number from journal_entry where trade_id = 'TDB_00000995'";
         String accountNumber = "";
         ResultSet resultSet = connection.prepareStatement(query).executeQuery();
         if (resultSet.next()) {
             accountNumber = resultSet.getString("account_number");
         }
-        assertEquals("TDB_CUST_6635059", accountNumber);
+        assertEquals("TDB_CUST_5423076", accountNumber);
     }
 
     @Test
@@ -193,14 +197,15 @@ public class TradeProcessorTest {
         ChunkProcessor chunkProcessor = new ChunkProcessor(dataSource);
         chunkProcessor.processChunk(MaintainStaticValues.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
         TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0), dataSource);
-        tradeProcessor.processTrade("TDB_00001000");
-        String query = "Select positions from positions where account_number='TDB_CUST_6635059' and security_cusip='NFLX'";
+        tradeProcessor.processTrade("TDB_00000995");
+        String query = "Select positions from positions where account_number='TDB_CUST_5423076' and " +
+                "security_cusip='MSFT'";
         int positions = 0;
         ResultSet resultSet = connection.prepareStatement(query).executeQuery();
         if (resultSet.next()) {
             positions = resultSet.getInt("positions");
         }
-        assertEquals(-137, positions);
+        assertEquals(-830, positions);
     }
 
     @Test
