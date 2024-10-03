@@ -44,7 +44,7 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
     @Override
     public void run() {
         count++;
-        while (count < MaintainStaticValues.getRowsPerFile() + MaintainStaticValues.getNumberOfChunks()) {
+        while (count < MaintainStaticValues.getTotalNoOfLines() + MaintainStaticValues.getNumberOfChunks()) {
             try {
                 String tradeId = this.tradeDeque.poll(500, TimeUnit.MILLISECONDS);
                 if(tradeId==null) break;

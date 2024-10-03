@@ -22,7 +22,7 @@ Logger logger = Logger.getLogger(ChunkGeneratorRunnable.class.getName());
 
     @Override
     public void generateChunks() throws IOException, InterruptedException {
-        long numOfLines = MaintainStaticValues.getRowsPerFile();
+        long numOfLines = MaintainStaticValues.getTotalNoOfLines();
         String path = MaintainStaticValues.getFilePath();
         int chunksCount = MaintainStaticValues.getNumberOfChunks();
         int tempChunkCount = 1;

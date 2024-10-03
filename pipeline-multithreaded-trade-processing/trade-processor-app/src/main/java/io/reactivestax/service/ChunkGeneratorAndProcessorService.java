@@ -25,7 +25,7 @@ public class ChunkGeneratorAndProcessorService implements Submittable<ChunkProce
             String path = MaintainStaticValues.getFilePath();
             logger.info("Counting total number of lines in the file");
             long numOfLines = fileLineCounter(path);
-            MaintainStaticValues.setRowsPerFile(numOfLines);
+            MaintainStaticValues.setTotalNoOfLines(numOfLines);
             HikariDataSource hikariDataSource = DatabaseConnection.configureHikariCP(
                     MaintainStaticValues.getPortNumber(),
                     MaintainStaticValues.getDbName(),

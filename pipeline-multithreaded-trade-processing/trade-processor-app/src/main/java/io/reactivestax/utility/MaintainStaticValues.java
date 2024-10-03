@@ -5,7 +5,7 @@ public class MaintainStaticValues {
     private MaintainStaticValues() {
     }
 
-    static long rowsPerFile = 0;
+    static long totalNoOfLines = 0;
     static int numberOfChunks = 0;
     static String filePath = "";
     static String chunkDirectoryPath = "";
@@ -20,12 +20,12 @@ public class MaintainStaticValues {
     static int tradeProcessorThreadCount = 0;
     static String tradeDistributionCriteria = "";
 
-    public static long getRowsPerFile() {
-        return rowsPerFile;
+    public static long getTotalNoOfLines() {
+        return totalNoOfLines;
     }
 
-    public static void setRowsPerFile(long rowsPerFile) {
-        MaintainStaticValues.rowsPerFile = rowsPerFile;
+    public static void setTotalNoOfLines(long totalNoOfLines) {
+        MaintainStaticValues.totalNoOfLines = totalNoOfLines;
     }
 
     public static int getNumberOfChunks() {

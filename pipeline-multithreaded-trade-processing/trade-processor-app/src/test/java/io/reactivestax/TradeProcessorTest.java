@@ -4,7 +4,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.reactivestax.database.DatabaseConnection;
 import io.reactivestax.service.*;
 import io.reactivestax.utility.MaintainStaticValues;
-import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -15,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.*;
 import java.util.Objects;
+import java.util.logging.Logger;
 
 import static org.junit.Assert.*;
 
@@ -29,6 +29,7 @@ public class TradeProcessorTest {
         chunkGeneratorAndProcessorService.setStaticValues();
         QueueDistributor.initializeQueue();
         MaintainStaticValues.setPortNumber("3308");
+        MaintainStaticValues.setTotalNoOfLines(10000);
         MaintainStaticValues.setFilePath("/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/trades.csv");
         MaintainStaticValues.setChunkFilePathWithName("/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/chunks/trade_records_chunk");
         MaintainStaticValues.setChunkDirectoryPath("/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/chunks");
@@ -60,8 +61,11 @@ public class TradeProcessorTest {
         }
         File directory = new File(MaintainStaticValues.getChunkDirectoryPath());
         boolean delete = false;
-        for (File file : Objects.requireNonNull(directory.listFiles())) {
-            delete = file.delete();
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : Objects.requireNonNull(directory.listFiles())) {
+                delete = file.delete();
+            }
         }
         if (delete) logger.info("Cleanup done");
     }
@@ -151,7 +155,7 @@ public class TradeProcessorTest {
 
 
     @Test(expected = NullPointerException.class)
-    public void testChunkProcessorWithNullDataSource() throws SQLException{
+    public void testChunkProcessorWithNullDataSource() throws SQLException {
         ChunkProcessor chunkProcessor = new ChunkProcessor(null);
         chunkProcessor.processChunk("wrong_file_path");
     }
@@ -167,13 +171,13 @@ public class TradeProcessorTest {
         ChunkGeneratorRunnable chunkGeneratorRunnable = new ChunkGeneratorRunnable();
         chunkGeneratorRunnable.generateChunks();
         ChunkProcessor chunkProcessor = new ChunkProcessor(dataSource);
-        chunkProcessor.processChunk(MaintainStaticValues.getChunkDirectoryPath()+"/trade_records_chunk1.csv");
+        chunkProcessor.processChunk(MaintainStaticValues.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
         TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0), dataSource);
         tradeProcessor.processTrade("TDB_00001000");
         String query = "Select account_number from journal_entry where trade_id = 'TDB_00001000'";
         String accountNumber = "";
         ResultSet resultSet = connection.prepareStatement(query).executeQuery();
-        if(resultSet.next()){
+        if (resultSet.next()) {
             accountNumber = resultSet.getString("account_number");
         }
         assertEquals("TDB_CUST_6635059", accountNumber);
@@ -184,13 +188,13 @@ public class TradeProcessorTest {
         ChunkGeneratorRunnable chunkGeneratorRunnable = new ChunkGeneratorRunnable();
         chunkGeneratorRunnable.generateChunks();
         ChunkProcessor chunkProcessor = new ChunkProcessor(dataSource);
-        chunkProcessor.processChunk(MaintainStaticValues.getChunkDirectoryPath()+"/trade_records_chunk1.csv");
+        chunkProcessor.processChunk(MaintainStaticValues.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
         TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0), dataSource);
         tradeProcessor.processTrade("TDB_00001000");
         String query = "Select positions from positions where account_number='TDB_CUST_6635059' and security_cusip='NFLX'";
         int positions = 0;
         ResultSet resultSet = connection.prepareStatement(query).executeQuery();
-        if(resultSet.next()){
+        if (resultSet.next()) {
             positions = resultSet.getInt("positions");
         }
         assertEquals(-137, positions);
@@ -201,7 +205,7 @@ public class TradeProcessorTest {
         ChunkGeneratorRunnable chunkGeneratorRunnable = new ChunkGeneratorRunnable();
         chunkGeneratorRunnable.generateChunks();
         ChunkProcessor chunkProcessor = new ChunkProcessor(dataSource);
-        chunkProcessor.processChunk(MaintainStaticValues.getChunkDirectoryPath()+"/trade_records_chunk1.csv");
+        chunkProcessor.processChunk(MaintainStaticValues.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
         TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0), dataSource);
         tradeProcessor.processTrade("TDB_00000001");
         tradeProcessor.processTrade("TDB_00000002");
@@ -209,7 +213,7 @@ public class TradeProcessorTest {
                 "security_cusip='TSLA'";
         int version = 0;
         ResultSet resultSet = connection.prepareStatement(query).executeQuery();
-        if(resultSet.next()){
+        if (resultSet.next()) {
             version = resultSet.getInt("version");
         }
         assertEquals(2, version);
