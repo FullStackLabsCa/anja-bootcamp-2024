@@ -89,7 +89,7 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
                 cusip,
                 payloadArr[4],
                 Integer.parseInt(payloadArr[5]),
-                "NOT_POSTED",
+                "not_posted",
                 LocalDateTime.parse(payloadArr[1], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
         );
         tradeRepository.insertIntoJournalEntry(journalEntry, connection);

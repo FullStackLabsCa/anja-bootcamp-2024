@@ -42,7 +42,7 @@ public class TradeRepository implements ReadAndWriteTradePayload, LookupSecuriti
         String query = "Update trade_payloads set lookup_status = ? where trade_id = ?";
         connection.setAutoCommit(false);
         try(PreparedStatement preparedStatement = connection.prepareStatement(query)){
-            preparedStatement.setString(1, lookupStatus ? "succeeded": "failed");
+            preparedStatement.setString(1, lookupStatus ? "pass": "fail");
             preparedStatement.setString(2, tradeId);
             preparedStatement.execute();
         }
@@ -51,7 +51,7 @@ public class TradeRepository implements ReadAndWriteTradePayload, LookupSecuriti
 
     @Override
     public void updateTradePayloadPostedStatus(String postedStatus, String tradeId, Connection connection) throws SQLException {
-        String query = "Update trade_payloads set posted_status = ? where trade_id = ?";
+        String query = "Update trade_payloads set je_status = ? where trade_id = ?";
         try(PreparedStatement preparedStatement = connection.prepareStatement(query)){
             preparedStatement.setString(1, postedStatus);
             preparedStatement.setString(2, tradeId);

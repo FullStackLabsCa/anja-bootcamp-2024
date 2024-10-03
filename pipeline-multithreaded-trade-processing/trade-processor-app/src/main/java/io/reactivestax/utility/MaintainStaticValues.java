@@ -19,6 +19,8 @@ public class MaintainStaticValues {
     static int tradeProcessorQueueCount = 0;
     static int tradeProcessorThreadCount = 0;
     static String tradeDistributionCriteria = "";
+    static boolean tradeDistributionUseMap = false;
+    static String tradeDistributionAlgorithm = "";
 
     public static long getTotalNoOfLines() {
         return totalNoOfLines;
@@ -130,5 +132,21 @@ public class MaintainStaticValues {
 
     public static void setTradeDistributionCriteria(String tradeDistributionCriteria) {
         MaintainStaticValues.tradeDistributionCriteria = tradeDistributionCriteria;
+    }
+
+    public static boolean isTradeDistributionUseMap() {
+        return tradeDistributionUseMap;
+    }
+
+    public static void setTradeDistributionUseMap(boolean tradeDistributionUseMap) {
+        MaintainStaticValues.tradeDistributionUseMap = tradeDistributionUseMap;
+    }
+
+    public static String getTradeDistributionAlgorithm() {
+        return tradeDistributionAlgorithm;
+    }
+
+    public static void setTradeDistributionAlgorithm(String tradeDistributionAlgorithm) {
+        MaintainStaticValues.tradeDistributionAlgorithm = tradeDistributionAlgorithm;
     }
 }

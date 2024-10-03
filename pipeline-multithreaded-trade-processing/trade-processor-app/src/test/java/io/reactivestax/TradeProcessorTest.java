@@ -187,6 +187,74 @@ public class TradeProcessorTest {
     }
 
     @Test
+    public void testTradeProcessorProcessForLookupStatusWithCusipNotPresentInSecuritiesReference() throws SQLException, InterruptedException, IOException {
+        ChunkGeneratorRunnable chunkGeneratorRunnable = new ChunkGeneratorRunnable();
+        chunkGeneratorRunnable.generateChunks();
+        ChunkProcessor chunkProcessor = new ChunkProcessor(dataSource);
+        chunkProcessor.processChunk(MaintainStaticValues.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
+        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0), dataSource);
+        tradeProcessor.processTrade("TDB_00000000");
+        String query = "Select lookup_status from trade_payloads where trade_id = 'TDB_00000000'";
+        String lookupStatus = "";
+        ResultSet resultSet = connection.prepareStatement(query).executeQuery();
+        if (resultSet.next()) {
+            lookupStatus = resultSet.getString("lookup_status");
+        }
+        assertEquals("fail", lookupStatus);
+    }
+
+    @Test
+    public void testTradeProcessorProcessForLookupStatusWithCusipPresentInSecuritiesReference() throws SQLException, InterruptedException, IOException {
+        ChunkGeneratorRunnable chunkGeneratorRunnable = new ChunkGeneratorRunnable();
+        chunkGeneratorRunnable.generateChunks();
+        ChunkProcessor chunkProcessor = new ChunkProcessor(dataSource);
+        chunkProcessor.processChunk(MaintainStaticValues.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
+        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0), dataSource);
+        tradeProcessor.processTrade("TDB_00000002");
+        String query = "Select lookup_status from trade_payloads where trade_id = 'TDB_00000002'";
+        String lookupStatus = "";
+        ResultSet resultSet = connection.prepareStatement(query).executeQuery();
+        if (resultSet.next()) {
+            lookupStatus = resultSet.getString("lookup_status");
+        }
+        assertEquals("pass", lookupStatus);
+    }
+
+    @Test
+    public void testTradeProcessorProcessForPostedStatusWithCusipNotPresentInSecuritiesReference() throws SQLException, InterruptedException, IOException {
+        ChunkGeneratorRunnable chunkGeneratorRunnable = new ChunkGeneratorRunnable();
+        chunkGeneratorRunnable.generateChunks();
+        ChunkProcessor chunkProcessor = new ChunkProcessor(dataSource);
+        chunkProcessor.processChunk(MaintainStaticValues.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
+        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0), dataSource);
+        tradeProcessor.processTrade("TDB_00000002");
+        String query = "Select je_status from trade_payloads where trade_id = 'TDB_00000000'";
+        String postedStatus = "";
+        ResultSet resultSet = connection.prepareStatement(query).executeQuery();
+        if (resultSet.next()) {
+            postedStatus = resultSet.getString("je_status");
+        }
+        assertEquals("not_posted", postedStatus);
+    }
+
+    @Test
+    public void testTradeProcessorProcessForPostedStatusWithCusipPresentInSecuritiesReference() throws SQLException, InterruptedException, IOException {
+        ChunkGeneratorRunnable chunkGeneratorRunnable = new ChunkGeneratorRunnable();
+        chunkGeneratorRunnable.generateChunks();
+        ChunkProcessor chunkProcessor = new ChunkProcessor(dataSource);
+        chunkProcessor.processChunk(MaintainStaticValues.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
+        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0), dataSource);
+        tradeProcessor.processTrade("TDB_00000002");
+        String query = "Select je_status from trade_payloads where trade_id = 'TDB_00000002'";
+        String postedStatus = "";
+        ResultSet resultSet = connection.prepareStatement(query).executeQuery();
+        if (resultSet.next()) {
+            postedStatus = resultSet.getString("je_status");
+        }
+        assertEquals("posted", postedStatus);
+    }
+
+    @Test
     public void testTradeProcessorProcessWithCorrectTradeIdForPositionsEntryInsert() throws SQLException, InterruptedException, IOException {
         ChunkGeneratorRunnable chunkGeneratorRunnable = new ChunkGeneratorRunnable();
         chunkGeneratorRunnable.generateChunks();
@@ -239,4 +307,6 @@ public class TradeProcessorTest {
         tradeProcessor.retryTransaction("TDB_00001000");
         assertEquals(1, tradeProcessor.getRetryCountMap().size());
     }
+
+
 }

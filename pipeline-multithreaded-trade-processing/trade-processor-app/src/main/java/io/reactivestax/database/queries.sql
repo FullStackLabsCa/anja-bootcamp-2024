@@ -30,7 +30,7 @@ CREATE TABLE trade_payloads (
     trade_id VARCHAR(20) NOT NULL UNIQUE,
     payload TEXT NOT NULL,
     validity_status ENUM('valid', 'invalid') NOT NULL,
-    lookup_status ENUM('succeeded', 'failed') NOT NULL,
-    posted_status ENUM('posted', 'not_posted') NOT NULL,
+    lookup_status ENUM('pass', 'fail') NOT NULL,
+    je_status ENUM('posted', 'not_posted') NOT NULL,
     PRIMARY KEY (id)
 );
