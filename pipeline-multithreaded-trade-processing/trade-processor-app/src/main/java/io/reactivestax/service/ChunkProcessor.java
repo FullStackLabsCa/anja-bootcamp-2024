@@ -71,7 +71,6 @@ public class ChunkProcessor implements Runnable, ProcessChunk {
         } catch (IOException e) {
             logger.warning("File not found.");
         } catch (SQLException e) {
-            System.out.println(e);
             connection.rollback();
             connection.setAutoCommit(true);
         } finally {
