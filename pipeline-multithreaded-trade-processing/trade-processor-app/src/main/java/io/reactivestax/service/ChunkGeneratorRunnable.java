@@ -3,6 +3,8 @@ package io.reactivestax.service;
 import io.reactivestax.utility.MaintainStaticValues;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.logging.Logger;
 
 public class ChunkGeneratorRunnable implements Runnable, ChunkGenerator{
@@ -30,6 +32,7 @@ Logger logger = Logger.getLogger(ChunkGeneratorRunnable.class.getName());
         long linesCountPerFile = numOfLines / chunksCount;
         ChunkGeneratorAndProcessorService chunkGeneratorAndProcessorService = new ChunkGeneratorAndProcessorService();
         String chunkFilePath = chunkGeneratorAndProcessorService.buildFilePath(tempChunkCount);
+        Files.createDirectories(Paths.get(MaintainStaticValues.getChunkDirectoryPath()));
         BufferedWriter writer = new BufferedWriter(new FileWriter(chunkFilePath));
         try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
             String line = reader.readLine();

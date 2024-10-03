@@ -12,6 +12,8 @@ import org.junit.contrib.java.lang.system.SystemOutRule;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.util.Objects;
 import java.util.logging.Logger;
@@ -24,7 +26,7 @@ public class TradeProcessorTest {
     Logger logger = Logger.getLogger(TradeProcessorTest.class.getName());
 
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
         ChunkGeneratorAndProcessorService chunkGeneratorAndProcessorService = new ChunkGeneratorAndProcessorService();
         chunkGeneratorAndProcessorService.setStaticValues();
         QueueDistributor.initializeQueue();
@@ -33,6 +35,7 @@ public class TradeProcessorTest {
         MaintainStaticValues.setFilePath("/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/trades.csv");
         MaintainStaticValues.setChunkFilePathWithName("/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/chunks/trade_records_chunk");
         MaintainStaticValues.setChunkDirectoryPath("/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/chunks");
+        Files.createDirectories(Paths.get(MaintainStaticValues.getChunkDirectoryPath()));
         dataSource = DatabaseConnection.configureHikariCP(MaintainStaticValues.getPortNumber(),
                 MaintainStaticValues.getDbName(), MaintainStaticValues.getUsername(), MaintainStaticValues.getPassword());
         try {
