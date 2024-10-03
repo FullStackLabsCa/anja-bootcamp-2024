@@ -4,6 +4,7 @@ import io.reactivestax.utility.MaintainStaticValues;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.*;
 
 public class QueueDistributor {
@@ -17,6 +18,8 @@ public class QueueDistributor {
 
     static BlockingDeque<String> deadLetterTransactionDeque = new LinkedBlockingDeque<>();
 
+    static Random random = new Random();
+
     private QueueDistributor() {
     }
 
@@ -25,19 +28,29 @@ public class QueueDistributor {
     }
 
     public static synchronized int figureOutTheNextQueue(String value) {
-        int queue = 0;
-        if (concurrentQueueDistributorMap.containsKey(value)) {
-            queue = concurrentQueueDistributorMap.get(value);
+        int queue;
+        if (MaintainStaticValues.isTradeDistributionUseMap()) {
+            if (concurrentQueueDistributorMap.containsKey(value)) {
+                queue = concurrentQueueDistributorMap.get(value);
+            } else {
+                queue = getQueueNumberNumberUsingAlgorithm();
+                concurrentQueueDistributorMap.put(value, queue);
+            }
+        } else queue = getQueueNumberNumberUsingAlgorithm();
+
+        return queue;
+    }
+
+    public static int getQueueNumberNumberUsingAlgorithm() {
+        if (MaintainStaticValues.getTradeDistributionAlgorithm().equals("random")) {
+            return random.nextInt(MaintainStaticValues.getTradeProcessorQueueCount());
         } else {
-            concurrentQueueDistributorMap.put(value, queueNumber);
-            queue = queueNumber;
             queueNumber++;
             if (queueNumber >= MaintainStaticValues.getTradeProcessorQueueCount()) {
                 queueNumber = 0;
             }
         }
-
-        return queue;
+        return queueNumber;
     }
 
     public static void initializeQueue() {

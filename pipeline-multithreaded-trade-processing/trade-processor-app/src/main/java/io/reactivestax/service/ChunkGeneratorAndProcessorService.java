@@ -74,6 +74,8 @@ public class ChunkGeneratorAndProcessorService implements Submittable<ChunkProce
             MaintainStaticValues.setTradeProcessorQueueCount(Integer.parseInt(properties.getProperty("queue.count")));
             MaintainStaticValues.setTradeProcessorThreadCount(Integer.parseInt(properties.getProperty("trade.processor.thread.count")));
             MaintainStaticValues.setTradeDistributionCriteria(properties.getProperty("trade.distribution.criteria"));
+            MaintainStaticValues.setTradeDistributionUseMap(Boolean.parseBoolean(properties.getProperty("trade.distribution.use.map")));
+            MaintainStaticValues.setTradeDistributionAlgorithm(properties.getProperty("trade.distribution.algorithm"));
         } catch (IOException e) {
             logger.warning("File not found Exception.");
             System.exit(1);

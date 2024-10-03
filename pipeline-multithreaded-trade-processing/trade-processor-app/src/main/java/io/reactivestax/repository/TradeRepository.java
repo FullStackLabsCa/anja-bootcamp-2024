@@ -10,13 +10,12 @@ public class TradeRepository implements ReadAndWriteTradePayload, LookupSecuriti
 
     @Override
     public void insertTradeRawPayload(RawPayload rawPayload, Connection connection) throws SQLException {
-        String query = "Insert into trade_payloads (trade_id, status, status_reason, payload) values(?, ?, ?, ?)";
+        String query = "Insert into trade_payloads (trade_id, validity_status, payload) values(?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
             preparedStatement.setString(1, rawPayload.getTradeId());
-            preparedStatement.setString(2, rawPayload.getStatus());
-            preparedStatement.setString(3, rawPayload.getStatusReason());
-            preparedStatement.setString(4, rawPayload.getPayload());
+            preparedStatement.setString(2, rawPayload.getValidityStatus());
+            preparedStatement.setString(3, rawPayload.getPayload());
             preparedStatement.execute();
             connection.commit();
             connection.setAutoCommit(true);
@@ -39,6 +38,28 @@ public class TradeRepository implements ReadAndWriteTradePayload, LookupSecuriti
     }
 
     @Override
+    public void updateTradePayloadLookupStatus(boolean lookupStatus, String tradeId, Connection connection) throws SQLException {
+        String query = "Update trade_payloads set lookup_status = ? where trade_id = ?";
+        connection.setAutoCommit(false);
+        try(PreparedStatement preparedStatement = connection.prepareStatement(query)){
+            preparedStatement.setString(1, lookupStatus ? "pass": "fail");
+            preparedStatement.setString(2, tradeId);
+            preparedStatement.execute();
+        }
+        if(!lookupStatus) connection.commit();
+    }
+
+    @Override
+    public void updateTradePayloadPostedStatus(String postedStatus, String tradeId, Connection connection) throws SQLException {
+        String query = "Update trade_payloads set je_status = ? where trade_id = ?";
+        try(PreparedStatement preparedStatement = connection.prepareStatement(query)){
+            preparedStatement.setString(1, postedStatus);
+            preparedStatement.setString(2, tradeId);
+            preparedStatement.execute();
+        }
+    }
+
+    @Override
     public boolean lookupSecurities(String cusip, Connection connection) throws SQLException {
         boolean validSecurity = false;
         String query = "Select 1 from securities_reference where cusip = ?";
@@ -56,7 +77,6 @@ public class TradeRepository implements ReadAndWriteTradePayload, LookupSecuriti
         String query = "Insert into journal_entry (trade_id, account_number, security_cusip, direction, quantity, " +
                 "posted_status, transaction_time) values(?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            connection.setAutoCommit(false);
             preparedStatement.setString(1, journalEntry.tradeId());
             preparedStatement.setString(2, journalEntry.accountNumber());
             preparedStatement.setString(3, journalEntry.securityCusip());
