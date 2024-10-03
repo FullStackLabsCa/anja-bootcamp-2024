@@ -65,6 +65,7 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
             String[] payloadArr = payload.split(",");
             String cusip = payloadArr[3];
             boolean validSecurity = tradeRepository.lookupSecurities(cusip, connection);
+            tradeRepository.updateTradePayloadLookupStatus(validSecurity, tradeId, connection);
             if (validSecurity) {
                 JournalEntry journalEntry = journalEntryTransaction(payloadArr, cusip, tradeRepository, connection);
                 positionTransaction(journalEntry, tradeRepository, connection);
@@ -92,6 +93,7 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
                 LocalDateTime.parse(payloadArr[1], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
         );
         tradeRepository.insertIntoJournalEntry(journalEntry, connection);
+        tradeRepository.updateTradePayloadPostedStatus("posted", journalEntry.tradeId(), connection);
         return journalEntry;
     }
 

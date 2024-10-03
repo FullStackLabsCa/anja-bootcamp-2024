@@ -51,16 +51,15 @@ public class ChunkProcessor implements Runnable, ProcessChunk {
                 rawPayload.setPayload(payload);
                 String[] transaction = payload.split(",");
                 rawPayload.setTradeId(transaction[0]);
-                rawPayload.setStatus("valid");
+                rawPayload.setValidityStatus("valid");
                 if (transaction.length != 7) {
-                    rawPayload.setStatus("invalid");
-                    rawPayload.setStatusReason("missing column(s)");
+                    rawPayload.setValidityStatus("invalid");
                 }
                 TradeRepository tradeRepository = new TradeRepository();
                 // inserts to raw_payloads table
                 tradeRepository.insertTradeRawPayload(rawPayload, connection);
                 // inserts to concurrent hash map and get the queue number
-                if (rawPayload.getStatus().equals("valid")) {
+                if (rawPayload.getValidityStatus().equals("valid")) {
                     int queueNumber = QueueDistributor.figureOutTheNextQueue(MaintainStaticValues.getTradeDistributionCriteria().equals("accountNumber") ? transaction[2] : rawPayload.getTradeId());
                     // inserts to the queue number found in above step
                     QueueDistributor.giveToTradeQueue(rawPayload.getTradeId(), queueNumber);

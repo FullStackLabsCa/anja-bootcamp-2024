@@ -9,4 +9,8 @@ public interface ReadAndWriteTradePayload {
     void insertTradeRawPayload(RawPayload rawPayload, Connection connection) throws SQLException;
 
     String readRawPayload(String tradeId, Connection connection) throws SQLException;
+
+    void updateTradePayloadLookupStatus(boolean lookupStatus, String tradeId, Connection connection) throws SQLException;
+
+    void updateTradePayloadPostedStatus(String postedStatus, String tradeId, Connection connection) throws SQLException;
 }
