@@ -33,6 +33,9 @@ public class TradeProcessorTest {
         ApplicationPropertiesUtils.setChunkFilePathWithName("/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/chunks/trade_records_chunk");
         ApplicationPropertiesUtils.setChunkDirectoryPath("/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/chunks");
         ApplicationPropertiesUtils.setNumberOfChunks(10);
+        ApplicationPropertiesUtils.setChunkProcessorThreadCount(1);
+        ApplicationPropertiesUtils.setTradeProcessorQueueCount(1);
+        ApplicationPropertiesUtils.setChunkProcessorThreadCount(1);
         Files.createDirectories(Paths.get(ApplicationPropertiesUtils.getChunkDirectoryPath()));
         try {
             connection = DBUtils.getInstance().getConnection();
