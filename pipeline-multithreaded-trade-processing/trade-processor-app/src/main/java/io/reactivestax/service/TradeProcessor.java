@@ -2,8 +2,6 @@ package io.reactivestax.service;
 
 import io.reactivestax.database.DBUtils;
 import io.reactivestax.model.JournalEntry;
-import io.reactivestax.model.Position;
-import io.reactivestax.repository.PositionsRepository;
 import io.reactivestax.repository.SecuritiesReferenceRepository;
 import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.repository.JournalEntryRepository;
@@ -13,23 +11,19 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTransaction, RetryTransaction {
+public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTransaction {
     Logger logger = Logger.getLogger(TradeProcessor.class.getName());
     LinkedBlockingDeque<String> tradeDeque;
     int count = 0;
-    private final Map<String, Integer> retryCountMap;
     private Connection connection;
     ApplicationPropertiesUtils applicationPropertiesUtils;
 
     public TradeProcessor(LinkedBlockingDeque<String> tradeDeque, ApplicationPropertiesUtils applicationPropertiesUtils) {
         this.tradeDeque = tradeDeque;
-        this.retryCountMap = new HashMap<>();
         this.applicationPropertiesUtils = applicationPropertiesUtils;
     }
 
@@ -39,14 +33,6 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
 
     public LinkedBlockingDeque<String> getTradeDeque() {
         return this.tradeDeque;
-    }
-
-    public void setRetryCountMap(String key, Integer value) {
-        this.retryCountMap.put(key, value);
-    }
-
-    public Map<String, Integer> getRetryCountMap() {
-        return this.retryCountMap;
     }
 
     @Override
@@ -84,21 +70,18 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
             boolean validSecurity = securitiesReferenceRepository.lookupSecurities(cusip, this.connection);
             tradePayloadRepository.updateTradePayloadLookupStatus(validSecurity, tradeId, this.connection);
             if (validSecurity) {
-                JournalEntry journalEntry = journalEntryTransaction(payloadArr, cusip);
-                positionTransaction(journalEntry);
+               journalEntryTransaction(payloadArr, cusip);
             }
         } catch (SQLException e) {
-            System.out.println(e);
             logger.info("Exception in SQL.");
             this.connection.rollback();
-            retryTransaction(tradeId);
         } finally {
             this.connection.setAutoCommit(true);
         }
     }
 
     @Override
-    public JournalEntry journalEntryTransaction(String[] payloadArr, String cusip) throws SQLException {
+    public void journalEntryTransaction(String[] payloadArr, String cusip) throws SQLException {
         JournalEntry journalEntry = new JournalEntry(
                 payloadArr[0],
                 payloadArr[2],
@@ -112,35 +95,5 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
         journalEntryRepository.insertIntoJournalEntry(journalEntry, this.connection);
         TradePayloadRepository tradePayloadRepository = new TradePayloadRepository();
         tradePayloadRepository.updateTradePayloadPostedStatus("posted", journalEntry.tradeId(), this.connection);
-        return journalEntry;
-    }
-
-    @Override
-    public void positionTransaction(JournalEntry journalEntry) throws SQLException {
-        Position position = new Position(journalEntry.accountNumber(), journalEntry.securityCusip(),
-                journalEntry.quantity(), 0);
-        PositionsRepository positionsRepository = new PositionsRepository();
-        int[] positionsAndVersion = positionsRepository.lookupPositions(position, this.connection);
-        position.setVersion(positionsAndVersion[1]);
-        if (journalEntry.direction().equalsIgnoreCase("BUY")) {
-            position.setPositions(positionsAndVersion[0] + journalEntry.quantity());
-        } else position.setPositions(positionsAndVersion[0] - journalEntry.quantity());
-        if (position.getVersion() == 0) {
-            positionsRepository.insertIntoPositions(position, this.connection);
-        } else positionsRepository.updatePositions(position, this.connection);
-        JournalEntryRepository journalEntryRepository = new JournalEntryRepository();
-        journalEntryRepository.updateJournalEntryStatus(journalEntry.tradeId(), this.connection);
-    }
-
-    @Override
-    public void retryTransaction(String tradeId) throws InterruptedException {
-        int retryCount = this.retryCountMap.getOrDefault(tradeId, 0) + 1;
-        if (retryCount >= this.applicationPropertiesUtils.getMaxRetryCount()) {
-            QueueDistributor.deadLetterTransactionDeque.putLast(tradeId);
-            this.retryCountMap.remove(tradeId);
-        } else {
-            this.tradeDeque.putFirst(tradeId);
-            setRetryCountMap(tradeId, retryCount);
-        }
     }
 }

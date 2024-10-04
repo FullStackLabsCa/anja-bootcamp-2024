@@ -1,7 +1,5 @@
 package io.reactivestax.service;
 
-import io.reactivestax.utility.ApplicationPropertiesUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -15,8 +13,6 @@ public class QueueDistributor {
     static LinkedBlockingQueue<String> chunkQueue = new LinkedBlockingQueue<>();
 
     static List<LinkedBlockingDeque<String>> transactionDeque = new ArrayList<>();
-
-    static BlockingDeque<String> deadLetterTransactionDeque = new LinkedBlockingDeque<>();
 
     static Random random = new Random();
 
