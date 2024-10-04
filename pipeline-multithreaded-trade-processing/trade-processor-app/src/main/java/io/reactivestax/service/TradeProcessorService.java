@@ -1,21 +1,17 @@
 package io.reactivestax.service;
 
-import com.sun.tools.javac.Main;
-import com.zaxxer.hikari.HikariDataSource;
-import io.reactivestax.utility.MaintainStaticValues;
+import io.reactivestax.utility.ApplicationPropertiesUtils;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class TradeProcessorService implements Submittable<TradeProcessor> {
 
-    ExecutorService tradeProcessorExecutorService = Executors.newFixedThreadPool(MaintainStaticValues.getTradeProcessorThreadCount());
-    HikariDataSource hikariDataSource;
+    ExecutorService tradeProcessorExecutorService = Executors.newFixedThreadPool(ApplicationPropertiesUtils.getTradeProcessorThreadCount());
 
-    public void submitTrade(HikariDataSource hikariDataSource) {
-        this.hikariDataSource = hikariDataSource;
-        for (int i = 0; i < MaintainStaticValues.getTradeProcessorQueueCount(); i++) {
-            submitTask(new TradeProcessor(QueueDistributor.getTransactionDeque(i), hikariDataSource));
+    public void submitTrade() {
+        for (int i = 0; i < ApplicationPropertiesUtils.getTradeProcessorQueueCount(); i++) {
+            submitTask(new TradeProcessor(QueueDistributor.getTransactionDeque(i)));
         }
         tradeProcessorExecutorService.shutdown();
     }

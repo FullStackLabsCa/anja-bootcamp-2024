@@ -1,9 +1,9 @@
 package io.reactivestax.service;
 
-import com.zaxxer.hikari.HikariDataSource;
+import io.reactivestax.database.DBUtils;
 import io.reactivestax.model.RawPayload;
-import io.reactivestax.repository.TradeRepository;
-import io.reactivestax.utility.MaintainStaticValues;
+import io.reactivestax.repository.TradePayloadRepository;
+import io.reactivestax.utility.ApplicationPropertiesUtils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -16,11 +16,9 @@ import java.util.logging.Logger;
 public class ChunkProcessor implements Runnable, ProcessChunk {
     Logger logger = Logger.getLogger(ChunkProcessor.class.getName());
     LinkedBlockingQueue<String> chunkQueue = QueueDistributor.chunkQueue;
-    HikariDataSource hikariDataSource;
     int count = 0;
 
-    public ChunkProcessor(HikariDataSource hikariDataSource) {
-        this.hikariDataSource = hikariDataSource;
+    public ChunkProcessor() {
         this.count = 0;
     }
 
@@ -43,7 +41,7 @@ public class ChunkProcessor implements Runnable, ProcessChunk {
 
     @Override
     public void processChunk(String filePath) throws SQLException {
-        Connection connection = hikariDataSource.getConnection();
+        Connection connection = DBUtils.getInstance().getConnection();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             RawPayload rawPayload = new RawPayload();
             String payload;
@@ -55,12 +53,13 @@ public class ChunkProcessor implements Runnable, ProcessChunk {
                 if (transaction.length != 7) {
                     rawPayload.setValidityStatus("invalid");
                 }
-                TradeRepository tradeRepository = new TradeRepository();
+                TradePayloadRepository tradePayloadRepository = new TradePayloadRepository();
                 // inserts to raw_payloads table
-                tradeRepository.insertTradeRawPayload(rawPayload, connection);
+                tradePayloadRepository.insertTradeRawPayload(rawPayload, connection);
                 // inserts to concurrent hash map and get the queue number
                 if (rawPayload.getValidityStatus().equals("valid")) {
-                    int queueNumber = QueueDistributor.figureOutTheNextQueue(MaintainStaticValues.getTradeDistributionCriteria().equals("accountNumber") ? transaction[2] : rawPayload.getTradeId());
+                    int queueNumber = QueueDistributor.figureOutTheNextQueue(ApplicationPropertiesUtils.getTradeDistributionCriteria().equals(
+                            "accountNumber") ? transaction[2] : rawPayload.getTradeId());
                     // inserts to the queue number found in above step
                     QueueDistributor.giveToTradeQueue(rawPayload.getTradeId(), queueNumber);
                 }

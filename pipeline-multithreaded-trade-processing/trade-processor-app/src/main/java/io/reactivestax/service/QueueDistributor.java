@@ -1,6 +1,6 @@
 package io.reactivestax.service;
 
-import io.reactivestax.utility.MaintainStaticValues;
+import io.reactivestax.utility.ApplicationPropertiesUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,7 @@ public class QueueDistributor {
 
     public static synchronized int figureOutTheNextQueue(String value) {
         int queue;
-        if (MaintainStaticValues.isTradeDistributionUseMap()) {
+        if (ApplicationPropertiesUtils.isTradeDistributionUseMap()) {
             if (concurrentQueueDistributorMap.containsKey(value)) {
                 queue = concurrentQueueDistributorMap.get(value);
             } else {
@@ -42,19 +42,21 @@ public class QueueDistributor {
     }
 
     public static int getQueueNumberNumberUsingAlgorithm() {
-        if (MaintainStaticValues.getTradeDistributionAlgorithm().equals("random")) {
-            return random.nextInt(MaintainStaticValues.getTradeProcessorQueueCount());
+        int quue = 0;
+        if (ApplicationPropertiesUtils.getTradeDistributionAlgorithm().equals("random")) {
+            quue = random.nextInt(ApplicationPropertiesUtils.getTradeProcessorQueueCount());
         } else {
+            quue = queueNumber;
             queueNumber++;
-            if (queueNumber >= MaintainStaticValues.getTradeProcessorQueueCount()) {
+            if (queueNumber >= ApplicationPropertiesUtils.getTradeProcessorQueueCount()) {
                 queueNumber = 0;
             }
         }
-        return queueNumber;
+        return quue;
     }
 
     public static void initializeQueue() {
-        int count = MaintainStaticValues.getTradeProcessorQueueCount();
+        int count = ApplicationPropertiesUtils.getTradeProcessorQueueCount();
         while (count-- != 0) {
             transactionDeque.add(new LinkedBlockingDeque<>());
         }

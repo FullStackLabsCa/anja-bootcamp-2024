@@ -1,9 +1,8 @@
 package io.reactivestax;
 
-import com.zaxxer.hikari.HikariDataSource;
-import io.reactivestax.database.DatabaseConnection;
+import io.reactivestax.database.DBUtils;
 import io.reactivestax.service.*;
-import io.reactivestax.utility.MaintainStaticValues;
+import io.reactivestax.utility.ApplicationPropertiesUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -21,29 +20,25 @@ import java.util.logging.Logger;
 import static org.junit.Assert.*;
 
 public class TradeProcessorTest {
-    HikariDataSource dataSource;
     Connection connection;
     Logger logger = Logger.getLogger(TradeProcessorTest.class.getName());
 
     @Before
     public void setUp() throws IOException {
-        ChunkGeneratorAndProcessorService chunkGeneratorAndProcessorService = new ChunkGeneratorAndProcessorService();
-        chunkGeneratorAndProcessorService.setStaticValues();
+        ApplicationPropertiesUtils.loadApplicationProperties();
         QueueDistributor.initializeQueue();
-        MaintainStaticValues.setPortNumber("3308");
-        MaintainStaticValues.setTotalNoOfLines(10000);
-        MaintainStaticValues.setFilePath("/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/trades.csv");
-        MaintainStaticValues.setChunkFilePathWithName("/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/chunks/trade_records_chunk");
-        MaintainStaticValues.setChunkDirectoryPath("/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/chunks");
-        MaintainStaticValues.setNumberOfChunks(10);
-        MaintainStaticValues.setChunkProcessorThreadCount(10);
-        MaintainStaticValues.setTradeProcessorQueueCount(2);
-        MaintainStaticValues.setChunkProcessorThreadCount(5);
-        Files.createDirectories(Paths.get(MaintainStaticValues.getChunkDirectoryPath()));
-        dataSource = DatabaseConnection.configureHikariCP(MaintainStaticValues.getPortNumber(),
-                MaintainStaticValues.getDbName(), MaintainStaticValues.getUsername(), MaintainStaticValues.getPassword());
+        ApplicationPropertiesUtils.setPortNumber("3308");
+        ApplicationPropertiesUtils.setTotalNoOfLines(10000);
+        ApplicationPropertiesUtils.setFilePath("/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/trades.csv");
+        ApplicationPropertiesUtils.setChunkFilePathWithName("/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/chunks/trade_records_chunk");
+        ApplicationPropertiesUtils.setChunkDirectoryPath("/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources/chunks");
+        ApplicationPropertiesUtils.setNumberOfChunks(10);
+        ApplicationPropertiesUtils.setChunkProcessorThreadCount(10);
+        ApplicationPropertiesUtils.setTradeProcessorQueueCount(2);
+        ApplicationPropertiesUtils.setChunkProcessorThreadCount(5);
+        Files.createDirectories(Paths.get(ApplicationPropertiesUtils.getChunkDirectoryPath()));
         try {
-            connection = dataSource.getConnection();
+            connection = DBUtils.getInstance().getConnection();
         } catch (SQLException e) {
             System.out.println("SQL Exception");
         }
@@ -64,9 +59,8 @@ public class TradeProcessorTest {
             System.out.println("SQL Exception");
         } finally {
             connection.close();
-            dataSource.close();
         }
-        File directory = new File(MaintainStaticValues.getChunkDirectoryPath());
+        File directory = new File(ApplicationPropertiesUtils.getChunkDirectoryPath());
         boolean delete = false;
         File[] files = directory.listFiles();
         if (files != null) {
@@ -83,7 +77,7 @@ public class TradeProcessorTest {
     @Test
     public void testFileLineCounterWithCorrectFilePath() throws IOException {
         ChunkGeneratorAndProcessorService chunkGeneratorAndProcessorService = new ChunkGeneratorAndProcessorService();
-        long numberOfLines = chunkGeneratorAndProcessorService.fileLineCounter(MaintainStaticValues.getFilePath());
+        long numberOfLines = chunkGeneratorAndProcessorService.fileLineCounter(ApplicationPropertiesUtils.getFilePath());
         assertEquals(10000, numberOfLines);
     }
 
@@ -97,7 +91,7 @@ public class TradeProcessorTest {
     public void testGenerateChunksWithCorrectFilePath() throws IOException, InterruptedException {
         ChunkGeneratorRunnable chunkGeneratorRunnable = new ChunkGeneratorRunnable();
         chunkGeneratorRunnable.generateChunks();
-        File directory = new File(MaintainStaticValues.getChunkDirectoryPath());
+        File directory = new File(ApplicationPropertiesUtils.getChunkDirectoryPath());
         File[] files = directory.listFiles();
         if (files != null) {
             long fileCount = 0;
@@ -113,7 +107,7 @@ public class TradeProcessorTest {
     @Test(expected = IOException.class)
     public void testGenerateChunksWithIncorrectFilePath() throws IOException, InterruptedException {
         ChunkGeneratorRunnable chunkGeneratorRunnable = new ChunkGeneratorRunnable();
-        MaintainStaticValues.setFilePath("wrong_file_path");
+        ApplicationPropertiesUtils.setFilePath("wrong_file_path");
         chunkGeneratorRunnable.generateChunks();
     }
 
@@ -121,23 +115,61 @@ public class TradeProcessorTest {
     public void testBuildFilePath() {
         ChunkGeneratorAndProcessorService chunkGeneratorAndProcessorService = new ChunkGeneratorAndProcessorService();
         String path = chunkGeneratorAndProcessorService.buildFilePath(1);
-        assertEquals(MaintainStaticValues.getChunkDirectoryPath() + "/trade_records_chunk1.csv", path);
+        assertEquals(ApplicationPropertiesUtils.getChunkDirectoryPath() + "/trade_records_chunk1.csv", path);
     }
 
     @Test
     public void testSetStaticValues() {
-        assertEquals(10, MaintainStaticValues.getNumberOfChunks());
+        assertEquals(10, ApplicationPropertiesUtils.getNumberOfChunks());
     }
 
     @Test
-    public void testChunkProcessorForQueueSize() throws SQLException {
-        ChunkProcessor chunkProcessor = new ChunkProcessor(dataSource);
-        chunkProcessor.processChunk(MaintainStaticValues.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
+    public void testChunkProcessorForQueueSize() throws SQLException, IOException, InterruptedException {
+        ChunkGeneratorRunnable chunkGeneratorRunnable = new ChunkGeneratorRunnable();
+        chunkGeneratorRunnable.generateChunks();
+        ChunkProcessor chunkProcessor = new ChunkProcessor();
+        chunkProcessor.processChunk(ApplicationPropertiesUtils.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
         assertFalse(QueueDistributor.getTransactionDeque(0).isEmpty());
     }
 
     @Test
-    public void testChunkProcessorForQueueNumber() {
+    public void testChunkProcessorForQueueNumberWithoutMapAndRoundRobin() {
+        ApplicationPropertiesUtils.setTradeDistributionUseMap(false);
+        ApplicationPropertiesUtils.setTradeDistributionAlgorithm("round-robin");
+        QueueDistributor.figureOutTheNextQueue("TID_000000");
+        QueueDistributor.figureOutTheNextQueue("TID_000001");
+        QueueDistributor.figureOutTheNextQueue("TID_000002");
+        int queueNumber = QueueDistributor.figureOutTheNextQueue("TID_000003");
+        assertEquals(1, queueNumber);
+    }
+
+    @Test
+    public void testChunkProcessorForQueueNumberWithoutMapAndRandom() {
+        ApplicationPropertiesUtils.setTradeDistributionUseMap(false);
+        ApplicationPropertiesUtils.setTradeDistributionAlgorithm("random");
+        QueueDistributor.figureOutTheNextQueue("TID_000000");
+        QueueDistributor.figureOutTheNextQueue("TID_000001");
+        QueueDistributor.figureOutTheNextQueue("TID_000002");
+        int queueNumber = QueueDistributor.figureOutTheNextQueue("TID_000003");
+        assertTrue(queueNumber < ApplicationPropertiesUtils.getTradeProcessorQueueCount());
+    }
+
+    @Test
+    public void testChunkProcessorForQueueNumberWithMapAndRandomAndAccountNumberTradeDistribution() {
+        ApplicationPropertiesUtils.setTradeDistributionUseMap(true);
+        ApplicationPropertiesUtils.setTradeDistributionCriteria("accountNumber");
+        ApplicationPropertiesUtils.setTradeDistributionAlgorithm("random");
+        QueueDistributor.figureOutTheNextQueue("TDB_CUST_3017796");
+        QueueDistributor.figureOutTheNextQueue("TDB_CUST_3017796");
+        int queueNumber = QueueDistributor.figureOutTheNextQueue("TDB_CUST_3017797");
+        assertEquals(queueNumber, QueueDistributor.figureOutTheNextQueue("TDB_CUST_3017797"));
+    }
+
+    @Test
+    public void testChunkProcessorForQueueNumberWithMapAndRoundRobinAndTradeIdTradeDistribution() {
+        ApplicationPropertiesUtils.setTradeDistributionUseMap(true);
+        ApplicationPropertiesUtils.setTradeDistributionCriteria("tradeId");
+        ApplicationPropertiesUtils.setTradeDistributionAlgorithm("round-robin");
         QueueDistributor.figureOutTheNextQueue("TID_000000");
         QueueDistributor.figureOutTheNextQueue("TID_000001");
         QueueDistributor.figureOutTheNextQueue("TID_000002");
@@ -150,21 +182,14 @@ public class TradeProcessorTest {
         ChunkGeneratorRunnable chunkGeneratorRunnable = new ChunkGeneratorRunnable();
         chunkGeneratorRunnable.generateChunks();
         int count = 0;
-        ChunkProcessor chunkProcessor = new ChunkProcessor(dataSource);
-        chunkProcessor.processChunk(MaintainStaticValues.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
+        ChunkProcessor chunkProcessor = new ChunkProcessor();
+        chunkProcessor.processChunk(ApplicationPropertiesUtils.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
         String query = "Select count(*) as count from trade_payloads";
         ResultSet resultSet = connection.prepareStatement(query).executeQuery();
         if (resultSet.next()) {
             count = resultSet.getInt("count");
         }
         assertEquals(1000, count);
-    }
-
-
-    @Test(expected = NullPointerException.class)
-    public void testChunkProcessorWithNullDataSource() throws SQLException {
-        ChunkProcessor chunkProcessor = new ChunkProcessor(null);
-        chunkProcessor.processChunk("wrong_file_path");
     }
 
     @Test
@@ -177,9 +202,10 @@ public class TradeProcessorTest {
     public void testTradeProcessorProcessWithCorrectTradeIdForJournalEntry() throws SQLException, InterruptedException, IOException {
         ChunkGeneratorRunnable chunkGeneratorRunnable = new ChunkGeneratorRunnable();
         chunkGeneratorRunnable.generateChunks();
-        ChunkProcessor chunkProcessor = new ChunkProcessor(dataSource);
-        chunkProcessor.processChunk(MaintainStaticValues.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
-        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0), dataSource);
+        ChunkProcessor chunkProcessor = new ChunkProcessor();
+        chunkProcessor.processChunk(ApplicationPropertiesUtils.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
+        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0));
+        tradeProcessor.setConnection(connection);
         tradeProcessor.processTrade("TDB_00000995");
         String query = "Select account_number from journal_entry where trade_id = 'TDB_00000995'";
         String accountNumber = "";
@@ -194,9 +220,10 @@ public class TradeProcessorTest {
     public void testTradeProcessorProcessForLookupStatusWithCusipNotPresentInSecuritiesReference() throws SQLException, InterruptedException, IOException {
         ChunkGeneratorRunnable chunkGeneratorRunnable = new ChunkGeneratorRunnable();
         chunkGeneratorRunnable.generateChunks();
-        ChunkProcessor chunkProcessor = new ChunkProcessor(dataSource);
-        chunkProcessor.processChunk(MaintainStaticValues.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
-        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0), dataSource);
+        ChunkProcessor chunkProcessor = new ChunkProcessor();
+        chunkProcessor.processChunk(ApplicationPropertiesUtils.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
+        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0));
+        tradeProcessor.setConnection(connection);
         tradeProcessor.processTrade("TDB_00000000");
         String query = "Select lookup_status from trade_payloads where trade_id = 'TDB_00000000'";
         String lookupStatus = "";
@@ -211,9 +238,10 @@ public class TradeProcessorTest {
     public void testTradeProcessorProcessForLookupStatusWithCusipPresentInSecuritiesReference() throws SQLException, InterruptedException, IOException {
         ChunkGeneratorRunnable chunkGeneratorRunnable = new ChunkGeneratorRunnable();
         chunkGeneratorRunnable.generateChunks();
-        ChunkProcessor chunkProcessor = new ChunkProcessor(dataSource);
-        chunkProcessor.processChunk(MaintainStaticValues.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
-        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0), dataSource);
+        ChunkProcessor chunkProcessor = new ChunkProcessor();
+        chunkProcessor.processChunk(ApplicationPropertiesUtils.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
+        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0));
+        tradeProcessor.setConnection(connection);
         tradeProcessor.processTrade("TDB_00000002");
         String query = "Select lookup_status from trade_payloads where trade_id = 'TDB_00000002'";
         String lookupStatus = "";
@@ -228,9 +256,10 @@ public class TradeProcessorTest {
     public void testTradeProcessorProcessForPostedStatusWithCusipNotPresentInSecuritiesReference() throws SQLException, InterruptedException, IOException {
         ChunkGeneratorRunnable chunkGeneratorRunnable = new ChunkGeneratorRunnable();
         chunkGeneratorRunnable.generateChunks();
-        ChunkProcessor chunkProcessor = new ChunkProcessor(dataSource);
-        chunkProcessor.processChunk(MaintainStaticValues.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
-        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0), dataSource);
+        ChunkProcessor chunkProcessor = new ChunkProcessor();
+        chunkProcessor.processChunk(ApplicationPropertiesUtils.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
+        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0));
+        tradeProcessor.setConnection(connection);
         tradeProcessor.processTrade("TDB_00000002");
         String query = "Select je_status from trade_payloads where trade_id = 'TDB_00000000'";
         String postedStatus = "";
@@ -245,9 +274,10 @@ public class TradeProcessorTest {
     public void testTradeProcessorProcessForPostedStatusWithCusipPresentInSecuritiesReference() throws SQLException, InterruptedException, IOException {
         ChunkGeneratorRunnable chunkGeneratorRunnable = new ChunkGeneratorRunnable();
         chunkGeneratorRunnable.generateChunks();
-        ChunkProcessor chunkProcessor = new ChunkProcessor(dataSource);
-        chunkProcessor.processChunk(MaintainStaticValues.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
-        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0), dataSource);
+        ChunkProcessor chunkProcessor = new ChunkProcessor();
+        chunkProcessor.processChunk(ApplicationPropertiesUtils.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
+        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0));
+        tradeProcessor.setConnection(connection);
         tradeProcessor.processTrade("TDB_00000002");
         String query = "Select je_status from trade_payloads where trade_id = 'TDB_00000002'";
         String postedStatus = "";
@@ -262,9 +292,10 @@ public class TradeProcessorTest {
     public void testTradeProcessorProcessWithCorrectTradeIdForPositionsEntryInsert() throws SQLException, InterruptedException, IOException {
         ChunkGeneratorRunnable chunkGeneratorRunnable = new ChunkGeneratorRunnable();
         chunkGeneratorRunnable.generateChunks();
-        ChunkProcessor chunkProcessor = new ChunkProcessor(dataSource);
-        chunkProcessor.processChunk(MaintainStaticValues.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
-        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0), dataSource);
+        ChunkProcessor chunkProcessor = new ChunkProcessor();
+        chunkProcessor.processChunk(ApplicationPropertiesUtils.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
+        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0));
+        tradeProcessor.setConnection(connection);
         tradeProcessor.processTrade("TDB_00000995");
         String query = "Select positions from positions where account_number='TDB_CUST_5423076' and " +
                 "security_cusip='MSFT'";
@@ -280,9 +311,10 @@ public class TradeProcessorTest {
     public void testTradeProcessorProcessWithCorrectTradeIdForPositionsEntryUpdate() throws SQLException, InterruptedException, IOException {
         ChunkGeneratorRunnable chunkGeneratorRunnable = new ChunkGeneratorRunnable();
         chunkGeneratorRunnable.generateChunks();
-        ChunkProcessor chunkProcessor = new ChunkProcessor(dataSource);
-        chunkProcessor.processChunk(MaintainStaticValues.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
-        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0), dataSource);
+        ChunkProcessor chunkProcessor = new ChunkProcessor();
+        chunkProcessor.processChunk(ApplicationPropertiesUtils.getChunkDirectoryPath() + "/trade_records_chunk1.csv");
+        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0));
+        tradeProcessor.setConnection(connection);
         tradeProcessor.processTrade("TDB_00000001");
         tradeProcessor.processTrade("TDB_00000002");
         String query = "Select version from positions where account_number='TDB_CUST_2517563' and " +
@@ -297,7 +329,7 @@ public class TradeProcessorTest {
 
     @Test
     public void testTradeProcessorRetryTransactionDeadLetterQueue() throws InterruptedException {
-        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0), dataSource);
+        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0));
         tradeProcessor.retryTransaction("TDB_00001000");
         tradeProcessor.retryTransaction("TDB_00001000");
         tradeProcessor.retryTransaction("TDB_00001000");
@@ -307,11 +339,9 @@ public class TradeProcessorTest {
 
     @Test
     public void testTradeProcessorRetryTransactionRetryCountMap() throws InterruptedException {
-        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0), dataSource);
+        TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0));
         tradeProcessor.retryTransaction("TDB_00001000");
         tradeProcessor.retryTransaction("TDB_00001000");
         assertEquals(1, tradeProcessor.getRetryCountMap().size());
     }
-
-
 }

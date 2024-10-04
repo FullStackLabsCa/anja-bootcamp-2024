@@ -1,6 +1,6 @@
 package io.reactivestax.service;
 
-import io.reactivestax.utility.MaintainStaticValues;
+import io.reactivestax.utility.ApplicationPropertiesUtils;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -24,15 +24,15 @@ Logger logger = Logger.getLogger(ChunkGeneratorRunnable.class.getName());
 
     @Override
     public void generateChunks() throws IOException, InterruptedException {
-        long numOfLines = MaintainStaticValues.getTotalNoOfLines();
-        String path = MaintainStaticValues.getFilePath();
-        int chunksCount = MaintainStaticValues.getNumberOfChunks();
+        long numOfLines = ApplicationPropertiesUtils.getTotalNoOfLines();
+        String path = ApplicationPropertiesUtils.getFilePath();
+        int chunksCount = ApplicationPropertiesUtils.getNumberOfChunks();
         int tempChunkCount = 1;
         long tempLineCount = 0;
         long linesCountPerFile = numOfLines / chunksCount;
         ChunkGeneratorAndProcessorService chunkGeneratorAndProcessorService = new ChunkGeneratorAndProcessorService();
         String chunkFilePath = chunkGeneratorAndProcessorService.buildFilePath(tempChunkCount);
-        Files.createDirectories(Paths.get(MaintainStaticValues.getChunkDirectoryPath()));
+        Files.createDirectories(Paths.get(ApplicationPropertiesUtils.getChunkDirectoryPath()));
         BufferedWriter writer = new BufferedWriter(new FileWriter(chunkFilePath));
         try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
             String line = reader.readLine();
