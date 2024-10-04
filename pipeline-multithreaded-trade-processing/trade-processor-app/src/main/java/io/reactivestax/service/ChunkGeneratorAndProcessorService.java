@@ -16,24 +16,24 @@ public class ChunkGeneratorAndProcessorService implements Submittable<ChunkProce
     private ExecutorService chunkProcessorExecutorService;
     Logger logger = Logger.getLogger(ChunkGeneratorAndProcessorService.class.getName());
 
-    public void setupDataSourceAndStartGeneratorsAndProcessors() {
+    public void setupDataSourceAndStartGeneratorsAndProcessors(ApplicationPropertiesUtils applicationProperties) {
         logger.info("Setting up database and project dependencies.");
         try {
-            String path = ApplicationPropertiesUtils.getFilePath();
+            String path = applicationProperties.getFilePath();
             logger.info("Counting total number of lines in the file");
             long numOfLines = fileLineCounter(path);
-            ApplicationPropertiesUtils.setTotalNoOfLines(numOfLines);
-            QueueDistributor.initializeQueue();
+            applicationProperties.setTotalNoOfLines(numOfLines);
+            QueueDistributor.initializeQueue(applicationProperties.getTradeProcessorQueueCount());
             chunkGeneratorExecutorService = Executors.newSingleThreadExecutor();
             chunkProcessorExecutorService =
-                    Executors.newFixedThreadPool(ApplicationPropertiesUtils.getChunkProcessorThreadCount());
-            chunkGeneratorExecutorService.submit(new ChunkGeneratorRunnable());
+                    Executors.newFixedThreadPool(applicationProperties.getChunkProcessorThreadCount());
+            chunkGeneratorExecutorService.submit(new ChunkGeneratorRunnable(applicationProperties));
             logger.info("Stated chunk generator.");
-            for (int i = 0; i < ApplicationPropertiesUtils.getNumberOfChunks(); i++) {
-                submitTask(new ChunkProcessor());
+            for (int i = 0; i < applicationProperties.getNumberOfChunks(); i++) {
+                submitTask(new ChunkProcessor(applicationProperties));
             }
             logger.info("Started chunk processor.");
-            TradeProcessorService tradeProcessorService = new TradeProcessorService();
+            TradeProcessorService tradeProcessorService = new TradeProcessorService(applicationProperties);
             tradeProcessorService.submitTrade();
             logger.info("Started trade processor.");
         } catch (IOException e) {
@@ -52,8 +52,8 @@ public class ChunkGeneratorAndProcessorService implements Submittable<ChunkProce
         return lineCount - 1;
     }
 
-    public String buildFilePath(int chunkNumber) {
-        return ApplicationPropertiesUtils.getChunkFilePathWithName() + chunkNumber + ".csv";
+    public String buildFilePath(int chunkNumber, String chunkFilePathWithName) {
+        return chunkFilePathWithName + chunkNumber + ".csv";
     }
 
     @Override

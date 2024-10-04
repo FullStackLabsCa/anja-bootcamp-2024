@@ -7,11 +7,17 @@ import java.util.concurrent.Executors;
 
 public class TradeProcessorService implements Submittable<TradeProcessor> {
 
-    ExecutorService tradeProcessorExecutorService = Executors.newFixedThreadPool(ApplicationPropertiesUtils.getTradeProcessorThreadCount());
+    ExecutorService tradeProcessorExecutorService;
+    ApplicationPropertiesUtils applicationPropertiesUtils;
+
+    public TradeProcessorService(ApplicationPropertiesUtils applicationProperties){
+        this.applicationPropertiesUtils = applicationProperties;
+        tradeProcessorExecutorService = Executors.newFixedThreadPool(applicationProperties.getTradeProcessorThreadCount());
+    }
 
     public void submitTrade() {
-        for (int i = 0; i < ApplicationPropertiesUtils.getTradeProcessorQueueCount(); i++) {
-            submitTask(new TradeProcessor(QueueDistributor.getTransactionDeque(i)));
+        for (int i = 0; i < this.applicationPropertiesUtils.getTradeProcessorQueueCount(); i++) {
+            submitTask(new TradeProcessor(QueueDistributor.getTransactionDeque(i), this.applicationPropertiesUtils));
         }
         tradeProcessorExecutorService.shutdown();
     }

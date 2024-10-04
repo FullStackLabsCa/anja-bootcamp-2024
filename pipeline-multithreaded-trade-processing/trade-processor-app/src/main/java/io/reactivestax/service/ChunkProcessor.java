@@ -17,9 +17,11 @@ public class ChunkProcessor implements Runnable, ProcessChunk {
     Logger logger = Logger.getLogger(ChunkProcessor.class.getName());
     LinkedBlockingQueue<String> chunkQueue = QueueDistributor.chunkQueue;
     int count = 0;
+    ApplicationPropertiesUtils applicationPropertiesUtils;
 
-    public ChunkProcessor() {
+    public ChunkProcessor(ApplicationPropertiesUtils applicationPropertiesUtils) {
         this.count = 0;
+        this.applicationPropertiesUtils = applicationPropertiesUtils;
     }
 
     @Override
@@ -41,7 +43,7 @@ public class ChunkProcessor implements Runnable, ProcessChunk {
 
     @Override
     public void processChunk(String filePath) throws SQLException {
-        Connection connection = DBUtils.getInstance().getConnection();
+        Connection connection = DBUtils.getInstance(this.applicationPropertiesUtils).getConnection();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             RawPayload rawPayload = new RawPayload();
             String payload;
@@ -58,8 +60,7 @@ public class ChunkProcessor implements Runnable, ProcessChunk {
                 tradePayloadRepository.insertTradeRawPayload(rawPayload, connection);
                 // inserts to concurrent hash map and get the queue number
                 if (rawPayload.getValidityStatus().equals("valid")) {
-                    int queueNumber = QueueDistributor.figureOutTheNextQueue(ApplicationPropertiesUtils.getTradeDistributionCriteria().equals(
-                            "accountNumber") ? transaction[2] : rawPayload.getTradeId());
+                    int queueNumber = QueueDistributor.figureOutTheNextQueue(this.applicationPropertiesUtils.getTradeDistributionCriteria().equals("accountNumber") ? transaction[2] : rawPayload.getTradeId(), this.applicationPropertiesUtils.isTradeDistributionUseMap(), this.applicationPropertiesUtils.getTradeDistributionAlgorithm(), this.applicationPropertiesUtils.getTradeProcessorQueueCount());
                     // inserts to the queue number found in above step
                     QueueDistributor.giveToTradeQueue(rawPayload.getTradeId(), queueNumber);
                 }

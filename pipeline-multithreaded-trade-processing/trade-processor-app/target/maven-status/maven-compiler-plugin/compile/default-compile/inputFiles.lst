@@ -1,12 +1,15 @@
 /Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/main/java/io/reactivestax/TradeProcessorRunner.java
-/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/main/java/io/reactivestax/database/DatabaseConnection.java
+/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/main/java/io/reactivestax/database/DBUtils.java
 /Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/main/java/io/reactivestax/model/JournalEntry.java
 /Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/main/java/io/reactivestax/model/Position.java
 /Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/main/java/io/reactivestax/model/RawPayload.java
+/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/main/java/io/reactivestax/repository/JournalEntryRepository.java
 /Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/main/java/io/reactivestax/repository/LookupSecurities.java
+/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/main/java/io/reactivestax/repository/PositionsRepository.java
 /Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/main/java/io/reactivestax/repository/ReadAndUpsertPositions.java
 /Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/main/java/io/reactivestax/repository/ReadAndWriteTradePayload.java
-/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/main/java/io/reactivestax/repository/TradeRepository.java
+/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/main/java/io/reactivestax/repository/SecuritiesReferenceRepository.java
+/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/main/java/io/reactivestax/repository/TradePayloadRepository.java
 /Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/main/java/io/reactivestax/repository/WriteToJournalEntry.java
 /Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/main/java/io/reactivestax/service/ChunkGenerator.java
 /Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/main/java/io/reactivestax/service/ChunkGeneratorAndProcessorService.java
@@ -20,4 +23,4 @@
 /Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/main/java/io/reactivestax/service/Submittable.java
 /Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/main/java/io/reactivestax/service/TradeProcessor.java
 /Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/main/java/io/reactivestax/service/TradeProcessorService.java
-/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/main/java/io/reactivestax/utility/MaintainStaticValues.java
+/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/main/java/io/reactivestax/utility/ApplicationPropertiesUtils.java

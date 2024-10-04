@@ -25,10 +25,12 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
     int count = 0;
     private final Map<String, Integer> retryCountMap;
     private Connection connection;
+    ApplicationPropertiesUtils applicationPropertiesUtils;
 
-    public TradeProcessor(LinkedBlockingDeque<String> tradeDeque) {
+    public TradeProcessor(LinkedBlockingDeque<String> tradeDeque, ApplicationPropertiesUtils applicationPropertiesUtils) {
         this.tradeDeque = tradeDeque;
         this.retryCountMap = new HashMap<>();
+        this.applicationPropertiesUtils = applicationPropertiesUtils;
     }
 
     public void setConnection(Connection connection){
@@ -51,7 +53,7 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
     public void run() {
         count++;
         try {
-            this.connection = DBUtils.getInstance().getConnection();
+            this.connection = DBUtils.getInstance(this.applicationPropertiesUtils).getConnection();
             while (true) {
                 String tradeId = this.tradeDeque.poll(500, TimeUnit.MILLISECONDS);
                 if (tradeId == null) break;
@@ -133,7 +135,7 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
     @Override
     public void retryTransaction(String tradeId) throws InterruptedException {
         int retryCount = this.retryCountMap.getOrDefault(tradeId, 0) + 1;
-        if (retryCount >= ApplicationPropertiesUtils.getMaxRetryCount()) {
+        if (retryCount >= this.applicationPropertiesUtils.getMaxRetryCount()) {
             QueueDistributor.deadLetterTransactionDeque.putLast(tradeId);
             this.retryCountMap.remove(tradeId);
         } else {

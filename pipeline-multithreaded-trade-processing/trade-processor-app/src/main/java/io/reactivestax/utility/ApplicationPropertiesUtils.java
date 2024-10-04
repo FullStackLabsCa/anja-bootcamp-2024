@@ -1,37 +1,37 @@
 package io.reactivestax.utility;
 
-import io.reactivestax.service.ChunkGeneratorAndProcessorService;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.Logger;
 
 public class ApplicationPropertiesUtils {
-    static Logger logger = Logger.getLogger(ApplicationPropertiesUtils.class.getName());
+    private final Logger logger = Logger.getLogger(ApplicationPropertiesUtils.class.getName());
 
-    static long totalNoOfLines = 0;
-    static int numberOfChunks = 0;
-    static String filePath = "";
-    static String chunkDirectoryPath = "";
-    static String chunkFilePathWithName = "";
-    static int maxRetryCount = 0;
-    static String dbName = "";
-    static String portNumber = "";
-    static String username = "";
-    static String password = "";
-    static int chunkProcessorThreadCount = 0;
-    static int tradeProcessorQueueCount = 0;
-    static int tradeProcessorThreadCount = 0;
-    static String tradeDistributionCriteria = "";
-    static boolean tradeDistributionUseMap = false;
-    static String tradeDistributionAlgorithm = "";
+    private long totalNoOfLines;
+    private int numberOfChunks;
+    private String filePath;
+    private String chunkDirectoryPath;
+    private String chunkFilePathWithName;
+    private int maxRetryCount;
+    private String dbName;
+    private String portNumber;
+    private String username;
+    private String password;
+    private int chunkProcessorThreadCount;
+    private int tradeProcessorQueueCount;
+    private int tradeProcessorThreadCount;
+    private String tradeDistributionCriteria;
+    private boolean tradeDistributionUseMap;
+    private String tradeDistributionAlgorithm;
 
-    private ApplicationPropertiesUtils(){}
+    public ApplicationPropertiesUtils(String applicationPropertiesFileName){
+        loadApplicationProperties(applicationPropertiesFileName);
+    }
 
-    public static void loadApplicationProperties(){
+    public void loadApplicationProperties(String applicationPropertiesFileName){
         Properties properties = new Properties();
-        try (InputStream input = ChunkGeneratorAndProcessorService.class.getClassLoader().getResourceAsStream("application.properties")) {
+        try (InputStream input = ApplicationPropertiesUtils.class.getClassLoader().getResourceAsStream(applicationPropertiesFileName)) {
             if (input == null) {
                 logger.warning("Sorry, unable to find application.properties");
                 System.exit(1);
@@ -58,111 +58,71 @@ public class ApplicationPropertiesUtils {
         }
     }
 
-    public static long getTotalNoOfLines() {
+    public long getTotalNoOfLines() {
         return totalNoOfLines;
     }
 
-    public static void setTotalNoOfLines(long totalNoOfLines) {
-        ApplicationPropertiesUtils.totalNoOfLines = totalNoOfLines;
+    public void setTotalNoOfLines(long totalNoOfLines) {
+        this.totalNoOfLines = totalNoOfLines;
     }
 
-    public static int getNumberOfChunks() {
+    public int getNumberOfChunks() {
         return numberOfChunks;
     }
 
-    public static void setNumberOfChunks(int numberOfChunks) {
-        ApplicationPropertiesUtils.numberOfChunks = numberOfChunks;
-    }
-
-    public static String getFilePath() {
+    public String getFilePath() {
         return filePath;
     }
 
-    public static void setFilePath(String filePath) {
-        ApplicationPropertiesUtils.filePath = filePath;
-    }
-
-    public static String getChunkDirectoryPath() {
+    public String getChunkDirectoryPath() {
         return chunkDirectoryPath;
     }
 
-    public static void setChunkDirectoryPath(String chunkDirectoryPath) {
-        ApplicationPropertiesUtils.chunkDirectoryPath = chunkDirectoryPath;
-    }
-
-    public static String getChunkFilePathWithName() {
+    public String getChunkFilePathWithName() {
         return chunkFilePathWithName;
     }
 
-    public static void setChunkFilePathWithName(String chunkFilePathWithName) {
-        ApplicationPropertiesUtils.chunkFilePathWithName = chunkFilePathWithName;
-    }
-
-    public static int getMaxRetryCount() {
+    public int getMaxRetryCount() {
         return maxRetryCount;
     }
 
-    public static String getDbName() {
+    public String getDbName() {
         return dbName;
     }
 
-    public static String getPortNumber() {
+    public String getPortNumber() {
         return portNumber;
     }
 
-    public static void setPortNumber(String portNumber) {
-        ApplicationPropertiesUtils.portNumber = portNumber;
-    }
-
-    public static String getUsername() {
+    public String getUsername() {
         return username;
     }
 
-    public static String getPassword() {
+    public String getPassword() {
         return password;
     }
 
-    public static int getChunkProcessorThreadCount() {
+    public int getChunkProcessorThreadCount() {
         return chunkProcessorThreadCount;
     }
 
-    public static void setChunkProcessorThreadCount(int chunkProcessorThreadCount) {
-        ApplicationPropertiesUtils.chunkProcessorThreadCount = chunkProcessorThreadCount;
-    }
-
-    public static int getTradeProcessorQueueCount() {
+    public int getTradeProcessorQueueCount() {
         return tradeProcessorQueueCount;
     }
 
-    public static void setTradeProcessorQueueCount(int tradeProcessorQueueCount) {
-        ApplicationPropertiesUtils.tradeProcessorQueueCount = tradeProcessorQueueCount;
-    }
-
-    public static int getTradeProcessorThreadCount() {
+    public int getTradeProcessorThreadCount() {
         return tradeProcessorThreadCount;
     }
 
-    public static String getTradeDistributionCriteria() {
+    public String getTradeDistributionCriteria() {
         return tradeDistributionCriteria;
     }
 
-    public static void setTradeDistributionCriteria(String tradeDistributionCriteria) {
-        ApplicationPropertiesUtils.tradeDistributionCriteria = tradeDistributionCriteria;
-    }
-
-    public static boolean isTradeDistributionUseMap() {
+    public boolean isTradeDistributionUseMap() {
         return tradeDistributionUseMap;
     }
 
-    public static void setTradeDistributionUseMap(boolean tradeDistributionUseMap) {
-        ApplicationPropertiesUtils.tradeDistributionUseMap = tradeDistributionUseMap;
-    }
-
-    public static String getTradeDistributionAlgorithm() {
+    public String getTradeDistributionAlgorithm() {
         return tradeDistributionAlgorithm;
-    }
-
-    public static void setTradeDistributionAlgorithm(String tradeDistributionAlgorithm) {
-        ApplicationPropertiesUtils.tradeDistributionAlgorithm = tradeDistributionAlgorithm;
     }
 }

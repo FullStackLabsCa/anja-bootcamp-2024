@@ -9,7 +9,11 @@ import java.util.logging.Logger;
 
 public class ChunkGeneratorRunnable implements Runnable, ChunkGenerator{
 Logger logger = Logger.getLogger(ChunkGeneratorRunnable.class.getName());
+ApplicationPropertiesUtils applicationPropertiesUtils;
 
+    public ChunkGeneratorRunnable(ApplicationPropertiesUtils applicationPropertiesUtils){
+     this.applicationPropertiesUtils =applicationPropertiesUtils;
+    }
 
     @Override
     public void run(){
@@ -24,15 +28,15 @@ Logger logger = Logger.getLogger(ChunkGeneratorRunnable.class.getName());
 
     @Override
     public void generateChunks() throws IOException, InterruptedException {
-        long numOfLines = ApplicationPropertiesUtils.getTotalNoOfLines();
-        String path = ApplicationPropertiesUtils.getFilePath();
-        int chunksCount = ApplicationPropertiesUtils.getNumberOfChunks();
+        long numOfLines = this.applicationPropertiesUtils.getTotalNoOfLines();
+        String path = this.applicationPropertiesUtils.getFilePath();
+        int chunksCount = this.applicationPropertiesUtils.getNumberOfChunks();
         int tempChunkCount = 1;
         long tempLineCount = 0;
         long linesCountPerFile = numOfLines / chunksCount;
         ChunkGeneratorAndProcessorService chunkGeneratorAndProcessorService = new ChunkGeneratorAndProcessorService();
-        String chunkFilePath = chunkGeneratorAndProcessorService.buildFilePath(tempChunkCount);
-        Files.createDirectories(Paths.get(ApplicationPropertiesUtils.getChunkDirectoryPath()));
+        String chunkFilePath = chunkGeneratorAndProcessorService.buildFilePath(tempChunkCount, this.applicationPropertiesUtils.getChunkFilePathWithName());
+        Files.createDirectories(Paths.get(this.applicationPropertiesUtils.getChunkDirectoryPath()));
         BufferedWriter writer = new BufferedWriter(new FileWriter(chunkFilePath));
         try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
             String line = reader.readLine();
@@ -45,7 +49,7 @@ Logger logger = Logger.getLogger(ChunkGeneratorRunnable.class.getName());
                     tempLineCount = 0;
                     writer.close();
                     QueueDistributor.chunkQueue.put(chunkFilePath);
-                    chunkFilePath = chunkGeneratorAndProcessorService.buildFilePath(tempChunkCount);
+                    chunkFilePath = chunkGeneratorAndProcessorService.buildFilePath(tempChunkCount, this.applicationPropertiesUtils.getChunkFilePathWithName());
                     writer = new BufferedWriter(new FileWriter(chunkFilePath));
                 }
             }

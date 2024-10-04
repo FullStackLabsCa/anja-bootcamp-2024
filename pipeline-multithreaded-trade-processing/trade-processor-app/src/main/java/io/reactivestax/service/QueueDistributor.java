@@ -27,36 +27,36 @@ public class QueueDistributor {
         return transactionDeque.get(index);
     }
 
-    public static synchronized int figureOutTheNextQueue(String value) {
+    public static synchronized int figureOutTheNextQueue(String value, boolean useMap, String distAlgorithm, int queueCount) {
         int queue;
-        if (ApplicationPropertiesUtils.isTradeDistributionUseMap()) {
+        if (useMap) {
             if (concurrentQueueDistributorMap.containsKey(value)) {
                 queue = concurrentQueueDistributorMap.get(value);
             } else {
-                queue = getQueueNumberNumberUsingAlgorithm();
+                queue = getQueueNumberNumberUsingAlgorithm(distAlgorithm, queueCount);
                 concurrentQueueDistributorMap.put(value, queue);
             }
-        } else queue = getQueueNumberNumberUsingAlgorithm();
+        } else queue = getQueueNumberNumberUsingAlgorithm(distAlgorithm, queueCount);
 
         return queue;
     }
 
-    public static int getQueueNumberNumberUsingAlgorithm() {
-        int quue = 0;
-        if (ApplicationPropertiesUtils.getTradeDistributionAlgorithm().equals("random")) {
-            quue = random.nextInt(ApplicationPropertiesUtils.getTradeProcessorQueueCount());
+    public static int getQueueNumberNumberUsingAlgorithm(String distAlgorithm, int queueCount) {
+        int queue = 0;
+        if (distAlgorithm.equals("random")) {
+            queue = random.nextInt(queueCount);
         } else {
-            quue = queueNumber;
+            queue = queueNumber;
             queueNumber++;
-            if (queueNumber >= ApplicationPropertiesUtils.getTradeProcessorQueueCount()) {
+            if (queueNumber >= queueCount) {
                 queueNumber = 0;
             }
         }
-        return quue;
+        return queue;
     }
 
-    public static void initializeQueue() {
-        int count = ApplicationPropertiesUtils.getTradeProcessorQueueCount();
+    public static void initializeQueue(int queueCount) {
+        int count = queueCount;
         while (count-- != 0) {
             transactionDeque.add(new LinkedBlockingDeque<>());
         }
