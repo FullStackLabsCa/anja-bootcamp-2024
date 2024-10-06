@@ -1,21 +1,17 @@
 package io.reactivestax.service;
 
 import io.reactivestax.database.DBUtils;
-import io.reactivestax.model.JournalEntry;
 import io.reactivestax.repository.SecuritiesReferenceRepository;
 import io.reactivestax.repository.TradePayloadRepository;
-import io.reactivestax.repository.JournalEntryRepository;
 import io.reactivestax.utility.ApplicationPropertiesUtils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTransaction {
+public class TradeProcessor implements Runnable, ProcessTrade {
     Logger logger = Logger.getLogger(TradeProcessor.class.getName());
     LinkedBlockingDeque<String> tradeDeque;
     int count = 0;
@@ -70,7 +66,7 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
             boolean validSecurity = securitiesReferenceRepository.lookupSecurities(cusip, this.connection);
             tradePayloadRepository.updateTradePayloadLookupStatus(validSecurity, tradeId, this.connection);
             if (validSecurity) {
-               journalEntryTransaction(payloadArr, cusip);
+//               journalEntryTransaction(payloadArr, cusip);
             }
         } catch (SQLException e) {
             logger.info("Exception in SQL.");
@@ -78,22 +74,5 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
         } finally {
             this.connection.setAutoCommit(true);
         }
-    }
-
-    @Override
-    public void journalEntryTransaction(String[] payloadArr, String cusip) throws SQLException {
-        JournalEntry journalEntry = new JournalEntry(
-                payloadArr[0],
-                payloadArr[2],
-                cusip,
-                payloadArr[4],
-                Integer.parseInt(payloadArr[5]),
-                "not_posted",
-                LocalDateTime.parse(payloadArr[1], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-        );
-        JournalEntryRepository journalEntryRepository = new JournalEntryRepository();
-        journalEntryRepository.insertIntoJournalEntry(journalEntry, this.connection);
-        TradePayloadRepository tradePayloadRepository = new TradePayloadRepository();
-        tradePayloadRepository.updateTradePayloadPostedStatus("posted", journalEntry.tradeId(), this.connection);
     }
 }
