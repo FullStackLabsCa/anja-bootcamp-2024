@@ -14,6 +14,10 @@ public class QueueDistributor {
 
     static List<LinkedBlockingDeque<String>> transactionDeque = new ArrayList<>();
 
+    static BlockingQueue<String> deadLetterQueue = new LinkedBlockingQueue<>();
+
+    static ConcurrentMap<String, Integer> retryMap = new ConcurrentHashMap<>();
+
     static Random random = new Random();
 
     private QueueDistributor() {
@@ -62,5 +66,25 @@ public class QueueDistributor {
         LinkedBlockingDeque<String> linkedBlockingDeque = transactionDeque.get(queueNumber);
         linkedBlockingDeque.put(tradeId);
         transactionDeque.set(queueNumber, linkedBlockingDeque);
+    }
+
+    public static Integer getValueFromRetryMap(String tradeId) {
+        return retryMap.getOrDefault(tradeId, 0);
+    }
+
+    public static void setValueInRetryMap(String tradeId, Integer retryCount) {
+        QueueDistributor.retryMap.put(tradeId, retryCount);
+    }
+
+    public static void removeValueFromRetryMap(String tradeId){
+        QueueDistributor.retryMap.remove(tradeId);
+    }
+
+    public static void setDeadLetterQueue(String tradeId) throws InterruptedException {
+        QueueDistributor.deadLetterQueue.put(tradeId);
+    }
+
+    public static BlockingQueue<String> getDeadLetterQueue() {
+        return deadLetterQueue;
     }
 }

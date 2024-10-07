@@ -45,18 +45,16 @@ public class TradeProcessor implements Runnable, ProcessTrade {
                 if (tradeId == null) break;
                 else processTrade(tradeId);
             }
+            System.out.println("DEad letter queue: " + QueueDistributor.getDeadLetterQueue().toString());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             logger.warning("Thread was interrupted.");
         } catch (SQLException e) {
             logger.warning("Exception in database query.");
-        } catch (Exception e){
-            e.printStackTrace();
-    }finally {
+        } finally {
             try {
                 this.connection.close();
             } catch (SQLException e) {
-                e.printStackTrace();
                 logger.warning("Exception in closing the connection with DB connection pool");
             }
         }
@@ -83,15 +81,23 @@ public class TradeProcessor implements Runnable, ProcessTrade {
                         LocalDateTime.parse(payloadArr[1], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
                 );
                 TradeStoredProcedureRepository tradeStoredProcedureRepository = new TradeStoredProcedureRepository();
-                tradeStoredProcedureRepository.callTradeStoredProcedure(journalEntry, connection);
+                int errorCode = tradeStoredProcedureRepository.callTradeStoredProcedure(journalEntry, connection);
+                if (errorCode != 0) {
+                    Integer retryCount = QueueDistributor.getValueFromRetryMap(tradeId);
+                    retryCount++;
+                    if (retryCount <= applicationPropertiesUtils.getMaxRetryCount()) {
+                        QueueDistributor.setValueInRetryMap(journalEntry.tradeId(), retryCount);
+                        this.tradeDeque.putFirst(tradeId);
+                    } else {
+                        QueueDistributor.removeValueFromRetryMap(tradeId);
+                        QueueDistributor.setDeadLetterQueue(tradeId);
+                    }
+                }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-            logger.info("Exception in SQL.");
+            logger.info("Exception in SQL."+e);
             this.connection.rollback();
-        } catch (Exception e){
-            e.printStackTrace();
-    }finally {
+        } finally {
             this.connection.setAutoCommit(true);
         }
     }

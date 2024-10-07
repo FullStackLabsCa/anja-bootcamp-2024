@@ -16,7 +16,9 @@ begin
 
          insert into journal_entry (account_number, security_cusip, direction, quantity, posted_status, transaction_time, trade_id)
          values (accountNumber,securityCusip,direction,quantity,postedStatus,transactionTime,tradeId);
-         if(row_count > 0)
+         if(row_count() <= 0) then
+            set error = 1;
+         end if;
 
          if direction = 'sell' then
             set quantity = 0-quantity;
@@ -25,6 +27,10 @@ begin
          Update trade_payloads
          set je_status = 'posted'
          where trade_id = tradeId;
+         if(row_count() <= 0) then
+             set error = 2;
+         end if;
+
 
          Select version into versionOfPosition
          from positions
@@ -33,15 +39,26 @@ begin
          if versionOfPosition = 0 then
                 Insert into positions (account_number, security_cusip, positions, version)
                 values(accountNumber, securityCusip, quantity, 1);
+                if(row_count() <= 0) then
+                   set error = 3;
+                end if;
          else
                 Update positions
                 set positions = positions + quantity, version = version+1
                 where account_number = accountNumber and security_cusip = securityCusip and version = versionOfPosition;
+                if(row_count() <= 0) then
+                   set error = 4;
+                end if;
          end if;
 
          Update journal_entry
          set posted_status = 'POSTED'
          where trade_id = tradeId;
+         if(row_count() <= 0) then
+            set error = 5;
+         end if;
+
+         set error_code = error;
 end $$
 
 delimiter ;
