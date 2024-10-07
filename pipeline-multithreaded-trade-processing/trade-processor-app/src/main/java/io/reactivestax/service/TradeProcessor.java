@@ -4,6 +4,7 @@ import io.reactivestax.database.DBUtils;
 import io.reactivestax.model.JournalEntry;
 import io.reactivestax.repository.SecuritiesReferenceRepository;
 import io.reactivestax.repository.TradePayloadRepository;
+import io.reactivestax.repository.TradeStoredProcedureRepository;
 import io.reactivestax.utility.ApplicationPropertiesUtils;
 
 import java.sql.Connection;
@@ -78,6 +79,8 @@ public class TradeProcessor implements Runnable, ProcessTrade {
                         "not_posted",
                         LocalDateTime.parse(payloadArr[1], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
                 );
+                TradeStoredProcedureRepository tradeStoredProcedureRepository = new TradeStoredProcedureRepository();
+                tradeStoredProcedureRepository.callTradeStoredProcedure(journalEntry, connection);
             }
         } catch (SQLException e) {
             logger.info("Exception in SQL.");
