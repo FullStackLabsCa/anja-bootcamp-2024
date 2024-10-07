@@ -68,23 +68,27 @@ public class QueueDistributor {
         transactionDeque.set(queueNumber, linkedBlockingDeque);
     }
 
-    public static Integer getValueFromRetryMap(String tradeId) {
+    public synchronized static Integer getValueFromRetryMap(String tradeId) {
         return retryMap.getOrDefault(tradeId, 0);
     }
 
-    public static void setValueInRetryMap(String tradeId, Integer retryCount) {
+    public synchronized static void setValueInRetryMap(String tradeId, Integer retryCount) {
         QueueDistributor.retryMap.put(tradeId, retryCount);
     }
 
-    public static void removeValueFromRetryMap(String tradeId){
+    public synchronized static void removeValueFromRetryMap(String tradeId){
         QueueDistributor.retryMap.remove(tradeId);
     }
 
-    public static void setDeadLetterQueue(String tradeId) throws InterruptedException {
+    public synchronized static ConcurrentMap<String, Integer> getRetryMap() {
+        return retryMap;
+    }
+
+    public synchronized static void setDeadLetterQueue(String tradeId) throws InterruptedException {
         QueueDistributor.deadLetterQueue.put(tradeId);
     }
 
-    public static BlockingQueue<String> getDeadLetterQueue() {
+    public synchronized static BlockingQueue<String> getDeadLetterQueue() {
         return deadLetterQueue;
     }
 }

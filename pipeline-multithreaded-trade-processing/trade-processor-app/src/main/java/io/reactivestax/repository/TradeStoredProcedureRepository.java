@@ -7,8 +7,9 @@ import java.sql.*;
 public class TradeStoredProcedureRepository {
 
     public int callTradeStoredProcedure(JournalEntry journalEntry, Connection connection) throws SQLException{
-        String tradeStoredProcedure = "Call trade_procedure(?, ?, ?, ?, ?, ?, ?, ?)";
+        String tradeStoredProcedure = "Call trade_procedure(?, ?, ?, ?, ?, ?, ?, ?, ?)";
         int errorCode = 0;
+        int version = 0;
         try (CallableStatement statement = connection.prepareCall(tradeStoredProcedure)) {
             statement.setString(1, journalEntry.accountNumber());
             statement.setString(2, journalEntry.securityCusip());
@@ -20,8 +21,13 @@ public class TradeStoredProcedureRepository {
             statement.registerOutParameter(8, Types.INTEGER);
             statement.execute();
             errorCode = statement.getInt(8);
-            if (errorCode != 0) connection.commit();
-            else connection.rollback();
+            version = statement.getInt(9);
+            if (errorCode == 0) connection.commit();
+            else{
+                connection.rollback();
+                System.out.println("Error: " + errorCode + journalEntry);
+                System.out.println("Version: " + version + journalEntry);
+            }
         }
         return errorCode;
     }

@@ -8,7 +8,8 @@ create procedure trade_procedure(
         in postedStatus varchar(100),
         in transactionTime Timestamp,
         in tradeId varchar(100),
-        out error_code int
+        out error_code int,
+        out version int
 )
 begin
          declare versionOfPosition int default 0;
@@ -32,11 +33,11 @@ begin
          end if;
 
 
-         Select version into versionOfPosition
-         from positions
-         where account_number = accountNumber and security_cusip = security_cusip;
+         SELECT COALESCE(version, 0) INTO versionOfPosition
+                  FROM positions
+                  WHERE account_number = accountNumber AND security_cusip = securityCusip;
 
-         if versionOfPosition = 0 then
+         if versionOfPosition <= 0 then
                 Insert into positions (account_number, security_cusip, positions, version)
                 values(accountNumber, securityCusip, quantity, 1);
                 if(row_count() <= 0) then
@@ -59,6 +60,7 @@ begin
          end if;
 
          set error_code = error;
+         set version = versionOfPosition;
 end $$
 
 delimiter ;

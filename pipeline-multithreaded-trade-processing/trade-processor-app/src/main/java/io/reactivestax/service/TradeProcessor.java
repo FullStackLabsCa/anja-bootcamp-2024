@@ -41,11 +41,12 @@ public class TradeProcessor implements Runnable, ProcessTrade {
         try {
             this.connection = DBUtils.getInstance(this.applicationPropertiesUtils).getConnection();
             while (true) {
-                String tradeId = this.tradeDeque.poll(500, TimeUnit.MILLISECONDS);
+                String tradeId = this.tradeDeque.poll(5000, TimeUnit.MILLISECONDS);
                 if (tradeId == null) break;
                 else processTrade(tradeId);
             }
-            System.out.println("DEad letter queue: " + QueueDistributor.getDeadLetterQueue().toString());
+            System.out.println("DEad letter queue: " + QueueDistributor.getDeadLetterQueue().size());
+            System.out.println("Map: " + QueueDistributor.getRetryMap().size());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             logger.warning("Thread was interrupted.");
