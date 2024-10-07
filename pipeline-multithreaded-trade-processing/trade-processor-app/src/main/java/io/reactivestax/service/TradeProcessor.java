@@ -41,7 +41,7 @@ public class TradeProcessor implements Runnable, ProcessTrade {
         try {
             this.connection = DBUtils.getInstance(this.applicationPropertiesUtils).getConnection();
             while (true) {
-                String tradeId = this.tradeDeque.poll(50000, TimeUnit.MILLISECONDS);
+                String tradeId = this.tradeDeque.poll(500, TimeUnit.MILLISECONDS);
                 if (tradeId == null) break;
                 else processTrade(tradeId);
             }
