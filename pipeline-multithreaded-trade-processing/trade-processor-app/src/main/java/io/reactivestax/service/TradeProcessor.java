@@ -88,7 +88,6 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
                 positionTransaction(journalEntry);
             }
         } catch (SQLException e) {
-            System.out.println(e);
             logger.info("Exception in SQL.");
             this.connection.rollback();
             retryTransaction(tradeId);

@@ -4,33 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="78417491-511b-4611-b59b-a01284ce0e83" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/io/reactivestax/TradeProcessorRunner.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/io/reactivestax/TradeProcessorRunner.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/io/reactivestax/database/DBUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/io/reactivestax/database/DBUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/io/reactivestax/service/ChunkGeneratorAndProcessorService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/io/reactivestax/service/ChunkGeneratorAndProcessorService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/io/reactivestax/service/ChunkGeneratorRunnable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/io/reactivestax/service/ChunkGeneratorRunnable.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/io/reactivestax/service/ChunkProcessor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/io/reactivestax/service/ChunkProcessor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/io/reactivestax/service/QueueDistributor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/io/reactivestax/service/QueueDistributor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/io/reactivestax/service/TradeProcessor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/io/reactivestax/service/TradeProcessor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/io/reactivestax/service/TradeProcessorService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/io/reactivestax/service/TradeProcessorService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/io/reactivestax/utility/ApplicationPropertiesUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/io/reactivestax/utility/ApplicationPropertiesUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/io/reactivestax/TradeProcessorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/io/reactivestax/TradeProcessorTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/io/reactivestax/TradeProcessorRunner.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/io/reactivestax/TradeProcessorRunner.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/io/reactivestax/database/DBUtils.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/io/reactivestax/database/DBUtils.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/io/reactivestax/model/JournalEntry.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/io/reactivestax/model/JournalEntry.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/io/reactivestax/service/ChunkGeneratorAndProcessorService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/io/reactivestax/service/ChunkGeneratorAndProcessorService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/io/reactivestax/service/ChunkGeneratorRunnable.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/io/reactivestax/service/ChunkGeneratorRunnable.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/io/reactivestax/service/ChunkProcessor.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/io/reactivestax/service/ChunkProcessor.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/io/reactivestax/service/QueueDistributor.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/io/reactivestax/service/QueueDistributor.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/io/reactivestax/service/TradeProcessor.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/io/reactivestax/service/TradeProcessor.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/io/reactivestax/service/TradeProcessorService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/io/reactivestax/service/TradeProcessorService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/io/reactivestax/utility/ApplicationPropertiesUtils.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/io/reactivestax/utility/ApplicationPropertiesUtils.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/io/reactivestax/TradeProcessorTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/io/reactivestax/TradeProcessorTest.class" afterDir="false" />
-    </list>
+    <list default="true" id="78417491-511b-4611-b59b-a01284ce0e83" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -39,39 +13,52 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 0
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
   <component name="ProjectId" id="2myXHk7JZY6zVDI4SlyppJIRVQB" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.TradeProcessorRunner.executor": "Run",
-    "JUnit.TradeProcessorTest.executor": "Run",
-    "JUnit.TradeProcessorTest.test.executor": "Run",
-    "JUnit.TradeProcessorTest.testChunkProcessorForDatabaseInsertionOfRawPayload.executor": "Run",
-    "JUnit.TradeProcessorTest.testChunkProcessorForQueueNumberWithMapAndRandomAndAccountNumberTradeDistribution.executor": "Run",
-    "JUnit.TradeProcessorTest.testChunkProcessorForQueueNumberWithMapAndRoundRobinAndTradeIdTradeDistribution.executor": "Run",
-    "JUnit.TradeProcessorTest.testChunkProcessorForQueueNumberWithoutMapAndRandom.executor": "Run",
-    "JUnit.TradeProcessorTest.testChunkProcessorForQueueSize.executor": "Run",
-    "JUnit.TradeProcessorTest.testGenerateChunksWithIncorrectFilePath.executor": "Run",
-    "JUnit.TradeProcessorTest.testQueueDistributorGiveToQueue.executor": "Run",
-    "JUnit.TradeProcessorTest.testTradeProcessorProcessWithCorrectTradeIdForJournalEntry.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "version-1.1-single-threaded",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.TradeProcessorRunner.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.TradeProcessorTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.TradeProcessorTest.test.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.TradeProcessorTest.testChunkProcessorForDatabaseInsertionOfRawPayload.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.TradeProcessorTest.testChunkProcessorForQueueNumberWithMapAndRandomAndAccountNumberTradeDistribution.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.TradeProcessorTest.testChunkProcessorForQueueNumberWithMapAndRoundRobinAndTradeIdTradeDistribution.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.TradeProcessorTest.testChunkProcessorForQueueNumberWithoutMapAndRandom.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.TradeProcessorTest.testChunkProcessorForQueueSize.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.TradeProcessorTest.testGenerateChunksWithIncorrectFilePath.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.TradeProcessorTest.testQueueDistributorGiveToQueue.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.TradeProcessorTest.testTradeProcessorProcessWithCorrectTradeIdForJournalEntry.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;version-1.1-single-threaded&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/src/test/resources&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/test/resources" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.TradeProcessorTest">
+  <component name="RunManager" selected="Application.TradeProcessorRunner">
+    <configuration name="TradeProcessorRunner" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="io.reactivestax.TradeProcessorRunner" />
+      <module name="trade-processor-app" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="io.reactivestax.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="TradeProcessorTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="trade-processor-app" />
       <extension name="coverage">
@@ -135,29 +122,13 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="TradeProcessorTest.testTradeProcessorProcessWithCorrectTradeIdForJournalEntry" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="trade-processor-app" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="io.reactivestax.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="io.reactivestax" />
-      <option name="MAIN_CLASS_NAME" value="io.reactivestax.TradeProcessorTest" />
-      <option name="METHOD_NAME" value="testTradeProcessorProcessWithCorrectTradeIdForJournalEntry" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.TradeProcessorRunner" />
         <item itemvalue="JUnit.TradeProcessorTest" />
         <item itemvalue="JUnit.TradeProcessorTest.testTradeProcessorProcessForPostedStatusWithCusipNotPresentInSecuritiesReference" />
         <item itemvalue="JUnit.TradeProcessorTest.testTradeProcessorProcessForLookupStatusWithCusipPresentInSecuritiesReference" />
         <item itemvalue="JUnit.TradeProcessorTest.testTradeProcessorProcessForLookupStatusWithCusipNotPresentInSecuritiesReference" />
-        <item itemvalue="JUnit.TradeProcessorTest.testTradeProcessorProcessWithCorrectTradeIdForJournalEntry" />
       </list>
     </recent_temporary>
   </component>

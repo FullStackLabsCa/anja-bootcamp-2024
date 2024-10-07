@@ -1,7 +1,6 @@
 package io.reactivestax.repository;
 
 import io.reactivestax.model.JournalEntry;
-import io.reactivestax.model.Position;
 
 import java.sql.*;
 
