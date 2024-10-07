@@ -41,7 +41,7 @@ public class TradeProcessor implements Runnable, ProcessTrade {
         try {
             this.connection = DBUtils.getInstance(this.applicationPropertiesUtils).getConnection();
             while (true) {
-                String tradeId = this.tradeDeque.poll(500, TimeUnit.MILLISECONDS);
+                String tradeId = this.tradeDeque.poll(50000, TimeUnit.MILLISECONDS);
                 if (tradeId == null) break;
                 else processTrade(tradeId);
             }
@@ -50,10 +50,13 @@ public class TradeProcessor implements Runnable, ProcessTrade {
             logger.warning("Thread was interrupted.");
         } catch (SQLException e) {
             logger.warning("Exception in database query.");
-        } finally {
+        } catch (Exception e){
+            e.printStackTrace();
+    }finally {
             try {
                 this.connection.close();
             } catch (SQLException e) {
+                e.printStackTrace();
                 logger.warning("Exception in closing the connection with DB connection pool");
             }
         }
@@ -83,9 +86,12 @@ public class TradeProcessor implements Runnable, ProcessTrade {
                 tradeStoredProcedureRepository.callTradeStoredProcedure(journalEntry, connection);
             }
         } catch (SQLException e) {
+            e.printStackTrace();
             logger.info("Exception in SQL.");
             this.connection.rollback();
-        } finally {
+        } catch (Exception e){
+            e.printStackTrace();
+    }finally {
             this.connection.setAutoCommit(true);
         }
     }
