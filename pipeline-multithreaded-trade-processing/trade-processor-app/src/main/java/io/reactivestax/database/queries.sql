@@ -34,8 +34,3 @@ CREATE TABLE trade_payloads (
     je_status ENUM('posted', 'not_posted') NOT NULL,
     PRIMARY KEY (id)
 );
-
-create procedure upsert_journal_entry_to_positions_table
-as
-case SELECT
-go;

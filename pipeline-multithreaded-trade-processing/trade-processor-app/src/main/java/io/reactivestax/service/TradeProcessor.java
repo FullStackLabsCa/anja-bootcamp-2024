@@ -1,12 +1,15 @@
 package io.reactivestax.service;
 
 import io.reactivestax.database.DBUtils;
+import io.reactivestax.model.JournalEntry;
 import io.reactivestax.repository.SecuritiesReferenceRepository;
 import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.utility.ApplicationPropertiesUtils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -23,7 +26,7 @@ public class TradeProcessor implements Runnable, ProcessTrade {
         this.applicationPropertiesUtils = applicationPropertiesUtils;
     }
 
-    public void setConnection(Connection connection){
+    public void setConnection(Connection connection) {
         this.connection = connection;
     }
 
@@ -46,7 +49,7 @@ public class TradeProcessor implements Runnable, ProcessTrade {
             logger.warning("Thread was interrupted.");
         } catch (SQLException e) {
             logger.warning("Exception in database query.");
-        }finally {
+        } finally {
             try {
                 this.connection.close();
             } catch (SQLException e) {
@@ -66,7 +69,15 @@ public class TradeProcessor implements Runnable, ProcessTrade {
             boolean validSecurity = securitiesReferenceRepository.lookupSecurities(cusip, this.connection);
             tradePayloadRepository.updateTradePayloadLookupStatus(validSecurity, tradeId, this.connection);
             if (validSecurity) {
-//               journalEntryTransaction(payloadArr, cusip);
+                JournalEntry journalEntry = new JournalEntry(
+                        payloadArr[0],
+                        payloadArr[2],
+                        cusip,
+                        payloadArr[4],
+                        Integer.parseInt(payloadArr[5]),
+                        "not_posted",
+                        LocalDateTime.parse(payloadArr[1], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                );
             }
         } catch (SQLException e) {
             logger.info("Exception in SQL.");
