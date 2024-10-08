@@ -41,7 +41,7 @@ public class TradeProcessor implements Runnable, ProcessTrade {
         try {
             this.connection = DBUtils.getInstance(this.applicationPropertiesUtils).getConnection();
             while (true) {
-                String tradeId = this.tradeDeque.poll(5000, TimeUnit.MILLISECONDS);
+                String tradeId = this.tradeDeque.poll(500, TimeUnit.MILLISECONDS);
                 if (tradeId == null) break;
                 else processTrade(tradeId);
             }
@@ -84,22 +84,27 @@ public class TradeProcessor implements Runnable, ProcessTrade {
                 TradeStoredProcedureRepository tradeStoredProcedureRepository = new TradeStoredProcedureRepository();
                 int errorCode = tradeStoredProcedureRepository.callTradeStoredProcedure(journalEntry, connection);
                 if (errorCode != 0) {
-                    Integer retryCount = QueueDistributor.getValueFromRetryMap(tradeId);
-                    retryCount++;
-                    if (retryCount <= applicationPropertiesUtils.getMaxRetryCount()) {
-                        QueueDistributor.setValueInRetryMap(journalEntry.tradeId(), retryCount);
-                        this.tradeDeque.putFirst(tradeId);
-                    } else {
-                        QueueDistributor.removeValueFromRetryMap(tradeId);
-                        QueueDistributor.setDeadLetterQueue(tradeId);
-                    }
+                    retryTransaction(tradeId);
                 }
             }
         } catch (SQLException e) {
-            logger.info("Exception in SQL."+e);
+            logger.info("Exception in SQL." + e);
             this.connection.rollback();
+            retryTransaction(tradeId);
         } finally {
             this.connection.setAutoCommit(true);
+        }
+    }
+
+    public void retryTransaction(String tradeId) throws InterruptedException {
+        Integer retryCount = QueueDistributor.getValueFromRetryMap(tradeId);
+        retryCount++;
+        if (retryCount <= applicationPropertiesUtils.getMaxRetryCount()) {
+            QueueDistributor.setValueInRetryMap(tradeId, retryCount);
+            this.tradeDeque.putFirst(tradeId);
+        } else {
+            QueueDistributor.removeValueFromRetryMap(tradeId);
+            QueueDistributor.setDeadLetterQueue(tradeId);
         }
     }
 }
