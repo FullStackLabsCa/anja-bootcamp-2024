@@ -84,7 +84,7 @@ public class TradeProcessor implements Runnable, ProcessTrade {
                 if (errorCode != 0) {
                     retryTransaction(tradeId);
                 }
-            }
+            } else QueueDistributor.setDeadLetterQueue(tradeId);
         } catch (SQLException e) {
             logger.info("Exception in SQL." + e);
             this.connection.rollback();

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="io.reactivestax.TradeProcessorTest" time="10.165" tests="22" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="io.reactivestax.TradeProcessorTest" time="10.502" tests="22" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="23"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -12,7 +12,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="CA"/>
     <property name="sun.boot.library.path" value="/opt/homebrew/Cellar/openjdk/23/libexec/openjdk.jdk/Contents/Home/lib"/>
-    <property name="sun.java.command" value="/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/target/surefire/surefirebooter-20241004120224515_3.jar /Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/target/surefire 2024-10-04T12-02-24_484-jvmRun1 surefire-20241004120224515_1tmp surefire_0-20241004120224515_2tmp"/>
+    <property name="sun.java.command" value="/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/target/surefire/surefirebooter-20241008110110587_3.jar /Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/target/surefire 2024-10-08T11-01-10_534-jvmRun1 surefire-20241008110110587_1tmp surefire_0-20241008110110587_2tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/target/test-classes:/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/target/classes:/Users/Anant.Jain/.m2/repository/junit/junit/4.13.2/junit-4.13.2.jar:/Users/Anant.Jain/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:/Users/Anant.Jain/.m2/repository/com/github/stefanbirkner/system-rules/1.19.0/system-rules-1.19.0.jar:/Users/Anant.Jain/.m2/repository/com/zaxxer/HikariCP/6.0.0/HikariCP-6.0.0.jar:/Users/Anant.Jain/.m2/repository/com/mysql/mysql-connector-j/8.0.33/mysql-connector-j-8.0.33.jar:/Users/Anant.Jain/.m2/repository/com/google/protobuf/protobuf-java/3.21.9/protobuf-java-3.21.9.jar:/Users/Anant.Jain/.m2/repository/org/apache/logging/log4j/log4j-core/2.24.1/log4j-core-2.24.1.jar:/Users/Anant.Jain/.m2/repository/org/apache/logging/log4j/log4j-api/2.24.1/log4j-api-2.24.1.jar:/Users/Anant.Jain/.m2/repository/ch/qos/reload4j/reload4j/1.2.22/reload4j-1.2.22.jar:/Users/Anant.Jain/.m2/repository/org/slf4j/slf4j-api/2.0.16/slf4j-api-2.0.16.jar:"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -28,7 +28,7 @@
     <property name="java.specification.name" value="Java Platform API Specification"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="apple.awt.application.name" value="ForkedBooter"/>
-    <property name="surefire.real.class.path" value="/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/target/surefire/surefirebooter-20241004120224515_3.jar"/>
+    <property name="surefire.real.class.path" value="/Users/Anant.Jain/source/student/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-processor-app/target/surefire/surefirebooter-20241008110110587_3.jar"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="23"/>
     <property name="user.name" value="Anant.Jain"/>
@@ -55,74 +55,74 @@
     <property name="sun.io.unicode.encoding" value="UnicodeBig"/>
     <property name="java.class.version" value="67.0"/>
   </properties>
-  <testcase name="testChunkProcessorForQueueNumberWithoutMapAndRandom" classname="io.reactivestax.TradeProcessorTest" time="0.238">
+  <testcase name="testChunkProcessorForQueueNumberWithoutMapAndRandom" classname="io.reactivestax.TradeProcessorTest" time="0.239">
     <system-err><![CDATA[SLF4J(W): No SLF4J providers were found.
 SLF4J(W): Defaulting to no-operation (NOP) logger implementation
 SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
 ]]></system-err>
   </testcase>
-  <testcase name="testChunkProcessorForQueueNumberWithoutMapAndRoundRobin" classname="io.reactivestax.TradeProcessorTest" time="0.005"/>
-  <testcase name="testTradeProcessorRetryTransactionDeadLetterQueue" classname="io.reactivestax.TradeProcessorTest" time="0.003"/>
-  <testcase name="testFileLineCounterWithWrongFilePath" classname="io.reactivestax.TradeProcessorTest" time="0.003"/>
-  <testcase name="testTradeProcessorProcessForLookupStatusWithCusipNotPresentInSecuritiesReference" classname="io.reactivestax.TradeProcessorTest" time="1.196">
-    <system-err><![CDATA[Oct 04, 2024 12:02:26 P.M. io.reactivestax.TradeProcessorTest cleanUp
+  <testcase name="testChunkProcessorForQueueNumberWithoutMapAndRoundRobin" classname="io.reactivestax.TradeProcessorTest" time="0.001"/>
+  <testcase name="testTradeProcessorRetryTransactionDeadLetterQueue" classname="io.reactivestax.TradeProcessorTest" time="0.004"/>
+  <testcase name="testFileLineCounterWithWrongFilePath" classname="io.reactivestax.TradeProcessorTest" time="0.004"/>
+  <testcase name="testTradeProcessorProcessForLookupStatusWithCusipNotPresentInSecuritiesReference" classname="io.reactivestax.TradeProcessorTest" time="1.134">
+    <system-err><![CDATA[Oct 08, 2024 11:01:12 A.M. io.reactivestax.TradeProcessorTest cleanUp
 INFO: Cleanup done
 ]]></system-err>
   </testcase>
-  <testcase name="testChunkProcessorForQueueSize" classname="io.reactivestax.TradeProcessorTest" time="0.922">
-    <system-err><![CDATA[Oct 04, 2024 12:02:27 P.M. io.reactivestax.TradeProcessorTest cleanUp
+  <testcase name="testChunkProcessorForQueueSize" classname="io.reactivestax.TradeProcessorTest" time="1.152">
+    <system-err><![CDATA[Oct 08, 2024 11:01:13 A.M. io.reactivestax.TradeProcessorTest cleanUp
 INFO: Cleanup done
 ]]></system-err>
   </testcase>
-  <testcase name="testTradeProcessorProcessForLookupStatusWithCusipPresentInSecuritiesReference" classname="io.reactivestax.TradeProcessorTest" time="0.924">
-    <system-err><![CDATA[Oct 04, 2024 12:02:27 P.M. io.reactivestax.TradeProcessorTest cleanUp
+  <testcase name="testTradeProcessorProcessForLookupStatusWithCusipPresentInSecuritiesReference" classname="io.reactivestax.TradeProcessorTest" time="1.157">
+    <system-err><![CDATA[Oct 08, 2024 11:01:14 A.M. io.reactivestax.TradeProcessorTest cleanUp
 INFO: Cleanup done
 ]]></system-err>
   </testcase>
   <testcase name="testSetStaticValues" classname="io.reactivestax.TradeProcessorTest" time="0.002"/>
-  <testcase name="testChunkProcessorForDatabaseInsertionOfRawPayload" classname="io.reactivestax.TradeProcessorTest" time="1.08">
-    <system-err><![CDATA[Oct 04, 2024 12:02:29 P.M. io.reactivestax.TradeProcessorTest cleanUp
+  <testcase name="testChunkProcessorForDatabaseInsertionOfRawPayload" classname="io.reactivestax.TradeProcessorTest" time="1.156">
+    <system-err><![CDATA[Oct 08, 2024 11:01:15 A.M. io.reactivestax.TradeProcessorTest cleanUp
 INFO: Cleanup done
 ]]></system-err>
   </testcase>
   <testcase name="testFileLineCounterWithCorrectFilePath" classname="io.reactivestax.TradeProcessorTest" time="0.012"/>
-  <testcase name="testGenerateChunksWithCorrectFilePath" classname="io.reactivestax.TradeProcessorTest" time="0.006">
-    <system-err><![CDATA[Oct 04, 2024 12:02:29 P.M. io.reactivestax.TradeProcessorTest cleanUp
+  <testcase name="testGenerateChunksWithCorrectFilePath" classname="io.reactivestax.TradeProcessorTest" time="0.008">
+    <system-err><![CDATA[Oct 08, 2024 11:01:15 A.M. io.reactivestax.TradeProcessorTest cleanUp
 INFO: Cleanup done
 ]]></system-err>
   </testcase>
-  <testcase name="testTradeProcessorProcessForPostedStatusWithCusipNotPresentInSecuritiesReference" classname="io.reactivestax.TradeProcessorTest" time="1.166">
-    <system-err><![CDATA[Oct 04, 2024 12:02:30 P.M. io.reactivestax.TradeProcessorTest cleanUp
+  <testcase name="testTradeProcessorProcessForPostedStatusWithCusipNotPresentInSecuritiesReference" classname="io.reactivestax.TradeProcessorTest" time="1.094">
+    <system-err><![CDATA[Oct 08, 2024 11:01:16 A.M. io.reactivestax.TradeProcessorTest cleanUp
 INFO: Cleanup done
 ]]></system-err>
   </testcase>
-  <testcase name="testChunkProcessorForQueueNumberWithMapAndRoundRobinAndTradeIdTradeDistribution" classname="io.reactivestax.TradeProcessorTest" time="0.002"/>
-  <testcase name="testTradeProcessorProcessWithCorrectTradeIdForPositionsEntryInsert" classname="io.reactivestax.TradeProcessorTest" time="1.1">
-    <system-err><![CDATA[Oct 04, 2024 12:02:31 P.M. io.reactivestax.TradeProcessorTest cleanUp
+  <testcase name="testChunkProcessorForQueueNumberWithMapAndRoundRobinAndTradeIdTradeDistribution" classname="io.reactivestax.TradeProcessorTest" time="0.001"/>
+  <testcase name="testTradeProcessorProcessWithCorrectTradeIdForPositionsEntryInsert" classname="io.reactivestax.TradeProcessorTest" time="1.109">
+    <system-err><![CDATA[Oct 08, 2024 11:01:17 A.M. io.reactivestax.TradeProcessorTest cleanUp
 INFO: Cleanup done
 ]]></system-err>
   </testcase>
-  <testcase name="testBuildFilePath" classname="io.reactivestax.TradeProcessorTest" time="0.002"/>
-  <testcase name="testTradeProcessorProcessWithCorrectTradeIdForPositionsEntryUpdate" classname="io.reactivestax.TradeProcessorTest" time="1.181">
-    <system-err><![CDATA[Oct 04, 2024 12:02:32 P.M. io.reactivestax.TradeProcessorTest cleanUp
+  <testcase name="testBuildFilePath" classname="io.reactivestax.TradeProcessorTest" time="0.001"/>
+  <testcase name="testTradeProcessorProcessWithCorrectTradeIdForPositionsEntryUpdate" classname="io.reactivestax.TradeProcessorTest" time="1.144">
+    <system-err><![CDATA[Oct 08, 2024 11:01:18 A.M. io.reactivestax.TradeProcessorTest cleanUp
 INFO: Cleanup done
 ]]></system-err>
   </testcase>
-  <testcase name="testTradeProcessorRetryTransactionRetryCountMap" classname="io.reactivestax.TradeProcessorTest" time="0.002"/>
+  <testcase name="testTradeProcessorRetryTransactionRetryCountMap" classname="io.reactivestax.TradeProcessorTest" time="0.001"/>
   <testcase name="testQueueDistributorGiveToQueue" classname="io.reactivestax.TradeProcessorTest" time="0.001"/>
-  <testcase name="testTradeProcessorProcessForPostedStatusWithCusipPresentInSecuritiesReference" classname="io.reactivestax.TradeProcessorTest" time="1.116">
-    <system-err><![CDATA[Oct 04, 2024 12:02:33 P.M. io.reactivestax.TradeProcessorTest cleanUp
+  <testcase name="testTradeProcessorProcessForPostedStatusWithCusipPresentInSecuritiesReference" classname="io.reactivestax.TradeProcessorTest" time="1.126">
+    <system-err><![CDATA[Oct 08, 2024 11:01:20 A.M. io.reactivestax.TradeProcessorTest cleanUp
 INFO: Cleanup done
 ]]></system-err>
   </testcase>
   <testcase name="testGenerateChunksWithIncorrectFilePath" classname="io.reactivestax.TradeProcessorTest" time="0.003">
-    <system-err><![CDATA[Oct 04, 2024 12:02:33 P.M. io.reactivestax.TradeProcessorTest cleanUp
+    <system-err><![CDATA[Oct 08, 2024 11:01:20 A.M. io.reactivestax.TradeProcessorTest cleanUp
 INFO: Cleanup done
 ]]></system-err>
   </testcase>
   <testcase name="testChunkProcessorForQueueNumberWithMapAndRandomAndAccountNumberTradeDistribution" classname="io.reactivestax.TradeProcessorTest" time="0.002"/>
-  <testcase name="testTradeProcessorProcessWithCorrectTradeIdForJournalEntry" classname="io.reactivestax.TradeProcessorTest" time="1.174">
-    <system-err><![CDATA[Oct 04, 2024 12:02:34 P.M. io.reactivestax.TradeProcessorTest cleanUp
+  <testcase name="testTradeProcessorProcessWithCorrectTradeIdForJournalEntry" classname="io.reactivestax.TradeProcessorTest" time="1.122">
+    <system-err><![CDATA[Oct 08, 2024 11:01:21 A.M. io.reactivestax.TradeProcessorTest cleanUp
 INFO: Cleanup done
 ]]></system-err>
   </testcase>
