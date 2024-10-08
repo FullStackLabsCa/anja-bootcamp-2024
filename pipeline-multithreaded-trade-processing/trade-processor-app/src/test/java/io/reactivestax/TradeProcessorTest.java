@@ -387,6 +387,6 @@ public class TradeProcessorTest {
         TradeProcessor tradeProcessor = new TradeProcessor(QueueDistributor.getTransactionDeque(0), applicationTestWithAccNoMapTrueRdRobin);
         tradeProcessor.retryTransaction("TDB_00001000");
         tradeProcessor.retryTransaction("TDB_00001000");
-        assertEquals(1, tradeProcessor.getRetryCountMap().size());
+        assertEquals(1, QueueDistributor.getRetryMap().size());
     }
 }

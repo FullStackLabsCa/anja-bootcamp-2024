@@ -45,8 +45,6 @@ public class TradeProcessor implements Runnable, ProcessTrade {
                 if (tradeId == null) break;
                 else processTrade(tradeId);
             }
-            System.out.println("DEad letter queue: " + QueueDistributor.getDeadLetterQueue().size());
-            System.out.println("Map: " + QueueDistributor.getRetryMap().size());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             logger.warning("Thread was interrupted.");

@@ -38,7 +38,6 @@ public class ChunkProcessor implements Runnable, ProcessChunk {
             Thread.currentThread().interrupt();
         } catch (SQLException e) {
             logger.warning("Something went wrong while establishing database connection.");
-            e.printStackTrace();
         }
     }
 
@@ -71,7 +70,6 @@ public class ChunkProcessor implements Runnable, ProcessChunk {
         } catch (IOException e) {
             logger.warning("File not found.");
         } catch (SQLException e) {
-            e.printStackTrace();
             connection.rollback();
             connection.setAutoCommit(true);
         } finally {

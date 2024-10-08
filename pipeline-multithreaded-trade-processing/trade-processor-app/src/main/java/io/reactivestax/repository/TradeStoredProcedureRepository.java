@@ -4,7 +4,7 @@ import io.reactivestax.model.JournalEntry;
 
 import java.sql.*;
 
-public class TradeStoredProcedureRepository {
+public class TradeStoredProcedureRepository implements TradeStoredProcedure {
 
     public int callTradeStoredProcedure(JournalEntry journalEntry, Connection connection) throws SQLException {
         String tradeStoredProcedure = "Call trade_procedure(?, ?, ?, ?, ?, ?, ?, ?)";
@@ -20,7 +20,7 @@ public class TradeStoredProcedureRepository {
             statement.registerOutParameter(8, Types.INTEGER);
             statement.execute();
             errorCode = statement.getInt(8);
-            if (errorCode != 0) connection.commit();
+            if (errorCode == 0) connection.commit();
             else connection.rollback();
         }
         return errorCode;
