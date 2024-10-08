@@ -86,9 +86,8 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
             if (validSecurity) {
                 JournalEntry journalEntry = journalEntryTransaction(payloadArr, cusip);
                 positionTransaction(journalEntry);
-            }
+            } else QueueDistributor.deadLetterTransactionDeque.put(tradeId);
         } catch (SQLException e) {
-            System.out.println(e);
             logger.info("Exception in SQL.");
             this.connection.rollback();
             retryTransaction(tradeId);
