@@ -1,22 +1,20 @@
 package io.reactivestax.repository;
 
+import io.reactivestax.entity.SecuritiesReference;
+import org.hibernate.Session;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 public class SecuritiesReferenceRepository implements LookupSecurities {
-    private static final String LOOKUP_SECURITIES_QUERY = "Select 1 from securities_reference where cusip = ?";
 
     @Override
-    public boolean lookupSecurities(String cusip, Connection connection) throws SQLException {
-        boolean validSecurity = false;
-        try (PreparedStatement preparedStatement = connection.prepareStatement(LOOKUP_SECURITIES_QUERY)) {
-            preparedStatement.setString(1, cusip);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) validSecurity = true;
-        }
-
-        return validSecurity;
+    public boolean lookupSecurities(String cusip, Session session) {
+        List<SecuritiesReference> cusipList = session.createQuery("from SecuritiesReference sr where sr.cusip = :cusip",
+                SecuritiesReference.class).setParameter("cusip", cusip).getResultList();
+        return !cusipList.isEmpty();
     }
 }

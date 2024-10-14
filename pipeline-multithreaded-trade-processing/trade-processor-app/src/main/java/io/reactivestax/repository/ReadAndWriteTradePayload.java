@@ -1,16 +1,16 @@
 package io.reactivestax.repository;
 
-import io.reactivestax.model.RawPayload;
+import io.reactivestax.entity.TradePayload;
+import org.hibernate.Session;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 
 public interface ReadAndWriteTradePayload {
-    void insertTradeRawPayload(RawPayload rawPayload, Connection connection) throws SQLException;
+    void insertTradeRawPayload(TradePayload tradePayload, Session session);
 
-    String readRawPayload(String tradeId, Connection connection) throws SQLException;
+    TradePayload readRawPayload(String tradeId, Session session);
 
-    void updateTradePayloadLookupStatus(boolean lookupStatus, String tradeId, Connection connection) throws SQLException;
+    void updateTradePayloadLookupStatus(boolean lookupStatus, int tradeId, Session session);
 
-    void updateTradePayloadPostedStatus(String postedStatus, String tradeId, Connection connection) throws SQLException;
+    void updateTradePayloadPostedStatus(int tradeId, Session session);
 }

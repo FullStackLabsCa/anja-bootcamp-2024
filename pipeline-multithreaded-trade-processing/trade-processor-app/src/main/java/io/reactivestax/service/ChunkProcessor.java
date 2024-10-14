@@ -1,14 +1,16 @@
 package io.reactivestax.service;
 
-import io.reactivestax.database.DBUtils;
-import io.reactivestax.model.RawPayload;
+import io.reactivestax.database.HibernateUtil;
+import io.reactivestax.entity.TradePayload;
+import io.reactivestax.enums.ValidityStatusEnum;
 import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.utility.ApplicationPropertiesUtils;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
@@ -16,22 +18,20 @@ import java.util.logging.Logger;
 public class ChunkProcessor implements Runnable, ProcessChunk {
     Logger logger = Logger.getLogger(ChunkProcessor.class.getName());
     LinkedBlockingQueue<String> chunkQueue = QueueDistributor.chunkQueue;
-    int count = 0;
     ApplicationPropertiesUtils applicationPropertiesUtils;
 
     public ChunkProcessor(ApplicationPropertiesUtils applicationPropertiesUtils) {
-        this.count = 0;
         this.applicationPropertiesUtils = applicationPropertiesUtils;
     }
 
     @Override
     public void run() {
         try {
-            while (this.count == 0) {
+            while (true) {
                 String filePath = this.chunkQueue.take();
                 if (!filePath.isEmpty()) {
                     processChunk(filePath);
-                    count++;
+                    break;
                 }
             }
         } catch (InterruptedException e) {
@@ -43,37 +43,35 @@ public class ChunkProcessor implements Runnable, ProcessChunk {
 
     @Override
     public void processChunk(String filePath) throws SQLException {
-        Connection connection = DBUtils.getInstance(this.applicationPropertiesUtils).getConnection();
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-            RawPayload rawPayload = new RawPayload();
+        try (Session session = HibernateUtil.getSessionFactory().openSession(); BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String payload;
             while ((payload = reader.readLine()) != null) {
-                rawPayload.setPayload(payload);
+                TradePayload tradePayload = new TradePayload();
+                tradePayload.setPayload(payload);
                 String[] transaction = payload.split(",");
-                rawPayload.setTradeId(transaction[0]);
-                rawPayload.setValidityStatus("valid");
+                tradePayload.setTradeNumber(transaction[0]);
+                tradePayload.setValidityStatus(ValidityStatusEnum.VALID);
                 if (transaction.length != 7) {
-                    rawPayload.setValidityStatus("invalid");
+                    tradePayload.setValidityStatus(ValidityStatusEnum.INVALID);
                 }
                 TradePayloadRepository tradePayloadRepository = new TradePayloadRepository();
-                // inserts to raw_payloads table
-                tradePayloadRepository.insertTradeRawPayload(rawPayload, connection);
-                // inserts to concurrent hash map and get the queue number
-                if (rawPayload.getValidityStatus().equals("valid")) {
-                    int queueNumber = QueueDistributor.figureOutTheNextQueue(this.applicationPropertiesUtils.getTradeDistributionCriteria().equals("accountNumber") ? transaction[2] : rawPayload.getTradeId(), this.applicationPropertiesUtils.isTradeDistributionUseMap(), this.applicationPropertiesUtils.getTradeDistributionAlgorithm(), this.applicationPropertiesUtils.getTradeProcessorQueueCount());
-                    // inserts to the queue number found in above step
-                    QueueDistributor.giveToTradeQueue(rawPayload.getTradeId(), queueNumber);
+                tradePayloadRepository.insertTradeRawPayload(tradePayload, session);
+                if (tradePayload.getValidityStatus().equals(ValidityStatusEnum.VALID)) {
+                    int queueNumber = QueueDistributor.figureOutTheNextQueue(
+                            this.applicationPropertiesUtils.getTradeDistributionCriteria().equals("accountNumber") ? transaction[2] : tradePayload.getTradeNumber(),
+                            this.applicationPropertiesUtils.isTradeDistributionUseMap(),
+                            this.applicationPropertiesUtils.getTradeDistributionAlgorithm(),
+                            this.applicationPropertiesUtils.getTradeProcessorQueueCount()
+                    );
+                    QueueDistributor.giveToTradeQueue(tradePayload.getTradeNumber(), queueNumber);
                 }
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (IOException e) {
             logger.warning("File not found.");
-        } catch (SQLException e) {
-            connection.rollback();
-            connection.setAutoCommit(true);
-        } finally {
-            connection.close();
+        } catch (HibernateException e) {
+            logger.warning("Hibernate exception detected.");
         }
     }
 }

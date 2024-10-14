@@ -1,11 +1,9 @@
 package io.reactivestax.service;
 
-import io.reactivestax.model.JournalEntry;
-
-import java.sql.SQLException;
+import io.reactivestax.entity.JournalEntry;
 
 public interface ProcessTradeTransaction {
-    JournalEntry journalEntryTransaction(String[] payloadArr, String cusip) throws SQLException;
+    JournalEntry journalEntryTransaction(String[] payloadArr, int tradeId);
 
-    void positionTransaction(JournalEntry journalEntry) throws SQLException;
+    void positionTransaction(JournalEntry journalEntry);
 }

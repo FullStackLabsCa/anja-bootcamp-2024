@@ -1,12 +1,10 @@
 package io.reactivestax.repository;
 
-import io.reactivestax.model.JournalEntry;
-
-import java.sql.Connection;
-import java.sql.SQLException;
+import io.reactivestax.entity.JournalEntry;
+import org.hibernate.Session;
 
 public interface WriteToJournalEntry {
-    void insertIntoJournalEntry(JournalEntry journalEntry, Connection connection) throws SQLException;
+    void insertIntoJournalEntry(JournalEntry journalEntry , Session session);
 
-    void updateJournalEntryStatus(String tradeId, Connection connection) throws SQLException;
+    void updateJournalEntryStatus(int journalEntryId, Session session);
 }

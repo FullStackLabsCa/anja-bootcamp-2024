@@ -1,14 +1,8 @@
 package io.reactivestax.repository;
 
-import io.reactivestax.model.Position;
-
-import java.sql.Connection;
-import java.sql.SQLException;
+import io.reactivestax.entity.Position;
+import org.hibernate.Session;
 
 public interface ReadAndUpsertPositions {
-    int[] lookupPositions(Position position, Connection connection) throws SQLException;
-
-    void insertIntoPositions(Position position, Connection connection) throws SQLException;
-
-    void updatePositions(Position position, Connection connection) throws SQLException;
+    void upsertPosition(Position position, Session session);
 }
