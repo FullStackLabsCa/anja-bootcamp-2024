@@ -1,100 +1,82 @@
-//package io.reactivestax;
-//
-//import io.reactivestax.database.DBUtils;
-//import io.reactivestax.service.*;
-//import io.reactivestax.utility.ApplicationPropertiesUtils;
-//import org.junit.After;
-//import org.junit.Before;
-//import org.junit.Rule;
-//import org.junit.Test;
-//import org.junit.contrib.java.lang.system.SystemOutRule;
-//
-//import java.io.File;
-//import java.io.IOException;
-//import java.nio.file.Files;
-//import java.nio.file.Paths;
-//import java.sql.*;
-//import java.util.Objects;
-//import java.util.logging.Logger;
-//
-//import static org.junit.Assert.*;
-//
-//public class TradeProcessorTest {
-//    Connection connection;
-//    Logger logger = Logger.getLogger(TradeProcessorTest.class.getName());
-//    ApplicationPropertiesUtils applicationTestWithAccNoMapFalseRandom;
-//    ApplicationPropertiesUtils applicationTestWithAccNoMapFalseRdRobin;
-//    ApplicationPropertiesUtils applicationTestWithAccNoMapTrueRandom;
-//    ApplicationPropertiesUtils applicationTestWithAccNoMapTrueRdRobin;
-//    ApplicationPropertiesUtils applicationTestWithTradeIdMapTrueRandom;
-//    ApplicationPropertiesUtils applicationTestWithTradeIdMapTrueRdRobin;
-//    ApplicationPropertiesUtils applicationTestWrongFilePath;
-//
-//    public TradeProcessorTest(){
-//        applicationTestWithAccNoMapFalseRandom = new ApplicationPropertiesUtils("applicationTestWithAccNoMapFalseRandom.properties");
-//        applicationTestWithAccNoMapFalseRdRobin = new ApplicationPropertiesUtils("applicationTestWithAccNoMapFalseRdRobin.properties");
-//        applicationTestWithAccNoMapTrueRandom = new ApplicationPropertiesUtils("applicationTestWithAccNoMapTrueRandom.properties");
-//        applicationTestWithAccNoMapTrueRdRobin = new ApplicationPropertiesUtils("applicationTestWithAccNoMapTrueRdRobin.properties");
-//        applicationTestWithTradeIdMapTrueRandom = new ApplicationPropertiesUtils("applicationTestWithTradeIdMapTrueRandom.properties");
-//        applicationTestWithTradeIdMapTrueRdRobin = new ApplicationPropertiesUtils("applicationTestWithTradeIdMapTrueRdRobin.properties");
-//        applicationTestWrongFilePath = new ApplicationPropertiesUtils("applicationTestWrongFilePath.properties");
-//        QueueDistributor.initializeQueue(applicationTestWithTradeIdMapTrueRandom.getTradeProcessorQueueCount());
-//        applicationTestWithTradeIdMapTrueRandom.setTotalNoOfLines(10000);
-//    }
-//
-//    @Before
-//    public void setUp() throws IOException {
-//        Files.createDirectories(Paths.get(applicationTestWithTradeIdMapTrueRandom.getChunkDirectoryPath()));
-//        try {
-//            connection = DBUtils.getInstance(applicationTestWithTradeIdMapTrueRandom).getConnection();
-//        } catch (SQLException e) {
-//            System.out.println("SQL Exception");
-//        }
-//    }
-//
-//    @After
-//    public void cleanUp() throws SQLException, NullPointerException {
-//        String deleteFromTradePayload = "Delete from trade_payloads";
-//        String deleteFromJournalEntry = "Delete from journal_entry";
-//        String deleteFromPositions = "Delete from positions";
-//        try (PreparedStatement preparedStatement1 = connection.prepareStatement(deleteFromTradePayload);
-//             PreparedStatement preparedStatement2 = connection.prepareStatement(deleteFromJournalEntry);
-//             PreparedStatement preparedStatement3 = connection.prepareStatement(deleteFromPositions)) {
-//            preparedStatement1.execute();
-//            preparedStatement2.execute();
-//            preparedStatement3.execute();
-//        } catch (SQLException e) {
-//            System.out.println("SQL Exception");
-//        } finally {
-//            connection.close();
-//        }
-//        File directory = new File(applicationTestWithTradeIdMapTrueRandom.getChunkDirectoryPath());
-//        boolean delete = false;
-//        File[] files = directory.listFiles();
-//        if (files != null) {
-//            for (File file : Objects.requireNonNull(directory.listFiles())) {
-//                delete = file.delete();
-//            }
-//        }
-//        if (delete) logger.info("Cleanup done");
-//    }
-//
-//    @Rule
-//    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
-//
-//    @Test
-//    public void testFileLineCounterWithCorrectFilePath() throws IOException {
-//        ChunkGeneratorAndProcessorService chunkGeneratorAndProcessorService = new ChunkGeneratorAndProcessorService();
-//        long numberOfLines = chunkGeneratorAndProcessorService.fileLineCounter(applicationTestWithTradeIdMapTrueRandom.getFilePath());
-//        assertEquals(10000, numberOfLines);
-//    }
-//
-//    @Test(expected = IOException.class)
-//    public void testFileLineCounterWithWrongFilePath() throws IOException {
-//        ChunkGeneratorAndProcessorService chunkGeneratorAndProcessorService = new ChunkGeneratorAndProcessorService();
-//        chunkGeneratorAndProcessorService.fileLineCounter("wrong_file_path");
-//    }
-//
+package io.reactivestax;
+
+import io.reactivestax.database.HibernateUtil;
+import io.reactivestax.service.ChunkGeneratorAndProcessorService;
+import io.reactivestax.utility.ApplicationPropertiesUtils;
+import org.hibernate.SessionFactory;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.contrib.java.lang.system.SystemOutRule;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Objects;
+import java.util.logging.Logger;
+
+import static org.junit.Assert.assertEquals;
+
+public class TradeProcessorTest {
+    Logger logger = Logger.getLogger(TradeProcessorTest.class.getName());
+    ApplicationPropertiesUtils applicationTestWithAccNoMapFalseRandom;
+    ApplicationPropertiesUtils applicationTestWithAccNoMapFalseRdRobin;
+    ApplicationPropertiesUtils applicationTestWithAccNoMapTrueRandom;
+    ApplicationPropertiesUtils applicationTestWithAccNoMapTrueRdRobin;
+    ApplicationPropertiesUtils applicationTestWithTradeIdMapTrueRandom;
+    ApplicationPropertiesUtils applicationTestWithTradeIdMapTrueRdRobin;
+    ApplicationPropertiesUtils applicationTestWrongFilePath;
+    SessionFactory sessionFactory;
+
+    public TradeProcessorTest(){
+        applicationTestWithAccNoMapFalseRandom = new ApplicationPropertiesUtils("applicationTestWithAccNoMapFalseRandom.properties");
+        applicationTestWithAccNoMapFalseRdRobin = new ApplicationPropertiesUtils("applicationTestWithAccNoMapFalseRdRobin.properties");
+        applicationTestWithAccNoMapTrueRandom = new ApplicationPropertiesUtils("applicationTestWithAccNoMapTrueRandom.properties");
+        applicationTestWithAccNoMapTrueRdRobin = new ApplicationPropertiesUtils("applicationTestWithAccNoMapTrueRdRobin.properties");
+        applicationTestWithTradeIdMapTrueRandom = new ApplicationPropertiesUtils("applicationTestWithTradeIdMapTrueRandom.properties");
+        applicationTestWithTradeIdMapTrueRdRobin = new ApplicationPropertiesUtils("applicationTestWithTradeIdMapTrueRdRobin.properties");
+        applicationTestWrongFilePath = new ApplicationPropertiesUtils("applicationTestWrongFilePath.properties");
+        applicationTestWithTradeIdMapTrueRandom.setTotalNoOfLines(10000);
+    }
+
+    @Before
+    public void setUp() throws IOException {
+        Files.createDirectories(Paths.get(applicationTestWithTradeIdMapTrueRandom.getChunkDirectoryPath()));
+        sessionFactory = HibernateUtil.getSessionFactory("hibernatetest.cfg.xml");
+    }
+
+    @After
+    public void cleanUp() throws NullPointerException {
+        File directory = new File(applicationTestWithTradeIdMapTrueRandom.getChunkDirectoryPath());
+        boolean delete = false;
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : Objects.requireNonNull(directory.listFiles())) {
+                delete = file.delete();
+            }
+        }
+        if (delete) logger.info("Cleanup done");
+        sessionFactory.close();
+    }
+
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
+
+    @Test
+    public void testFileLineCounterWithCorrectFilePath() throws IOException {
+        ChunkGeneratorAndProcessorService chunkGeneratorAndProcessorService = new ChunkGeneratorAndProcessorService();
+        long numberOfLines = chunkGeneratorAndProcessorService.fileLineCounter(applicationTestWithTradeIdMapTrueRandom.getFilePath());
+        assertEquals(10000, numberOfLines);
+    }
+
+    @Test(expected = IOException.class)
+    public void testFileLineCounterWithWrongFilePath() throws IOException {
+        ChunkGeneratorAndProcessorService chunkGeneratorAndProcessorService = new ChunkGeneratorAndProcessorService();
+        chunkGeneratorAndProcessorService.fileLineCounter("wrong_file_path");
+    }
+
 //    @Test
 //    public void testGenerateChunksWithCorrectFilePath() throws IOException, InterruptedException {
 //        ChunkGeneratorRunnable chunkGeneratorRunnable = new ChunkGeneratorRunnable(applicationTestWithTradeIdMapTrueRandom);
@@ -389,4 +371,4 @@
 //        tradeProcessor.retryTransaction("TDB_00001000");
 //        assertEquals(1, tradeProcessor.getRetryCountMap().size());
 //    }
-//}
+}

@@ -16,22 +16,15 @@ public class TradePayloadRepository implements ReadAndWriteTradePayload {
 
     @Override
     public TradePayload readRawPayload(String tradeNumber, Session session) {
-        session.beginTransaction();
-        TradePayload tradePayload = session.createQuery("from TradePayload tp where tp.tradeNumber = :tradeNumber", TradePayload.class)
+        return session.createQuery("from TradePayload tp where tp.tradeNumber = :tradeNumber", TradePayload.class)
                 .setParameter("tradeNumber", tradeNumber)
                 .getSingleResult();
-        session.getTransaction().commit();
-        session.clear();
-        return tradePayload;
     }
 
     @Override
     public void updateTradePayloadLookupStatus(boolean lookupStatus, int tradeId, Session session) {
-        session.beginTransaction();
         TradePayload tradePayload = session.get(TradePayload.class, tradeId);
         tradePayload.setLookupStatus(lookupStatus ? LookupStatusEnum.PASS : LookupStatusEnum.FAIL);
-        session.getTransaction().commit();
-        session.clear();
     }
 
     @Override

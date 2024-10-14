@@ -84,6 +84,7 @@ public class TradeProcessor implements Callable<Void>, ProcessTrade, ProcessTrad
     public void processTrade(String tradeId) throws InterruptedException, IOException {
         try {
             TradePayloadRepository tradePayloadRepository = new TradePayloadRepository();
+            this.session.beginTransaction();
             TradePayload tradePayload = tradePayloadRepository.readRawPayload(tradeId, this.session);
             String[] payloadArr = tradePayload.getPayload().split(",");
             String cusip = payloadArr[3];
@@ -94,6 +95,8 @@ public class TradeProcessor implements Callable<Void>, ProcessTrade, ProcessTrad
                 JournalEntry journalEntry = journalEntryTransaction(payloadArr, tradePayload.getId());
                 positionTransaction(journalEntry);
             }
+            this.session.getTransaction().commit();
+            this.session.clear();
         } catch (HibernateException | OptimisticLockException e) {
             logger.warning("Hibernate/Optimistic Lock exception detected.");
             this.session.getTransaction().rollback();
@@ -112,7 +115,6 @@ public class TradeProcessor implements Callable<Void>, ProcessTrade, ProcessTrad
         journalEntry.setQuantity(Integer.parseInt(payloadArr[5]));
         journalEntry.setTransactionDateTime(Timestamp.valueOf(LocalDateTime.parse(payloadArr[1], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
         JournalEntryRepository journalEntryRepository = new JournalEntryRepository();
-        this.session.beginTransaction();
         journalEntryRepository.insertIntoJournalEntry(journalEntry, this.session);
         TradePayloadRepository tradePayloadRepository = new TradePayloadRepository();
         tradePayloadRepository.updateTradePayloadPostedStatus(tradeId, this.session);
@@ -132,8 +134,6 @@ public class TradeProcessor implements Callable<Void>, ProcessTrade, ProcessTrad
         positionsRepository.upsertPosition(position, this.session);
         JournalEntryRepository journalEntryRepository = new JournalEntryRepository();
         journalEntryRepository.updateJournalEntryStatus(journalEntry.getId(), this.session);
-        this.session.getTransaction().commit();
-        this.session.clear();
     }
 
     @Override
