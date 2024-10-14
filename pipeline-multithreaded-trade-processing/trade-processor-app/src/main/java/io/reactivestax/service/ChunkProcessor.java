@@ -1,8 +1,12 @@
 package io.reactivestax.service;
 
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
 import io.reactivestax.database.HibernateUtil;
 import io.reactivestax.entity.TradePayload;
 import io.reactivestax.enums.ValidityStatusEnum;
+import io.reactivestax.queueconnection.QueueUtil;
 import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.utility.ApplicationPropertiesUtils;
 import org.hibernate.HibernateException;
@@ -11,8 +15,10 @@ import org.hibernate.Session;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 public class ChunkProcessor implements Runnable, ProcessChunk {
@@ -43,7 +49,14 @@ public class ChunkProcessor implements Runnable, ProcessChunk {
 
     @Override
     public void processChunk(String filePath) throws SQLException {
-        try (Session session = HibernateUtil.getSessionFactory().openSession(); BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+        ConnectionFactory connectionFactory =
+                QueueUtil.getInstance(applicationPropertiesUtils).getQueueConnectionFactory();
+        try (Session session = HibernateUtil.getSessionFactory().openSession();
+             BufferedReader reader = new BufferedReader(new FileReader(filePath));
+             Connection connection = connectionFactory.newConnection();
+             Channel channel = connection.createChannel()) {
+            channel.exchangeDeclare(applicationPropertiesUtils.getQueueExchangeName(),
+                    applicationPropertiesUtils.getQueueExchangeType());
             String payload;
             while ((payload = reader.readLine()) != null) {
                 TradePayload tradePayload = new TradePayload();
@@ -57,17 +70,18 @@ public class ChunkProcessor implements Runnable, ProcessChunk {
                 TradePayloadRepository tradePayloadRepository = new TradePayloadRepository();
                 tradePayloadRepository.insertTradeRawPayload(tradePayload, session);
                 if (tradePayload.getValidityStatus().equals(ValidityStatusEnum.VALID)) {
-                    int queueNumber = QueueDistributor.figureOutTheNextQueue(
+                    String routingKey = "trade_processor_queue"+QueueDistributor.figureOutTheNextQueue(
                             this.applicationPropertiesUtils.getTradeDistributionCriteria().equals("accountNumber") ? transaction[2] : tradePayload.getTradeNumber(),
                             this.applicationPropertiesUtils.isTradeDistributionUseMap(),
                             this.applicationPropertiesUtils.getTradeDistributionAlgorithm(),
                             this.applicationPropertiesUtils.getTradeProcessorQueueCount()
                     );
-                    QueueDistributor.giveToTradeQueue(tradePayload.getTradeNumber(), queueNumber);
+                    channel.basicPublish(applicationPropertiesUtils.getQueueExchangeName(), routingKey, null,
+                            tradePayload.getTradeNumber().getBytes(StandardCharsets.UTF_8));
                 }
             }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+        } catch (TimeoutException e) {
+            logger.warning("RabbitMQ timeout exception detected.");
         } catch (IOException e) {
             logger.warning("File not found.");
         } catch (HibernateException e) {

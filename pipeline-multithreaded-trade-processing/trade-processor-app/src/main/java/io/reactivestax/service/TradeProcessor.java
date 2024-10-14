@@ -74,7 +74,7 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
                 positionTransaction(journalEntry);
             }
         } catch (HibernateException | OptimisticLockException e) {
-            logger.warning("Hibernate exception detected.");
+            logger.warning("Hibernate/Optimistic Lock exception detected.");
             this.session.getTransaction().rollback();
             this.session.clear();
             retryTransaction(tradeId);

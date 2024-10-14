@@ -1,10 +1,13 @@
 package io.reactivestax.utility;
 
+import lombok.Data;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+@Data
 public class ApplicationPropertiesUtils {
     private final Logger logger = Logger.getLogger(ApplicationPropertiesUtils.class.getName());
 
@@ -18,6 +21,11 @@ public class ApplicationPropertiesUtils {
     private String portNumber;
     private String username;
     private String password;
+    private String queueHost;
+    private String queueUsername;
+    private String queuePassword;
+    private String queueExchangeName;
+    private String queueExchangeType;
     private int chunkProcessorThreadCount;
     private int tradeProcessorQueueCount;
     private int tradeProcessorThreadCount;
@@ -52,77 +60,14 @@ public class ApplicationPropertiesUtils {
             tradeDistributionCriteria = properties.getProperty("trade.distribution.criteria");
             tradeDistributionUseMap = Boolean.parseBoolean(properties.getProperty("trade.distribution.use.map"));
             tradeDistributionAlgorithm = properties.getProperty("trade.distribution.algorithm");
+            queueHost = properties.getProperty("queue.host");
+            queueUsername = properties.getProperty("queue.username");
+            queuePassword = properties.getProperty("queue.password");
+            queueExchangeName = properties.getProperty("queue.exchange.name");
+            queueExchangeType = properties.getProperty("queue.exchange.type");
         } catch (IOException e) {
             logger.warning("File not found Exception.");
             System.exit(1);
         }
-    }
-
-    public long getTotalNoOfLines() {
-        return totalNoOfLines;
-    }
-
-    public void setTotalNoOfLines(long totalNoOfLines) {
-        this.totalNoOfLines = totalNoOfLines;
-    }
-
-    public int getNumberOfChunks() {
-        return numberOfChunks;
-    }
-
-    public String getFilePath() {
-        return filePath;
-    }
-
-    public String getChunkDirectoryPath() {
-        return chunkDirectoryPath;
-    }
-
-    public String getChunkFilePathWithName() {
-        return chunkFilePathWithName;
-    }
-
-    public int getMaxRetryCount() {
-        return maxRetryCount;
-    }
-
-    public String getDbName() {
-        return dbName;
-    }
-
-    public String getPortNumber() {
-        return portNumber;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public int getChunkProcessorThreadCount() {
-        return chunkProcessorThreadCount;
-    }
-
-    public int getTradeProcessorQueueCount() {
-        return tradeProcessorQueueCount;
-    }
-
-    public int getTradeProcessorThreadCount() {
-        return tradeProcessorThreadCount;
-    }
-
-    public String getTradeDistributionCriteria() {
-        return tradeDistributionCriteria;
-    }
-
-    public boolean isTradeDistributionUseMap() {
-        return tradeDistributionUseMap;
-    }
-
-    public String getTradeDistributionAlgorithm() {
-        return tradeDistributionAlgorithm;
     }
 }

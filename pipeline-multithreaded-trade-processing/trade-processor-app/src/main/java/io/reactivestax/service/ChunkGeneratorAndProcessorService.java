@@ -33,9 +33,9 @@ public class ChunkGeneratorAndProcessorService implements Submittable<ChunkProce
                 submitTask(new ChunkProcessor(applicationProperties));
             }
             logger.info("Started chunk processor.");
-            TradeProcessorService tradeProcessorService = new TradeProcessorService(applicationProperties);
-            tradeProcessorService.submitTrade();
-            logger.info("Started trade processor.");
+//            TradeProcessorService tradeProcessorService = new TradeProcessorService(applicationProperties);
+//            tradeProcessorService.submitTrade();
+//            logger.info("Started trade processor.");
         } catch (IOException e) {
             logger.warning("File parsing failed...");
         }finally {

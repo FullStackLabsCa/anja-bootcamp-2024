@@ -32,6 +32,12 @@
       <artifactId>hibernate-core</artifactId>
       <version>6.4.0.Final</version>
     </dependency>
+    <!-- RabbitMQ Java Client -->
+    <dependency>
+      <groupId>com.rabbitmq</groupId>
+      <artifactId>amqp-client</artifactId>
+      <version>5.22.0</version> <!-- You can use the latest version -->
+    </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
