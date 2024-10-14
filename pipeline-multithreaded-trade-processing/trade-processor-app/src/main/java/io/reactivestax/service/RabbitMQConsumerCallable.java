@@ -32,7 +32,7 @@ public class RabbitMQConsumerCallable implements Callable<Void> {
             // Declare the exchange and queue, then bind them
             channel.exchangeDeclare(EXCHANGE_NAME, "direct");
             channel.queueDeclare(queueName, true, false, false, null);
-            channel.queueBind(queueName, EXCHANGE_NAME, "cc_partition_1");
+            channel.queueBind("cc_partition_1_queue", EXCHANGE_NAME, "cc_partition_1");
 
             System.out.println(" [*] Waiting for messages in '" + queueName + "'.");
 

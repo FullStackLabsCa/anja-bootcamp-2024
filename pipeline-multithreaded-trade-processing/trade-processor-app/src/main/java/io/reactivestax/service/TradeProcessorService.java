@@ -10,16 +10,15 @@ public class TradeProcessorService implements Submittable<TradeProcessor> {
     ExecutorService tradeProcessorExecutorService;
     ApplicationPropertiesUtils applicationPropertiesUtils;
 
-    public TradeProcessorService(ApplicationPropertiesUtils applicationProperties){
+    public TradeProcessorService(ApplicationPropertiesUtils applicationProperties) {
         this.applicationPropertiesUtils = applicationProperties;
         tradeProcessorExecutorService = Executors.newFixedThreadPool(applicationProperties.getTradeProcessorThreadCount());
     }
 
     public void submitTrade() {
         for (int i = 0; i < this.applicationPropertiesUtils.getTradeProcessorQueueCount(); i++) {
-            submitTask(new TradeProcessor(QueueDistributor.getTransactionDeque(i), this.applicationPropertiesUtils));
+            submitTask(new TradeProcessor("trade_processor_queue" + i, this.applicationPropertiesUtils));
         }
-        tradeProcessorExecutorService.shutdown();
     }
 
     @Override

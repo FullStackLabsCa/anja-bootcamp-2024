@@ -1,7 +1,5 @@
 package io.reactivestax.service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.*;
 
@@ -12,17 +10,11 @@ public class QueueDistributor {
 
     static LinkedBlockingQueue<String> chunkQueue = new LinkedBlockingQueue<>();
 
-    static List<LinkedBlockingDeque<String>> transactionDeque = new ArrayList<>();
-
     static BlockingDeque<String> deadLetterTransactionDeque = new LinkedBlockingDeque<>();
 
     static Random random = new Random();
 
     private QueueDistributor() {
-    }
-
-    public static LinkedBlockingDeque<String> getTransactionDeque(int index) {
-        return transactionDeque.get(index);
     }
 
     public static synchronized int figureOutTheNextQueue(String value, boolean useMap, String distAlgorithm, int queueCount) {
@@ -51,18 +43,5 @@ public class QueueDistributor {
             }
         }
         return queue;
-    }
-
-    public static void initializeQueue(int queueCount) {
-        int count = queueCount;
-        while (count-- != 0) {
-            transactionDeque.add(new LinkedBlockingDeque<>());
-        }
-    }
-
-    public static void giveToTradeQueue(String tradeId, int queueNumber) throws InterruptedException {
-        LinkedBlockingDeque<String> linkedBlockingDeque = transactionDeque.get(queueNumber);
-        linkedBlockingDeque.put(tradeId);
-        transactionDeque.set(queueNumber, linkedBlockingDeque);
     }
 }

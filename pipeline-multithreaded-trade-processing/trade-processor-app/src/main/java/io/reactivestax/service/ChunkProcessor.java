@@ -70,7 +70,7 @@ public class ChunkProcessor implements Runnable, ProcessChunk {
                 TradePayloadRepository tradePayloadRepository = new TradePayloadRepository();
                 tradePayloadRepository.insertTradeRawPayload(tradePayload, session);
                 if (tradePayload.getValidityStatus().equals(ValidityStatusEnum.VALID)) {
-                    String routingKey = "trade_processor_queue"+QueueDistributor.figureOutTheNextQueue(
+                    String routingKey = "trade_processor_queue" + QueueDistributor.figureOutTheNextQueue(
                             this.applicationPropertiesUtils.getTradeDistributionCriteria().equals("accountNumber") ? transaction[2] : tradePayload.getTradeNumber(),
                             this.applicationPropertiesUtils.isTradeDistributionUseMap(),
                             this.applicationPropertiesUtils.getTradeDistributionAlgorithm(),

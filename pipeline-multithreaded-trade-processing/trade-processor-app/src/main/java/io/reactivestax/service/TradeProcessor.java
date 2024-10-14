@@ -1,11 +1,13 @@
 package io.reactivestax.service;
 
+import com.rabbitmq.client.*;
 import io.reactivestax.database.HibernateUtil;
 import io.reactivestax.entity.JournalEntry;
 import io.reactivestax.entity.Position;
 import io.reactivestax.entity.PositionCompositeKey;
 import io.reactivestax.entity.TradePayload;
 import io.reactivestax.enums.DirectionEnum;
+import io.reactivestax.queueconnection.QueueUtil;
 import io.reactivestax.repository.JournalEntryRepository;
 import io.reactivestax.repository.PositionsRepository;
 import io.reactivestax.repository.SecuritiesReferenceRepository;
@@ -15,24 +17,31 @@ import jakarta.persistence.OptimisticLockException;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
-public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTransaction, RetryTransaction {
+public class TradeProcessor implements Callable<Void>, ProcessTrade, ProcessTradeTransaction, RetryTransaction {
     Logger logger = Logger.getLogger(TradeProcessor.class.getName());
+    CountDownLatch latch = new CountDownLatch(1);
     LinkedBlockingDeque<String> tradeDeque;
+    String queueName;
     private final Map<String, Integer> retryCountMap;
     ApplicationPropertiesUtils applicationPropertiesUtils;
     Session session;
+    int count = 0;
 
-    public TradeProcessor(LinkedBlockingDeque<String> tradeDeque, ApplicationPropertiesUtils applicationPropertiesUtils) {
-        this.tradeDeque = tradeDeque;
+    public TradeProcessor(String queueName, ApplicationPropertiesUtils applicationPropertiesUtils) {
+        this.queueName = queueName;
         this.retryCountMap = new HashMap<>();
         this.applicationPropertiesUtils = applicationPropertiesUtils;
     }
@@ -42,21 +51,33 @@ public class TradeProcessor implements Runnable, ProcessTrade, ProcessTradeTrans
     }
 
     @Override
-    public void run() {
-        String tradeId = "";
-        try (Session localSession = HibernateUtil.getSessionFactory().openSession()) {
+    public Void call() {
+        ConnectionFactory connectionFactory = QueueUtil.getInstance(applicationPropertiesUtils).getQueueConnectionFactory();
+        try (Session localSession = HibernateUtil.getSessionFactory().openSession();
+             Connection connection = connectionFactory.newConnection();
+             Channel channel = connection.createChannel()) {
             this.session = localSession;
-            while (true) {
-                tradeId = this.tradeDeque.poll(500, TimeUnit.MILLISECONDS);
-                if (tradeId == null) break;
-                else processTrade(tradeId);
-            }
-        } catch (InterruptedException e) {
+            channel.exchangeDeclare(applicationPropertiesUtils.getQueueExchangeName(), applicationPropertiesUtils.getQueueExchangeType());
+            channel.queueDeclare(queueName, true, false, false, null);
+            channel.queueBind(queueName, applicationPropertiesUtils.getQueueExchangeName(), queueName);
+            DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+                String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
+                try {
+                    processTrade(message);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            };
+            CancelCallback cancelCallback = consumerTag -> {
+            };
+            channel.basicConsume(queueName, true, deliverCallback, cancelCallback);
+            latch.await();
+        } catch (IOException | TimeoutException | InterruptedException e) {
+            logger.warning("Exception detected in Trade Processor.");
             Thread.currentThread().interrupt();
-            logger.warning("Thread was interrupted.");
-        } catch (HibernateException e) {
-            logger.warning("Hibernate exception detected.");
         }
+
+        return null;
     }
 
     @Override
