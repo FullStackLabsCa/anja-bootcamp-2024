@@ -26,19 +26,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 public class TradeProcessor implements Callable<Void>, ProcessTrade, ProcessTradeTransaction, RetryTransaction {
     Logger logger = Logger.getLogger(TradeProcessor.class.getName());
     CountDownLatch latch = new CountDownLatch(1);
-    LinkedBlockingDeque<String> tradeDeque;
     String queueName;
     private final Map<String, Integer> retryCountMap;
     ApplicationPropertiesUtils applicationPropertiesUtils;
     Session session;
     int count = 0;
+    Channel channel;
 
     public TradeProcessor(String queueName, ApplicationPropertiesUtils applicationPropertiesUtils) {
         this.queueName = queueName;
@@ -55,7 +54,8 @@ public class TradeProcessor implements Callable<Void>, ProcessTrade, ProcessTrad
         ConnectionFactory connectionFactory = QueueUtil.getInstance(applicationPropertiesUtils).getQueueConnectionFactory();
         try (Session localSession = HibernateUtil.getSessionFactory().openSession();
              Connection connection = connectionFactory.newConnection();
-             Channel channel = connection.createChannel()) {
+             Channel localChannel = connection.createChannel()) {
+            this.channel = localChannel;
             this.session = localSession;
             channel.exchangeDeclare(applicationPropertiesUtils.getQueueExchangeName(), applicationPropertiesUtils.getQueueExchangeType());
             channel.queueDeclare(queueName, true, false, false, null);
@@ -81,7 +81,7 @@ public class TradeProcessor implements Callable<Void>, ProcessTrade, ProcessTrad
     }
 
     @Override
-    public void processTrade(String tradeId) throws InterruptedException {
+    public void processTrade(String tradeId) throws InterruptedException, IOException {
         try {
             TradePayloadRepository tradePayloadRepository = new TradePayloadRepository();
             TradePayload tradePayload = tradePayloadRepository.readRawPayload(tradeId, this.session);
@@ -137,13 +137,14 @@ public class TradeProcessor implements Callable<Void>, ProcessTrade, ProcessTrad
     }
 
     @Override
-    public void retryTransaction(String tradeId) throws InterruptedException {
+    public void retryTransaction(String tradeId) throws InterruptedException, IOException {
         int retryCount = this.retryCountMap.getOrDefault(tradeId, 0) + 1;
         if (retryCount >= this.applicationPropertiesUtils.getMaxRetryCount()) {
             QueueDistributor.deadLetterTransactionDeque.putLast(tradeId);
             this.retryCountMap.remove(tradeId);
         } else {
-            this.tradeDeque.putFirst(tradeId);
+            channel.basicPublish(applicationPropertiesUtils.getQueueExchangeName(), this.queueName, null,
+                    tradeId.getBytes(StandardCharsets.UTF_8));
             setRetryCountMap(tradeId, retryCount);
         }
     }
