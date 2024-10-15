@@ -5,7 +5,7 @@ import io.reactivestax.repository.PositionsRepository;
 import jakarta.persistence.NoResultException;
 import org.hibernate.Session;
 
-public class HibernatePositionsRepositoryRepository implements PositionsRepository {
+public class HibernatePositionsRepository implements PositionsRepository {
     @Override
     public void upsertPosition(Position position, Session session) {
         try {

@@ -1,16 +1,18 @@
 package io.reactivestax.utility;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-@Data
+@Getter
 public class ApplicationPropertiesUtils {
     private final Logger logger = Logger.getLogger(ApplicationPropertiesUtils.class.getName());
 
+    @Setter
     private long totalNoOfLines;
     private int numberOfChunks;
     private String filePath;
@@ -32,6 +34,7 @@ public class ApplicationPropertiesUtils {
     private String tradeDistributionCriteria;
     private boolean tradeDistributionUseMap;
     private String tradeDistributionAlgorithm;
+    private String persistenceTechnology;
 
     public ApplicationPropertiesUtils(String applicationPropertiesFileName){
         loadApplicationProperties(applicationPropertiesFileName);
@@ -65,6 +68,7 @@ public class ApplicationPropertiesUtils {
             queuePassword = properties.getProperty("queue.password");
             queueExchangeName = properties.getProperty("queue.exchange.name");
             queueExchangeType = properties.getProperty("queue.exchange.type");
+            persistenceTechnology = properties.getProperty("persistence.technology");
         } catch (IOException e) {
             logger.warning("File not found Exception.");
             System.exit(1);

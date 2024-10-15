@@ -6,12 +6,11 @@ import org.hibernate.Session;
 import io.reactivestax.entity.TradePayload;
 import io.reactivestax.enums.LookupStatusEnum;
 import io.reactivestax.enums.PostedStatusEnum;
-import io.reactivestax.utility.hibernate.HibernateServiceUtil;
 
-public class HibernateTradePayloadRepositoryRepository implements TradePayloadRepository {
+public class HibernateTradePayloadRepository implements TradePayloadRepository {
     @Override
     public void insertTradeRawPayload(TradePayload tradePayload, Session session) {
-        HibernateServiceUtil.getSession();
+//        HibernateServiceUtil.getSession();
         session.beginTransaction();
         session.persist(tradePayload);
         session.getTransaction().commit();

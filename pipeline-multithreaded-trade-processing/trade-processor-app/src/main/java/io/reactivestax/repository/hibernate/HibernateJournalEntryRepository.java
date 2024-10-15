@@ -5,7 +5,7 @@ import io.reactivestax.enums.PostedStatusEnum;
 import io.reactivestax.repository.JournalEntryRepository;
 import org.hibernate.Session;
 
-public class HibernateJournalEntryRepositoryRepository implements JournalEntryRepository {
+public class HibernateJournalEntryRepository implements JournalEntryRepository {
 
     @Override
     public void insertIntoJournalEntry(JournalEntry journalEntry, Session session) {

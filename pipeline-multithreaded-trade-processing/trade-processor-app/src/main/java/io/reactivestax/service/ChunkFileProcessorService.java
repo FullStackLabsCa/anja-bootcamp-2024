@@ -7,7 +7,7 @@ import io.reactivestax.utility.hibernate.HibernateConnectionUtil;
 import io.reactivestax.entity.TradePayload;
 import io.reactivestax.enums.ValidityStatusEnum;
 import io.reactivestax.utility.rabbitmq.QueueUtil;
-import io.reactivestax.repository.hibernate.HibernateTradePayloadRepositoryRepository;
+import io.reactivestax.repository.hibernate.HibernateTradePayloadRepository;
 import io.reactivestax.utility.ApplicationPropertiesUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -67,7 +67,7 @@ public class ChunkFileProcessorService implements Runnable, ChunkProcessorServic
                 if (transaction.length != 7) {
                     tradePayload.setValidityStatus(ValidityStatusEnum.INVALID);
                 }
-                HibernateTradePayloadRepositoryRepository hibernateTradePayloadRepository = new HibernateTradePayloadRepositoryRepository();
+                HibernateTradePayloadRepository hibernateTradePayloadRepository = new HibernateTradePayloadRepository();
                 hibernateTradePayloadRepository.insertTradeRawPayload(tradePayload, session);
                 if (tradePayload.getValidityStatus().equals(ValidityStatusEnum.VALID)) {
                     String routingKey = "trade_processor_queue" + QueueDistributor.figureOutTheNextQueue(

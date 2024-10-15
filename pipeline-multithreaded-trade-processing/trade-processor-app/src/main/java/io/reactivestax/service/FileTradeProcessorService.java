@@ -28,10 +28,10 @@ import io.reactivestax.entity.PositionCompositeKey;
 import io.reactivestax.entity.TradePayload;
 import io.reactivestax.enums.DirectionEnum;
 import io.reactivestax.utility.rabbitmq.QueueUtil;
-import io.reactivestax.repository.hibernate.HibernateJournalEntryRepositoryRepository;
-import io.reactivestax.repository.hibernate.HibernatePositionsRepositoryRepository;
-import io.reactivestax.repository.hibernate.HibernateSecuritiesRepositoryReferenceRepository;
-import io.reactivestax.repository.hibernate.HibernateTradePayloadRepositoryRepository;
+import io.reactivestax.repository.hibernate.HibernateJournalEntryRepository;
+import io.reactivestax.repository.hibernate.HibernatePositionsRepository;
+import io.reactivestax.repository.hibernate.HibernateSecuritiesReferenceRepository;
+import io.reactivestax.repository.hibernate.HibernateTradePayloadRepository;
 import io.reactivestax.utility.ApplicationPropertiesUtils;
 import jakarta.persistence.OptimisticLockException;
 
@@ -90,13 +90,13 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
     
     public void processTrade(String tradeId) throws InterruptedException, IOException {
         try {
-            HibernateTradePayloadRepositoryRepository hibernateTradePayloadRepository = new HibernateTradePayloadRepositoryRepository();
+            HibernateTradePayloadRepository hibernateTradePayloadRepository = new HibernateTradePayloadRepository();
 //            ServiceUtil.beginTransaction();
             this.session.beginTransaction();
             TradePayload tradePayload = hibernateTradePayloadRepository.readRawPayload(tradeId, this.session);
             String[] payloadArr = tradePayload.getPayload().split(",");
             String cusip = payloadArr[3];
-            HibernateSecuritiesRepositoryReferenceRepository hibernateSecuritiesReferenceRepository = new HibernateSecuritiesRepositoryReferenceRepository();
+            HibernateSecuritiesReferenceRepository hibernateSecuritiesReferenceRepository = new HibernateSecuritiesReferenceRepository();
             boolean validSecurity = hibernateSecuritiesReferenceRepository.lookupSecurities(cusip, this.session);
             hibernateTradePayloadRepository.updateTradePayloadLookupStatus(validSecurity, tradePayload.getId(), this.session);
             if (validSecurity) {
@@ -124,9 +124,9 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
         journalEntry.setDirection(DirectionEnum.valueOf(payloadArr[4]));
         journalEntry.setQuantity(Integer.parseInt(payloadArr[5]));
         journalEntry.setTransactionDateTime(Timestamp.valueOf(LocalDateTime.parse(payloadArr[1], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
-        HibernateJournalEntryRepositoryRepository hibernateJournalEntryRepository = new HibernateJournalEntryRepositoryRepository();
+        HibernateJournalEntryRepository hibernateJournalEntryRepository = new HibernateJournalEntryRepository();
         hibernateJournalEntryRepository.insertIntoJournalEntry(journalEntry, this.session);
-        HibernateTradePayloadRepositoryRepository hibernateTradePayloadRepository = new HibernateTradePayloadRepositoryRepository();
+        HibernateTradePayloadRepository hibernateTradePayloadRepository = new HibernateTradePayloadRepository();
         hibernateTradePayloadRepository.updateTradePayloadPostedStatus(tradeId, this.session);
         return journalEntry;
     }
@@ -140,9 +140,9 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
         position.setPositionCompositeKey(positionCompositeKey);
         position.setHolding(journalEntry.getDirection().equals(DirectionEnum.SELL) ? -journalEntry.getQuantity() :
                 journalEntry.getQuantity());
-        HibernatePositionsRepositoryRepository hibernatePositionsRepository = new HibernatePositionsRepositoryRepository();
+        HibernatePositionsRepository hibernatePositionsRepository = new HibernatePositionsRepository();
         hibernatePositionsRepository.upsertPosition(position, this.session);
-        HibernateJournalEntryRepositoryRepository hibernateJournalEntryRepository = new HibernateJournalEntryRepositoryRepository();
+        HibernateJournalEntryRepository hibernateJournalEntryRepository = new HibernateJournalEntryRepository();
         hibernateJournalEntryRepository.updateJournalEntryStatus(journalEntry.getId(), this.session);
     }
 

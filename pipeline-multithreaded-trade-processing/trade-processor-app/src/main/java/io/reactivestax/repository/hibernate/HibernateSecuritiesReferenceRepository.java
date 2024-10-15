@@ -6,7 +6,7 @@ import org.hibernate.Session;
 
 import java.util.List;
 
-public class HibernateSecuritiesRepositoryReferenceRepository implements LookupSecuritiesRepository {
+public class HibernateSecuritiesReferenceRepository implements LookupSecuritiesRepository {
 
     @Override
     public boolean lookupSecurities(String cusip, Session session) {
