@@ -2,9 +2,6 @@ package io.reactivestax.repository;
 
 import org.hibernate.Session;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
-public interface LookupSecurities {
+public interface LookupSecuritiesRepository {
     boolean lookupSecurities(String cusip, Session session);
 }

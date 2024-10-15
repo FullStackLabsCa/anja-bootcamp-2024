@@ -7,11 +7,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
 
-public class ChunkGeneratorRunnable implements Runnable, ChunkGenerator{
-Logger logger = Logger.getLogger(ChunkGeneratorRunnable.class.getName());
+public class FileChunkGeneratorService implements Runnable, ChunkGeneratorService {
+Logger logger = Logger.getLogger(FileChunkGeneratorService.class.getName());
 ApplicationPropertiesUtils applicationPropertiesUtils;
 
-    public ChunkGeneratorRunnable(ApplicationPropertiesUtils applicationPropertiesUtils){
+    public FileChunkGeneratorService(ApplicationPropertiesUtils applicationPropertiesUtils){
      this.applicationPropertiesUtils =applicationPropertiesUtils;
     }
 

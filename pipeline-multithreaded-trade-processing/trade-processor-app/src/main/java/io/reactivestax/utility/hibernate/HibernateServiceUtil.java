@@ -1,4 +1,4 @@
-package io.reactivestax.utility;
+package io.reactivestax.utility.hibernate;
 
 public class HibernateServiceUtil {
     //read Application.proeprties 

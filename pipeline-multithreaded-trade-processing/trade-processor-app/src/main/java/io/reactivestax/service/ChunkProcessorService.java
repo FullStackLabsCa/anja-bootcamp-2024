@@ -2,6 +2,6 @@ package io.reactivestax.service;
 
 import java.sql.SQLException;
 
-public interface ProcessChunk {
+public interface ChunkProcessorService {
     void processChunk(String filePath) throws SQLException;
 }

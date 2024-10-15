@@ -1,7 +1,8 @@
-package io.reactivestax.utility;
+package io.reactivestax.utility.jdbc;
 
 import java.sql.Connection;
 
+import io.reactivestax.utility.ServiceUtil;
 import jakarta.transaction.Transaction;
 
 public class JDBCServiceUtil implements ServiceUtil<Connection, Transaction> {

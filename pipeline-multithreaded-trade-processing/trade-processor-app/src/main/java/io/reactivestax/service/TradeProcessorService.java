@@ -1,34 +1,13 @@
 package io.reactivestax.service;
 
-import io.reactivestax.utility.ApplicationPropertiesUtils;
+import io.reactivestax.entity.JournalEntry;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.logging.Logger;
+import java.io.IOException;
 
-public class TradeProcessorService implements Submittable<TradeProcessor> {
-    Logger logger = Logger.getLogger(TradeProcessorService.class.getName());
-    ExecutorService tradeProcessorExecutorService;
-    ApplicationPropertiesUtils applicationPropertiesUtils;
+public interface TradeProcessorService {
+    void processTrade(String tradeId) throws InterruptedException, IOException;
 
-    public TradeProcessorService(ApplicationPropertiesUtils applicationProperties) {
-        this.applicationPropertiesUtils = applicationProperties;
-        tradeProcessorExecutorService = Executors.newFixedThreadPool(applicationProperties.getTradeProcessorThreadCount());
-    }
+    JournalEntry journalEntryTransaction(String[] payloadArr, int tradeId);
 
-    public void submitTrade() {
-        for (int i = 0; i < this.applicationPropertiesUtils.getTradeProcessorQueueCount(); i++) {
-            submitTask(new TradeProcessor("trade_processor_queue" + i, this.applicationPropertiesUtils));
-        }
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            logger.info("Shutdown signal received. Stopping consumer...");
-            tradeProcessorExecutorService.shutdownNow();
-            logger.info("Consumer stopped.");
-        }));
-    }
-
-    @Override
-    public void submitTask(TradeProcessor tradeProcessor) {
-        tradeProcessorExecutorService.submit(tradeProcessor);
-    }
+    void positionTransaction(JournalEntry journalEntry);
 }

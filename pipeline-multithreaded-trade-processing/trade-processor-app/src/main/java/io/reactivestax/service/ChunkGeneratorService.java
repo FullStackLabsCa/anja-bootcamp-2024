@@ -2,6 +2,6 @@ package io.reactivestax.service;
 
 import java.io.IOException;
 
-public interface ChunkGenerator {
+public interface ChunkGeneratorService {
     void generateChunks() throws IOException, InterruptedException;
 }

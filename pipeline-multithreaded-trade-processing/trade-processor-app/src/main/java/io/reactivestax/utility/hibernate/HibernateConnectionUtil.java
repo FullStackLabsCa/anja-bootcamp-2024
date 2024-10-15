@@ -1,4 +1,4 @@
-package io.reactivestax.database;
+package io.reactivestax.utility.hibernate;
 
 import io.reactivestax.entity.JournalEntry;
 import io.reactivestax.entity.Position;
@@ -12,13 +12,12 @@ import org.hibernate.cfg.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-public class HibernateUtil {
+public class HibernateConnectionUtil {
 
     private static final String DEFAULT_RESOURCE = "hibernate.cfg.xml";
-    private static final Logger LOGGER = LoggerFactory.getLogger(HibernateUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HibernateConnectionUtil.class);
 
-    private HibernateUtil() {
+    private HibernateConnectionUtil() {
     }
 
     private static SessionFactory buildSessionFactory(String resource) {

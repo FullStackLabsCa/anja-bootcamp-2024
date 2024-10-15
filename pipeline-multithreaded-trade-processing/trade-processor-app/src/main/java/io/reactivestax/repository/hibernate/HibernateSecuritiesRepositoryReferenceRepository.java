@@ -1,11 +1,12 @@
-package io.reactivestax.repository;
+package io.reactivestax.repository.hibernate;
 
 import io.reactivestax.entity.SecuritiesReference;
+import io.reactivestax.repository.LookupSecuritiesRepository;
 import org.hibernate.Session;
 
 import java.util.List;
 
-public class SecuritiesReferenceRepository implements LookupSecurities {
+public class HibernateSecuritiesRepositoryReferenceRepository implements LookupSecuritiesRepository {
 
     @Override
     public boolean lookupSecurities(String cusip, Session session) {

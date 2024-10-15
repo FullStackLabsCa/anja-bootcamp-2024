@@ -21,22 +21,22 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
 
-import io.reactivestax.database.HibernateUtil;
+import io.reactivestax.utility.hibernate.HibernateConnectionUtil;
 import io.reactivestax.entity.JournalEntry;
 import io.reactivestax.entity.Position;
 import io.reactivestax.entity.PositionCompositeKey;
 import io.reactivestax.entity.TradePayload;
 import io.reactivestax.enums.DirectionEnum;
-import io.reactivestax.queueconnection.QueueUtil;
-import io.reactivestax.repository.JournalEntryRepository;
-import io.reactivestax.repository.PositionsRepository;
-import io.reactivestax.repository.SecuritiesReferenceRepository;
-import io.reactivestax.repository.TradePayloadRepository;
+import io.reactivestax.utility.rabbitmq.QueueUtil;
+import io.reactivestax.repository.hibernate.HibernateJournalEntryRepositoryRepository;
+import io.reactivestax.repository.hibernate.HibernatePositionsRepositoryRepository;
+import io.reactivestax.repository.hibernate.HibernateSecuritiesRepositoryReferenceRepository;
+import io.reactivestax.repository.hibernate.HibernateTradePayloadRepositoryRepository;
 import io.reactivestax.utility.ApplicationPropertiesUtils;
 import jakarta.persistence.OptimisticLockException;
 
-public class TradeProcessor implements Callable<Void>, ProcessTrade, ProcessTradeTransaction, RetryTransaction {
-    Logger logger = Logger.getLogger(TradeProcessor.class.getName());
+public class FileTradeProcessorService implements Callable<Void>, TradeProcessorService, RetryTransaction {
+    Logger logger = Logger.getLogger(FileTradeProcessorService.class.getName());
     CountDownLatch latch = new CountDownLatch(1);
     String queueName;
     private final Map<String, Integer> retryCountMap;
@@ -45,7 +45,7 @@ public class TradeProcessor implements Callable<Void>, ProcessTrade, ProcessTrad
     int count = 0;
     Channel channel;
 
-    public TradeProcessor(String queueName, ApplicationPropertiesUtils applicationPropertiesUtils) {
+    public FileTradeProcessorService(String queueName, ApplicationPropertiesUtils applicationPropertiesUtils) {
         this.queueName = queueName;
         this.retryCountMap = new HashMap<>();
         this.applicationPropertiesUtils = applicationPropertiesUtils;
@@ -58,7 +58,7 @@ public class TradeProcessor implements Callable<Void>, ProcessTrade, ProcessTrad
     @Override
     public Void call() {
         ConnectionFactory connectionFactory = QueueUtil.getInstance(applicationPropertiesUtils).getQueueConnectionFactory();
-        try (Session localSession = HibernateUtil.getSessionFactory().openSession();
+        try (Session localSession = HibernateConnectionUtil.getSessionFactory().openSession();
              Connection connection = connectionFactory.newConnection();
              Channel localChannel = connection.createChannel()) {
             this.channel = localChannel;
@@ -90,26 +90,26 @@ public class TradeProcessor implements Callable<Void>, ProcessTrade, ProcessTrad
     
     public void processTrade(String tradeId) throws InterruptedException, IOException {
         try {
-            TradePayloadRepository tradePayloadRepository = new TradePayloadRepository();
-            ServiceUtil.beginTransaction();
+            HibernateTradePayloadRepositoryRepository hibernateTradePayloadRepository = new HibernateTradePayloadRepositoryRepository();
+//            ServiceUtil.beginTransaction();
             this.session.beginTransaction();
-            TradePayload tradePayload = tradePayloadRepository.readRawPayload(tradeId, this.session);
+            TradePayload tradePayload = hibernateTradePayloadRepository.readRawPayload(tradeId, this.session);
             String[] payloadArr = tradePayload.getPayload().split(",");
             String cusip = payloadArr[3];
-            SecuritiesReferenceRepository securitiesReferenceRepository = new SecuritiesReferenceRepository();
-            boolean validSecurity = securitiesReferenceRepository.lookupSecurities(cusip, this.session);
-            tradePayloadRepository.updateTradePayloadLookupStatus(validSecurity, tradePayload.getId(), this.session);
+            HibernateSecuritiesRepositoryReferenceRepository hibernateSecuritiesReferenceRepository = new HibernateSecuritiesRepositoryReferenceRepository();
+            boolean validSecurity = hibernateSecuritiesReferenceRepository.lookupSecurities(cusip, this.session);
+            hibernateTradePayloadRepository.updateTradePayloadLookupStatus(validSecurity, tradePayload.getId(), this.session);
             if (validSecurity) {
                 JournalEntry journalEntry = journalEntryTransaction(payloadArr, tradePayload.getId());
                 positionTransaction(journalEntry);
             }
             this.session.getTransaction().commit();
-            ServiceUtil.commitTransaction();
+//            ServiceUtil.commitTransaction();
             this.session.clear();
         } catch (HibernateException | OptimisticLockException e) {
             logger.warning("Hibernate/Optimistic Lock exception detected.");
             this.session.getTransaction().rollback();
-            ServiceUtil.rollbackTransaction();
+//            ServiceUtil.rollbackTransaction();
             this.session.clear();
             retryTransaction(tradeId);
         }
@@ -124,10 +124,10 @@ public class TradeProcessor implements Callable<Void>, ProcessTrade, ProcessTrad
         journalEntry.setDirection(DirectionEnum.valueOf(payloadArr[4]));
         journalEntry.setQuantity(Integer.parseInt(payloadArr[5]));
         journalEntry.setTransactionDateTime(Timestamp.valueOf(LocalDateTime.parse(payloadArr[1], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
-        JournalEntryRepository journalEntryRepository = new JournalEntryRepository();
-        journalEntryRepository.insertIntoJournalEntry(journalEntry, this.session);
-        TradePayloadRepository tradePayloadRepository = new TradePayloadRepository();
-        tradePayloadRepository.updateTradePayloadPostedStatus(tradeId, this.session);
+        HibernateJournalEntryRepositoryRepository hibernateJournalEntryRepository = new HibernateJournalEntryRepositoryRepository();
+        hibernateJournalEntryRepository.insertIntoJournalEntry(journalEntry, this.session);
+        HibernateTradePayloadRepositoryRepository hibernateTradePayloadRepository = new HibernateTradePayloadRepositoryRepository();
+        hibernateTradePayloadRepository.updateTradePayloadPostedStatus(tradeId, this.session);
         return journalEntry;
     }
 
@@ -140,10 +140,10 @@ public class TradeProcessor implements Callable<Void>, ProcessTrade, ProcessTrad
         position.setPositionCompositeKey(positionCompositeKey);
         position.setHolding(journalEntry.getDirection().equals(DirectionEnum.SELL) ? -journalEntry.getQuantity() :
                 journalEntry.getQuantity());
-        PositionsRepository positionsRepository = new PositionsRepository();
-        positionsRepository.upsertPosition(position, this.session);
-        JournalEntryRepository journalEntryRepository = new JournalEntryRepository();
-        journalEntryRepository.updateJournalEntryStatus(journalEntry.getId(), this.session);
+        HibernatePositionsRepositoryRepository hibernatePositionsRepository = new HibernatePositionsRepositoryRepository();
+        hibernatePositionsRepository.upsertPosition(position, this.session);
+        HibernateJournalEntryRepositoryRepository hibernateJournalEntryRepository = new HibernateJournalEntryRepositoryRepository();
+        hibernateJournalEntryRepository.updateJournalEntryStatus(journalEntry.getId(), this.session);
     }
 
     @Override

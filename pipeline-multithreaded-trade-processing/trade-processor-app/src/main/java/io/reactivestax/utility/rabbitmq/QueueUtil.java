@@ -1,4 +1,4 @@
-package io.reactivestax.queueconnection;
+package io.reactivestax.utility.rabbitmq;
 
 import com.rabbitmq.client.ConnectionFactory;
 import io.reactivestax.utility.ApplicationPropertiesUtils;

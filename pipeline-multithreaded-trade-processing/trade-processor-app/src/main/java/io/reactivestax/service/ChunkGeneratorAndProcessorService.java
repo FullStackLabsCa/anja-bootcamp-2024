@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-public class ChunkGeneratorAndProcessorService implements Submittable<ChunkProcessor> {
+public class ChunkGeneratorAndProcessorService implements Submittable<ChunkFileProcessorService> {
     private ExecutorService chunkGeneratorExecutorService;
     private ExecutorService chunkProcessorExecutorService;
     Logger logger = Logger.getLogger(ChunkGeneratorAndProcessorService.class.getName());
@@ -26,14 +26,14 @@ public class ChunkGeneratorAndProcessorService implements Submittable<ChunkProce
             chunkGeneratorExecutorService = Executors.newSingleThreadExecutor();
             chunkProcessorExecutorService =
                     Executors.newFixedThreadPool(applicationProperties.getChunkProcessorThreadCount());
-            chunkGeneratorExecutorService.submit(new ChunkGeneratorRunnable(applicationProperties));
+            chunkGeneratorExecutorService.submit(new FileChunkGeneratorService(applicationProperties));
             logger.info("Stated chunk generator.");
             for (int i = 0; i < applicationProperties.getNumberOfChunks(); i++) {
-                submitTask(new ChunkProcessor(applicationProperties));
+                submitTask(new ChunkFileProcessorService(applicationProperties));
             }
             logger.info("Started chunk processor.");
-            TradeProcessorService tradeProcessorService = new TradeProcessorService(applicationProperties);
-            tradeProcessorService.submitTrade();
+            TradeProcessorSubmitterService tradeProcessorSubmitterService = new TradeProcessorSubmitterService(applicationProperties);
+            tradeProcessorSubmitterService.submitTrade();
             logger.info("Started trade processor.");
         } catch (IOException e) {
             logger.warning("File parsing failed...");
@@ -56,7 +56,7 @@ public class ChunkGeneratorAndProcessorService implements Submittable<ChunkProce
     }
 
     @Override
-    public void submitTask(ChunkProcessor chunkProcessor) {
+    public void submitTask(ChunkFileProcessorService chunkProcessor) {
         chunkProcessorExecutorService.submit(chunkProcessor);
     }
 }
