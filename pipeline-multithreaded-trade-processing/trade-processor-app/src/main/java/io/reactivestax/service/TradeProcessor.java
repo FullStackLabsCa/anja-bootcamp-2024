@@ -1,6 +1,26 @@
 package io.reactivestax.service;
 
-import com.rabbitmq.client.*;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeoutException;
+import java.util.logging.Logger;
+
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+
+import com.rabbitmq.client.CancelCallback;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.DeliverCallback;
+
 import io.reactivestax.database.HibernateUtil;
 import io.reactivestax.entity.JournalEntry;
 import io.reactivestax.entity.Position;
@@ -14,20 +34,6 @@ import io.reactivestax.repository.SecuritiesReferenceRepository;
 import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.utility.ApplicationPropertiesUtils;
 import jakarta.persistence.OptimisticLockException;
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeoutException;
-import java.util.logging.Logger;
 
 public class TradeProcessor implements Callable<Void>, ProcessTrade, ProcessTradeTransaction, RetryTransaction {
     Logger logger = Logger.getLogger(TradeProcessor.class.getName());
@@ -81,9 +87,11 @@ public class TradeProcessor implements Callable<Void>, ProcessTrade, ProcessTrad
     }
 
     @Override
+    
     public void processTrade(String tradeId) throws InterruptedException, IOException {
         try {
             TradePayloadRepository tradePayloadRepository = new TradePayloadRepository();
+            ServiceUtil.beginTransaction();
             this.session.beginTransaction();
             TradePayload tradePayload = tradePayloadRepository.readRawPayload(tradeId, this.session);
             String[] payloadArr = tradePayload.getPayload().split(",");
@@ -96,10 +104,12 @@ public class TradeProcessor implements Callable<Void>, ProcessTrade, ProcessTrad
                 positionTransaction(journalEntry);
             }
             this.session.getTransaction().commit();
+            ServiceUtil.commitTransaction();
             this.session.clear();
         } catch (HibernateException | OptimisticLockException e) {
             logger.warning("Hibernate/Optimistic Lock exception detected.");
             this.session.getTransaction().rollback();
+            ServiceUtil.rollbackTransaction();
             this.session.clear();
             retryTransaction(tradeId);
         }

@@ -1,13 +1,16 @@
 package io.reactivestax.repository;
 
+import org.hibernate.Session;
+
 import io.reactivestax.entity.TradePayload;
 import io.reactivestax.enums.LookupStatusEnum;
 import io.reactivestax.enums.PostedStatusEnum;
-import org.hibernate.Session;
+import io.reactivestax.utility.HibernateServiceUtil;
 
 public class TradePayloadRepository implements ReadAndWriteTradePayload {
     @Override
     public void insertTradeRawPayload(TradePayload tradePayload, Session session) {
+        HibernateServiceUtil.getSession();
         session.beginTransaction();
         session.persist(tradePayload);
         session.getTransaction().commit();
