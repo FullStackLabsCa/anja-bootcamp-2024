@@ -4,10 +4,11 @@ import io.reactivestax.database.HibernateUtil;
 import io.reactivestax.service.School;
 
 import java.util.Scanner;
+import java.util.logging.Logger;
 
 // Command-line interface for enrolling students
 public class SchoolCLI {
-    private static final School school = new School();
+    private static final School school = new School("hibernate.cfg.xml");
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -29,22 +30,22 @@ public class SchoolCLI {
                     school.assignGrade(Integer.parseInt(command[1]), command[2], Double.parseDouble(command[3]));
                     break;
                 case "list_courses":
-                    school.listCourses();
+                    System.out.println(school.listCourses());
                     break;
                 case "list_grades":
-                    school.listGradesByCourseId(Integer.parseInt(command[1]));
+                    System.out.println(school.listGradesByCourseId(Integer.parseInt(command[1])));
                     break;
                 case "report_unique_courses":
-                    school.reportUniqueCourses();
+                    System.out.println(school.reportUniqueCourses());
                     break;
                 case "report_unique_students":
-                    school.reportUniqueStudents();
+                    System.out.println(school.reportUniqueStudents());
                     break;
                 case "report_average_score":
-                    school.reportAverageScore(Integer.parseInt(command[1]));
+                    System.out.println(school.reportAverageScore(Integer.parseInt(command[1])));
                     break;
                 case "report_cumulative_average":
-                    school.reportCumulativeAverage(Integer.parseInt(command[1]));
+                    System.out.println(school.reportCumulativeAverage(Integer.parseInt(command[1])));
                     break;
                 case "exit":
                     System.out.println("Exiting...");

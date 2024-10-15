@@ -6,24 +6,25 @@ import io.reactivestax.entity.Enrollment;
 import io.reactivestax.entity.Grade;
 import io.reactivestax.entity.Student;
 import io.reactivestax.repository.SchoolRepository;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class School {
 
     Logger logger = Logger.getLogger(School.class.getName());
+    SessionFactory sessionFactory;
+
+    public School(String resource){
+        this.sessionFactory = HibernateUtil.getSessionFactory(resource);
+    }
 
     // Add course
     public void addCourse(String courseName) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = this.sessionFactory.openSession()) {
             session.beginTransaction();
             Course course = new Course();
             course.setCourseName(courseName);
@@ -34,7 +35,7 @@ public class School {
 
     // Enroll student
     public void enrollStudent(int studentId, String studentName, String courseName) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = this.sessionFactory.openSession()) {
             session.beginTransaction();
             SchoolRepository schoolRepository = new SchoolRepository();
             Course course = schoolRepository.getCourseByName(courseName, session);
@@ -62,7 +63,7 @@ public class School {
 
     // Assign grade
     public void assignGrade(int studentId, String courseName, double grade) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = this.sessionFactory.openSession()) {
             session.beginTransaction();
             SchoolRepository schoolRepository = new SchoolRepository();
             Course course = schoolRepository.getCourseByName(courseName, session);
@@ -84,73 +85,66 @@ public class School {
         }
     }
 
-    public void listCourses() {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+    public List<Course> listCourses() {
+        try (Session session = this.sessionFactory.openSession()) {
             session.beginTransaction();
             SchoolRepository schoolRepository = new SchoolRepository();
             List<Course> allCourses = schoolRepository.getAllCourses(session);
-            for (Course course : allCourses) {
-                System.out.println(course.getCourseName());
-            }
             session.getTransaction().commit();
+            return allCourses;
         }
     }
 
-    public void listGradesByCourseId(int courseId) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+    public List<Grade> listGradesByCourseId(int courseId) {
+        try (Session session = this.sessionFactory.openSession()) {
+            session.beginTransaction();
             SchoolRepository schoolRepository = new SchoolRepository();
             List<Grade> gradeList = schoolRepository.getGradesByCourseId(courseId, session);
-            for (Grade grade : gradeList) {
-                System.out.println(grade.getGradeValue());
-            }
+            session.getTransaction().commit();
+            return gradeList;
         }
     }
 
-    public void reportUniqueCourses() {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+    public List<Course> reportUniqueCourses() {
+        try (Session session = this.sessionFactory.openSession()) {
             session.beginTransaction();
             SchoolRepository schoolRepository = new SchoolRepository();
-            List<Course> allCourses = schoolRepository.getAllCourses(session);
-            for (Course course : allCourses) {
-                System.out.println(course.getCourseName());
-            }
             session.getTransaction().commit();
+            return schoolRepository.getAllCourses(session);
         }
     }
 
-    public void reportUniqueStudents() {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+    public List<Student> reportUniqueStudents() {
+        try (Session session = this.sessionFactory.openSession()) {
             session.beginTransaction();
             SchoolRepository schoolRepository = new SchoolRepository();
             List<Student> allStudents = schoolRepository.getAllStudents(session);
-            for (Student student : allStudents) {
-                System.out.println(student.getStudentName());
-            }
             session.getTransaction().commit();
+            return allStudents;
         }
     }
 
-    public void reportAverageScore(int courseId) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+    public double reportAverageScore(int courseId) {
+        try (Session session = this.sessionFactory.openSession()) {
             SchoolRepository schoolRepository = new SchoolRepository();
             List<Grade> gradeList = schoolRepository.getGradesByCourseId(courseId, session);
             double sum = 0;
             for (Grade grade : gradeList) {
                 sum += grade.getGradeValue();
             }
-            System.out.println("Average is: " + sum/gradeList.size());
+            return sum / gradeList.size();
         }
     }
 
-    public void reportCumulativeAverage(int studentId) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+    public double reportCumulativeAverage(int studentId) {
+        try (Session session = this.sessionFactory.openSession()) {
             SchoolRepository schoolRepository = new SchoolRepository();
             List<Grade> gradeList = schoolRepository.getGradesByStudentId(studentId, session);
             double sum = 0;
             for (Grade grade : gradeList) {
                 sum += grade.getGradeValue();
             }
-            System.out.println("Average is: " + sum/gradeList.size());
+            return sum / gradeList.size();
         }
     }
 }
