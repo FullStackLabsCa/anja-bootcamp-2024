@@ -4,9 +4,10 @@ import io.reactivestax.utility.ApplicationPropertiesUtils;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Logger;
 
 public class TradeProcessorService implements Submittable<TradeProcessor> {
-
+    Logger logger = Logger.getLogger(TradeProcessorService.class.getName());
     ExecutorService tradeProcessorExecutorService;
     ApplicationPropertiesUtils applicationPropertiesUtils;
 
@@ -19,6 +20,11 @@ public class TradeProcessorService implements Submittable<TradeProcessor> {
         for (int i = 0; i < this.applicationPropertiesUtils.getTradeProcessorQueueCount(); i++) {
             submitTask(new TradeProcessor("trade_processor_queue" + i, this.applicationPropertiesUtils));
         }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            logger.info("Shutdown signal received. Stopping consumer...");
+            tradeProcessorExecutorService.shutdownNow();
+            logger.info("Consumer stopped.");
+        }));
     }
 
     @Override
