@@ -77,8 +77,7 @@ public class JDBCTransactionUtil implements TransactionUtil<Connection, Transact
         return null;
     }
 
-    @Override
-    public void closeConnection() {
+    private void closeConnection() {
         Connection connection = connectionHolder.get();
         if (connection != null) {
             try {

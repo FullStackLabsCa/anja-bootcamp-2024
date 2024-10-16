@@ -5,7 +5,7 @@ public interface TransactionUtil<C,T> {
 
    public T startTransaction();
 
-   public void closeConnection();
+//   public void closeConnection();
 
    public void commitTransaction();
 

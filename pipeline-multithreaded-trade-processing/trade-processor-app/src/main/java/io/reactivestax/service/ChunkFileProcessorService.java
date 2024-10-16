@@ -6,15 +6,12 @@ import com.rabbitmq.client.ConnectionFactory;
 import io.reactivestax.factory.BeanFactory;
 import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.utility.TransactionUtil;
-import io.reactivestax.utility.hibernate.HibernateConnectionUtil;
 import io.reactivestax.entity.TradePayload;
 import io.reactivestax.enums.ValidityStatusEnum;
 import io.reactivestax.utility.rabbitmq.QueueUtil;
-import io.reactivestax.repository.hibernate.HibernateTradePayloadRepository;
 import io.reactivestax.utility.ApplicationPropertiesUtils;
-import org.hibernate.Hibernate;
+import jakarta.transaction.Transactional;
 import org.hibernate.HibernateException;
-import org.hibernate.Session;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -75,6 +72,7 @@ public class ChunkFileProcessorService implements Runnable, ChunkProcessorServic
 
                         submitValidTradePayloadsToQueue(tradePayload, transaction, channel);
                     }
+
         } catch (TimeoutException | IOException | HibernateException e) {
             transactionUtil.rollbackTransaction();
             logger.warning("Exception detected in Chunk Processor.");

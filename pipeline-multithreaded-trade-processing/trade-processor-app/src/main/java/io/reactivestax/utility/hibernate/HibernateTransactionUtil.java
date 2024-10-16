@@ -80,8 +80,7 @@ public class HibernateTransactionUtil implements TransactionUtil<Session, Transa
         return getConnection().beginTransaction();
     }
 
-    @Override
-    public void closeConnection() {
+    private void closeConnection() {
         Session session = threadLocalSession.get();
         if (session != null) {
             session.close();
@@ -92,11 +91,16 @@ public class HibernateTransactionUtil implements TransactionUtil<Session, Transa
     @Override
     public void commitTransaction() {
         getConnection().getTransaction().commit();
+        //
+        closeConnection();
+
     }
 
     @Override
-    public void rollbackTransaction() {
+    public void rollbackTransaction()
+    {
         getConnection().getTransaction().rollback();
+        closeConnection();
     }
 
 }

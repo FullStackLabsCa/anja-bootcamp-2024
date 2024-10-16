@@ -90,20 +90,20 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
     
     public void processTrade(String tradeId) throws InterruptedException, IOException {
         try {
-            HibernateTradePayloadRepository hibernateTradePayloadRepository = new HibernateTradePayloadRepository();
-//            ServiceUtil.beginTransaction();
-            this.session.beginTransaction();
-            TradePayload tradePayload = hibernateTradePayloadRepository.readRawPayload(tradeId);
-            String[] payloadArr = tradePayload.getPayload().split(",");
-            String cusip = payloadArr[3];
-            HibernateSecuritiesReferenceRepository hibernateSecuritiesReferenceRepository = new HibernateSecuritiesReferenceRepository();
-            boolean validSecurity = hibernateSecuritiesReferenceRepository.lookupSecurities(cusip);
-            hibernateTradePayloadRepository.updateTradePayloadLookupStatus(validSecurity, tradePayload.getId());
-            if (validSecurity) {
-                JournalEntry journalEntry = journalEntryTransaction(payloadArr, tradePayload.getId());
-                positionTransaction(journalEntry);
-            }
-            this.session.getTransaction().commit();
+//            HibernateTradePayloadRepository hibernateTradePayloadRepository = new HibernateTradePayloadRepository();
+////            ServiceUtil.beginTransaction();
+//            this.session.beginTransaction();
+//            TradePayload tradePayload = hibernateTradePayloadRepository.readRawPayload(tradeId);
+//            String[] payloadArr = tradePayload.getPayload().split(",");
+//            String cusip = payloadArr[3];
+//            HibernateSecuritiesReferenceRepository hibernateSecuritiesReferenceRepository = new HibernateSecuritiesReferenceRepository();
+//            boolean validSecurity = hibernateSecuritiesReferenceRepository.lookupSecurities(cusip);
+//            hibernateTradePayloadRepository.updateTradePayloadLookupStatus(validSecurity, tradePayload.getId());
+//            if (validSecurity) {
+//                JournalEntry journalEntry = journalEntryTransaction(payloadArr, tradePayload.getId());
+//                positionTransaction(journalEntry);
+//            }
+//            this.session.getTransaction().commit();
 //            ServiceUtil.commitTransaction();
             this.session.clear();
         } catch (HibernateException | OptimisticLockException e) {
