@@ -7,6 +7,7 @@ import org.hibernate.Transaction;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,6 +82,12 @@ public class HibernateTransactionUtil implements TransactionUtil<Session, Transa
     @Override
     public Transaction startTransaction() {
         return getConnection().beginTransaction();
+//        TransactionStatus status = getConnection().getTransaction().getStatus();
+//        if(status !=TransactionStatus.ACTIVE){
+//            return getConnection().beginTransaction();
+//        }else{
+//            return getConnection().getTransaction();
+//        }
     }
 
     private void closeConnection() {
@@ -95,7 +102,6 @@ public class HibernateTransactionUtil implements TransactionUtil<Session, Transa
     public void commitTransaction() {
         getConnection().getTransaction().commit();
         closeConnection();
-
     }
 
     @Override

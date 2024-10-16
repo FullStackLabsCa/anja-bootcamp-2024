@@ -22,6 +22,7 @@ public class RabbitMQQueueMessageSender implements QueueMessageSender {
     @Override
     public Boolean sendMessageToQueue(String queueName, String message) throws IOException, TimeoutException {
         try{
+            System.out.println("sending message " + message);
             RabbitMQChannelProvider.getRabbitMQChannel().basicPublish(ApplicationPropertiesUtils.getInstance().getQueueExchangeName(), queueName, null,
                     message.getBytes());
             return true;

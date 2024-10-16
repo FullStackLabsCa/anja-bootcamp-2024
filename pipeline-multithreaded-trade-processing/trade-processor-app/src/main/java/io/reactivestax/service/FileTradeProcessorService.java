@@ -68,10 +68,17 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
             Channel receiverChannel = rabbitMQQueueMessageReceiver.getReceiverChannel(queueName);
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
                 String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
+                System.out.println("received message = " + message);
+
                 try {
                     processTrade(message);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
+                }
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
             };
             CancelCallback cancelCallback = consumerTag -> {
