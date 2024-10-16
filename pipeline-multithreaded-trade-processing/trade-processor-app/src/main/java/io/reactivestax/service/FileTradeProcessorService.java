@@ -12,8 +12,14 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
+import io.reactivestax.entity.TradePayload;
+import io.reactivestax.factory.BeanFactory;
+import io.reactivestax.repository.JournalEntryRepository;
+import io.reactivestax.repository.LookupSecuritiesRepository;
+import io.reactivestax.repository.PositionsRepository;
+import io.reactivestax.repository.TradePayloadRepository;
+import io.reactivestax.utility.database.TransactionUtil;
 import org.hibernate.HibernateException;
-import org.hibernate.Session;
 
 import com.rabbitmq.client.CancelCallback;
 import com.rabbitmq.client.Channel;
@@ -24,13 +30,8 @@ import com.rabbitmq.client.DeliverCallback;
 import io.reactivestax.entity.JournalEntry;
 import io.reactivestax.entity.Position;
 import io.reactivestax.entity.PositionCompositeKey;
-import io.reactivestax.entity.TradePayload;
 import io.reactivestax.enums.DirectionEnum;
 import io.reactivestax.utility.rabbitmq.QueueUtil;
-import io.reactivestax.repository.hibernate.HibernateJournalEntryRepository;
-import io.reactivestax.repository.hibernate.HibernatePositionsRepository;
-import io.reactivestax.repository.hibernate.HibernateSecuritiesReferenceRepository;
-import io.reactivestax.repository.hibernate.HibernateTradePayloadRepository;
 import io.reactivestax.utility.ApplicationPropertiesUtils;
 import jakarta.persistence.OptimisticLockException;
 
@@ -40,14 +41,23 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
     String queueName;
     private final Map<String, Integer> retryCountMap;
     ApplicationPropertiesUtils applicationPropertiesUtils;
-    Session session;
     int count = 0;
     Channel channel;
+    private final TradePayloadRepository tradePayloadRepository;
+    private final TransactionUtil transactionUtil;
+    private final LookupSecuritiesRepository lookupSecuritiesRepository;
+    private final JournalEntryRepository journalEntryRepository;
+    private final PositionsRepository positionsRepository;
 
     public FileTradeProcessorService(String queueName, ApplicationPropertiesUtils applicationPropertiesUtils) {
         this.queueName = queueName;
         this.retryCountMap = new HashMap<>();
         this.applicationPropertiesUtils = applicationPropertiesUtils;
+        this.transactionUtil = BeanFactory.getTransactionUtil();
+        this.tradePayloadRepository = BeanFactory.getTradePayloadRepository();
+        this.lookupSecuritiesRepository = BeanFactory.getLookupSecuritiesRepository();
+        this.journalEntryRepository = BeanFactory.getJournalEntryRepository();
+        this.positionsRepository = BeanFactory.getPositionsRepository();
     }
 
     public void setRetryCountMap(String key, Integer value) {
@@ -56,32 +66,29 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
 
     @Override
     public Void call() {
-//        ConnectionFactory connectionFactory = QueueUtil.getInstance(applicationPropertiesUtils).getQueueConnectionFactory();
-//        try (
-//              /*  Session localSession = HibernateConnectionUtil.getSessionFactory().openSession();*/
-//             Connection connection = connectionFactory.newConnection();
-//             Channel localChannel = connection.createChannel()) {
-//            this.channel = localChannel;
-//            this.session = localSession;
-//            channel.exchangeDeclare(applicationPropertiesUtils.getQueueExchangeName(), applicationPropertiesUtils.getQueueExchangeType());
-//            channel.queueDeclare(queueName, true, false, false, null);
-//            channel.queueBind(queueName, applicationPropertiesUtils.getQueueExchangeName(), queueName);
-//            DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-//                String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
-//                try {
-//                    processTrade(message);
-//                } catch (InterruptedException e) {
-//                    Thread.currentThread().interrupt();
-//                }
-//            };
-//            CancelCallback cancelCallback = consumerTag -> {
-//            };
-//            channel.basicConsume(queueName, true, deliverCallback, cancelCallback);
-//            latch.await();
-//        } catch (IOException | TimeoutException | InterruptedException e) {
-//            logger.warning("Exception detected in Trade Processor.");
-//            Thread.currentThread().interrupt();
-//        }
+        ConnectionFactory connectionFactory = QueueUtil.getInstance(applicationPropertiesUtils).getQueueConnectionFactory();
+        try (Connection connection = connectionFactory.newConnection();
+             Channel localChannel = connection.createChannel()) {
+            this.channel = localChannel;
+            channel.exchangeDeclare(applicationPropertiesUtils.getQueueExchangeName(), applicationPropertiesUtils.getQueueExchangeType());
+            channel.queueDeclare(queueName, true, false, false, null);
+            channel.queueBind(queueName, applicationPropertiesUtils.getQueueExchangeName(), queueName);
+            DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+                String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
+                try {
+                    processTrade(message);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            };
+            CancelCallback cancelCallback = consumerTag -> {
+            };
+            channel.basicConsume(queueName, true, deliverCallback, cancelCallback);
+            latch.await();
+        } catch (IOException | TimeoutException | InterruptedException e) {
+            logger.warning("Exception detected in Trade Processor.");
+            Thread.currentThread().interrupt();
+        }
 
         return null;
     }
@@ -90,27 +97,20 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
     
     public void processTrade(String tradeId) throws InterruptedException, IOException {
         try {
-//            HibernateTradePayloadRepository hibernateTradePayloadRepository = new HibernateTradePayloadRepository();
-////            ServiceUtil.beginTransaction();
-//            this.session.beginTransaction();
-//            TradePayload tradePayload = hibernateTradePayloadRepository.readRawPayload(tradeId);
-//            String[] payloadArr = tradePayload.getPayload().split(",");
-//            String cusip = payloadArr[3];
-//            HibernateSecuritiesReferenceRepository hibernateSecuritiesReferenceRepository = new HibernateSecuritiesReferenceRepository();
-//            boolean validSecurity = hibernateSecuritiesReferenceRepository.lookupSecurities(cusip);
-//            hibernateTradePayloadRepository.updateTradePayloadLookupStatus(validSecurity, tradePayload.getId());
-//            if (validSecurity) {
-//                JournalEntry journalEntry = journalEntryTransaction(payloadArr, tradePayload.getId());
-//                positionTransaction(journalEntry);
-//            }
-//            this.session.getTransaction().commit();
-//            ServiceUtil.commitTransaction();
-//            this.session.clear();
+            transactionUtil.startTransaction();
+            TradePayload tradePayload = tradePayloadRepository.readRawPayload(tradeId);
+            String[] payloadArr = tradePayload.getPayload().split(",");
+            String cusip = payloadArr[3];
+            boolean validSecurity = lookupSecuritiesRepository.lookupSecurities(cusip);
+            tradePayloadRepository.updateTradePayloadLookupStatus(validSecurity, tradePayload.getId());
+            if (validSecurity) {
+                JournalEntry journalEntry = journalEntryTransaction(payloadArr, tradePayload.getId());
+                positionTransaction(journalEntry);
+            }
+            transactionUtil.commitTransaction();
         } catch (HibernateException | OptimisticLockException e) {
             logger.warning("Hibernate/Optimistic Lock exception detected.");
-            //this.session.getTransaction().rollback();
-//            ServiceUtil.rollbackTransaction();
-            //this.session.clear();
+            transactionUtil.rollbackTransaction();
             retryTransaction(tradeId);
         }
     }
@@ -124,11 +124,8 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
         journalEntry.setDirection(DirectionEnum.valueOf(payloadArr[4]));
         journalEntry.setQuantity(Integer.parseInt(payloadArr[5]));
         journalEntry.setTransactionDateTime(Timestamp.valueOf(LocalDateTime.parse(payloadArr[1], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
-        HibernateJournalEntryRepository hibernateJournalEntryRepository = new HibernateJournalEntryRepository();
-        hibernateJournalEntryRepository.insertIntoJournalEntry(journalEntry, this.session);
-        //
-        HibernateTradePayloadRepository hibernateTradePayloadRepository = HibernateTradePayloadRepository.getInstance();
-        hibernateTradePayloadRepository.updateTradePayloadPostedStatus(tradeId);
+        journalEntryRepository.insertIntoJournalEntry(journalEntry);
+        tradePayloadRepository.updateTradePayloadPostedStatus(tradeId);
         return journalEntry;
     }
 
@@ -141,10 +138,8 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
         position.setPositionCompositeKey(positionCompositeKey);
         position.setHolding(journalEntry.getDirection().equals(DirectionEnum.SELL) ? -journalEntry.getQuantity() :
                 journalEntry.getQuantity());
-        HibernatePositionsRepository hibernatePositionsRepository = new HibernatePositionsRepository();
-        hibernatePositionsRepository.upsertPosition(position, this.session);
-        HibernateJournalEntryRepository hibernateJournalEntryRepository = new HibernateJournalEntryRepository();
-        hibernateJournalEntryRepository.updateJournalEntryStatus(journalEntry.getId(), this.session);
+        positionsRepository.upsertPosition(position);
+        journalEntryRepository.updateJournalEntryStatus(journalEntry.getId());
     }
 
     @Override

@@ -1,8 +1,17 @@
 package io.reactivestax.factory;
 
 import io.reactivestax.exceptions.InvalidPersistenceTechnologyException;
+import io.reactivestax.repository.JournalEntryRepository;
+import io.reactivestax.repository.LookupSecuritiesRepository;
+import io.reactivestax.repository.PositionsRepository;
 import io.reactivestax.repository.TradePayloadRepository;
+import io.reactivestax.repository.hibernate.HibernateJournalEntryRepository;
+import io.reactivestax.repository.hibernate.HibernatePositionsRepository;
+import io.reactivestax.repository.hibernate.HibernateSecuritiesReferenceRepository;
 import io.reactivestax.repository.hibernate.HibernateTradePayloadRepository;
+import io.reactivestax.repository.jdbc.JDBCJournalEntryRepository;
+import io.reactivestax.repository.jdbc.JDBCPositionsRepository;
+import io.reactivestax.repository.jdbc.JDBCSecuritiesReferenceRepository;
 import io.reactivestax.repository.jdbc.JDBCTradePayloadRepository;
 import io.reactivestax.utility.ApplicationPropertiesUtils;
 import io.reactivestax.utility.database.TransactionUtil;
@@ -38,6 +47,39 @@ public class BeanFactory {
             return HibernateTradePayloadRepository.getInstance();
         } else if(JDBC_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())){
             return JDBCTradePayloadRepository.getInstance();
+        } else{
+            throw new InvalidPersistenceTechnologyException("Invalid persistence technology");
+        }
+    }
+
+    public static LookupSecuritiesRepository getLookupSecuritiesRepository() {
+        ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
+        if(HIBERNATE_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())){
+            return HibernateSecuritiesReferenceRepository.getInstance();
+        } else if(JDBC_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())){
+            return JDBCSecuritiesReferenceRepository.getInstance();
+        } else{
+            throw new InvalidPersistenceTechnologyException("Invalid persistence technology");
+        }
+    }
+
+    public static JournalEntryRepository getJournalEntryRepository() {
+        ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
+        if(HIBERNATE_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())){
+            return HibernateJournalEntryRepository.getInstance();
+        } else if(JDBC_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())){
+            return JDBCJournalEntryRepository.getInstance();
+        } else{
+            throw new InvalidPersistenceTechnologyException("Invalid persistence technology");
+        }
+    }
+
+    public static PositionsRepository getPositionsRepository() {
+        ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
+        if(HIBERNATE_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())){
+            return HibernatePositionsRepository.getInstance();
+        } else if(JDBC_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())){
+            return JDBCPositionsRepository.getInstance();
         } else{
             throw new InvalidPersistenceTechnologyException("Invalid persistence technology");
         }

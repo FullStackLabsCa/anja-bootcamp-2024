@@ -27,7 +27,7 @@ public class ChunkGeneratorAndProcessorService implements Submittable<ChunkFileP
             chunkGeneratorExecutorService = Executors.newSingleThreadExecutor();
             chunkProcessorExecutorService =
                     Executors.newFixedThreadPool(applicationProperties.getChunkProcessorThreadCount());
-            chunkGeneratorExecutorService.submit(new FileChunkGeneratorService(applicationProperties));
+            chunkGeneratorExecutorService.submit(new ChunkFileGeneratorService(applicationProperties));
             logger.info("Stated chunk generator.");
             for (int i = 0; i < applicationProperties.getNumberOfChunks(); i++) {
                 submitTask(new ChunkFileProcessorService(applicationProperties));

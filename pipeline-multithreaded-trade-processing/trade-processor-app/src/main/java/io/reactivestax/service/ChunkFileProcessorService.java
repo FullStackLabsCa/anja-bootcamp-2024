@@ -1,22 +1,17 @@
 package io.reactivestax.service;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
 import io.reactivestax.factory.BeanFactory;
 import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.utility.database.TransactionUtil;
 import io.reactivestax.entity.TradePayload;
 import io.reactivestax.enums.ValidityStatusEnum;
 import io.reactivestax.utility.messaging.QueueMessageSender;
-import io.reactivestax.utility.rabbitmq.QueueUtil;
 import io.reactivestax.utility.ApplicationPropertiesUtils;
 import org.hibernate.HibernateException;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeoutException;
@@ -52,22 +47,20 @@ public class ChunkFileProcessorService implements Runnable, ChunkProcessorServic
     public void processChunk(String filePath) throws SQLException {
         TransactionUtil transactionUtil = BeanFactory.getTransactionUtil();
         QueueMessageSender queueMessageSender = BeanFactory.getQueueMessageSender();
-        //
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-                    String payload;
-                    while ((payload = reader.readLine()) != null) {
-                        String[] transaction = payload.split(",");
-                        TradePayload tradePayload = prepareTradePayload(payload, transaction);
+            String payload;
+            while ((payload = reader.readLine()) != null) {
+                String[] transaction = payload.split(",");
+                TradePayload tradePayload = prepareTradePayload(payload, transaction);
 
-                        TradePayloadRepository tradePayloadRepository = BeanFactory.getTradePayloadRepository();
-
+                TradePayloadRepository tradePayloadRepository = BeanFactory.getTradePayloadRepository();
                         transactionUtil.startTransaction();
                         tradePayloadRepository.insertTradeRawPayload(tradePayload);
                         transactionUtil.commitTransaction();
 
-                        submitValidTradePayloadsToQueue(tradePayload, transaction, queueMessageSender);
-                    }
-        } catch (IOException | HibernateException e) {
+                submitValidTradePayloadsToQueue(tradePayload, transaction, queueMessageSender);
+            }
+        } catch (IOException | HibernateException | TimeoutException e) {
             transactionUtil.rollbackTransaction();
             logger.warning("Exception detected in Chunk Processor.");
             throw new RuntimeException(e);
@@ -75,19 +68,17 @@ public class ChunkFileProcessorService implements Runnable, ChunkProcessorServic
     }
 
 
-
-    private void submitValidTradePayloadsToQueue(TradePayload tradePayload, String[] transaction, QueueMessageSender queueMessageSender) throws IOException {
+    private void submitValidTradePayloadsToQueue(TradePayload tradePayload, String[] transaction, QueueMessageSender queueMessageSender) throws IOException, TimeoutException {
         if (tradePayload.getValidityStatus().equals(ValidityStatusEnum.VALID)) {
-            String routingKey = "trade_processor_queue" + QueueDistributor.figureOutTheNextQueue(
-                    this.applicationPropertiesUtils.getTradeDistributionCriteria().equals("accountNumber") ? transaction[2] : tradePayload.getTradeNumber(),
-                    this.applicationPropertiesUtils.isTradeDistributionUseMap(),
-                    this.applicationPropertiesUtils.getTradeDistributionAlgorithm(),
-                    this.applicationPropertiesUtils.getTradeProcessorQueueCount()
-            );
-            queueMessageSender.sendMessageToQueue("trade_processor_queue", tradePayload);
-
-            //channel.basicPublish(applicationPropertiesUtils.getQueueExchangeName(), routingKey, null,
-                    //tradePayload.getTradeNumber().getBytes(StandardCharsets.UTF_8));
+            ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
+            String queueName =
+                    applicationPropertiesUtils.getQueueExchangeName() + "_queue_" + QueueDistributor.figureOutTheNextQueue(
+                            applicationPropertiesUtils.getTradeDistributionCriteria().equals("accountNumber") ? transaction[2] : tradePayload.getTradeNumber(),
+                            applicationPropertiesUtils.isTradeDistributionUseMap(),
+                            applicationPropertiesUtils.getTradeDistributionAlgorithm(),
+                            applicationPropertiesUtils.getTradeProcessorQueueCount()
+                    );
+            queueMessageSender.sendMessageToQueue(queueName, tradePayload.getTradeNumber());
         }
     }
 

@@ -85,6 +85,7 @@ public class ApplicationPropertiesUtils {
             queueExchangeName = properties.getProperty("queue.exchange.name");
             queueExchangeType = properties.getProperty("queue.exchange.type");
             persistenceTechnology = properties.getProperty("persistence.technology");
+            messagingTechnology = properties.getProperty("messaging.technology");
         } catch (IOException e) {
             logger.warning("File not found Exception.");
             System.exit(1);

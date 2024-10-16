@@ -4,7 +4,7 @@ import io.reactivestax.entity.JournalEntry;
 import org.hibernate.Session;
 
 public interface JournalEntryRepository {
-    void insertIntoJournalEntry(JournalEntry journalEntry , Session session);
+    void insertIntoJournalEntry(JournalEntry journalEntry);
 
-    void updateJournalEntryStatus(int journalEntryId, Session session);
+    void updateJournalEntryStatus(int journalEntryId);
 }

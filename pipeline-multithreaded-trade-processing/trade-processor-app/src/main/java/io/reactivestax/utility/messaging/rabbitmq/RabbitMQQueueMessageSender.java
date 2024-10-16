@@ -23,9 +23,9 @@ public class RabbitMQQueueMessageSender implements QueueMessageSender {
             instance = new RabbitMQQueueMessageSender();
             try {
                 channel = getRabbitMQChannel();
-            } catch (IOException |TimeoutException e) {
-                e.printStackTrace();
-                //TODO: Make custom exception here
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (TimeoutException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -35,7 +35,8 @@ public class RabbitMQQueueMessageSender implements QueueMessageSender {
     @Override
     public Boolean sendMessageToQueue(String queueName, String message) throws IOException, TimeoutException {
         try{
-            channel.basicPublish(ApplicationPropertiesUtils.getInstance().getQueueExchangeName(), queueName, null, message.getBytes());
+            channel.basicPublish(ApplicationPropertiesUtils.getInstance().getQueueExchangeName(), queueName, null,
+                    message.getBytes());
             return true;
         }catch (Throwable e){
             e.printStackTrace();
@@ -44,16 +45,17 @@ public class RabbitMQQueueMessageSender implements QueueMessageSender {
         }
     }
 
-    private static Channel getRabbitMQChannel() throws IOException, TimeoutException {
+    private static synchronized Channel getRabbitMQChannel() throws IOException, TimeoutException {
         if (channel == null) {
             ConnectionFactory connectionFactory = new ConnectionFactory();
             connectionFactory.setHost(ApplicationPropertiesUtils.getInstance().getQueueHost());
             connectionFactory.setUsername(ApplicationPropertiesUtils.getInstance().getQueueUsername());
             connectionFactory.setPassword(ApplicationPropertiesUtils.getInstance().getQueuePassword());
             Connection connection = connectionFactory.newConnection();
-            Channel channel = connection.createChannel();
-            channel.exchangeDeclare(ApplicationPropertiesUtils.getInstance().getQueueExchangeName(),
+            Channel localChannel = connection.createChannel();
+            localChannel.exchangeDeclare(ApplicationPropertiesUtils.getInstance().getQueueExchangeName(),
                     ApplicationPropertiesUtils.getInstance().getQueueExchangeType());
+            channel = localChannel;
         }
         return channel;
     }

@@ -21,6 +21,7 @@ public class HibernateTransactionUtil implements TransactionUtil<Session, Transa
     private static final ThreadLocal<Session> threadLocalSession = new ThreadLocal<>();
 
     private static HibernateTransactionUtil instance;
+    private static SessionFactory sessionFactory;
 
     private HibernateTransactionUtil() {
         // private constructor to prevent instantiation
@@ -33,28 +34,30 @@ public class HibernateTransactionUtil implements TransactionUtil<Session, Transa
         return instance;
     }
 
+    private static synchronized SessionFactory buildSessionFactory(String resource) {
+        if (sessionFactory == null) {
+            try {
+                // Create the SessionFactory from hibernate-annotation.cfg.xml
+                Configuration configuration = new Configuration();
+                configuration.addAnnotatedClass(JournalEntry.class);
+                configuration.addAnnotatedClass(Position.class);
+                configuration.addAnnotatedClass(SecuritiesReference.class);
+                configuration.addAnnotatedClass(TradePayload.class);
+                configuration.configure(resource);
+                LOGGER.debug("Hibernate Annotation Configuration loaded");
 
-    private static SessionFactory buildSessionFactory(String resource) {
-        try {
-            // Create the SessionFactory from hibernate-annotation.cfg.xml
-            Configuration configuration = new Configuration();
-            configuration.addAnnotatedClass(JournalEntry.class);
-            configuration.addAnnotatedClass(Position.class);
-            configuration.addAnnotatedClass(SecuritiesReference.class);
-            configuration.addAnnotatedClass(TradePayload.class);
-            configuration.configure(resource);
-            LOGGER.debug("Hibernate Annotation Configuration loaded");
+                StandardServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
+                        .applySettings(configuration.getProperties())
+                        .build();
+                LOGGER.debug("Hibernate Annotation serviceRegistry created");
 
-            StandardServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
-                    .applySettings(configuration.getProperties())
-                    .build();
-            LOGGER.debug("Hibernate Annotation serviceRegistry created");
-
-            return configuration.buildSessionFactory(serviceRegistry);
-        } catch (Throwable ex) {
-            LOGGER.error("Initial SessionFactory creation failed.", ex);
-            throw new ExceptionInInitializerError(ex);
+                sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+            } catch (Throwable ex) {
+                LOGGER.error("Initial SessionFactory creation failed.", ex);
+                throw new ExceptionInInitializerError(ex);
+            }
         }
+        return sessionFactory;
     }
 
     public static SessionFactory getSessionFactory() {
@@ -91,14 +94,12 @@ public class HibernateTransactionUtil implements TransactionUtil<Session, Transa
     @Override
     public void commitTransaction() {
         getConnection().getTransaction().commit();
-        //
         closeConnection();
 
     }
 
     @Override
-    public void rollbackTransaction()
-    {
+    public void rollbackTransaction() {
         getConnection().getTransaction().rollback();
         closeConnection();
     }
