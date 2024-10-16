@@ -6,3 +6,4 @@ import java.util.concurrent.TimeoutException;
 public interface QueueMessageReceiver {
     String receiveMessageFromQueue(String queueName) throws IOException, TimeoutException;
 }
+

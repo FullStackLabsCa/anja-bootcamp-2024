@@ -23,12 +23,13 @@ import io.reactivestax.utility.messaging.rabbitmq.RabbitMQQueueMessageSender;
 
 public class BeanFactory {
 
-    private final static String RABBITMQ_MESSAGING_TECHNOLOGY = "rabbitmq";
-    private final static String INMEMORY_MESSAGING_TECHNOLOGY = "inmemory";
+    private BeanFactory() {
+    }
+    private static final String RABBITMQ_MESSAGING_TECHNOLOGY = "rabbitmq";
+    private static final String INMEMORY_MESSAGING_TECHNOLOGY = "inmemory";
 
-    private final static String HIBERNATE_PERSISTENCE_TECHNOLOGY = "hibernate";
-    private final static String JDBC_PERSISTENCE_TECHNOLOGY = "jdbc";
-
+    private static final String HIBERNATE_PERSISTENCE_TECHNOLOGY = "hibernate";
+    private static final String JDBC_PERSISTENCE_TECHNOLOGY = "jdbc";
 
     public static QueueMessageSender getQueueMessageSender(){
         ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
