@@ -30,7 +30,7 @@ public class ChunkGeneratorAndProcessorService implements Submittable<ChunkFileP
             chunkGeneratorExecutorService.submit(new ChunkFileGeneratorService(applicationProperties));
             logger.info("Stated chunk generator.");
             for (int i = 0; i < applicationProperties.getNumberOfChunks(); i++) {
-                submitTask(new ChunkFileProcessorService(applicationProperties));
+                submitTask(new ChunkFileProcessorService());
             }
             logger.info("Started chunk processor.");
 //            TradeProcessorSubmitterService tradeProcessorSubmitterService = new TradeProcessorSubmitterService(applicationProperties);

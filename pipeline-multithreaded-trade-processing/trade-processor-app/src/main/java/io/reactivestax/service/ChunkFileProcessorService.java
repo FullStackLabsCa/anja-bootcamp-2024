@@ -20,11 +20,6 @@ import java.util.logging.Logger;
 public class ChunkFileProcessorService implements Runnable, ChunkProcessorService {
     Logger logger = Logger.getLogger(ChunkFileProcessorService.class.getName());
     LinkedBlockingQueue<String> chunkQueue = QueueDistributor.chunkQueue;
-    ApplicationPropertiesUtils applicationPropertiesUtils;
-
-    public ChunkFileProcessorService(ApplicationPropertiesUtils applicationPropertiesUtils) {
-        this.applicationPropertiesUtils = applicationPropertiesUtils;
-    }
 
     @Override
     public void run() {
@@ -54,9 +49,9 @@ public class ChunkFileProcessorService implements Runnable, ChunkProcessorServic
                 TradePayload tradePayload = prepareTradePayload(payload, transaction);
 
                 TradePayloadRepository tradePayloadRepository = BeanFactory.getTradePayloadRepository();
-                        transactionUtil.startTransaction();
-                        tradePayloadRepository.insertTradeRawPayload(tradePayload);
-                        transactionUtil.commitTransaction();
+                transactionUtil.startTransaction();
+                tradePayloadRepository.insertTradeRawPayload(tradePayload);
+                transactionUtil.commitTransaction();
 
                 submitValidTradePayloadsToQueue(tradePayload, transaction, queueMessageSender);
             }
@@ -71,13 +66,7 @@ public class ChunkFileProcessorService implements Runnable, ChunkProcessorServic
     private void submitValidTradePayloadsToQueue(TradePayload tradePayload, String[] transaction, QueueMessageSender queueMessageSender) throws IOException, TimeoutException {
         if (tradePayload.getValidityStatus().equals(ValidityStatusEnum.VALID)) {
             ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
-            String queueName =
-                    applicationPropertiesUtils.getQueueExchangeName() + "_queue_" + QueueDistributor.figureOutTheNextQueue(
-                            applicationPropertiesUtils.getTradeDistributionCriteria().equals("accountNumber") ? transaction[2] : tradePayload.getTradeNumber(),
-                            applicationPropertiesUtils.isTradeDistributionUseMap(),
-                            applicationPropertiesUtils.getTradeDistributionAlgorithm(),
-                            applicationPropertiesUtils.getTradeProcessorQueueCount()
-                    );
+            String queueName = applicationPropertiesUtils.getQueueExchangeName() + "_queue_" + QueueDistributor.figureOutTheNextQueue(applicationPropertiesUtils.getTradeDistributionCriteria().equals("accountNumber") ? transaction[2] : tradePayload.getTradeNumber(), applicationPropertiesUtils.isTradeDistributionUseMap(), applicationPropertiesUtils.getTradeDistributionAlgorithm(), applicationPropertiesUtils.getTradeProcessorQueueCount());
             queueMessageSender.sendMessageToQueue(queueName, tradePayload.getTradeNumber());
         }
     }
