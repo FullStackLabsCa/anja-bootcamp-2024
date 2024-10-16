@@ -5,12 +5,12 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import io.reactivestax.factory.BeanFactory;
 import io.reactivestax.repository.TradePayloadRepository;
-import io.reactivestax.utility.TransactionUtil;
+import io.reactivestax.utility.database.TransactionUtil;
 import io.reactivestax.entity.TradePayload;
 import io.reactivestax.enums.ValidityStatusEnum;
+import io.reactivestax.utility.messaging.QueueMessageSender;
 import io.reactivestax.utility.rabbitmq.QueueUtil;
 import io.reactivestax.utility.ApplicationPropertiesUtils;
-import jakarta.transaction.Transactional;
 import org.hibernate.HibernateException;
 
 import java.io.BufferedReader;
@@ -51,14 +51,9 @@ public class ChunkFileProcessorService implements Runnable, ChunkProcessorServic
     @Override
     public void processChunk(String filePath) throws SQLException {
         TransactionUtil transactionUtil = BeanFactory.getTransactionUtil();
+        QueueMessageSender queueMessageSender = BeanFactory.getQueueMessageSender();
         //
-        ConnectionFactory connectionFactory =
-                QueueUtil.getInstance(applicationPropertiesUtils).getQueueConnectionFactory();
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath));
-             Connection connection = connectionFactory.newConnection();
-             Channel channel = connection.createChannel()) {
-                    channel.exchangeDeclare(applicationPropertiesUtils.getQueueExchangeName(),applicationPropertiesUtils.getQueueExchangeType());
-
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
                     String payload;
                     while ((payload = reader.readLine()) != null) {
                         String[] transaction = payload.split(",");
@@ -70,17 +65,18 @@ public class ChunkFileProcessorService implements Runnable, ChunkProcessorServic
                         tradePayloadRepository.insertTradeRawPayload(tradePayload);
                         transactionUtil.commitTransaction();
 
-                        submitValidTradePayloadsToQueue(tradePayload, transaction, channel);
+                        submitValidTradePayloadsToQueue(tradePayload, transaction, queueMessageSender);
                     }
-
-        } catch (TimeoutException | IOException | HibernateException e) {
+        } catch (IOException | HibernateException e) {
             transactionUtil.rollbackTransaction();
             logger.warning("Exception detected in Chunk Processor.");
             throw new RuntimeException(e);
         }
     }
 
-    private void submitValidTradePayloadsToQueue(TradePayload tradePayload, String[] transaction, Channel channel) throws IOException {
+
+
+    private void submitValidTradePayloadsToQueue(TradePayload tradePayload, String[] transaction, QueueMessageSender queueMessageSender) throws IOException {
         if (tradePayload.getValidityStatus().equals(ValidityStatusEnum.VALID)) {
             String routingKey = "trade_processor_queue" + QueueDistributor.figureOutTheNextQueue(
                     this.applicationPropertiesUtils.getTradeDistributionCriteria().equals("accountNumber") ? transaction[2] : tradePayload.getTradeNumber(),
@@ -88,8 +84,10 @@ public class ChunkFileProcessorService implements Runnable, ChunkProcessorServic
                     this.applicationPropertiesUtils.getTradeDistributionAlgorithm(),
                     this.applicationPropertiesUtils.getTradeProcessorQueueCount()
             );
-            channel.basicPublish(applicationPropertiesUtils.getQueueExchangeName(), routingKey, null,
-                    tradePayload.getTradeNumber().getBytes(StandardCharsets.UTF_8));
+            queueMessageSender.sendMessageToQueue("trade_processor_queue", tradePayload);
+
+            //channel.basicPublish(applicationPropertiesUtils.getQueueExchangeName(), routingKey, null,
+                    //tradePayload.getTradeNumber().getBytes(StandardCharsets.UTF_8));
         }
     }
 

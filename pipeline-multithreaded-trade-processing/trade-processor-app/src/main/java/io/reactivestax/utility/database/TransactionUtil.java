@@ -1,4 +1,4 @@
-package io.reactivestax.utility;
+package io.reactivestax.utility.database;
 
 public interface TransactionUtil<C,T> {
    public C getConnection();

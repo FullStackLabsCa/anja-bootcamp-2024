@@ -1,4 +1,4 @@
-package io.reactivestax.utility.jdbc;
+package io.reactivestax.utility.database.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -10,7 +10,7 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import io.reactivestax.exceptions.HikariCPConnectionException;
 import io.reactivestax.exceptions.TransactionHandlingException;
-import io.reactivestax.utility.TransactionUtil;
+import io.reactivestax.utility.database.TransactionUtil;
 import jakarta.transaction.Transaction;
 
 public class JDBCTransactionUtil implements TransactionUtil<Connection, Transaction> {

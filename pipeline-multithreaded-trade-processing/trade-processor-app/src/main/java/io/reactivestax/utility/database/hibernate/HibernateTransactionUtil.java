@@ -1,6 +1,6 @@
-package io.reactivestax.utility.hibernate;
+package io.reactivestax.utility.database.hibernate;
 
-import io.reactivestax.utility.TransactionUtil;
+import io.reactivestax.utility.database.TransactionUtil;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;

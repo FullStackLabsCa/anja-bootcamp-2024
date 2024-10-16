@@ -2,7 +2,7 @@ package io.reactivestax.repository.hibernate;
 
 import io.reactivestax.factory.BeanFactory;
 import io.reactivestax.repository.TradePayloadRepository;
-import io.reactivestax.utility.TransactionUtil;
+import io.reactivestax.utility.database.TransactionUtil;
 import org.hibernate.Session;
 
 import io.reactivestax.entity.TradePayload;

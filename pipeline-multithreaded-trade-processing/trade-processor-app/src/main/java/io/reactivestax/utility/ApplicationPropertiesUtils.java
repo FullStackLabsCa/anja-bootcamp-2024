@@ -36,6 +36,7 @@ public class ApplicationPropertiesUtils {
     private boolean tradeDistributionUseMap;
     private String tradeDistributionAlgorithm;
     private String persistenceTechnology;
+    private String messagingTechnology;
 
     private ApplicationPropertiesUtils(String applicationPropertiesFileName){
         loadApplicationProperties(applicationPropertiesFileName);
