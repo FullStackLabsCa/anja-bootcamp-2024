@@ -16,8 +16,9 @@ public class ChunkGeneratorAndProcessorService implements Submittable<ChunkFileP
     private ExecutorService chunkProcessorExecutorService;
     Logger logger = Logger.getLogger(ChunkGeneratorAndProcessorService.class.getName());
 
-    public void setupDataSourceAndStartGeneratorsAndProcessors(ApplicationPropertiesUtils applicationProperties) {
+    public void setupDataSourceAndStartGeneratorsAndProcessors() {
         logger.info("Setting up database and project dependencies.");
+        ApplicationPropertiesUtils applicationProperties = ApplicationPropertiesUtils.getInstance();
         try {
             String path = applicationProperties.getFilePath();
             logger.info("Counting total number of lines in the file");

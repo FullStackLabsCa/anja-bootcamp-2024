@@ -4,11 +4,11 @@ import io.reactivestax.entity.TradePayload;
 import org.hibernate.Session;
 
 public interface TradePayloadRepository {
-    void insertTradeRawPayload(TradePayload tradePayload, Session session);
+    void insertTradeRawPayload(TradePayload tradePayload);
 
-    TradePayload readRawPayload(String tradeId, Session session);
+    TradePayload readRawPayload(String tradeNumber);
 
-    void updateTradePayloadLookupStatus(boolean lookupStatus, int tradeId, Session session);
+    void updateTradePayloadLookupStatus(boolean lookupStatus, int tradeId);
 
-    void updateTradePayloadPostedStatus(int tradeId, Session session);
+    void updateTradePayloadPostedStatus(int tradeId);
 }

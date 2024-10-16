@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 @Getter
 public class ApplicationPropertiesUtils {
+    private static ApplicationPropertiesUtils instance;
     private final Logger logger = Logger.getLogger(ApplicationPropertiesUtils.class.getName());
 
     @Setter
@@ -36,8 +37,22 @@ public class ApplicationPropertiesUtils {
     private String tradeDistributionAlgorithm;
     private String persistenceTechnology;
 
-    public ApplicationPropertiesUtils(String applicationPropertiesFileName){
+    private ApplicationPropertiesUtils(String applicationPropertiesFileName){
         loadApplicationProperties(applicationPropertiesFileName);
+    }
+
+    public static synchronized ApplicationPropertiesUtils getInstance(String applicationPropertiesFileName) {
+        if (instance == null) {
+            instance = new ApplicationPropertiesUtils(applicationPropertiesFileName);
+        }
+        return instance;
+    }
+
+    public static synchronized ApplicationPropertiesUtils getInstance() {
+        if (instance == null) {
+            instance = new ApplicationPropertiesUtils("application.properties");
+        }
+        return instance;
     }
 
     public void loadApplicationProperties(String applicationPropertiesFileName){

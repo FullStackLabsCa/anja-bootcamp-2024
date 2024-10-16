@@ -1,17 +1,48 @@
-//package io.reactivestax.repository.jdbc;
-//
-//import io.reactivestax.model.RawPayload;
-//
-//import java.sql.Connection;
-//import java.sql.PreparedStatement;
-//import java.sql.ResultSet;
-//import java.sql.SQLException;
-//
-//public class TradePayloadRepository implements ReadAndWriteTradePayload{
-//    private static final String INSERT_TRADE_PAYLOAD = "Insert into trade_payloads (trade_id, validity_status, payload) values(?, ?, ?)";
-//    private static final String READ_RAW_PAYLOAD_QUERY = "Select payload from trade_payloads where trade_id = ?";
-//    private static final String UPDATE_TRADE_PAYLOAD_LOOKUP_STATUS_QUERY = "Update trade_payloads set lookup_status = ? where trade_id = ?";
-//    private static final String UPDATE_TRADE_PAYLOAD_POSTED_STATUS_QUERY = "Update trade_payloads set je_status = ? where trade_id = ?";
+package io.reactivestax.repository.jdbc;
+
+import io.reactivestax.entity.TradePayload;
+import io.reactivestax.repository.TradePayloadRepository;
+import org.hibernate.Session;
+
+public class JDBCTradePayloadRepository implements TradePayloadRepository {
+    private static final String INSERT_TRADE_PAYLOAD = "Insert into trade_payloads (trade_id, validity_status, payload) values(?, ?, ?)";
+    private static final String READ_RAW_PAYLOAD_QUERY = "Select payload from trade_payloads where trade_id = ?";
+    private static final String UPDATE_TRADE_PAYLOAD_LOOKUP_STATUS_QUERY = "Update trade_payloads set lookup_status = ? where trade_id = ?";
+    private static final String UPDATE_TRADE_PAYLOAD_POSTED_STATUS_QUERY = "Update trade_payloads set je_status = ? where trade_id = ?";
+    private static JDBCTradePayloadRepository instance;
+
+    private JDBCTradePayloadRepository() {
+        // private constructor to prevent instantiation
+    }
+
+    public static synchronized JDBCTradePayloadRepository getInstance() {
+        if (instance == null) {
+            instance = new JDBCTradePayloadRepository();
+        }
+        return instance;
+    }
+
+    @Override
+    public void insertTradeRawPayload(TradePayload tradePayload) {
+
+    }
+
+    @Override
+    public TradePayload readRawPayload(String tradeNumber) {
+        return null;
+    }
+
+    @Override
+    public void updateTradePayloadLookupStatus(boolean lookupStatus, int tradeId) {
+
+    }
+
+    @Override
+    public void updateTradePayloadPostedStatus(int tradeId) {
+
+    }
+
+
 //
 //    @Override
 //    public void insertTradeRawPayload(RawPayload rawPayload, Connection connection) throws SQLException {
@@ -59,4 +90,4 @@
 //            preparedStatement.execute();
 //        }
 //    }
-//}
+}

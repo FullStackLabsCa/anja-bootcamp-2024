@@ -1,6 +1,6 @@
 package io.reactivestax.utility.hibernate;
 
-import io.reactivestax.utility.ServiceUtil;
+import io.reactivestax.utility.TransactionUtil;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -15,18 +15,24 @@ import io.reactivestax.entity.Position;
 import io.reactivestax.entity.SecuritiesReference;
 import io.reactivestax.entity.TradePayload;
 
-public class HibernateServiceUtil implements ServiceUtil<Session, Transaction> {
+public class HibernateTransactionUtil implements TransactionUtil<Session, Transaction> {
     private static final String DEFAULT_RESOURCE = "hibernate.cfg.xml";
-    private static final Logger LOGGER = LoggerFactory.getLogger(HibernateServiceUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HibernateTransactionUtil.class);
     private static final ThreadLocal<Session> threadLocalSession = new ThreadLocal<>();
-    private static HibernateServiceUtil instance;
 
-    static HibernateServiceUtil getInstance() {
+    private static HibernateTransactionUtil instance;
+
+    private HibernateTransactionUtil() {
+        // private constructor to prevent instantiation
+    }
+
+    public static synchronized HibernateTransactionUtil getInstance() {
         if (instance == null) {
-            instance = new HibernateServiceUtil();
+            instance = new HibernateTransactionUtil();
         }
         return instance;
     }
+
 
     private static SessionFactory buildSessionFactory(String resource) {
         try {

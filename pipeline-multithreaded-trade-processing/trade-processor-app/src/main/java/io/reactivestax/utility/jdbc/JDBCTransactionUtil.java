@@ -10,12 +10,24 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import io.reactivestax.exceptions.HikariCPConnectionException;
 import io.reactivestax.exceptions.TransactionHandlingException;
-import io.reactivestax.utility.ServiceUtil;
+import io.reactivestax.utility.TransactionUtil;
 import jakarta.transaction.Transaction;
 
-public class JDBCServiceUtil implements ServiceUtil<Connection, Transaction> {
+public class JDBCTransactionUtil implements TransactionUtil<Connection, Transaction> {
     private DataSource dataSource;
     private ThreadLocal<Connection> connectionHolder = new ThreadLocal<>();
+    private static JDBCTransactionUtil instance;
+
+    private JDBCTransactionUtil() {
+        // private constructor to prevent instantiation
+    }
+
+    public static synchronized JDBCTransactionUtil getInstance() {
+        if (instance == null) {
+            instance = new JDBCTransactionUtil();
+        }
+        return instance;
+    }
 
     @Override
     public Connection getConnection() {

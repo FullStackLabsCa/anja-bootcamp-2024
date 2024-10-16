@@ -1,6 +1,6 @@
 package io.reactivestax.utility;
 
-public interface ServiceUtil<C,T> {
+public interface TransactionUtil<C,T> {
    public C getConnection();
 
    public T startTransaction();

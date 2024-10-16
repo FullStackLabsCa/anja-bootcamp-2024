@@ -1,7 +1,12 @@
 package io.reactivestax.exceptions;
 
-public class HikariCPConnectionException extends RuntimeException {
-    public HikariCPConnectionException(String message, Throwable cause) {
+public class InvalidPersistenceTechnologyException extends RuntimeException {
+    public InvalidPersistenceTechnologyException(String message, Throwable cause) {
         super(message, cause);
     }
+
+    public InvalidPersistenceTechnologyException(String message) {
+        super(message);
+    }
+
 }

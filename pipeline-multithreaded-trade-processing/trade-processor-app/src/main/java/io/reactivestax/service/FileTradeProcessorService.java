@@ -93,12 +93,12 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
             HibernateTradePayloadRepository hibernateTradePayloadRepository = new HibernateTradePayloadRepository();
 //            ServiceUtil.beginTransaction();
             this.session.beginTransaction();
-            TradePayload tradePayload = hibernateTradePayloadRepository.readRawPayload(tradeId, this.session);
+            TradePayload tradePayload = hibernateTradePayloadRepository.readRawPayload(tradeId);
             String[] payloadArr = tradePayload.getPayload().split(",");
             String cusip = payloadArr[3];
             HibernateSecuritiesReferenceRepository hibernateSecuritiesReferenceRepository = new HibernateSecuritiesReferenceRepository();
-            boolean validSecurity = hibernateSecuritiesReferenceRepository.lookupSecurities(cusip, this.session);
-            hibernateTradePayloadRepository.updateTradePayloadLookupStatus(validSecurity, tradePayload.getId(), this.session);
+            boolean validSecurity = hibernateSecuritiesReferenceRepository.lookupSecurities(cusip);
+            hibernateTradePayloadRepository.updateTradePayloadLookupStatus(validSecurity, tradePayload.getId());
             if (validSecurity) {
                 JournalEntry journalEntry = journalEntryTransaction(payloadArr, tradePayload.getId());
                 positionTransaction(journalEntry);
@@ -126,8 +126,9 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
         journalEntry.setTransactionDateTime(Timestamp.valueOf(LocalDateTime.parse(payloadArr[1], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
         HibernateJournalEntryRepository hibernateJournalEntryRepository = new HibernateJournalEntryRepository();
         hibernateJournalEntryRepository.insertIntoJournalEntry(journalEntry, this.session);
-        HibernateTradePayloadRepository hibernateTradePayloadRepository = new HibernateTradePayloadRepository();
-        hibernateTradePayloadRepository.updateTradePayloadPostedStatus(tradeId, this.session);
+        //
+        HibernateTradePayloadRepository hibernateTradePayloadRepository = HibernateTradePayloadRepository.getInstance();
+        hibernateTradePayloadRepository.updateTradePayloadPostedStatus(tradeId);
         return journalEntry;
     }
 
