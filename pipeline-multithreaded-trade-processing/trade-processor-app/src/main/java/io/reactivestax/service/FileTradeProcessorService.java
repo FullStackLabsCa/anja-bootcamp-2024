@@ -21,7 +21,6 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
 
-import io.reactivestax.utility.hibernate.HibernateConnectionUtil;
 import io.reactivestax.entity.JournalEntry;
 import io.reactivestax.entity.Position;
 import io.reactivestax.entity.PositionCompositeKey;
@@ -57,31 +56,32 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
 
     @Override
     public Void call() {
-        ConnectionFactory connectionFactory = QueueUtil.getInstance(applicationPropertiesUtils).getQueueConnectionFactory();
-        try (Session localSession = HibernateConnectionUtil.getSessionFactory().openSession();
-             Connection connection = connectionFactory.newConnection();
-             Channel localChannel = connection.createChannel()) {
-            this.channel = localChannel;
-            this.session = localSession;
-            channel.exchangeDeclare(applicationPropertiesUtils.getQueueExchangeName(), applicationPropertiesUtils.getQueueExchangeType());
-            channel.queueDeclare(queueName, true, false, false, null);
-            channel.queueBind(queueName, applicationPropertiesUtils.getQueueExchangeName(), queueName);
-            DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-                String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
-                try {
-                    processTrade(message);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            };
-            CancelCallback cancelCallback = consumerTag -> {
-            };
-            channel.basicConsume(queueName, true, deliverCallback, cancelCallback);
-            latch.await();
-        } catch (IOException | TimeoutException | InterruptedException e) {
-            logger.warning("Exception detected in Trade Processor.");
-            Thread.currentThread().interrupt();
-        }
+//        ConnectionFactory connectionFactory = QueueUtil.getInstance(applicationPropertiesUtils).getQueueConnectionFactory();
+//        try (
+//              /*  Session localSession = HibernateConnectionUtil.getSessionFactory().openSession();*/
+//             Connection connection = connectionFactory.newConnection();
+//             Channel localChannel = connection.createChannel()) {
+//            this.channel = localChannel;
+//            this.session = localSession;
+//            channel.exchangeDeclare(applicationPropertiesUtils.getQueueExchangeName(), applicationPropertiesUtils.getQueueExchangeType());
+//            channel.queueDeclare(queueName, true, false, false, null);
+//            channel.queueBind(queueName, applicationPropertiesUtils.getQueueExchangeName(), queueName);
+//            DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+//                String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
+//                try {
+//                    processTrade(message);
+//                } catch (InterruptedException e) {
+//                    Thread.currentThread().interrupt();
+//                }
+//            };
+//            CancelCallback cancelCallback = consumerTag -> {
+//            };
+//            channel.basicConsume(queueName, true, deliverCallback, cancelCallback);
+//            latch.await();
+//        } catch (IOException | TimeoutException | InterruptedException e) {
+//            logger.warning("Exception detected in Trade Processor.");
+//            Thread.currentThread().interrupt();
+//        }
 
         return null;
     }
@@ -105,12 +105,12 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
 //            }
 //            this.session.getTransaction().commit();
 //            ServiceUtil.commitTransaction();
-            this.session.clear();
+//            this.session.clear();
         } catch (HibernateException | OptimisticLockException e) {
             logger.warning("Hibernate/Optimistic Lock exception detected.");
-            this.session.getTransaction().rollback();
+            //this.session.getTransaction().rollback();
 //            ServiceUtil.rollbackTransaction();
-            this.session.clear();
+            //this.session.clear();
             retryTransaction(tradeId);
         }
     }
