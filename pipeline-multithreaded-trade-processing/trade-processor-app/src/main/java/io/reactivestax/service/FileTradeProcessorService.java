@@ -19,19 +19,17 @@ import io.reactivestax.repository.LookupSecuritiesRepository;
 import io.reactivestax.repository.PositionsRepository;
 import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.utility.database.TransactionUtil;
+import io.reactivestax.utility.messaging.rabbitmq.RabbitMQQueueMessageReceiver;
 import org.hibernate.HibernateException;
 
 import com.rabbitmq.client.CancelCallback;
 import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
 
 import io.reactivestax.entity.JournalEntry;
 import io.reactivestax.entity.Position;
 import io.reactivestax.entity.PositionCompositeKey;
 import io.reactivestax.enums.DirectionEnum;
-import io.reactivestax.utility.rabbitmq.QueueUtil;
 import io.reactivestax.utility.ApplicationPropertiesUtils;
 import jakarta.persistence.OptimisticLockException;
 
@@ -42,7 +40,6 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
     private final Map<String, Integer> retryCountMap;
     ApplicationPropertiesUtils applicationPropertiesUtils;
     int count = 0;
-    Channel channel;
     private final TradePayloadRepository tradePayloadRepository;
     private final TransactionUtil transactionUtil;
     private final LookupSecuritiesRepository lookupSecuritiesRepository;
@@ -66,13 +63,9 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
 
     @Override
     public Void call() {
-        ConnectionFactory connectionFactory = QueueUtil.getInstance(applicationPropertiesUtils).getQueueConnectionFactory();
-        try (Connection connection = connectionFactory.newConnection();
-             Channel localChannel = connection.createChannel()) {
-            this.channel = localChannel;
-            channel.exchangeDeclare(applicationPropertiesUtils.getQueueExchangeName(), applicationPropertiesUtils.getQueueExchangeType());
-            channel.queueDeclare(queueName, true, false, false, null);
-            channel.queueBind(queueName, applicationPropertiesUtils.getQueueExchangeName(), queueName);
+        try {
+            RabbitMQQueueMessageReceiver rabbitMQQueueMessageReceiver = new RabbitMQQueueMessageReceiver();
+            Channel receiverChannel = rabbitMQQueueMessageReceiver.getReceiverChannel(queueName);
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
                 String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
                 try {
@@ -83,7 +76,7 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
             };
             CancelCallback cancelCallback = consumerTag -> {
             };
-            channel.basicConsume(queueName, true, deliverCallback, cancelCallback);
+            receiverChannel.basicConsume(queueName, true, deliverCallback, cancelCallback);
             latch.await();
         } catch (IOException | TimeoutException | InterruptedException e) {
             logger.warning("Exception detected in Trade Processor.");
@@ -149,8 +142,8 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
             QueueDistributor.deadLetterTransactionDeque.putLast(tradeId);
             this.retryCountMap.remove(tradeId);
         } else {
-            channel.basicPublish(applicationPropertiesUtils.getQueueExchangeName(), this.queueName, null,
-                    tradeId.getBytes(StandardCharsets.UTF_8));
+//            channel.basicPublish(applicationPropertiesUtils.getQueueExchangeName(), this.queueName, null,
+//                    tradeId.getBytes(StandardCharsets.UTF_8));
             setRetryCountMap(tradeId, retryCount);
         }
     }

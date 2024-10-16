@@ -1,8 +1,5 @@
 package io.reactivestax.utility.messaging.rabbitmq;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
 import io.reactivestax.utility.ApplicationPropertiesUtils;
 import io.reactivestax.utility.messaging.QueueMessageSender;
 

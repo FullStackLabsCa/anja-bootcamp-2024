@@ -1,18 +1,16 @@
 package io.reactivestax.utility.messaging.rabbitmq;
 
 import com.rabbitmq.client.Channel;
+import io.reactivestax.utility.ApplicationPropertiesUtils;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 public class RabbitMQQueueMessageReceiver {
-    private static RabbitMQQueueMessageReceiver instance;
-    private static final ThreadLocal<Channel> channelThreadLocal = new ThreadLocal<>();
-
-    private RabbitMQQueueMessageReceiver() {
-    }
-
-    public static synchronized RabbitMQQueueMessageReceiver getInstance() {
-        if (instance == null) {
-            instance = new RabbitMQQueueMessageReceiver();
-        }
-        return instance;
+    public Channel getReceiverChannel(String queueName) throws IOException, TimeoutException {
+        Channel channel = RabbitMQChannelProvider.getRabbitMQChannel();
+        channel.queueDeclare(queueName, true, false, false, null);
+        channel.queueBind(queueName, ApplicationPropertiesUtils.getInstance().getQueueExchangeName(), queueName);
+        return channel;
     }
 }

@@ -11,7 +11,7 @@ import java.util.concurrent.TimeoutException;
 public class RabbitMQChannelProvider {
     private static final ThreadLocal<Channel> channelThreadLocal = new ThreadLocal<>();
 
-    public static synchronized Channel getRabbitMQChannel() throws IOException, TimeoutException {
+    public static Channel getRabbitMQChannel() throws IOException, TimeoutException {
         if (channelThreadLocal.get() == null) {
             ConnectionFactory connectionFactory = new ConnectionFactory();
             connectionFactory.setHost(ApplicationPropertiesUtils.getInstance().getQueueHost());

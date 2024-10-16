@@ -18,7 +18,7 @@ public class TradeProcessorSubmitterService implements Submittable<FileTradeProc
 
     public void submitTrade() {
         for (int i = 0; i < this.applicationPropertiesUtils.getTradeProcessorQueueCount(); i++) {
-            submitTask(new FileTradeProcessorService("trade_processor_queue" + i, this.applicationPropertiesUtils));
+            submitTask(new FileTradeProcessorService(applicationPropertiesUtils.getQueueExchangeName() + "_queue_" + i, this.applicationPropertiesUtils));
         }
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             logger.info("Shutdown signal received. Stopping consumer...");
