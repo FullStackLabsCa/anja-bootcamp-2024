@@ -5,7 +5,7 @@ import io.reactivestax.utility.ApplicationPropertiesUtils;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 public class ChunkFileGeneratorService implements Runnable, ChunkGeneratorService {
 Logger logger = Logger.getLogger(ChunkFileGeneratorService.class.getName());
@@ -22,7 +22,7 @@ ApplicationPropertiesUtils applicationPropertiesUtils;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (IOException e) {
-            logger.warning("IO Exception.");
+            logger.warn("IO Exception.");
         }
     }
 

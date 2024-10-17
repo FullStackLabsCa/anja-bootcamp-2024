@@ -1,12 +1,17 @@
 package io.reactivestax.utility.messaging.rabbitmq;
 
 import io.reactivestax.utility.ApplicationPropertiesUtils;
+import io.reactivestax.utility.database.hibernate.HibernateTransactionUtil;
 import io.reactivestax.utility.messaging.QueueMessageSender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 public class RabbitMQQueueMessageSender implements QueueMessageSender {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQQueueMessageSender.class);
+
     private static RabbitMQQueueMessageSender instance;
 
     private RabbitMQQueueMessageSender() {
@@ -22,7 +27,7 @@ public class RabbitMQQueueMessageSender implements QueueMessageSender {
     @Override
     public Boolean sendMessageToQueue(String queueName, String message) throws IOException, TimeoutException {
         try{
-            System.out.println("sending message " + message);
+            LOGGER.debug("sending message " + message);
             RabbitMQChannelProvider.getRabbitMQChannel().basicPublish(ApplicationPropertiesUtils.getInstance().getQueueExchangeName(), queueName, null,
                     message.getBytes());
             return true;

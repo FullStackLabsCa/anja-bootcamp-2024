@@ -81,13 +81,13 @@ public class HibernateTransactionUtil implements TransactionUtil<Session, Transa
 
     @Override
     public Transaction startTransaction() {
-        return getConnection().beginTransaction();
-//        TransactionStatus status = getConnection().getTransaction().getStatus();
-//        if(status !=TransactionStatus.ACTIVE){
-//            return getConnection().beginTransaction();
-//        }else{
-//            return getConnection().getTransaction();
-//        }
+//        return getConnection().beginTransaction();
+        TransactionStatus status = getConnection().getTransaction().getStatus();
+        if(status !=TransactionStatus.ACTIVE){
+            return getConnection().beginTransaction();
+        }else{
+            return getConnection().getTransaction();
+        }
     }
 
     private void closeConnection() {

@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeoutException;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 public class ChunkFileProcessorService implements Runnable, ChunkProcessorService {
     Logger logger = Logger.getLogger(ChunkFileProcessorService.class.getName());
@@ -34,7 +34,7 @@ public class ChunkFileProcessorService implements Runnable, ChunkProcessorServic
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (SQLException e) {
-            logger.warning("Something went wrong while establishing database connection.");
+            logger.warn("Something went wrong while establishing database connection.");
         }
     }
 
@@ -57,7 +57,7 @@ public class ChunkFileProcessorService implements Runnable, ChunkProcessorServic
             }
         } catch (IOException | HibernateException | TimeoutException e) {
             transactionUtil.rollbackTransaction();
-            logger.warning("Exception detected in Chunk Processor.");
+            logger.warn("Exception detected in Chunk Processor.");
             throw new RuntimeException(e);
         }
     }

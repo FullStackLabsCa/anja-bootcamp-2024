@@ -3,7 +3,7 @@ package io.reactivestax;
 import io.reactivestax.service.ChunkGeneratorAndProcessorService;
 import io.reactivestax.utility.ApplicationPropertiesUtils;
 
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 public class TradeProcessorRunner {
     static Logger logger = Logger.getLogger(TradeProcessorRunner.class.getName());
