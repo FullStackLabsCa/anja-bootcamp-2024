@@ -31,7 +31,6 @@ import io.reactivestax.repository.PositionsRepository;
 import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.utility.ApplicationPropertiesUtils;
 import io.reactivestax.utility.database.TransactionUtil;
-import io.reactivestax.utility.messaging.QueueDistributor;
 import io.reactivestax.utility.messaging.TransactionRetryer;
 import io.reactivestax.utility.messaging.rabbitmq.RabbitMQQueueMessageReceiver;
 import jakarta.persistence.OptimisticLockException;
@@ -41,7 +40,6 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
     CountDownLatch latch = new CountDownLatch(1);
     String queueName;
     private final Map<String, Integer> retryCountMap;
-    ApplicationPropertiesUtils applicationPropertiesUtils;
     int count = 0;
     private final TradePayloadRepository tradePayloadRepository;
     private final TransactionUtil transactionUtil;
@@ -50,11 +48,9 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
     private final PositionsRepository positionsRepository;
     Channel channel;
 
-    public FileTradeProcessorService(String queueName, ApplicationPropertiesUtils applicationPropertiesUtils) {
-        // TODO: #15 @infinityjain remove this constructor second argument
+    public FileTradeProcessorService(String queueName) {
         this.queueName = queueName;
         this.retryCountMap = new HashMap<>();
-        this.applicationPropertiesUtils = applicationPropertiesUtils;
         this.transactionUtil = BeanFactory.getTransactionUtil();
         this.tradePayloadRepository = BeanFactory.getTradePayloadRepository();
         this.lookupSecuritiesRepository = BeanFactory.getLookupSecuritiesRepository();
@@ -128,8 +124,7 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
         journalEntry.setSecurityCusip(payloadArr[3]);
         journalEntry.setDirection(DirectionEnum.valueOf(payloadArr[4]));
         journalEntry.setQuantity(Integer.parseInt(payloadArr[5]));
-        journalEntry.setTransactionDateTime(Timestamp
-                .valueOf(LocalDateTime.parse(payloadArr[1], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
+        journalEntry.setTransactionDateTime(Timestamp.valueOf(LocalDateTime.parse(payloadArr[1], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
         journalEntryRepository.insertIntoJournalEntry(journalEntry);
         tradePayloadRepository.updateTradePayloadPostedStatus(tradeId);
         return journalEntry;
@@ -142,26 +137,24 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
         positionCompositeKey.setAccountNumber(journalEntry.getAccountNumber());
         positionCompositeKey.setSecurityCusip(journalEntry.getSecurityCusip());
         position.setPositionCompositeKey(positionCompositeKey);
-        position.setHolding(journalEntry.getDirection().equals(DirectionEnum.SELL) ? -journalEntry.getQuantity()
-                : journalEntry.getQuantity());
+        position.setHolding(journalEntry.getDirection().equals(DirectionEnum.SELL) ? -journalEntry.getQuantity() : journalEntry.getQuantity());
         positionsRepository.upsertPosition(position);
         journalEntryRepository.updateJournalEntryStatus(journalEntry.getId());
     }
 
     @Override
     public void retryTransaction(String tradeId) throws InterruptedException, IOException {
+        ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
         int retryCount = this.retryCountMap.getOrDefault(tradeId, 0) + 1;
-        if (retryCount >= this.applicationPropertiesUtils.getMaxRetryCount()) {
-            // TODO: #13 @infinityjain this should work with rabbitMQ queues not with
+        if (retryCount >= applicationPropertiesUtils.getMaxRetryCount()) {
             // inMemory
             // queues
-            QueueDistributor.deadLetterTransactionDeque.putLast(tradeId);
+            channel.basicPublish(applicationPropertiesUtils.getQueueExchangeName(), "trade_processor_dead_letter_queue", null, tradeId.getBytes(StandardCharsets.UTF_8));
             this.retryCountMap.remove(tradeId);
         } else {
             // TODO:@infinityjain #14 Use the sample for quorum queue with DLX exchange and
             // DLQ
-            channel.basicPublish(applicationPropertiesUtils.getQueueExchangeName(), this.queueName, null,
-                    tradeId.getBytes(StandardCharsets.UTF_8));
+            channel.basicPublish(applicationPropertiesUtils.getQueueExchangeName(), this.queueName, null, tradeId.getBytes(StandardCharsets.UTF_8));
             setRetryCountMap(tradeId, retryCount);
         }
     }

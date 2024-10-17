@@ -16,11 +16,12 @@ public class TradeProcessorRunner {
         chunkGeneratorAndProcessorService.setupDataSourceAndStartGeneratorsAndProcessors();
 
     }
+
     public static void main(String[] args) {
         try {
             TradeProcessorRunner runner = new TradeProcessorRunner();
             runner.start();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

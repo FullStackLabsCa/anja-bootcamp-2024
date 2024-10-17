@@ -28,18 +28,18 @@ public class ChunkGeneratorAndProcessorService implements Submittable<ChunkFileP
             chunkGeneratorExecutorService = Executors.newSingleThreadExecutor();
             chunkProcessorExecutorService =
                     Executors.newFixedThreadPool(applicationProperties.getChunkProcessorThreadCount());
-            chunkGeneratorExecutorService.submit(new ChunkFileGeneratorService(applicationProperties));
+            chunkGeneratorExecutorService.submit(new ChunkFileGeneratorService());
             logger.info("Stated chunk generator.");
             for (int i = 0; i < applicationProperties.getNumberOfChunks(); i++) {
                 submitTask(new ChunkFileProcessorService());
             }
             logger.info("Started chunk processor.");
-            TradeProcessorSubmitterService tradeProcessorSubmitterService = new TradeProcessorSubmitterService(applicationProperties);
+            TradeProcessorSubmitterService tradeProcessorSubmitterService = new TradeProcessorSubmitterService();
             tradeProcessorSubmitterService.submitTrade();
             logger.info("Started trade processor.");
         } catch (IOException e) {
             logger.warning("File parsing failed...");
-        }finally {
+        } finally {
             chunkProcessorExecutorService.shutdown();
             chunkGeneratorExecutorService.shutdown();
         }

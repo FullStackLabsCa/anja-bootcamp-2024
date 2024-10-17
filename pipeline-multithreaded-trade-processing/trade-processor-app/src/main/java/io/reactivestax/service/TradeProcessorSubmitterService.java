@@ -12,14 +12,14 @@ public class TradeProcessorSubmitterService implements Submittable<FileTradeProc
     ExecutorService tradeProcessorExecutorService;
     ApplicationPropertiesUtils applicationPropertiesUtils;
 
-    public TradeProcessorSubmitterService(ApplicationPropertiesUtils applicationProperties) {
-        this.applicationPropertiesUtils = applicationProperties;
-        tradeProcessorExecutorService = Executors.newFixedThreadPool(applicationProperties.getTradeProcessorThreadCount());
+    public TradeProcessorSubmitterService() {
+        this.applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
+        tradeProcessorExecutorService = Executors.newFixedThreadPool(applicationPropertiesUtils.getTradeProcessorThreadCount());
     }
 
     public void submitTrade() {
         for (int i = 0; i < this.applicationPropertiesUtils.getTradeProcessorQueueCount(); i++) {
-            submitTask(new FileTradeProcessorService(applicationPropertiesUtils.getQueueExchangeName() + "_queue_" + i, this.applicationPropertiesUtils));
+            submitTask(new FileTradeProcessorService(applicationPropertiesUtils.getQueueExchangeName() + "_queue_" + i));
         }
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             logger.info("Shutdown signal received. Stopping consumer...");
