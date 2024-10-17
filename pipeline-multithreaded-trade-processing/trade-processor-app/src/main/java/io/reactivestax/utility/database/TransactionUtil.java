@@ -1,13 +1,10 @@
 package io.reactivestax.utility.database;
 
-public interface TransactionUtil<C,T> {
-   public C getConnection();
+public interface TransactionUtil {
 
-   public T startTransaction();
+   void startTransaction();
 
-//   public void closeConnection();
+   void commitTransaction();
 
-   public void commitTransaction();
-
-   public void rollbackTransaction();
+   void rollbackTransaction();
 }

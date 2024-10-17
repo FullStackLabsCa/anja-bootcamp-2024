@@ -1,5 +1,6 @@
 package io.reactivestax.utility.database.hibernate;
 
+import io.reactivestax.utility.database.ConnectionUtil;
 import io.reactivestax.utility.database.TransactionUtil;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -16,7 +17,7 @@ import io.reactivestax.entity.Position;
 import io.reactivestax.entity.SecuritiesReference;
 import io.reactivestax.entity.TradePayload;
 
-public class HibernateTransactionUtil implements TransactionUtil<Session, Transaction> {
+public class HibernateTransactionUtil implements TransactionUtil, ConnectionUtil<Session> {
     private static final String DEFAULT_RESOURCE = "hibernate.cfg.xml";
     private static final Logger LOGGER = LoggerFactory.getLogger(HibernateTransactionUtil.class);
     private static final ThreadLocal<Session> threadLocalSession = new ThreadLocal<>();
@@ -80,13 +81,13 @@ public class HibernateTransactionUtil implements TransactionUtil<Session, Transa
     }
 
     @Override
-    public Transaction startTransaction() {
-        return getConnection().beginTransaction();
+    public void startTransaction() {
+        getConnection().beginTransaction();
 //        TransactionStatus status = getConnection().getTransaction().getStatus();
 //        if(status !=TransactionStatus.ACTIVE){
-//            return getConnection().beginTransaction();
+//            getConnection().beginTransaction();
 //        }else{
-//            return getConnection().getTransaction();
+//             getConnection().getTransaction();
 //        }
     }
 

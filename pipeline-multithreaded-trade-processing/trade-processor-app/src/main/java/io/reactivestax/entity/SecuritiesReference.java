@@ -13,6 +13,6 @@ public class SecuritiesReference {
     @Column(name = "id")
     private int id;
 
-    @Column(name = "cusip")
+    @Column(name = "cusip", nullable = false, unique = true)
     private String cusip;
 }

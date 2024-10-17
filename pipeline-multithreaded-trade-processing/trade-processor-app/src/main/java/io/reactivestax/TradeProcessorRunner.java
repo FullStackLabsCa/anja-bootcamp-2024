@@ -17,7 +17,11 @@ public class TradeProcessorRunner {
 
     }
     public static void main(String[] args) {
-        TradeProcessorRunner runner = new TradeProcessorRunner();
-        runner.start();
+        try {
+            TradeProcessorRunner runner = new TradeProcessorRunner();
+            runner.start();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }

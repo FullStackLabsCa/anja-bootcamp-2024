@@ -59,6 +59,8 @@ public class ChunkFileProcessorService implements Runnable, ChunkProcessorServic
             transactionUtil.rollbackTransaction();
             logger.warning("Exception detected in Chunk Processor.");
             throw new RuntimeException(e);
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 

@@ -5,7 +5,7 @@ import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 
 @Data
 @Entity
@@ -16,18 +16,18 @@ public class Position {
     @AttributeOverride(name = "securityCusip", column = @Column(name = "security_cusip"))
     private PositionCompositeKey positionCompositeKey;
 
-    @Column(name = "holding")
-    private int holding;
+    @Column(name = "holding", nullable = false)
+    private int holding;    
 
     @Version
-    @Column(name = "version")
+    @Column(name = "version", nullable = false)
     private int version;
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "created_at", updatable = false, nullable = false)
+    private Timestamp createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Column(name = "updated_at", nullable = false)
+    private Timestamp updatedAt;
 }

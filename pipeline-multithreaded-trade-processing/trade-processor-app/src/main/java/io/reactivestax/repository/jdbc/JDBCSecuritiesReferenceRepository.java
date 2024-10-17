@@ -1,6 +1,12 @@
 package io.reactivestax.repository.jdbc;
 
 import io.reactivestax.repository.LookupSecuritiesRepository;
+import io.reactivestax.utility.database.jdbc.JDBCTransactionUtil;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class JDBCSecuritiesReferenceRepository implements LookupSecuritiesRepository {
     private static JDBCSecuritiesReferenceRepository instance;
@@ -19,12 +25,14 @@ public class JDBCSecuritiesReferenceRepository implements LookupSecuritiesReposi
     @Override
     public boolean lookupSecurities(String cusip) {
         boolean validSecurity = false;
-//        try (
-//        PreparedStatement preparedStatement = connection.prepareStatement(LOOKUP_SECURITIES_QUERY)) {
-//            preparedStatement.setString(1, cusip);
-//            ResultSet resultSet = preparedStatement.executeQuery();
-//            if (resultSet.next()) validSecurity = true;
-//        }
+        Connection connection = JDBCTransactionUtil.getInstance().getConnection();
+        try (PreparedStatement preparedStatement = connection.prepareStatement(LOOKUP_SECURITIES_QUERY)) {
+            preparedStatement.setString(1, cusip);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) validSecurity = true;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 
         return validSecurity;
     }

@@ -10,12 +10,12 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import io.reactivestax.exceptions.HikariCPConnectionException;
 import io.reactivestax.exceptions.TransactionHandlingException;
+import io.reactivestax.utility.database.ConnectionUtil;
 import io.reactivestax.utility.database.TransactionUtil;
-import jakarta.transaction.Transaction;
 
-public class JDBCTransactionUtil implements TransactionUtil<Connection, Transaction> {
+public class JDBCTransactionUtil implements TransactionUtil, ConnectionUtil<Connection> {
     private DataSource dataSource;
-    private ThreadLocal<Connection> connectionHolder = new ThreadLocal<>();
+    private final ThreadLocal<Connection> connectionHolder = new ThreadLocal<>();
     private static JDBCTransactionUtil instance;
 
     private JDBCTransactionUtil() {
@@ -45,7 +45,7 @@ public class JDBCTransactionUtil implements TransactionUtil<Connection, Transact
         return connection;
     }
 
-    private DataSource getHikariDataSource() {
+    private synchronized DataSource getHikariDataSource() {
         if (dataSource == null) {
             createDataSource();
         }
@@ -55,10 +55,10 @@ public class JDBCTransactionUtil implements TransactionUtil<Connection, Transact
 
     private void createDataSource() {
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:mysql://localhost:3306/bootcamp");
+        config.setJdbcUrl("jdbc:mysql://localhost:3306/hibernate_trade_processor");
         config.setUsername("root");
         config.setPassword("password123");
-        config.setMaximumPoolSize(10); // Set max connections in pool
+        config.setMaximumPoolSize(50); // Set max connections in pool
         config.setConnectionTimeout(30000); // Timeout in milliseconds
         config.setIdleTimeout(600000); // Idle timeout before connection is closed
 
@@ -67,14 +67,14 @@ public class JDBCTransactionUtil implements TransactionUtil<Connection, Transact
     }
 
     @Override
-    public Transaction startTransaction() {
+    public void startTransaction() {
         try {
-            connectionHolder.get().setAutoCommit(false);
+            getConnection().setAutoCommit(false);
+//            connectionHolder.get().setAutoCommit(false);
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-        return null;
     }
 
     private void closeConnection() {
@@ -95,6 +95,7 @@ public class JDBCTransactionUtil implements TransactionUtil<Connection, Transact
         try {
             connectionHolder.get().commit();
             connectionHolder.get().setAutoCommit(false);
+            closeConnection();
         } catch (SQLException e) {
             e.printStackTrace();
             throw new TransactionHandlingException("error committing transaction", e);
@@ -106,6 +107,7 @@ public class JDBCTransactionUtil implements TransactionUtil<Connection, Transact
         try {
             connectionHolder.get().rollback();
             connectionHolder.get().setAutoCommit(false);
+            closeConnection();
         } catch (SQLException e) {
             e.printStackTrace();
             throw new TransactionHandlingException("error rolling back transaction", e);

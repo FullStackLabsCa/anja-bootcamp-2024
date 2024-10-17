@@ -45,6 +45,7 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
     private final LookupSecuritiesRepository lookupSecuritiesRepository;
     private final JournalEntryRepository journalEntryRepository;
     private final PositionsRepository positionsRepository;
+    Channel channel;
 
     public FileTradeProcessorService(String queueName, ApplicationPropertiesUtils applicationPropertiesUtils) {
         this.queueName = queueName;
@@ -65,7 +66,7 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
     public Void call() {
         try {
             RabbitMQQueueMessageReceiver rabbitMQQueueMessageReceiver = new RabbitMQQueueMessageReceiver();
-            Channel receiverChannel = rabbitMQQueueMessageReceiver.getReceiverChannel(queueName);
+            this.channel = rabbitMQQueueMessageReceiver.getReceiverChannel(queueName);
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
                 String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
                 System.out.println("received message = " + message);
@@ -83,7 +84,7 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
             };
             CancelCallback cancelCallback = consumerTag -> {
             };
-            receiverChannel.basicConsume(queueName, true, deliverCallback, cancelCallback);
+            channel.basicConsume(queueName, true, deliverCallback, cancelCallback);
             latch.await();
         } catch (IOException | TimeoutException | InterruptedException e) {
             logger.warning("Exception detected in Trade Processor.");
@@ -94,7 +95,7 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
     }
 
     @Override
-    
+
     public void processTrade(String tradeId) throws InterruptedException, IOException {
         try {
             transactionUtil.startTransaction();
@@ -149,8 +150,8 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
             QueueDistributor.deadLetterTransactionDeque.putLast(tradeId);
             this.retryCountMap.remove(tradeId);
         } else {
-//            channel.basicPublish(applicationPropertiesUtils.getQueueExchangeName(), this.queueName, null,
-//                    tradeId.getBytes(StandardCharsets.UTF_8));
+            channel.basicPublish(applicationPropertiesUtils.getQueueExchangeName(), this.queueName, null,
+                    tradeId.getBytes(StandardCharsets.UTF_8));
             setRetryCountMap(tradeId, retryCount);
         }
     }

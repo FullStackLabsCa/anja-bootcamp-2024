@@ -8,7 +8,7 @@ import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 
 @Data
 @Entity
@@ -20,29 +20,29 @@ public class TradePayload {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "trade_number")
+    @Column(name = "trade_number", nullable = false, unique = true)
     private String tradeNumber;
 
-    @Column(name = "payload")
+    @Column(name = "payload", nullable = false)
     private String payload;
 
-    @Column(name = "validity_status")
+    @Column(name = "validity_status", nullable = false)
     @Enumerated(EnumType.STRING)
     private ValidityStatusEnum validityStatus = ValidityStatusEnum.VALID;
 
-    @Column(name = "lookup_status")
+    @Column(name = "lookup_status", nullable = false)
     @Enumerated(EnumType.STRING)
     private LookupStatusEnum lookupStatus = LookupStatusEnum.NOT_CHECKED;
 
-    @Column(name = "je_status")
+    @Column(name = "je_status", nullable = false)
     @Enumerated(EnumType.STRING)
     private PostedStatusEnum journalEntryStatus = PostedStatusEnum.NOT_POSTED;
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "created_at", updatable = false, nullable = false)
+    private Timestamp createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Column(name = "updated_at", nullable = false)
+    private Timestamp updatedAt;
 }

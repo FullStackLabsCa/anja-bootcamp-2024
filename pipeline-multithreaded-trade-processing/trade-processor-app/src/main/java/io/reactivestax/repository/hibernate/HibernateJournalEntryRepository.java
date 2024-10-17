@@ -2,9 +2,8 @@ package io.reactivestax.repository.hibernate;
 
 import io.reactivestax.entity.JournalEntry;
 import io.reactivestax.enums.PostedStatusEnum;
-import io.reactivestax.factory.BeanFactory;
 import io.reactivestax.repository.JournalEntryRepository;
-import io.reactivestax.utility.database.TransactionUtil;
+import io.reactivestax.utility.database.hibernate.HibernateTransactionUtil;
 import org.hibernate.Session;
 
 public class HibernateJournalEntryRepository implements JournalEntryRepository {
@@ -22,20 +21,14 @@ public class HibernateJournalEntryRepository implements JournalEntryRepository {
 
     @Override
     public void insertIntoJournalEntry(JournalEntry journalEntry) {
-        Session session = getSession();
+        Session session = HibernateTransactionUtil.getInstance().getConnection();
         session.persist(journalEntry);
     }
 
     @Override
     public void updateJournalEntryStatus(int journalEntryId) {
-        Session session = getSession();
+        Session session = HibernateTransactionUtil.getInstance().getConnection();
         JournalEntry journalEntry = session.get(JournalEntry.class, journalEntryId);
         journalEntry.setPostedStatus(PostedStatusEnum.POSTED);
-    }
-
-    private static Session getSession() {
-        TransactionUtil transactionUtil = BeanFactory.getTransactionUtil();
-        Session session = (Session)transactionUtil.getConnection();
-        return session;
     }
 }

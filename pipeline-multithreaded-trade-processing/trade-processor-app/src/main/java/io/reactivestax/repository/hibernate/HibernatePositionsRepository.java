@@ -1,9 +1,8 @@
 package io.reactivestax.repository.hibernate;
 
 import io.reactivestax.entity.Position;
-import io.reactivestax.factory.BeanFactory;
 import io.reactivestax.repository.PositionsRepository;
-import io.reactivestax.utility.database.TransactionUtil;
+import io.reactivestax.utility.database.hibernate.HibernateTransactionUtil;
 import jakarta.persistence.NoResultException;
 import org.hibernate.Session;
 
@@ -22,7 +21,7 @@ public class HibernatePositionsRepository implements PositionsRepository {
 
     @Override
     public void upsertPosition(Position position) {
-        Session session = getSession();
+        Session session = HibernateTransactionUtil.getInstance().getConnection();
         try {
             Position position1 = session.createQuery("from Position p where p.positionCompositeKey.accountNumber = :accountNumber and p" +
                             ".positionCompositeKey.securityCusip = " +
@@ -34,11 +33,5 @@ public class HibernatePositionsRepository implements PositionsRepository {
         } catch (NoResultException e) {
             session.persist(position);
         }
-    }
-
-    private static Session getSession() {
-        TransactionUtil transactionUtil = BeanFactory.getTransactionUtil();
-        Session session = (Session)transactionUtil.getConnection();
-        return session;
     }
 }
