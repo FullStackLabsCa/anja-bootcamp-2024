@@ -1,14 +1,10 @@
 package io.reactivestax.utility.database.hibernate;
 
-import io.reactivestax.utility.database.ConnectionUtil;
-import io.reactivestax.utility.database.TransactionUtil;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,11 +12,13 @@ import io.reactivestax.entity.JournalEntry;
 import io.reactivestax.entity.Position;
 import io.reactivestax.entity.SecuritiesReference;
 import io.reactivestax.entity.TradePayload;
+import io.reactivestax.utility.database.ConnectionUtil;
+import io.reactivestax.utility.database.TransactionUtil;
 
 public class HibernateTransactionUtil implements TransactionUtil, ConnectionUtil<Session> {
     private static final String DEFAULT_RESOURCE = "hibernate.cfg.xml";
     private static final Logger LOGGER = LoggerFactory.getLogger(HibernateTransactionUtil.class);
-    private static final ThreadLocal<Session> threadLocalSession = new ThreadLocal<>();
+    private final ThreadLocal<Session> threadLocalSession = new ThreadLocal<>();
 
     private static HibernateTransactionUtil instance;
     private static SessionFactory sessionFactory;
@@ -83,12 +81,12 @@ public class HibernateTransactionUtil implements TransactionUtil, ConnectionUtil
     @Override
     public void startTransaction() {
         getConnection().beginTransaction();
-//        TransactionStatus status = getConnection().getTransaction().getStatus();
-//        if(status !=TransactionStatus.ACTIVE){
-//            getConnection().beginTransaction();
-//        }else{
-//             getConnection().getTransaction();
-//        }
+        // TransactionStatus status = getConnection().getTransaction().getStatus();
+        // if(status !=TransactionStatus.ACTIVE){
+        // getConnection().beginTransaction();
+        // }else{
+        // getConnection().getTransaction();
+        // }
     }
 
     private void closeConnection() {

@@ -1,0 +1,8 @@
+- working with (properly named) interfaces 
+- good package names and layers should be honored
+- we don't want to initialize repo and service classes everytime
+- we don't want to initialize database connections, transactions, queue connection factory/connection/channel repeatedly
+- not everything will be mvc pattern - we draw out the architecture 
+and then our packages will reflect the layers accordingly '
+- entity package contains your entities being CRUD'ed into/from the DB
+- Enums are used for logically grouping your constant values 

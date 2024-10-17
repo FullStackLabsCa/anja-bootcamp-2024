@@ -31,6 +31,17 @@ public class BeanFactory {
     private static final String HIBERNATE_PERSISTENCE_TECHNOLOGY = "hibernate";
     private static final String JDBC_PERSISTENCE_TECHNOLOGY = "jdbc";
 
+    public static TransactionUtil getTransactionUtil() {
+        ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
+        if (HIBERNATE_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())) {
+            return HibernateTransactionUtil.getInstance();
+        } else if (JDBC_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())) {
+            return JDBCTransactionUtil.getInstance();
+        } else {
+            throw new InvalidPersistenceTechnologyException("Invalid persistence technology");
+        }
+    }
+    
     public static MessageSender getQueueMessageSender(){
         ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
         if(RABBITMQ_MESSAGING_TECHNOLOGY.equals(applicationPropertiesUtils.getMessagingTechnology())){
@@ -86,16 +97,7 @@ public class BeanFactory {
         }
     }
 
-    public static TransactionUtil getTransactionUtil() {
-        ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
-        if(HIBERNATE_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())){
-            return HibernateTransactionUtil.getInstance();
-        } else if(JDBC_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())){
-            return JDBCTransactionUtil.getInstance();
-        } else{
-            throw new InvalidPersistenceTechnologyException("Invalid persistence technology");
-        }
-    }
+    
 
 
 }

@@ -1,12 +1,12 @@
 package io.reactivestax.utility;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.Logger;
+
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 public class ApplicationPropertiesUtils {
@@ -38,7 +38,14 @@ public class ApplicationPropertiesUtils {
     private String persistenceTechnology;
     private String messagingTechnology;
 
-    private ApplicationPropertiesUtils(String applicationPropertiesFileName){
+    // NOTE: to avoid the penalty for loading all properties the very first time, we
+    // can load the properties eagerly
+    // in the app startup.
+    // static {
+    // instance = new ApplicationPropertiesUtils("application.properties");
+    // }
+
+    private ApplicationPropertiesUtils(String applicationPropertiesFileName) {
         loadApplicationProperties(applicationPropertiesFileName);
     }
 
@@ -56,9 +63,10 @@ public class ApplicationPropertiesUtils {
         return instance;
     }
 
-    public void loadApplicationProperties(String applicationPropertiesFileName){
+    public void loadApplicationProperties(String applicationPropertiesFileName) {
         Properties properties = new Properties();
-        try (InputStream input = ApplicationPropertiesUtils.class.getClassLoader().getResourceAsStream(applicationPropertiesFileName)) {
+        try (InputStream input = ApplicationPropertiesUtils.class.getClassLoader()
+                .getResourceAsStream(applicationPropertiesFileName)) {
             if (input == null) {
                 logger.warning("Sorry, unable to find application.properties");
                 System.exit(1);
