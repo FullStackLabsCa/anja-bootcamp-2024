@@ -2,6 +2,7 @@ package io.reactivestax.repository.jdbc;
 
 import io.reactivestax.entity.JournalEntry;
 import io.reactivestax.enums.PostedStatusEnum;
+import io.reactivestax.exceptions.OptimisticLockingException;
 import io.reactivestax.repository.JournalEntryRepository;
 import io.reactivestax.utility.DateTimeFormatterUtil;
 import io.reactivestax.utility.database.jdbc.JDBCTransactionUtil;
@@ -44,7 +45,7 @@ public class JDBCJournalEntryRepository implements JournalEntryRepository {
             preparedStatement.setTimestamp(9, journalEntry.getUpdatedAt());
             preparedStatement.execute();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new OptimisticLockingException("Optimistic locking", e);
         }
     }
 
@@ -57,7 +58,7 @@ public class JDBCJournalEntryRepository implements JournalEntryRepository {
             preparedStatement.setInt(3, journalEntryId);
             preparedStatement.execute();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new OptimisticLockingException("Optimistic locking", e);
         }
     }
 }

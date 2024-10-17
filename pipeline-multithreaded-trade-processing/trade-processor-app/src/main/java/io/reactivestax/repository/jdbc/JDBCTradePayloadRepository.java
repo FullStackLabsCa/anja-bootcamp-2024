@@ -4,12 +4,12 @@ import io.reactivestax.entity.TradePayload;
 import io.reactivestax.enums.LookupStatusEnum;
 import io.reactivestax.enums.PostedStatusEnum;
 import io.reactivestax.enums.ValidityStatusEnum;
+import io.reactivestax.exceptions.OptimisticLockingException;
 import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.utility.DateTimeFormatterUtil;
 import io.reactivestax.utility.database.jdbc.JDBCTransactionUtil;
 
 import java.sql.*;
-import java.time.format.DateTimeFormatter;
 
 public class JDBCTradePayloadRepository implements TradePayloadRepository {
     private static final String INSERT_TRADE_PAYLOAD = "Insert into trade_payloads (trade_number, validity_status, payload, je_status, lookup_status, created_at, updated_at) values(?, ?, ?, ?, ?, ?, ?)";
@@ -42,8 +42,8 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
             preparedStatement.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
             preparedStatement.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
             preparedStatement.execute();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new OptimisticLockingException("Optimistic locking", e);
         }
     }
 
@@ -64,8 +64,8 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
                 tradePayload.setCreatedAt(Timestamp.valueOf(resultSet.getString("created_at")));
                 tradePayload.setUpdatedAt(Timestamp.valueOf(resultSet.getString("updated_at")));
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new OptimisticLockingException("Optimistic locking", e);
         }
 
         return tradePayload;
@@ -80,7 +80,7 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
             preparedStatement.setInt(3, tradeId);
             preparedStatement.execute();
         } catch (SQLException e){
-            throw new RuntimeException(e);
+            throw new OptimisticLockingException("Optimistic locking", e);
         }
     }
 
@@ -93,7 +93,7 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
             preparedStatement.setInt(3, tradeId);
             preparedStatement.execute();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new OptimisticLockingException("Optimistic locking", e);
         }
     }
 }

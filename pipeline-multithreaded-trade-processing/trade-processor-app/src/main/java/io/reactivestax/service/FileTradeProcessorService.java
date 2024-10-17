@@ -13,6 +13,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 import io.reactivestax.entity.TradePayload;
+import io.reactivestax.exceptions.OptimisticLockingException;
 import io.reactivestax.factory.BeanFactory;
 import io.reactivestax.repository.JournalEntryRepository;
 import io.reactivestax.repository.LookupSecuritiesRepository;
@@ -109,7 +110,7 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
                 positionTransaction(journalEntry);
             }
             transactionUtil.commitTransaction();
-        } catch (HibernateException | OptimisticLockException e) {
+        } catch (HibernateException | OptimisticLockException | OptimisticLockingException e) {
             logger.warning("Hibernate/Optimistic Lock exception detected.");
             transactionUtil.rollbackTransaction();
             retryTransaction(tradeId);
