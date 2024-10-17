@@ -1,4 +1,4 @@
-package io.reactivestax.service;
+package io.reactivestax.utility.messaging;
 
 import java.util.Random;
 import java.util.concurrent.*;
@@ -8,9 +8,9 @@ public class QueueDistributor {
 
     static int queueNumber = 0;
 
-    static LinkedBlockingQueue<String> chunkQueue = new LinkedBlockingQueue<>();
+    public static LinkedBlockingQueue<String> chunkQueue = new LinkedBlockingQueue<>();
 
-    static BlockingDeque<String> deadLetterTransactionDeque = new LinkedBlockingDeque<>();
+    public static BlockingDeque<String> deadLetterTransactionDeque = new LinkedBlockingDeque<>();
 
     static Random random = new Random();
 

@@ -17,9 +17,9 @@ import io.reactivestax.utility.ApplicationPropertiesUtils;
 import io.reactivestax.utility.database.TransactionUtil;
 import io.reactivestax.utility.database.hibernate.HibernateTransactionUtil;
 import io.reactivestax.utility.database.jdbc.JDBCTransactionUtil;
-import io.reactivestax.utility.messaging.QueueMessageSender;
-import io.reactivestax.utility.messaging.inmemory.InMemoryQueueMessageSender;
-import io.reactivestax.utility.messaging.rabbitmq.RabbitMQQueueMessageSender;
+import io.reactivestax.utility.messaging.MessageSender;
+import io.reactivestax.utility.messaging.inmemory.InMemoryMessageSender;
+import io.reactivestax.utility.messaging.rabbitmq.RabbitMQMessageSender;
 
 public class BeanFactory {
 
@@ -31,12 +31,12 @@ public class BeanFactory {
     private static final String HIBERNATE_PERSISTENCE_TECHNOLOGY = "hibernate";
     private static final String JDBC_PERSISTENCE_TECHNOLOGY = "jdbc";
 
-    public static QueueMessageSender getQueueMessageSender(){
+    public static MessageSender getQueueMessageSender(){
         ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
         if(RABBITMQ_MESSAGING_TECHNOLOGY.equals(applicationPropertiesUtils.getMessagingTechnology())){
-            return RabbitMQQueueMessageSender.getInstance();
+            return RabbitMQMessageSender.getInstance();
         } else if(INMEMORY_MESSAGING_TECHNOLOGY.equals(applicationPropertiesUtils.getMessagingTechnology())){
-            return InMemoryQueueMessageSender.getInstance();
+            return InMemoryMessageSender.getInstance();
         } else{
             throw new InvalidPersistenceTechnologyException("Invalid messaging technology");
         }

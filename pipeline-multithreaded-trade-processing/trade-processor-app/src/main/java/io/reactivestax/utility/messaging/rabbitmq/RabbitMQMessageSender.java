@@ -1,20 +1,20 @@
 package io.reactivestax.utility.messaging.rabbitmq;
 
 import io.reactivestax.utility.ApplicationPropertiesUtils;
-import io.reactivestax.utility.messaging.QueueMessageSender;
+import io.reactivestax.utility.messaging.MessageSender;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-public class RabbitMQQueueMessageSender implements QueueMessageSender {
-    private static RabbitMQQueueMessageSender instance;
+public class RabbitMQMessageSender implements MessageSender {
+    private static RabbitMQMessageSender instance;
 
-    private RabbitMQQueueMessageSender() {
+    private RabbitMQMessageSender() {
     }
 
-    public static synchronized RabbitMQQueueMessageSender getInstance() {
+    public static synchronized RabbitMQMessageSender getInstance() {
         if (instance == null) {
-            instance = new RabbitMQQueueMessageSender();
+            instance = new RabbitMQMessageSender();
         }
         return instance;
     }

@@ -27,6 +27,6 @@
 <!--        <property name="hibernate.format_sql">true</property>-->
 
         <!-- Automatically create/update tables based on entity annotations -->
-        <property name="hibernate.hbm2ddl.auto">validate</property>
+        <property name="hibernate.hbm2ddl.auto">update</property>
     </session-factory>
 </hibernate-configuration>

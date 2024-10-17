@@ -5,8 +5,9 @@ import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.utility.database.TransactionUtil;
 import io.reactivestax.entity.TradePayload;
 import io.reactivestax.enums.ValidityStatusEnum;
-import io.reactivestax.utility.messaging.QueueMessageSender;
+import io.reactivestax.utility.messaging.MessageSender;
 import io.reactivestax.utility.ApplicationPropertiesUtils;
+import io.reactivestax.utility.messaging.QueueDistributor;
 import org.hibernate.HibernateException;
 
 import java.io.BufferedReader;
@@ -41,7 +42,7 @@ public class ChunkFileProcessorService implements Runnable, ChunkProcessorServic
     @Override
     public void processChunk(String filePath) throws SQLException {
         TransactionUtil transactionUtil = BeanFactory.getTransactionUtil();
-        QueueMessageSender queueMessageSender = BeanFactory.getQueueMessageSender();
+        MessageSender messageSender = BeanFactory.getQueueMessageSender();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String payload;
             while ((payload = reader.readLine()) != null) {
@@ -53,7 +54,7 @@ public class ChunkFileProcessorService implements Runnable, ChunkProcessorServic
                 tradePayloadRepository.insertTradeRawPayload(tradePayload);
                 transactionUtil.commitTransaction();
 
-                submitValidTradePayloadsToQueue(tradePayload, transaction, queueMessageSender);
+                submitValidTradePayloadsToQueue(tradePayload, transaction, messageSender);
             }
         } catch (IOException | HibernateException | TimeoutException e) {
             transactionUtil.rollbackTransaction();
@@ -65,11 +66,11 @@ public class ChunkFileProcessorService implements Runnable, ChunkProcessorServic
     }
 
 
-    private void submitValidTradePayloadsToQueue(TradePayload tradePayload, String[] transaction, QueueMessageSender queueMessageSender) throws IOException, TimeoutException {
+    private void submitValidTradePayloadsToQueue(TradePayload tradePayload, String[] transaction, MessageSender messageSender) throws IOException, TimeoutException {
         if (tradePayload.getValidityStatus().equals(ValidityStatusEnum.VALID)) {
             ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
             String queueName = applicationPropertiesUtils.getQueueExchangeName() + "_queue_" + QueueDistributor.figureOutTheNextQueue(applicationPropertiesUtils.getTradeDistributionCriteria().equals("accountNumber") ? transaction[2] : tradePayload.getTradeNumber(), applicationPropertiesUtils.isTradeDistributionUseMap(), applicationPropertiesUtils.getTradeDistributionAlgorithm(), applicationPropertiesUtils.getTradeProcessorQueueCount());
-            queueMessageSender.sendMessageToQueue(queueName, tradePayload.getTradeNumber());
+            messageSender.sendMessageToQueue(queueName, tradePayload.getTradeNumber());
         }
     }
 

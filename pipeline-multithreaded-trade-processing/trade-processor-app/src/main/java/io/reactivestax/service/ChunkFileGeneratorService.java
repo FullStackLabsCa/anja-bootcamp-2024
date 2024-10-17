@@ -1,16 +1,22 @@
 package io.reactivestax.service;
 
-import io.reactivestax.utility.ApplicationPropertiesUtils;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
+
+import io.reactivestax.utility.ApplicationPropertiesUtils;
+import io.reactivestax.utility.messaging.QueueDistributor;
 
 public class ChunkFileGeneratorService implements Runnable, ChunkGeneratorService {
 Logger logger = Logger.getLogger(ChunkFileGeneratorService.class.getName());
 ApplicationPropertiesUtils applicationPropertiesUtils;
 
+    //TODO: #12 remove this applicationPropertiesUtils being passed in constructor @infinityjain
     public ChunkFileGeneratorService(ApplicationPropertiesUtils applicationPropertiesUtils){
      this.applicationPropertiesUtils =applicationPropertiesUtils;
     }
