@@ -35,8 +35,8 @@ Logger logger = Logger.getLogger(ChunkFileGeneratorService.class.getName());
         int tempChunkCount = 1;
         long tempLineCount = 0;
         long linesCountPerFile = numOfLines / chunksCount;
-        ChunkGeneratorAndProcessorService chunkGeneratorAndProcessorService = new ChunkGeneratorAndProcessorService();
-        String chunkFilePath = chunkGeneratorAndProcessorService.buildFilePath(tempChunkCount, applicationPropertiesUtils.getChunkFilePathWithName());
+        TradeService tradeService = new TradeService();
+        String chunkFilePath = tradeService.buildFilePath(tempChunkCount, applicationPropertiesUtils.getChunkFilePathWithName());
         Files.createDirectories(Paths.get(applicationPropertiesUtils.getChunkDirectoryPath()));
         BufferedWriter writer = new BufferedWriter(new FileWriter(chunkFilePath));
         try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
@@ -50,7 +50,7 @@ Logger logger = Logger.getLogger(ChunkFileGeneratorService.class.getName());
                     tempLineCount = 0;
                     writer.close();
                     QueueDistributor.chunkQueue.put(chunkFilePath);
-                    chunkFilePath = chunkGeneratorAndProcessorService.buildFilePath(tempChunkCount, applicationPropertiesUtils.getChunkFilePathWithName());
+                    chunkFilePath = tradeService.buildFilePath(tempChunkCount, applicationPropertiesUtils.getChunkFilePathWithName());
                     writer = new BufferedWriter(new FileWriter(chunkFilePath));
                 }
             }

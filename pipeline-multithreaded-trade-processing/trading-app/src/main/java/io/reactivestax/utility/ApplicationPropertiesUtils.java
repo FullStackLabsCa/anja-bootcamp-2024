@@ -37,6 +37,7 @@ public class ApplicationPropertiesUtils {
     private String tradeDistributionAlgorithm;
     private String persistenceTechnology;
     private String messagingTechnology;
+    private String tradingAppMode;
 
     // NOTE: to avoid the penalty for loading all properties the very first time, we
     // can load the properties eagerly
@@ -94,6 +95,7 @@ public class ApplicationPropertiesUtils {
             queueExchangeType = properties.getProperty("queue.exchange.type");
             persistenceTechnology = properties.getProperty("persistence.technology");
             messagingTechnology = properties.getProperty("messaging.technology");
+            tradingAppMode = properties.getProperty("trading.app.mode");
         } catch (IOException e) {
             logger.warning("File not found Exception.");
             System.exit(1);

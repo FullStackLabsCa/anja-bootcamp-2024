@@ -42,7 +42,7 @@
             <configuration>
               <transformers>
                 <transformer>
-                  <mainClass>io.reactivestax.TradeProcessorRunner</mainClass>
+                  <mainClass>io.reactivestax.TradingAppRunner</mainClass>
                 </transformer>
               </transformers>
             </configuration>

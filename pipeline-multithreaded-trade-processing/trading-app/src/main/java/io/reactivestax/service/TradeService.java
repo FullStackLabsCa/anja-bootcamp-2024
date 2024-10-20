@@ -12,18 +12,17 @@ import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-public class ChunkGeneratorAndProcessorService implements Submittable<ChunkFileProcessorService> {
+public class TradeService implements Submittable<ChunkFileProcessorService> {
     private ExecutorService chunkGeneratorExecutorService;
     private ExecutorService chunkProcessorExecutorService;
-    Logger logger = Logger.getLogger(ChunkGeneratorAndProcessorService.class.getName());
+    Logger logger = Logger.getLogger(TradeService.class.getName());
 
-    public void setupDataSourceAndStartGeneratorsAndProcessors() {
-        logger.info("Setting up database and project dependencies.");
+    public void startTradeProducer() {
         ApplicationPropertiesUtils applicationProperties = ApplicationPropertiesUtils.getInstance();
         try {
             String path = applicationProperties.getFilePath();
-            logger.info("Counting total number of lines in the file");
             long numOfLines = fileLineCounter(path);
+            logger.info("Counting total number of lines in the file");
             applicationProperties.setTotalNoOfLines(numOfLines);
             chunkGeneratorExecutorService = Executors.newSingleThreadExecutor();
             chunkProcessorExecutorService =
@@ -34,15 +33,18 @@ public class ChunkGeneratorAndProcessorService implements Submittable<ChunkFileP
                 submitTask(new ChunkFileProcessorService());
             }
             logger.info("Started chunk processor.");
-            TradeProcessorSubmitterService tradeProcessorSubmitterService = new TradeProcessorSubmitterService();
-            tradeProcessorSubmitterService.submitTrade();
-            logger.info("Started trade processor.");
         } catch (IOException e) {
             logger.warning("File parsing failed...");
         } finally {
-            chunkProcessorExecutorService.shutdown();
             chunkGeneratorExecutorService.shutdown();
+            chunkProcessorExecutorService.shutdown();
         }
+    }
+
+    public void startTradeConsumer() {
+        TradeProcessorSubmitterService tradeProcessorSubmitterService = new TradeProcessorSubmitterService();
+        tradeProcessorSubmitterService.submitTrade();
+        logger.info("Started trade processor.");
     }
 
     public long fileLineCounter(String path) throws IOException {
