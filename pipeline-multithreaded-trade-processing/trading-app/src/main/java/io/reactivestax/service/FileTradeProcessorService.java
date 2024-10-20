@@ -12,11 +12,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
+import com.rabbitmq.client.*;
 import org.hibernate.HibernateException;
-
-import com.rabbitmq.client.CancelCallback;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.DeliverCallback;
 
 import io.reactivestax.entity.JournalEntry;
 import io.reactivestax.entity.Position;
@@ -32,25 +29,23 @@ import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.utility.ApplicationPropertiesUtils;
 import io.reactivestax.utility.database.TransactionUtil;
 import io.reactivestax.utility.messaging.TransactionRetryer;
-import io.reactivestax.utility.messaging.rabbitmq.RabbitMQQueueMessageReceiver;
+import io.reactivestax.utility.messaging.rabbitmq.RabbitMQMessageReceiver;
 import jakarta.persistence.OptimisticLockException;
 
 public class FileTradeProcessorService implements Callable<Void>, TradeProcessorService, TransactionRetryer {
     Logger logger = Logger.getLogger(FileTradeProcessorService.class.getName());
     CountDownLatch latch = new CountDownLatch(1);
     String queueName;
-    private final Map<String, Integer> retryCountMap;
-    int count = 0;
     private final TradePayloadRepository tradePayloadRepository;
     private final TransactionUtil transactionUtil;
     private final LookupSecuritiesRepository lookupSecuritiesRepository;
     private final JournalEntryRepository journalEntryRepository;
     private final PositionsRepository positionsRepository;
     Channel channel;
+    Delivery deliveryGlobal;
 
     public FileTradeProcessorService(String queueName) {
         this.queueName = queueName;
-        this.retryCountMap = new HashMap<>();
         this.transactionUtil = BeanFactory.getTransactionUtil();
         this.tradePayloadRepository = BeanFactory.getTradePayloadRepository();
         this.lookupSecuritiesRepository = BeanFactory.getLookupSecuritiesRepository();
@@ -58,16 +53,13 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
         this.positionsRepository = BeanFactory.getPositionsRepository();
     }
 
-    public void setRetryCountMap(String key, Integer value) {
-        this.retryCountMap.put(key, value);
-    }
-
     @Override
     public Void call() {
         try {
-            RabbitMQQueueMessageReceiver rabbitMQQueueMessageReceiver = new RabbitMQQueueMessageReceiver();
-            this.channel = rabbitMQQueueMessageReceiver.getReceiverChannel(queueName);
+            RabbitMQMessageReceiver rabbitMQMessageReceiver = new RabbitMQMessageReceiver();
+            this.channel = rabbitMQMessageReceiver.getReceiverChannel(queueName);
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+                deliveryGlobal = delivery;
                 String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
                 System.out.println("received message = " + message);
 
@@ -76,11 +68,6 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
-                // try {
-                // Thread.sleep(100);
-                // } catch (InterruptedException e) {
-                // throw new RuntimeException(e);
-                // }
             };
             CancelCallback cancelCallback = consumerTag -> {
             };
@@ -143,19 +130,20 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
     }
 
     @Override
-    public void retryTransaction(String tradeId) throws InterruptedException, IOException {
+    public void retryTransaction(String tradeId) throws IOException {
+        String retryHeader = "x-retry-count";
+        Map<String, Object> headers = deliveryGlobal.getProperties().getHeaders();
+        int retryCount = (headers != null && headers.containsKey(retryHeader)) ? (int) headers.get(retryHeader) : 0;
         ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
-        int retryCount = this.retryCountMap.getOrDefault(tradeId, 0) + 1;
-        if (retryCount >= applicationPropertiesUtils.getMaxRetryCount()) {
-            // inMemory
-            // queues
-            channel.basicPublish(applicationPropertiesUtils.getQueueExchangeName(), "trade_processor_dead_letter_queue", null, tradeId.getBytes(StandardCharsets.UTF_8));
-            this.retryCountMap.remove(tradeId);
+        if (retryCount < applicationPropertiesUtils.getMaxRetryCount()) {
+            Map<String, Object> retryHeaders = new HashMap<>();
+            retryHeaders.put(retryHeader, retryCount + 1);
+            AMQP.BasicProperties retryProps = new AMQP.BasicProperties.Builder()
+                    .headers(retryHeaders)
+                    .build();
+            channel.basicPublish(applicationPropertiesUtils.getQueueExchangeName(), "retry", retryProps, tradeId.getBytes(StandardCharsets.UTF_8));
         } else {
-            // TODO:@infinityjain #14 Use the sample for quorum queue with DLX exchange and
-            // DLQ
-            channel.basicPublish(applicationPropertiesUtils.getQueueExchangeName(), this.queueName, null, tradeId.getBytes(StandardCharsets.UTF_8));
-            setRetryCountMap(tradeId, retryCount);
+            channel.basicPublish("", applicationPropertiesUtils.getDlqName(), null, tradeId.getBytes());
         }
     }
 }

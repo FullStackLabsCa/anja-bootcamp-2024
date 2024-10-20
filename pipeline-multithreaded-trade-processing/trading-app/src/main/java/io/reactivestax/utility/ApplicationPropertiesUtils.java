@@ -29,6 +29,8 @@ public class ApplicationPropertiesUtils {
     private String queuePassword;
     private String queueExchangeName;
     private String queueExchangeType;
+    private String dlqName;
+    private String retryQueueName;
     private int chunkProcessorThreadCount;
     private int tradeProcessorQueueCount;
     private int tradeProcessorThreadCount;
@@ -96,6 +98,8 @@ public class ApplicationPropertiesUtils {
             persistenceTechnology = properties.getProperty("persistence.technology");
             messagingTechnology = properties.getProperty("messaging.technology");
             tradingAppMode = properties.getProperty("trading.app.mode");
+            dlqName = properties.getProperty("dlq.name");
+            retryQueueName = properties.getProperty("retry.queue.name");
         } catch (IOException e) {
             logger.warning("File not found Exception.");
             System.exit(1);
