@@ -43,10 +43,8 @@ public class ChunkFileProcessorService implements Runnable, ChunkProcessorServic
     @Override
     public void processChunk(String filePath) throws SQLException {
         TransactionUtil transactionUtil = BeanFactory.getTransactionUtil();
-        MessageSender messageSender = BeanFactory.getQueueMessageSender();
+        MessageSender messageSender = BeanFactory.getMessageSender();
         TradePayloadRepository tradePayloadRepository = BeanFactory.getTradePayloadRepository();
-        // NOTE: do not create the instance everytime
-        // TradePayloadRepository tradePayloadRepository = new TradePayloadRepository();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String payload;
@@ -54,9 +52,9 @@ public class ChunkFileProcessorService implements Runnable, ChunkProcessorServic
                 String[] transaction = payload.split(",");
                 TradePayload tradePayload = prepareTradePayload(payload, transaction);
 
-                transactionUtil.startTransaction();
-                tradePayloadRepository.insertTradeRawPayload(tradePayload);
-                transactionUtil.commitTransaction();
+//                transactionUtil.startTransaction();
+//                tradePayloadRepository.insertTradeRawPayload(tradePayload);
+//                transactionUtil.commitTransaction();
 
                 submitValidTradePayloadsToQueue(tradePayload, transaction, messageSender);
             }
@@ -81,7 +79,7 @@ public class ChunkFileProcessorService implements Runnable, ChunkProcessorServic
                             applicationPropertiesUtils.isTradeDistributionUseMap(),
                             applicationPropertiesUtils.getTradeDistributionAlgorithm(),
                             applicationPropertiesUtils.getTradeProcessorQueueCount());
-            messageSender.sendMessageToQueue(queueName, tradePayload.getTradeNumber());
+            messageSender.sendMessage(queueName, tradePayload.getTradeNumber());
         }
     }
 

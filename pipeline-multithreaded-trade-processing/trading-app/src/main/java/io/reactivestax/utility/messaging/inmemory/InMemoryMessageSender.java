@@ -4,7 +4,7 @@ import io.reactivestax.utility.messaging.MessageSender;
 
 public class InMemoryMessageSender implements MessageSender {
     @Override
-    public Boolean sendMessageToQueue(String queueName, String message) {
+    public Boolean sendMessage(String queueName, String message) {
         return null;
     }
 

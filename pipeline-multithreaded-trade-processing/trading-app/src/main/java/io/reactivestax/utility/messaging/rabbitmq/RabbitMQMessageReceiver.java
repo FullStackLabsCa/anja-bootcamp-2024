@@ -1,33 +1,50 @@
 package io.reactivestax.utility.messaging.rabbitmq;
 
 import com.rabbitmq.client.Channel;
-import io.reactivestax.utility.ApplicationPropertiesUtils;
+import com.rabbitmq.client.GetResponse;
+import io.reactivestax.utility.messaging.MessageReceiver;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeoutException;
+import java.nio.charset.StandardCharsets;
+import java.util.logging.Logger;
 
-public class RabbitMQMessageReceiver {
-    private static final String EXCHANGE_NAME = ApplicationPropertiesUtils.getInstance().getQueueExchangeName();
-    private static final int RETRY_TTL = 5;
+public class RabbitMQMessageReceiver implements MessageReceiver {
+    private static RabbitMQMessageReceiver instance;
+    private final Logger logger = Logger.getLogger(RabbitMQMessageReceiver.class.getName());
+    private final ThreadLocal<GetResponse> responseThreadLocal = new ThreadLocal<>();
 
-    public Channel getReceiverChannel(String queueName) throws IOException, TimeoutException {
-        String retryQueueName =
-                ApplicationPropertiesUtils.getInstance().getRetryQueueName() + queueName.substring(queueName.length() - 2);
-        Channel channel = RabbitMQChannelProvider.getRabbitMQChannel();
-        channel.queueDeclare(ApplicationPropertiesUtils.getInstance().getDlqName(), true, false, false, null);
-        Map<String, Object> retryArgs = new HashMap<>();
-        retryArgs.put("x-message-ttl", RETRY_TTL);
-        retryArgs.put("x-dead-letter-exchange", EXCHANGE_NAME);
-        retryArgs.put("x-dead-letter-routing-key", queueName);
-        channel.queueDeclare(retryQueueName, true, false, false, retryArgs);
-        channel.queueBind(retryQueueName, EXCHANGE_NAME, retryQueueName);
-        Map<String, Object> mainQueueArgs = new HashMap<>();
-        mainQueueArgs.put("x-dead-letter-exchange", EXCHANGE_NAME);
-        mainQueueArgs.put("x-dead-letter-routing-key", retryQueueName);
-        channel.queueDeclare(queueName, true, false, false, mainQueueArgs);
-        channel.queueBind(queueName, EXCHANGE_NAME, queueName);
-        return channel;
+    private RabbitMQMessageReceiver() {
+    }
+
+    public static synchronized RabbitMQMessageReceiver getInstance() {
+        if (instance == null) {
+            instance = new RabbitMQMessageReceiver();
+        }
+
+        return instance;
+    }
+
+
+    @Override
+    public String receiveMessage(String queueName) {
+        String message = "";
+        Channel receiverChannel = RabbitMQChannelProvider.getInstance().getReceiverChannel(queueName);
+        try {
+            GetResponse response = receiverChannel.basicGet(queueName, false);
+            if (response != null) {
+                responseThreadLocal.set(response);
+                message = new String(response.getBody(), StandardCharsets.UTF_8);
+                receiverChannel.basicAck(response.getEnvelope().getDeliveryTag(), false);
+            } else{
+                logger.info("No message received.");
+            }
+        } catch (IOException e) {
+            logger.warning("Error while receiving message");
+        }
+        return message;
+    }
+
+    public GetResponse getResponse(){
+        return responseThreadLocal.get();
     }
 }

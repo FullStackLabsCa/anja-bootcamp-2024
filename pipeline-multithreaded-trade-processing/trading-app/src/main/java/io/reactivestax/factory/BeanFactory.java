@@ -1,5 +1,6 @@
 package io.reactivestax.factory;
 
+import io.reactivestax.exceptions.InvalidMessagingTechnologyException;
 import io.reactivestax.exceptions.InvalidPersistenceTechnologyException;
 import io.reactivestax.repository.JournalEntryRepository;
 import io.reactivestax.repository.LookupSecuritiesRepository;
@@ -17,16 +18,23 @@ import io.reactivestax.utility.ApplicationPropertiesUtils;
 import io.reactivestax.utility.database.TransactionUtil;
 import io.reactivestax.utility.database.hibernate.HibernateTransactionUtil;
 import io.reactivestax.utility.database.jdbc.JDBCTransactionUtil;
+import io.reactivestax.utility.messaging.MessageReceiver;
 import io.reactivestax.utility.messaging.MessageSender;
+import io.reactivestax.utility.messaging.TransactionRetryer;
+import io.reactivestax.utility.messaging.inmemory.InMemoryMessageReceiver;
 import io.reactivestax.utility.messaging.inmemory.InMemoryMessageSender;
+import io.reactivestax.utility.messaging.inmemory.InMemoryRetry;
+import io.reactivestax.utility.messaging.rabbitmq.RabbitMQMessageReceiver;
 import io.reactivestax.utility.messaging.rabbitmq.RabbitMQMessageSender;
+import io.reactivestax.utility.messaging.rabbitmq.RabbitMQRetry;
 
 public class BeanFactory {
 
     private BeanFactory() {
     }
+
     private static final String RABBITMQ_MESSAGING_TECHNOLOGY = "rabbitmq";
-    private static final String INMEMORY_MESSAGING_TECHNOLOGY = "inmemory";
+    private static final String IN_MEMORY_MESSAGING_TECHNOLOGY = "in-memory";
 
     private static final String HIBERNATE_PERSISTENCE_TECHNOLOGY = "hibernate";
     private static final String JDBC_PERSISTENCE_TECHNOLOGY = "jdbc";
@@ -41,63 +49,81 @@ public class BeanFactory {
             throw new InvalidPersistenceTechnologyException("Invalid persistence technology");
         }
     }
-    
-    public static MessageSender getQueueMessageSender(){
-        ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
-        if(RABBITMQ_MESSAGING_TECHNOLOGY.equals(applicationPropertiesUtils.getMessagingTechnology())){
-            return RabbitMQMessageSender.getInstance();
-        } else if(INMEMORY_MESSAGING_TECHNOLOGY.equals(applicationPropertiesUtils.getMessagingTechnology())){
-            return InMemoryMessageSender.getInstance();
-        } else{
-            throw new InvalidPersistenceTechnologyException("Invalid messaging technology");
-        }
-    }
 
     public static TradePayloadRepository getTradePayloadRepository() {
         ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
-        if(HIBERNATE_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())){
+        if (HIBERNATE_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())) {
             return HibernateTradePayloadRepository.getInstance();
-        } else if(JDBC_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())){
+        } else if (JDBC_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())) {
             return JDBCTradePayloadRepository.getInstance();
-        } else{
+        } else {
             throw new InvalidPersistenceTechnologyException("Invalid persistence technology");
         }
     }
 
     public static LookupSecuritiesRepository getLookupSecuritiesRepository() {
         ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
-        if(HIBERNATE_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())){
+        if (HIBERNATE_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())) {
             return HibernateSecuritiesReferenceRepository.getInstance();
-        } else if(JDBC_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())){
+        } else if (JDBC_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())) {
             return JDBCSecuritiesReferenceRepository.getInstance();
-        } else{
+        } else {
             throw new InvalidPersistenceTechnologyException("Invalid persistence technology");
         }
     }
 
     public static JournalEntryRepository getJournalEntryRepository() {
         ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
-        if(HIBERNATE_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())){
+        if (HIBERNATE_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())) {
             return HibernateJournalEntryRepository.getInstance();
-        } else if(JDBC_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())){
+        } else if (JDBC_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())) {
             return JDBCJournalEntryRepository.getInstance();
-        } else{
+        } else {
             throw new InvalidPersistenceTechnologyException("Invalid persistence technology");
         }
     }
 
     public static PositionsRepository getPositionsRepository() {
         ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
-        if(HIBERNATE_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())){
+        if (HIBERNATE_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())) {
             return HibernatePositionsRepository.getInstance();
-        } else if(JDBC_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())){
+        } else if (JDBC_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())) {
             return JDBCPositionsRepository.getInstance();
-        } else{
+        } else {
             throw new InvalidPersistenceTechnologyException("Invalid persistence technology");
         }
     }
 
-    
+    public static MessageSender getMessageSender() {
+        ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
+        if (RABBITMQ_MESSAGING_TECHNOLOGY.equals(applicationPropertiesUtils.getMessagingTechnology())) {
+            return RabbitMQMessageSender.getInstance();
+        } else if (IN_MEMORY_MESSAGING_TECHNOLOGY.equals(applicationPropertiesUtils.getMessagingTechnology())) {
+            return InMemoryMessageSender.getInstance();
+        } else {
+            throw new InvalidMessagingTechnologyException("Invalid messaging technology");
+        }
+    }
 
+    public static MessageReceiver getMessageReceiver() {
+        ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
+        if (RABBITMQ_MESSAGING_TECHNOLOGY.equals(applicationPropertiesUtils.getMessagingTechnology())) {
+            return RabbitMQMessageReceiver.getInstance();
+        } else if (IN_MEMORY_MESSAGING_TECHNOLOGY.equals(applicationPropertiesUtils.getMessagingTechnology())) {
+            return InMemoryMessageReceiver.getInstance();
+        } else {
+            throw new InvalidMessagingTechnologyException("Invalid messaging technology");
+        }
+    }
 
+    public static TransactionRetryer getTransactionRetryer(){
+        ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
+        if(RABBITMQ_MESSAGING_TECHNOLOGY.equals(applicationPropertiesUtils.getMessagingTechnology())){
+            return RabbitMQRetry.getInstance();
+        } else if (IN_MEMORY_MESSAGING_TECHNOLOGY.equals(applicationPropertiesUtils.getMessagingTechnology())) {
+            return InMemoryRetry.getInstance();
+        } else {
+            throw new InvalidMessagingTechnologyException("Invalid messaging technology");
+        }
+    }
 }

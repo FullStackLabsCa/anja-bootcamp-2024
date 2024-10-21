@@ -31,6 +31,7 @@ public class ApplicationPropertiesUtils {
     private String queueExchangeType;
     private String dlqName;
     private String retryQueueName;
+    private int retryTTL;
     private int chunkProcessorThreadCount;
     private int tradeProcessorQueueCount;
     private int tradeProcessorThreadCount;
@@ -40,13 +41,6 @@ public class ApplicationPropertiesUtils {
     private String persistenceTechnology;
     private String messagingTechnology;
     private String tradingAppMode;
-
-    // NOTE: to avoid the penalty for loading all properties the very first time, we
-    // can load the properties eagerly
-    // in the app startup.
-    // static {
-    // instance = new ApplicationPropertiesUtils("application.properties");
-    // }
 
     private ApplicationPropertiesUtils(String applicationPropertiesFileName) {
         loadApplicationProperties(applicationPropertiesFileName);
@@ -100,6 +94,7 @@ public class ApplicationPropertiesUtils {
             tradingAppMode = properties.getProperty("trading.app.mode");
             dlqName = properties.getProperty("dlq.name");
             retryQueueName = properties.getProperty("retry.queue.name");
+            retryTTL = Integer.parseInt(properties.getProperty("retry.ttl"));
         } catch (IOException e) {
             logger.warning("File not found Exception.");
             System.exit(1);

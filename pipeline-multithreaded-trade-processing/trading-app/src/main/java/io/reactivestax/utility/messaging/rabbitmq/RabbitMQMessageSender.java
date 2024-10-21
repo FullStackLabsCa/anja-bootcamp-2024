@@ -1,10 +1,11 @@
 package io.reactivestax.utility.messaging.rabbitmq;
 
+import com.rabbitmq.client.Channel;
+import io.reactivestax.exceptions.MessageDeliveryException;
 import io.reactivestax.utility.ApplicationPropertiesUtils;
 import io.reactivestax.utility.messaging.MessageSender;
 
 import java.io.IOException;
-import java.util.concurrent.TimeoutException;
 
 public class RabbitMQMessageSender implements MessageSender {
     private static RabbitMQMessageSender instance;
@@ -20,16 +21,14 @@ public class RabbitMQMessageSender implements MessageSender {
     }
 
     @Override
-    public Boolean sendMessageToQueue(String queueName, String message) throws IOException, TimeoutException {
-        try{
-            System.out.println("sending message " + message);
-            RabbitMQChannelProvider.getRabbitMQChannel().basicPublish(ApplicationPropertiesUtils.getInstance().getQueueExchangeName(), queueName, null,
+    public Boolean sendMessage(String queueName, String message) {
+        Channel senderChannel = RabbitMQChannelProvider.getInstance().getSenderChannel();
+        try {
+            senderChannel.basicPublish(ApplicationPropertiesUtils.getInstance().getQueueExchangeName(), queueName, null,
                     message.getBytes());
             return true;
-        }catch (Throwable e){
-            e.printStackTrace();
-            //TODO: Make custom exception here
-            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new MessageDeliveryException("Error while sending message");
         }
     }
 
