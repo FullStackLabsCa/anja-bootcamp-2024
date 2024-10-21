@@ -61,8 +61,6 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
                 deliveryGlobal = delivery;
                 String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
-                System.out.println("received message = " + message);
-
                 try {
                     processTrade(message);
                 } catch (InterruptedException e) {
@@ -74,6 +72,7 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
             channel.basicConsume(queueName, true, deliverCallback, cancelCallback);
             latch.await();
         } catch (IOException | TimeoutException | InterruptedException e) {
+            e.printStackTrace();
             logger.warning("Exception detected in Trade Processor.");
             Thread.currentThread().interrupt();
         }
@@ -141,8 +140,14 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
             AMQP.BasicProperties retryProps = new AMQP.BasicProperties.Builder()
                     .headers(retryHeaders)
                     .build();
-            channel.basicPublish(applicationPropertiesUtils.getQueueExchangeName(), "retry", retryProps, tradeId.getBytes(StandardCharsets.UTF_8));
+            System.out.println("Retrying message to retryQueue, attempt: " + (retryCount + 1));
+            channel.basicPublish(applicationPropertiesUtils.getQueueExchangeName(),
+                    applicationPropertiesUtils.getRetryQueueName() + queueName.substring(queueName.length() - 2),
+                    retryProps,
+                    tradeId.getBytes(StandardCharsets.UTF_8));
+
         } else {
+            System.out.println("Sending message to DLQ after " + applicationPropertiesUtils.getMaxRetryCount() + " retries.");
             channel.basicPublish("", applicationPropertiesUtils.getDlqName(), null, tradeId.getBytes());
         }
     }
