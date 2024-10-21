@@ -12,11 +12,17 @@ public class TradingAppRunner {
         logger.info("Started project.");
         String producer = "producer";
         String consumer = "consumer";
+        String inMemory = "in-memory";
         TradeService tradeService = new TradeService();
-        if (ApplicationPropertiesUtils.getInstance().getTradingAppMode().equals(producer)) {
+        if (ApplicationPropertiesUtils.getInstance().getMessagingTechnology().equals(inMemory)) {
             tradeService.startTradeProducer();
-        } else if (ApplicationPropertiesUtils.getInstance().getTradingAppMode().equals(consumer)) {
             tradeService.startTradeConsumer();
+        } else {
+            if (ApplicationPropertiesUtils.getInstance().getTradingAppMode().equals(producer)) {
+                tradeService.startTradeProducer();
+            } else if (ApplicationPropertiesUtils.getInstance().getTradingAppMode().equals(consumer)) {
+                tradeService.startTradeConsumer();
+            }
         }
     }
 
