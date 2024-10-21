@@ -17,7 +17,7 @@ public class Position {
     private PositionCompositeKey positionCompositeKey;
 
     @Column(name = "holding", nullable = false)
-    private int holding;    
+    private int holding;
 
     @Version
     @Column(name = "version", nullable = false)

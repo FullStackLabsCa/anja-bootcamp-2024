@@ -2,12 +2,10 @@ package io.reactivestax.utility.messaging.inmemory;
 
 import io.reactivestax.utility.messaging.MessageSender;
 
-public class InMemoryMessageSender implements MessageSender {
-    @Override
-    public Boolean sendMessage(String queueName, String message) {
-        return null;
-    }
+import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 
+public class InMemoryMessageSender implements MessageSender {
     private static InMemoryMessageSender instance;
 
     private InMemoryMessageSender() {
@@ -18,5 +16,16 @@ public class InMemoryMessageSender implements MessageSender {
             instance = new InMemoryMessageSender();
         }
         return instance;
+    }
+
+    @Override
+    public void sendMessage(String queueName, String message) {
+        int queueNumber = Integer.parseInt(queueName.substring(queueName.length() - 1));
+        List<LinkedBlockingQueue<String>> tradeQueues = InMemoryQueueProvider.getInstance().getTradeQueues();
+        try {
+            tradeQueues.get(queueNumber).put(message);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

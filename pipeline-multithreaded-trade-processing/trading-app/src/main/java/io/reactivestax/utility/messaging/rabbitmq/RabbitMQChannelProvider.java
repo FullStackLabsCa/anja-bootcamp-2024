@@ -80,19 +80,21 @@ public class RabbitMQChannelProvider {
                 String retryQueueName =
                         applicationPropertiesUtils.getRetryQueueName() + queueName.substring(queueName.length() - 2);
                 Channel channel = getRabbitMQChannel();
-                channel.queueDeclare(applicationPropertiesUtils.getDlqName(), true, false, false, null);
-                Map<String, Object> retryArgs = new HashMap<>();
-                retryArgs.put("x-message-ttl", applicationPropertiesUtils.getRetryTTL());
-                retryArgs.put("x-dead-letter-exchange", applicationPropertiesUtils.getQueueExchangeName());
-                retryArgs.put("x-dead-letter-routing-key", queueName);
-                channel.queueDeclare(retryQueueName, true, false, false, retryArgs);
-                channel.queueBind(retryQueueName, applicationPropertiesUtils.getQueueExchangeName(), retryQueueName);
-                Map<String, Object> mainQueueArgs = new HashMap<>();
-                mainQueueArgs.put("x-dead-letter-exchange", applicationPropertiesUtils.getQueueExchangeName());
-                mainQueueArgs.put("x-dead-letter-routing-key", retryQueueName);
-                channel.queueDeclare(queueName, true, false, false, mainQueueArgs);
-                channel.queueBind(queueName, applicationPropertiesUtils.getQueueExchangeName(), queueName);
-                channelThreadLocal.set(channel);
+                if (channel != null) {
+                    channel.queueDeclare(applicationPropertiesUtils.getDlqName(), true, false, false, null);
+                    Map<String, Object> retryArgs = new HashMap<>();
+                    retryArgs.put("x-message-ttl", applicationPropertiesUtils.getRetryTTL());
+                    retryArgs.put("x-dead-letter-exchange", applicationPropertiesUtils.getQueueExchangeName());
+                    retryArgs.put("x-dead-letter-routing-key", queueName);
+                    channel.queueDeclare(retryQueueName, true, false, false, retryArgs);
+                    channel.queueBind(retryQueueName, applicationPropertiesUtils.getQueueExchangeName(), retryQueueName);
+                    Map<String, Object> mainQueueArgs = new HashMap<>();
+                    mainQueueArgs.put("x-dead-letter-exchange", applicationPropertiesUtils.getQueueExchangeName());
+                    mainQueueArgs.put("x-dead-letter-routing-key", retryQueueName);
+                    channel.queueDeclare(queueName, true, false, false, mainQueueArgs);
+                    channel.queueBind(queueName, applicationPropertiesUtils.getQueueExchangeName(), queueName);
+                    channelThreadLocal.set(channel);
+                }
             } catch (IOException e) {
                 logger.warning("Error while getting message receiver channel.");
             }

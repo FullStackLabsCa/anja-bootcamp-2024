@@ -1,7 +1,7 @@
 package io.reactivestax.entity;
 
-import io.reactivestax.enums.PostedStatusEnum;
 import io.reactivestax.enums.LookupStatusEnum;
+import io.reactivestax.enums.PostedStatusEnum;
 import io.reactivestax.enums.ValidityStatusEnum;
 import jakarta.persistence.*;
 import lombok.Data;

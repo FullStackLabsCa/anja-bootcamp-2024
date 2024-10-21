@@ -1,7 +1,6 @@
 package io.reactivestax.repository;
 
 import io.reactivestax.entity.TradePayload;
-import org.hibernate.Session;
 
 public interface TradePayloadRepository {
     void insertTradeRawPayload(TradePayload tradePayload);

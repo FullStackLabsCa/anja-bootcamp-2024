@@ -39,6 +39,9 @@ public class BeanFactory {
     private static final String HIBERNATE_PERSISTENCE_TECHNOLOGY = "hibernate";
     private static final String JDBC_PERSISTENCE_TECHNOLOGY = "jdbc";
 
+    private static final String INVALID_PERSISTENCE_TECHNOLOGY = "Invalid persistence technology.";
+    private static final String INVALID_MESSAGING_TECHNOLOGY = "Invalid messaging technology.";
+
     public static TransactionUtil getTransactionUtil() {
         ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
         if (HIBERNATE_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())) {
@@ -46,7 +49,7 @@ public class BeanFactory {
         } else if (JDBC_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())) {
             return JDBCTransactionUtil.getInstance();
         } else {
-            throw new InvalidPersistenceTechnologyException("Invalid persistence technology");
+            throw new InvalidPersistenceTechnologyException(INVALID_PERSISTENCE_TECHNOLOGY);
         }
     }
 
@@ -57,7 +60,7 @@ public class BeanFactory {
         } else if (JDBC_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())) {
             return JDBCTradePayloadRepository.getInstance();
         } else {
-            throw new InvalidPersistenceTechnologyException("Invalid persistence technology");
+            throw new InvalidPersistenceTechnologyException(INVALID_PERSISTENCE_TECHNOLOGY);
         }
     }
 
@@ -68,7 +71,7 @@ public class BeanFactory {
         } else if (JDBC_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())) {
             return JDBCSecuritiesReferenceRepository.getInstance();
         } else {
-            throw new InvalidPersistenceTechnologyException("Invalid persistence technology");
+            throw new InvalidPersistenceTechnologyException(INVALID_PERSISTENCE_TECHNOLOGY);
         }
     }
 
@@ -79,7 +82,7 @@ public class BeanFactory {
         } else if (JDBC_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())) {
             return JDBCJournalEntryRepository.getInstance();
         } else {
-            throw new InvalidPersistenceTechnologyException("Invalid persistence technology");
+            throw new InvalidPersistenceTechnologyException(INVALID_PERSISTENCE_TECHNOLOGY);
         }
     }
 
@@ -90,7 +93,7 @@ public class BeanFactory {
         } else if (JDBC_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())) {
             return JDBCPositionsRepository.getInstance();
         } else {
-            throw new InvalidPersistenceTechnologyException("Invalid persistence technology");
+            throw new InvalidPersistenceTechnologyException(INVALID_PERSISTENCE_TECHNOLOGY);
         }
     }
 
@@ -101,7 +104,7 @@ public class BeanFactory {
         } else if (IN_MEMORY_MESSAGING_TECHNOLOGY.equals(applicationPropertiesUtils.getMessagingTechnology())) {
             return InMemoryMessageSender.getInstance();
         } else {
-            throw new InvalidMessagingTechnologyException("Invalid messaging technology");
+            throw new InvalidMessagingTechnologyException(INVALID_MESSAGING_TECHNOLOGY);
         }
     }
 
@@ -112,18 +115,18 @@ public class BeanFactory {
         } else if (IN_MEMORY_MESSAGING_TECHNOLOGY.equals(applicationPropertiesUtils.getMessagingTechnology())) {
             return InMemoryMessageReceiver.getInstance();
         } else {
-            throw new InvalidMessagingTechnologyException("Invalid messaging technology");
+            throw new InvalidMessagingTechnologyException(INVALID_MESSAGING_TECHNOLOGY);
         }
     }
 
-    public static TransactionRetryer getTransactionRetryer(){
+    public static TransactionRetryer getTransactionRetryer() {
         ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
-        if(RABBITMQ_MESSAGING_TECHNOLOGY.equals(applicationPropertiesUtils.getMessagingTechnology())){
+        if (RABBITMQ_MESSAGING_TECHNOLOGY.equals(applicationPropertiesUtils.getMessagingTechnology())) {
             return RabbitMQRetry.getInstance();
         } else if (IN_MEMORY_MESSAGING_TECHNOLOGY.equals(applicationPropertiesUtils.getMessagingTechnology())) {
             return InMemoryRetry.getInstance();
         } else {
-            throw new InvalidMessagingTechnologyException("Invalid messaging technology");
+            throw new InvalidMessagingTechnologyException(INVALID_MESSAGING_TECHNOLOGY);
         }
     }
 }

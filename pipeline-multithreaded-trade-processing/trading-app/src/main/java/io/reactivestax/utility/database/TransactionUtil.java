@@ -2,9 +2,9 @@ package io.reactivestax.utility.database;
 
 public interface TransactionUtil {
 
-   void startTransaction();
+    void startTransaction();
 
-   void commitTransaction();
+    void commitTransaction();
 
-   void rollbackTransaction();
+    void rollbackTransaction();
 }

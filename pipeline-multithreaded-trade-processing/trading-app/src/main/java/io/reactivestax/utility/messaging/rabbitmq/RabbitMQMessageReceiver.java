@@ -35,7 +35,7 @@ public class RabbitMQMessageReceiver implements MessageReceiver {
                 responseThreadLocal.set(response);
                 message = new String(response.getBody(), StandardCharsets.UTF_8);
                 receiverChannel.basicAck(response.getEnvelope().getDeliveryTag(), false);
-            } else{
+            } else {
                 logger.info("No message received.");
             }
         } catch (IOException e) {
@@ -44,7 +44,7 @@ public class RabbitMQMessageReceiver implements MessageReceiver {
         return message;
     }
 
-    public GetResponse getResponse(){
+    public GetResponse getResponse() {
         return responseThreadLocal.get();
     }
 }

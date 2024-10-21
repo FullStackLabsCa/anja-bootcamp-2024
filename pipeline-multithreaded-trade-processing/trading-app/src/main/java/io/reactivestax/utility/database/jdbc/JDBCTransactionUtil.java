@@ -1,22 +1,25 @@
 package io.reactivestax.utility.database.jdbc;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import javax.sql.DataSource;
-
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-
 import io.reactivestax.exceptions.HikariCPConnectionException;
 import io.reactivestax.exceptions.TransactionHandlingException;
+import io.reactivestax.utility.ApplicationPropertiesUtils;
 import io.reactivestax.utility.database.ConnectionUtil;
 import io.reactivestax.utility.database.TransactionUtil;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.logging.Logger;
+
 public class JDBCTransactionUtil implements TransactionUtil, ConnectionUtil<Connection> {
     private DataSource dataSource;
+    private final Logger logger = Logger.getLogger(JDBCTransactionUtil.class.getName());
     private final ThreadLocal<Connection> connectionHolder = new ThreadLocal<>();
     private static JDBCTransactionUtil instance;
+    private final ApplicationPropertiesUtils applicationPropertiesUtils =
+            ApplicationPropertiesUtils.getInstance();
 
     private JDBCTransactionUtil() {
         // private constructor to prevent instantiation
@@ -38,7 +41,6 @@ public class JDBCTransactionUtil implements TransactionUtil, ConnectionUtil<Conn
                 connection = dataSource.getConnection();
                 connectionHolder.set(connection);
             } catch (Exception e) {
-                e.printStackTrace();
                 throw new HikariCPConnectionException("Error getting connection from HikariCP", e);
             }
         }
@@ -55,9 +57,9 @@ public class JDBCTransactionUtil implements TransactionUtil, ConnectionUtil<Conn
 
     private void createDataSource() {
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:mysql://localhost:3306/hibernate_trade_processor");
-        config.setUsername("root");
-        config.setPassword("password123");
+        config.setJdbcUrl("jdbc:mysql://localhost:" + applicationPropertiesUtils.getPortNumber() + "/" + applicationPropertiesUtils.getDbName());
+        config.setUsername(applicationPropertiesUtils.getUsername());
+        config.setPassword(applicationPropertiesUtils.getPassword());
         config.setMaximumPoolSize(50); // Set max connections in pool
         config.setConnectionTimeout(30000); // Timeout in milliseconds
         config.setIdleTimeout(600000); // Idle timeout before connection is closed
@@ -70,10 +72,8 @@ public class JDBCTransactionUtil implements TransactionUtil, ConnectionUtil<Conn
     public void startTransaction() {
         try {
             getConnection().setAutoCommit(false);
-//            connectionHolder.get().setAutoCommit(false);
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+            logger.warning("Error while starting transaction.");
         }
     }
 
@@ -83,7 +83,7 @@ public class JDBCTransactionUtil implements TransactionUtil, ConnectionUtil<Conn
             try {
                 connection.close();
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.warning("Error while closing the connection.");
             } finally {
                 connectionHolder.remove();
             }
@@ -97,7 +97,6 @@ public class JDBCTransactionUtil implements TransactionUtil, ConnectionUtil<Conn
             connectionHolder.get().setAutoCommit(false);
             closeConnection();
         } catch (SQLException e) {
-            e.printStackTrace();
             throw new TransactionHandlingException("error committing transaction", e);
         }
     }
@@ -109,7 +108,6 @@ public class JDBCTransactionUtil implements TransactionUtil, ConnectionUtil<Conn
             connectionHolder.get().setAutoCommit(false);
             closeConnection();
         } catch (SQLException e) {
-            e.printStackTrace();
             throw new TransactionHandlingException("error rolling back transaction", e);
         }
     }

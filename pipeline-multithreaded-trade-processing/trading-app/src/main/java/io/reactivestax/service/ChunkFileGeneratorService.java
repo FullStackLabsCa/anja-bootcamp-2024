@@ -1,22 +1,18 @@
 package io.reactivestax.service;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import io.reactivestax.utility.ApplicationPropertiesUtils;
+import io.reactivestax.utility.messaging.QueueDistributor;
+
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
 
-import io.reactivestax.utility.ApplicationPropertiesUtils;
-import io.reactivestax.utility.messaging.QueueDistributor;
-
 public class ChunkFileGeneratorService implements Runnable, ChunkGeneratorService {
-Logger logger = Logger.getLogger(ChunkFileGeneratorService.class.getName());
+    Logger logger = Logger.getLogger(ChunkFileGeneratorService.class.getName());
 
     @Override
-    public void run(){
+    public void run() {
         try {
             generateChunks();
         } catch (InterruptedException e) {

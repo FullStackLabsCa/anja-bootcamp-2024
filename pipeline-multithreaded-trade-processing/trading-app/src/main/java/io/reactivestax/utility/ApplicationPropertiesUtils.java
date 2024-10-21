@@ -1,12 +1,12 @@
 package io.reactivestax.utility;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.Logger;
-
-import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 public class ApplicationPropertiesUtils {

@@ -1,17 +1,5 @@
 package io.reactivestax.service;
 
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
-import java.util.logging.Logger;
-
-import io.reactivestax.utility.messaging.MessageReceiver;
-import io.reactivestax.utility.messaging.TransactionRetryer;
-import org.hibernate.HibernateException;
-
 import io.reactivestax.entity.JournalEntry;
 import io.reactivestax.entity.Position;
 import io.reactivestax.entity.PositionCompositeKey;
@@ -24,7 +12,18 @@ import io.reactivestax.repository.LookupSecuritiesRepository;
 import io.reactivestax.repository.PositionsRepository;
 import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.utility.database.TransactionUtil;
+import io.reactivestax.utility.messaging.MessageReceiver;
+import io.reactivestax.utility.messaging.TransactionRetryer;
 import jakarta.persistence.OptimisticLockException;
+import org.hibernate.HibernateException;
+
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.logging.Logger;
 
 public class FileTradeProcessorService implements Callable<Void>, TradeProcessorService {
     Logger logger = Logger.getLogger(FileTradeProcessorService.class.getName());

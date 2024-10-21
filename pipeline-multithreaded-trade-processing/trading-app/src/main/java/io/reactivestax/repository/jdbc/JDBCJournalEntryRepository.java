@@ -7,7 +7,9 @@ import io.reactivestax.repository.JournalEntryRepository;
 import io.reactivestax.utility.DateTimeFormatterUtil;
 import io.reactivestax.utility.database.jdbc.JDBCTransactionUtil;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 public class JDBCJournalEntryRepository implements JournalEntryRepository {
     private static final String INSERT_INTO_JOURNAL_ENTRY_QUERY = "Insert into journal_entry (trade_id, account_number, " +
@@ -18,7 +20,6 @@ public class JDBCJournalEntryRepository implements JournalEntryRepository {
     private static JDBCJournalEntryRepository instance;
 
     private JDBCJournalEntryRepository() {
-        // private constructor to prevent instantiation
     }
 
     public static synchronized JDBCJournalEntryRepository getInstance() {

@@ -17,6 +17,7 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
     private static final String UPDATE_TRADE_PAYLOAD_LOOKUP_STATUS_QUERY = "Update trade_payloads set lookup_status = ?, updated_at = ? where id = ?";
     private static final String UPDATE_TRADE_PAYLOAD_POSTED_STATUS_QUERY = "Update trade_payloads set je_status = ?, " +
             "updated_at = ? where id = ?";
+    private static final String OPTIMISTIC_LOCKING_EXCEPTION_MESSAGE = "Optimistic locking exception.";
     private static JDBCTradePayloadRepository instance;
 
     private JDBCTradePayloadRepository() {
@@ -43,7 +44,7 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
             preparedStatement.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
             preparedStatement.execute();
         } catch (SQLException e) {
-            throw new OptimisticLockingException("Optimistic locking", e);
+            throw new OptimisticLockingException(OPTIMISTIC_LOCKING_EXCEPTION_MESSAGE);
         }
     }
 
@@ -65,7 +66,7 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
                 tradePayload.setUpdatedAt(Timestamp.valueOf(resultSet.getString("updated_at")));
             }
         } catch (SQLException e) {
-            throw new OptimisticLockingException("Optimistic locking", e);
+            throw new OptimisticLockingException(OPTIMISTIC_LOCKING_EXCEPTION_MESSAGE);
         }
 
         return tradePayload;
@@ -74,13 +75,13 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
     @Override
     public void updateTradePayloadLookupStatus(boolean lookupStatus, int tradeId) {
         Connection connection = JDBCTransactionUtil.getInstance().getConnection();
-        try(PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_TRADE_PAYLOAD_LOOKUP_STATUS_QUERY)){
-            preparedStatement.setString(1, String.valueOf(lookupStatus ? LookupStatusEnum.PASS: LookupStatusEnum.FAIL));
+        try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_TRADE_PAYLOAD_LOOKUP_STATUS_QUERY)) {
+            preparedStatement.setString(1, String.valueOf(lookupStatus ? LookupStatusEnum.PASS : LookupStatusEnum.FAIL));
             preparedStatement.setTimestamp(2, DateTimeFormatterUtil.formattedTimestamp());
             preparedStatement.setInt(3, tradeId);
             preparedStatement.execute();
-        } catch (SQLException e){
-            throw new OptimisticLockingException("Optimistic locking", e);
+        } catch (SQLException e) {
+            throw new OptimisticLockingException(OPTIMISTIC_LOCKING_EXCEPTION_MESSAGE);
         }
     }
 
@@ -93,7 +94,7 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
             preparedStatement.setInt(3, tradeId);
             preparedStatement.execute();
         } catch (SQLException e) {
-            throw new OptimisticLockingException("Optimistic locking", e);
+            throw new OptimisticLockingException(OPTIMISTIC_LOCKING_EXCEPTION_MESSAGE);
         }
     }
 }
