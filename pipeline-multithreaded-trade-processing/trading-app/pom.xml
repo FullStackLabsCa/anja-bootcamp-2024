@@ -47,7 +47,7 @@
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>io.reactivestax.TradingAppRunner</mainClass>
+                                    <mainClass>io.reactivestax.consumer.MainRunner</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

@@ -1,7 +1,7 @@
 //package io.reactivestax;
 //
 //import io.reactivestax.database.HibernateUtil;
-//import io.reactivestax.service.ChunkGeneratorAndProcessorService;
+//import io.reactivestax.consumer.service.ChunkGeneratorAndProcessorService;
 //import io.reactivestax.utility.ApplicationPropertiesUtils;
 //import org.hibernate.SessionFactory;
 //import org.junit.After;
