@@ -20,13 +20,14 @@ public class HibernateJournalEntryRepository implements JournalEntryRepository {
     }
 
     @Override
-    public void insertIntoJournalEntry(JournalEntry journalEntry) {
+    public Long insertIntoJournalEntry(JournalEntry journalEntry) {
         Session session = HibernateTransactionUtil.getInstance().getConnection();
         session.persist(journalEntry);
+        return null;
     }
 
     @Override
-    public void updateJournalEntryStatus(int journalEntryId) {
+    public void updateJournalEntryStatus(Long journalEntryId) {
         Session session = HibernateTransactionUtil.getInstance().getConnection();
         JournalEntry journalEntry = session.get(JournalEntry.class, journalEntryId);
         journalEntry.setPostedStatus(PostedStatus.POSTED);

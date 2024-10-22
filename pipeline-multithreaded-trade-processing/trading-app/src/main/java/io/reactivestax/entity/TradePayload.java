@@ -5,13 +5,15 @@ import io.reactivestax.enums.PostedStatus;
 import io.reactivestax.enums.ValidityStatus;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
-@EqualsAndHashCode(callSuper = true)
+import java.sql.Timestamp;
+
 @Data
 @Entity
 @Table(name = "trade_payloads")
-public class TradePayload extends CustomTimestamp {
+public class TradePayload {
 
     @Id
     @Column(name = "id")
@@ -35,4 +37,12 @@ public class TradePayload extends CustomTimestamp {
     @Column(name = "je_status", nullable = false)
     @Enumerated(EnumType.STRING)
     private PostedStatus journalEntryStatus = PostedStatus.NOT_POSTED;
+
+    @CreationTimestamp
+    @Column(name = "created_timestamp", updatable = false, nullable = false)
+    private Timestamp createdTimestamp;
+
+    @UpdateTimestamp
+    @Column(name = "updated_timestamp", nullable = false)
+    private Timestamp updatedTimestamp;
 }

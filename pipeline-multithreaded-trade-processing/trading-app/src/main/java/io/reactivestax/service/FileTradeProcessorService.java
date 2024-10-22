@@ -69,7 +69,6 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
     }
 
     @Override
-
     public void processTrade(String tradeId) throws InterruptedException, IOException {
         try {
             transactionUtil.startTransaction();
@@ -91,7 +90,7 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
     }
 
     @Override
-    public JournalEntry journalEntryTransaction(String[] payloadArr, int tradeId) {
+    public JournalEntry journalEntryTransaction(String[] payloadArr, Long tradeId) {
         JournalEntry journalEntry = new JournalEntry();
         journalEntry.setTradeId(payloadArr[0]);
         journalEntry.setAccountNumber(payloadArr[2]);
@@ -99,7 +98,8 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
         journalEntry.setDirection(Direction.valueOf(payloadArr[4]));
         journalEntry.setQuantity(Integer.parseInt(payloadArr[5]));
         journalEntry.setTransactionTimestamp(Timestamp.valueOf(LocalDateTime.parse(payloadArr[1], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
-        journalEntryRepository.insertIntoJournalEntry(journalEntry);
+        Long journalEntryId = journalEntryRepository.insertIntoJournalEntry(journalEntry);
+        if(journalEntryId != null) journalEntry.setId(journalEntryId);
         tradePayloadRepository.updateTradePayloadPostedStatus(tradeId);
         return journalEntry;
     }
@@ -111,7 +111,7 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
         positionCompositeKey.setAccountNumber(journalEntry.getAccountNumber());
         positionCompositeKey.setSecurityCusip(journalEntry.getSecurityCusip());
         position.setPositionCompositeKey(positionCompositeKey);
-        position.setHolding(journalEntry.getDirection().equals(Direction.SELL) ? -journalEntry.getQuantity() : journalEntry.getQuantity());
+        position.setHolding((long) (journalEntry.getDirection().equals(Direction.SELL) ? -journalEntry.getQuantity() : journalEntry.getQuantity()));
         positionsRepository.upsertPosition(position);
         journalEntryRepository.updateJournalEntryStatus(journalEntry.getId());
     }

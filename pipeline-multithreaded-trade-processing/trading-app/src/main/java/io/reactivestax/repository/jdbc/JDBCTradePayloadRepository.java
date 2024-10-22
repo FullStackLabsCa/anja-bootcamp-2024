@@ -6,17 +6,19 @@ import io.reactivestax.enums.PostedStatus;
 import io.reactivestax.enums.ValidityStatus;
 import io.reactivestax.exception.OptimisticLockingException;
 import io.reactivestax.repository.TradePayloadRepository;
-import io.reactivestax.util.DateTimeFormatterUtil;
 import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
 
 import java.sql.*;
 
 public class JDBCTradePayloadRepository implements TradePayloadRepository {
-    private static final String INSERT_TRADE_PAYLOAD = "Insert into trade_payloads (trade_number, validity_status, payload, je_status, lookup_status, created_timestamp, updated_timestamp) values(?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_TRADE_PAYLOAD = "Insert into trade_payloads (trade_number, validity_status, " +
+            "payload, je_status, lookup_status, created_timestamp, updated_timestamp) values(?, ?, ?, ?, ?, NOW(), " +
+            "NOW())";
     private static final String READ_RAW_PAYLOAD_QUERY = "Select id, trade_number, payload, validity_status, lookup_status, je_status, created_timestamp, updated_timestamp from trade_payloads where trade_number = ?";
-    private static final String UPDATE_TRADE_PAYLOAD_LOOKUP_STATUS_QUERY = "Update trade_payloads set lookup_status = ?, updated_timestamp = ? where id = ?";
+    private static final String UPDATE_TRADE_PAYLOAD_LOOKUP_STATUS_QUERY = "Update trade_payloads set lookup_status =" +
+            " ?, updated_timestamp = NOW() where id = ?";
     private static final String UPDATE_TRADE_PAYLOAD_POSTED_STATUS_QUERY = "Update trade_payloads set je_status = ?, " +
-            "updated_timestamp = ? where id = ?";
+            "updated_timestamp = NOW() where id = ?";
     private static final String OPTIMISTIC_LOCKING_EXCEPTION_MESSAGE = "Optimistic locking exception.";
     private static JDBCTradePayloadRepository instance;
 
@@ -40,8 +42,6 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
             preparedStatement.setString(3, tradePayload.getPayload());
             preparedStatement.setString(4, tradePayload.getJournalEntryStatus().toString());
             preparedStatement.setString(5, tradePayload.getLookupStatus().toString());
-            preparedStatement.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
-            preparedStatement.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
             preparedStatement.execute();
         } catch (SQLException e) {
             throw new OptimisticLockingException(OPTIMISTIC_LOCKING_EXCEPTION_MESSAGE);
@@ -73,12 +73,11 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
     }
 
     @Override
-    public void updateTradePayloadLookupStatus(boolean lookupStatus, int tradeId) {
+    public void updateTradePayloadLookupStatus(boolean lookupStatus, Long tradeId) {
         Connection connection = JDBCTransactionUtil.getInstance().getConnection();
         try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_TRADE_PAYLOAD_LOOKUP_STATUS_QUERY)) {
             preparedStatement.setString(1, String.valueOf(lookupStatus ? LookupStatus.PASS : LookupStatus.FAIL));
-            preparedStatement.setTimestamp(2, DateTimeFormatterUtil.formattedTimestamp());
-            preparedStatement.setInt(3, tradeId);
+            preparedStatement.setLong(2, tradeId);
             preparedStatement.execute();
         } catch (SQLException e) {
             throw new OptimisticLockingException(OPTIMISTIC_LOCKING_EXCEPTION_MESSAGE);
@@ -86,12 +85,11 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
     }
 
     @Override
-    public void updateTradePayloadPostedStatus(int tradeId) {
+    public void updateTradePayloadPostedStatus(Long tradeId) {
         Connection connection = JDBCTransactionUtil.getInstance().getConnection();
         try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_TRADE_PAYLOAD_POSTED_STATUS_QUERY)) {
             preparedStatement.setString(1, String.valueOf(PostedStatus.POSTED));
-            preparedStatement.setTimestamp(2, DateTimeFormatterUtil.formattedTimestamp());
-            preparedStatement.setInt(3, tradeId);
+            preparedStatement.setLong(2, tradeId);
             preparedStatement.execute();
         } catch (SQLException e) {
             throw new OptimisticLockingException(OPTIMISTIC_LOCKING_EXCEPTION_MESSAGE);

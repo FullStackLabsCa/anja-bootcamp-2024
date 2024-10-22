@@ -35,14 +35,14 @@ public class HibernateTradePayloadRepository implements TradePayloadRepository {
     }
 
     @Override
-    public void updateTradePayloadLookupStatus(boolean lookupStatus, int tradeId) {
+    public void updateTradePayloadLookupStatus(boolean lookupStatus, Long tradeId) {
         Session session = HibernateTransactionUtil.getInstance().getConnection();
         TradePayload tradePayload = session.get(TradePayload.class, tradeId);
         tradePayload.setLookupStatus(lookupStatus ? LookupStatus.PASS : LookupStatus.FAIL);
     }
 
     @Override
-    public void updateTradePayloadPostedStatus(int tradeId) {
+    public void updateTradePayloadPostedStatus(Long tradeId) {
         Session session = HibernateTransactionUtil.getInstance().getConnection();
         TradePayload tradePayload = session.get(TradePayload.class, tradeId);
         tradePayload.setJournalEntryStatus(PostedStatus.POSTED);

@@ -7,7 +7,7 @@ public interface TradePayloadRepository {
 
     TradePayload readRawPayload(String tradeNumber);
 
-    void updateTradePayloadLookupStatus(boolean lookupStatus, int tradeId);
+    void updateTradePayloadLookupStatus(boolean lookupStatus, Long tradeId);
 
-    void updateTradePayloadPostedStatus(int tradeId);
+    void updateTradePayloadPostedStatus(Long tradeId);
 }

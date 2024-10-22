@@ -4,15 +4,15 @@ import io.reactivestax.enums.Direction;
 import io.reactivestax.enums.PostedStatus;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @Table(name = "journal_entry")
-public class JournalEntry extends CustomTimestamp {
+public class JournalEntry {
 
     @Id
     @Column(name = "id")
@@ -41,4 +41,12 @@ public class JournalEntry extends CustomTimestamp {
 
     @Column(name = "transaction_timestamp", nullable = false)
     private Timestamp transactionTimestamp;
+
+    @CreationTimestamp
+    @Column(name = "created_timestamp", updatable = false, nullable = false)
+    private Timestamp createdTimestamp;
+
+    @UpdateTimestamp
+    @Column(name = "updated_timestamp", nullable = false)
+    private Timestamp updatedTimestamp;
 }
