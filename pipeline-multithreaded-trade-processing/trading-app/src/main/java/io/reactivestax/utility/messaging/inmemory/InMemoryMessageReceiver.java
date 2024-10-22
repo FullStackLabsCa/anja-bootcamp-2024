@@ -3,7 +3,7 @@ package io.reactivestax.utility.messaging.inmemory;
 import io.reactivestax.utility.messaging.MessageReceiver;
 
 import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 public class InMemoryMessageReceiver implements MessageReceiver {
     private static InMemoryMessageReceiver instance;
@@ -21,8 +21,8 @@ public class InMemoryMessageReceiver implements MessageReceiver {
     @Override
     public String receiveMessage(String queueName) {
         String message = "";
-        List<LinkedBlockingQueue<String>> tradeQueues = InMemoryQueueProvider.getInstance().getTradeQueues();
-        LinkedBlockingQueue<String> tradeQueue =
+        List<LinkedBlockingDeque<String>> tradeQueues = InMemoryQueueProvider.getInstance().getTradeQueues();
+        LinkedBlockingDeque<String> tradeQueue =
                 tradeQueues.get(Integer.parseInt(queueName.substring(queueName.length() - 1)));
         try {
             message = tradeQueue.take();

@@ -8,6 +8,7 @@ import io.reactivestax.utility.ApplicationPropertiesUtils;
 import io.reactivestax.utility.database.TransactionUtil;
 import io.reactivestax.utility.messaging.MessageSender;
 import io.reactivestax.utility.messaging.QueueDistributor;
+import io.reactivestax.utility.messaging.inmemory.InMemoryQueueProvider;
 import org.hibernate.HibernateException;
 
 import java.io.BufferedReader;
@@ -19,7 +20,7 @@ import java.util.logging.Logger;
 
 public class ChunkFileProcessorService implements Runnable, ChunkProcessorService {
     Logger logger = Logger.getLogger(ChunkFileProcessorService.class.getName());
-    LinkedBlockingQueue<String> chunkQueue = QueueDistributor.chunkQueue;
+    LinkedBlockingQueue<String> chunkQueue = InMemoryQueueProvider.getInstance().getChunkQueue();
 
     @Override
     public void run() {

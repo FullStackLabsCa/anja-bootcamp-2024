@@ -1,16 +1,12 @@
 package io.reactivestax.utility.messaging;
 
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.*;
 
 public class QueueDistributor {
     static ConcurrentMap<String, Integer> concurrentQueueDistributorMap = new ConcurrentHashMap<>();
 
     static int queueNumber = 0;
-
-    public static LinkedBlockingQueue<String> chunkQueue = new LinkedBlockingQueue<>();
 
     static Random random = new Random();
 

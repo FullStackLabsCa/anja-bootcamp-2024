@@ -5,14 +5,21 @@ import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class InMemoryQueueProvider {
     private static InMemoryQueueProvider instance;
     private final ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
     @Getter
-    private final List<LinkedBlockingQueue<String>> tradeQueues =
+    private final List<LinkedBlockingDeque<String>> tradeQueues =
             new ArrayList<>(applicationPropertiesUtils.getTradeProcessorQueueCount());
+
+    @Getter
+    private final LinkedBlockingQueue<String> chunkQueue = new LinkedBlockingQueue<>();
+
+    @Getter
+    private final LinkedBlockingQueue<String> deadLetterQueue = new LinkedBlockingQueue<>();
 
     private InMemoryQueueProvider() {
         initializeQueue();
@@ -28,7 +35,7 @@ public class InMemoryQueueProvider {
 
     private void initializeQueue() {
         for (int i = 0; i < applicationPropertiesUtils.getTradeProcessorQueueCount(); i++) {
-            tradeQueues.add(new LinkedBlockingQueue<>());
+            tradeQueues.add(new LinkedBlockingDeque<>());
         }
     }
 }
