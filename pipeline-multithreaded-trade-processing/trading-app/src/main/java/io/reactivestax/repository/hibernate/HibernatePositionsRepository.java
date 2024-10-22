@@ -2,7 +2,7 @@ package io.reactivestax.repository.hibernate;
 
 import io.reactivestax.entity.Position;
 import io.reactivestax.repository.PositionsRepository;
-import io.reactivestax.utility.database.hibernate.HibernateTransactionUtil;
+import io.reactivestax.util.database.hibernate.HibernateTransactionUtil;
 import jakarta.persistence.NoResultException;
 import org.hibernate.Session;
 

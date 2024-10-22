@@ -1,7 +1,7 @@
 package io.reactivestax;
 
 import io.reactivestax.service.TradeService;
-import io.reactivestax.utility.ApplicationPropertiesUtils;
+import io.reactivestax.util.ApplicationPropertiesUtils;
 
 import java.util.logging.Logger;
 

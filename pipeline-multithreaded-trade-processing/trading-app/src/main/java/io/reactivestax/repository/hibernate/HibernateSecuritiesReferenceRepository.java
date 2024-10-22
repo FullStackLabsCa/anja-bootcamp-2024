@@ -2,7 +2,7 @@ package io.reactivestax.repository.hibernate;
 
 import io.reactivestax.entity.SecuritiesReference;
 import io.reactivestax.repository.LookupSecuritiesRepository;
-import io.reactivestax.utility.database.hibernate.HibernateTransactionUtil;
+import io.reactivestax.util.database.hibernate.HibernateTransactionUtil;
 import org.hibernate.Session;
 
 import java.util.List;

@@ -1,10 +1,10 @@
 package io.reactivestax.repository.hibernate;
 
 import io.reactivestax.entity.TradePayload;
-import io.reactivestax.enums.LookupStatusEnum;
-import io.reactivestax.enums.PostedStatusEnum;
+import io.reactivestax.enums.LookupStatus;
+import io.reactivestax.enums.PostedStatus;
 import io.reactivestax.repository.TradePayloadRepository;
-import io.reactivestax.utility.database.hibernate.HibernateTransactionUtil;
+import io.reactivestax.util.database.hibernate.HibernateTransactionUtil;
 import org.hibernate.Session;
 
 public class HibernateTradePayloadRepository implements TradePayloadRepository {
@@ -38,13 +38,13 @@ public class HibernateTradePayloadRepository implements TradePayloadRepository {
     public void updateTradePayloadLookupStatus(boolean lookupStatus, int tradeId) {
         Session session = HibernateTransactionUtil.getInstance().getConnection();
         TradePayload tradePayload = session.get(TradePayload.class, tradeId);
-        tradePayload.setLookupStatus(lookupStatus ? LookupStatusEnum.PASS : LookupStatusEnum.FAIL);
+        tradePayload.setLookupStatus(lookupStatus ? LookupStatus.PASS : LookupStatus.FAIL);
     }
 
     @Override
     public void updateTradePayloadPostedStatus(int tradeId) {
         Session session = HibernateTransactionUtil.getInstance().getConnection();
         TradePayload tradePayload = session.get(TradePayload.class, tradeId);
-        tradePayload.setJournalEntryStatus(PostedStatusEnum.POSTED);
+        tradePayload.setJournalEntryStatus(PostedStatus.POSTED);
     }
 }

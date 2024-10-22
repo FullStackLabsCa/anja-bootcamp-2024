@@ -1,24 +1,22 @@
 package io.reactivestax.entity;
 
-import io.reactivestax.enums.LookupStatusEnum;
-import io.reactivestax.enums.PostedStatusEnum;
-import io.reactivestax.enums.ValidityStatusEnum;
+import io.reactivestax.enums.LookupStatus;
+import io.reactivestax.enums.PostedStatus;
+import io.reactivestax.enums.ValidityStatus;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.EqualsAndHashCode;
 
-import java.sql.Timestamp;
-
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @Table(name = "trade_payloads")
-public class TradePayload {
+public class TradePayload extends CustomTimestamp {
 
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Column(name = "trade_number", nullable = false, unique = true)
     private String tradeNumber;
@@ -28,21 +26,13 @@ public class TradePayload {
 
     @Column(name = "validity_status", nullable = false)
     @Enumerated(EnumType.STRING)
-    private ValidityStatusEnum validityStatus = ValidityStatusEnum.VALID;
+    private ValidityStatus validityStatus = ValidityStatus.VALID;
 
     @Column(name = "lookup_status", nullable = false)
     @Enumerated(EnumType.STRING)
-    private LookupStatusEnum lookupStatus = LookupStatusEnum.NOT_CHECKED;
+    private LookupStatus lookupStatus = LookupStatus.NOT_CHECKED;
 
     @Column(name = "je_status", nullable = false)
     @Enumerated(EnumType.STRING)
-    private PostedStatusEnum journalEntryStatus = PostedStatusEnum.NOT_POSTED;
-
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false, nullable = false)
-    private Timestamp createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private Timestamp updatedAt;
+    private PostedStatus journalEntryStatus = PostedStatus.NOT_POSTED;
 }

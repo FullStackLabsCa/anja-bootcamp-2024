@@ -1,9 +1,9 @@
 package io.reactivestax.repository.hibernate;
 
 import io.reactivestax.entity.JournalEntry;
-import io.reactivestax.enums.PostedStatusEnum;
+import io.reactivestax.enums.PostedStatus;
 import io.reactivestax.repository.JournalEntryRepository;
-import io.reactivestax.utility.database.hibernate.HibernateTransactionUtil;
+import io.reactivestax.util.database.hibernate.HibernateTransactionUtil;
 import org.hibernate.Session;
 
 public class HibernateJournalEntryRepository implements JournalEntryRepository {
@@ -29,6 +29,6 @@ public class HibernateJournalEntryRepository implements JournalEntryRepository {
     public void updateJournalEntryStatus(int journalEntryId) {
         Session session = HibernateTransactionUtil.getInstance().getConnection();
         JournalEntry journalEntry = session.get(JournalEntry.class, journalEntryId);
-        journalEntry.setPostedStatus(PostedStatusEnum.POSTED);
+        journalEntry.setPostedStatus(PostedStatus.POSTED);
     }
 }

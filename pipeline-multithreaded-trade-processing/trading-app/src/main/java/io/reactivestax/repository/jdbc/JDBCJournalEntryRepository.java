@@ -1,11 +1,11 @@
 package io.reactivestax.repository.jdbc;
 
 import io.reactivestax.entity.JournalEntry;
-import io.reactivestax.enums.PostedStatusEnum;
-import io.reactivestax.exceptions.OptimisticLockingException;
+import io.reactivestax.enums.PostedStatus;
+import io.reactivestax.exception.OptimisticLockingException;
 import io.reactivestax.repository.JournalEntryRepository;
-import io.reactivestax.utility.DateTimeFormatterUtil;
-import io.reactivestax.utility.database.jdbc.JDBCTransactionUtil;
+import io.reactivestax.util.DateTimeFormatterUtil;
+import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,9 +13,9 @@ import java.sql.SQLException;
 
 public class JDBCJournalEntryRepository implements JournalEntryRepository {
     private static final String INSERT_INTO_JOURNAL_ENTRY_QUERY = "Insert into journal_entry (trade_id, account_number, " +
-            "security_cusip, direction, quantity, posted_status, transaction_date_time, created_at, updated_at) values(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "security_cusip, direction, quantity, posted_status, transaction_timestamp, created_timestamp, updated_timestamp) values(?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String UPDATE_JOURNAL_ENTRY_STATUS_QUERY = "Update journal_entry set posted_status = ?, " +
-            "updated_at = ? where id = ?";
+            "updated_timestamp = ? where id = ?";
 
     private static JDBCJournalEntryRepository instance;
 
@@ -32,8 +32,8 @@ public class JDBCJournalEntryRepository implements JournalEntryRepository {
     @Override
     public void insertIntoJournalEntry(JournalEntry journalEntry) {
         Connection connection = JDBCTransactionUtil.getInstance().getConnection();
-        journalEntry.setCreatedAt(DateTimeFormatterUtil.formattedTimestamp());
-        journalEntry.setUpdatedAt(DateTimeFormatterUtil.formattedTimestamp());
+        journalEntry.setCreatedTimestamp(DateTimeFormatterUtil.formattedTimestamp());
+        journalEntry.setUpdatedTimestamp(DateTimeFormatterUtil.formattedTimestamp());
         try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_INTO_JOURNAL_ENTRY_QUERY)) {
             preparedStatement.setString(1, journalEntry.getTradeId());
             preparedStatement.setString(2, journalEntry.getAccountNumber());
@@ -41,9 +41,9 @@ public class JDBCJournalEntryRepository implements JournalEntryRepository {
             preparedStatement.setString(4, journalEntry.getDirection().toString());
             preparedStatement.setInt(5, journalEntry.getQuantity());
             preparedStatement.setString(6, journalEntry.getPostedStatus().toString());
-            preparedStatement.setTimestamp(7, journalEntry.getTransactionDateTime());
-            preparedStatement.setTimestamp(8, journalEntry.getCreatedAt());
-            preparedStatement.setTimestamp(9, journalEntry.getUpdatedAt());
+            preparedStatement.setTimestamp(7, journalEntry.getTransactionTimestamp());
+            preparedStatement.setTimestamp(8, journalEntry.getCreatedTimestamp());
+            preparedStatement.setTimestamp(9, journalEntry.getUpdatedTimestamp());
             preparedStatement.execute();
         } catch (Exception e) {
             throw new OptimisticLockingException("Optimistic locking", e);
@@ -54,7 +54,7 @@ public class JDBCJournalEntryRepository implements JournalEntryRepository {
     public void updateJournalEntryStatus(int journalEntryId) {
         Connection connection = JDBCTransactionUtil.getInstance().getConnection();
         try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_JOURNAL_ENTRY_STATUS_QUERY)) {
-            preparedStatement.setString(1, PostedStatusEnum.POSTED.toString());
+            preparedStatement.setString(1, PostedStatus.POSTED.toString());
             preparedStatement.setTimestamp(2, DateTimeFormatterUtil.formattedTimestamp());
             preparedStatement.setInt(3, journalEntryId);
             preparedStatement.execute();

@@ -1,14 +1,14 @@
 package io.reactivestax.service;
 
 import io.reactivestax.entity.TradePayload;
-import io.reactivestax.enums.ValidityStatusEnum;
+import io.reactivestax.enums.ValidityStatus;
 import io.reactivestax.factory.BeanFactory;
 import io.reactivestax.repository.TradePayloadRepository;
-import io.reactivestax.utility.ApplicationPropertiesUtils;
-import io.reactivestax.utility.database.TransactionUtil;
-import io.reactivestax.utility.messaging.MessageSender;
-import io.reactivestax.utility.messaging.QueueDistributor;
-import io.reactivestax.utility.messaging.inmemory.InMemoryQueueProvider;
+import io.reactivestax.util.ApplicationPropertiesUtils;
+import io.reactivestax.util.database.TransactionUtil;
+import io.reactivestax.util.messaging.MessageSender;
+import io.reactivestax.util.messaging.QueueDistributor;
+import io.reactivestax.util.messaging.inmemory.InMemoryQueueProvider;
 import org.hibernate.HibernateException;
 
 import java.io.BufferedReader;
@@ -65,7 +65,7 @@ public class ChunkFileProcessorService implements Runnable, ChunkProcessorServic
 
     private void submitValidTradePayloadsToQueue(TradePayload tradePayload, String[] transaction,
                                                  MessageSender messageSender) {
-        if (tradePayload.getValidityStatus().equals(ValidityStatusEnum.VALID)) {
+        if (tradePayload.getValidityStatus().equals(ValidityStatus.VALID)) {
             ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
             String queueName = applicationPropertiesUtils.getQueueExchangeName() + "_queue_"
                     + QueueDistributor.figureOutTheNextQueue(
@@ -83,9 +83,9 @@ public class ChunkFileProcessorService implements Runnable, ChunkProcessorServic
         TradePayload tradePayload = new TradePayload();
         tradePayload.setPayload(payload);
         tradePayload.setTradeNumber(transaction[0]);
-        tradePayload.setValidityStatus(ValidityStatusEnum.VALID);
+        tradePayload.setValidityStatus(ValidityStatus.VALID);
         if (transaction.length != 7) {
-            tradePayload.setValidityStatus(ValidityStatusEnum.INVALID);
+            tradePayload.setValidityStatus(ValidityStatus.INVALID);
         }
         return tradePayload;
     }

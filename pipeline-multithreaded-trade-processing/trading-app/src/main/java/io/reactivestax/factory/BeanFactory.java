@@ -1,7 +1,7 @@
 package io.reactivestax.factory;
 
-import io.reactivestax.exceptions.InvalidMessagingTechnologyException;
-import io.reactivestax.exceptions.InvalidPersistenceTechnologyException;
+import io.reactivestax.exception.InvalidMessagingTechnologyException;
+import io.reactivestax.exception.InvalidPersistenceTechnologyException;
 import io.reactivestax.repository.JournalEntryRepository;
 import io.reactivestax.repository.LookupSecuritiesRepository;
 import io.reactivestax.repository.PositionsRepository;
@@ -14,19 +14,19 @@ import io.reactivestax.repository.jdbc.JDBCJournalEntryRepository;
 import io.reactivestax.repository.jdbc.JDBCPositionsRepository;
 import io.reactivestax.repository.jdbc.JDBCSecuritiesReferenceRepository;
 import io.reactivestax.repository.jdbc.JDBCTradePayloadRepository;
-import io.reactivestax.utility.ApplicationPropertiesUtils;
-import io.reactivestax.utility.database.TransactionUtil;
-import io.reactivestax.utility.database.hibernate.HibernateTransactionUtil;
-import io.reactivestax.utility.database.jdbc.JDBCTransactionUtil;
-import io.reactivestax.utility.messaging.MessageReceiver;
-import io.reactivestax.utility.messaging.MessageSender;
-import io.reactivestax.utility.messaging.TransactionRetryer;
-import io.reactivestax.utility.messaging.inmemory.InMemoryMessageReceiver;
-import io.reactivestax.utility.messaging.inmemory.InMemoryMessageSender;
-import io.reactivestax.utility.messaging.inmemory.InMemoryRetry;
-import io.reactivestax.utility.messaging.rabbitmq.RabbitMQMessageReceiver;
-import io.reactivestax.utility.messaging.rabbitmq.RabbitMQMessageSender;
-import io.reactivestax.utility.messaging.rabbitmq.RabbitMQRetry;
+import io.reactivestax.util.ApplicationPropertiesUtils;
+import io.reactivestax.util.database.TransactionUtil;
+import io.reactivestax.util.database.hibernate.HibernateTransactionUtil;
+import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
+import io.reactivestax.util.messaging.MessageReceiver;
+import io.reactivestax.util.messaging.MessageSender;
+import io.reactivestax.util.messaging.TransactionRetryer;
+import io.reactivestax.util.messaging.inmemory.InMemoryMessageReceiver;
+import io.reactivestax.util.messaging.inmemory.InMemoryMessageSender;
+import io.reactivestax.util.messaging.inmemory.InMemoryRetry;
+import io.reactivestax.util.messaging.rabbitmq.RabbitMQMessageReceiver;
+import io.reactivestax.util.messaging.rabbitmq.RabbitMQMessageSender;
+import io.reactivestax.util.messaging.rabbitmq.RabbitMQRetry;
 
 public class BeanFactory {
 

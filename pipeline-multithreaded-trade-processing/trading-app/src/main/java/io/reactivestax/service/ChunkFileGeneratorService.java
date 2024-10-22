@@ -9,9 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
 
-import io.reactivestax.utility.ApplicationPropertiesUtils;
-import io.reactivestax.utility.messaging.QueueDistributor;
-import io.reactivestax.utility.messaging.inmemory.InMemoryQueueProvider;
+import io.reactivestax.util.ApplicationPropertiesUtils;
+import io.reactivestax.util.messaging.inmemory.InMemoryQueueProvider;
 
 public class ChunkFileGeneratorService implements Runnable, ChunkGeneratorService {
 Logger logger = Logger.getLogger(ChunkFileGeneratorService.class.getName());

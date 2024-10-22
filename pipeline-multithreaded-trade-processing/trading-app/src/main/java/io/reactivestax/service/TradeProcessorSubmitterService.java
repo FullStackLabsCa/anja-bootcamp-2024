@@ -1,7 +1,7 @@
 package io.reactivestax.service;
 
-import io.reactivestax.utility.ApplicationPropertiesUtils;
-import io.reactivestax.utility.messaging.Submittable;
+import io.reactivestax.util.ApplicationPropertiesUtils;
+import io.reactivestax.util.messaging.Submittable;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

@@ -4,16 +4,16 @@ import io.reactivestax.entity.JournalEntry;
 import io.reactivestax.entity.Position;
 import io.reactivestax.entity.PositionCompositeKey;
 import io.reactivestax.entity.TradePayload;
-import io.reactivestax.enums.DirectionEnum;
-import io.reactivestax.exceptions.OptimisticLockingException;
+import io.reactivestax.enums.Direction;
+import io.reactivestax.exception.OptimisticLockingException;
 import io.reactivestax.factory.BeanFactory;
 import io.reactivestax.repository.JournalEntryRepository;
 import io.reactivestax.repository.LookupSecuritiesRepository;
 import io.reactivestax.repository.PositionsRepository;
 import io.reactivestax.repository.TradePayloadRepository;
-import io.reactivestax.utility.database.TransactionUtil;
-import io.reactivestax.utility.messaging.MessageReceiver;
-import io.reactivestax.utility.messaging.TransactionRetryer;
+import io.reactivestax.util.database.TransactionUtil;
+import io.reactivestax.util.messaging.MessageReceiver;
+import io.reactivestax.util.messaging.TransactionRetryer;
 import jakarta.persistence.OptimisticLockException;
 import org.hibernate.HibernateException;
 
@@ -96,9 +96,9 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
         journalEntry.setTradeId(payloadArr[0]);
         journalEntry.setAccountNumber(payloadArr[2]);
         journalEntry.setSecurityCusip(payloadArr[3]);
-        journalEntry.setDirection(DirectionEnum.valueOf(payloadArr[4]));
+        journalEntry.setDirection(Direction.valueOf(payloadArr[4]));
         journalEntry.setQuantity(Integer.parseInt(payloadArr[5]));
-        journalEntry.setTransactionDateTime(Timestamp.valueOf(LocalDateTime.parse(payloadArr[1], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
+        journalEntry.setTransactionTimestamp(Timestamp.valueOf(LocalDateTime.parse(payloadArr[1], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
         journalEntryRepository.insertIntoJournalEntry(journalEntry);
         tradePayloadRepository.updateTradePayloadPostedStatus(tradeId);
         return journalEntry;
@@ -111,7 +111,7 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
         positionCompositeKey.setAccountNumber(journalEntry.getAccountNumber());
         positionCompositeKey.setSecurityCusip(journalEntry.getSecurityCusip());
         position.setPositionCompositeKey(positionCompositeKey);
-        position.setHolding(journalEntry.getDirection().equals(DirectionEnum.SELL) ? -journalEntry.getQuantity() : journalEntry.getQuantity());
+        position.setHolding(journalEntry.getDirection().equals(Direction.SELL) ? -journalEntry.getQuantity() : journalEntry.getQuantity());
         positionsRepository.upsertPosition(position);
         journalEntryRepository.updateJournalEntryStatus(journalEntry.getId());
     }
