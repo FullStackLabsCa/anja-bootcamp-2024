@@ -1,6 +1,6 @@
 package io.reactivestax.producer.util.database.hibernate;
 
-import io.reactivestax.producer.type.entity.TradePayload;
+import io.reactivestax.producer.util.database.hibernate.entity.TradePayload;
 import io.reactivestax.producer.util.database.ConnectionUtil;
 import io.reactivestax.producer.util.database.TransactionUtil;
 import org.hibernate.Session;

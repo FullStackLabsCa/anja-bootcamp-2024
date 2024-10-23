@@ -1,4 +1,4 @@
-package io.reactivestax.producer.type.entity;
+package io.reactivestax.producer.util.database.hibernate.entity;
 
 import io.reactivestax.producer.type.enums.LookupStatus;
 import io.reactivestax.producer.type.enums.PostedStatus;

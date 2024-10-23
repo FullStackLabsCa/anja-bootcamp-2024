@@ -12,7 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-public class TradeService implements Submittable<ChunkFileProcessorService> {
+public class TradeService implements Submittable<ChunkFileProcessor> {
     private static TradeService instance;
     private ExecutorService chunkGeneratorExecutorService;
     private ExecutorService chunkProcessorExecutorService;
@@ -39,10 +39,10 @@ public class TradeService implements Submittable<ChunkFileProcessorService> {
             chunkGeneratorExecutorService = Executors.newSingleThreadExecutor();
             chunkProcessorExecutorService =
                     Executors.newFixedThreadPool(applicationProperties.getChunkProcessorThreadCount());
-            chunkGeneratorExecutorService.submit(new ChunkFileGeneratorService());
+            chunkGeneratorExecutorService.submit(new ChunkFileGenerator());
             logger.info("Stated chunk generator.");
             for (int i = 0; i < applicationProperties.getNumberOfChunks(); i++) {
-                submitTask(new ChunkFileProcessorService());
+                submitTask(new ChunkFileProcessor());
             }
             logger.info("Started chunk processor.");
         } catch (IOException e) {
@@ -66,7 +66,7 @@ public class TradeService implements Submittable<ChunkFileProcessorService> {
     }
 
     @Override
-    public void submitTask(ChunkFileProcessorService chunkProcessor) {
+    public void submitTask(ChunkFileProcessor chunkProcessor) {
         chunkProcessorExecutorService.submit(chunkProcessor);
     }
 }

@@ -1,7 +1,7 @@
 package io.reactivestax.producer.repository.hibernate;
 
 import io.reactivestax.producer.repository.TradePayloadRepository;
-import io.reactivestax.producer.type.entity.TradePayload;
+import io.reactivestax.producer.util.database.hibernate.entity.TradePayload;
 import io.reactivestax.producer.util.database.hibernate.HibernateTransactionUtil;
 import org.hibernate.Session;
 
