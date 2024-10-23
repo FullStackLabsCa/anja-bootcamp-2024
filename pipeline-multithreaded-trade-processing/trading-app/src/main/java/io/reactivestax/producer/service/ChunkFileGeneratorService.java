@@ -1,7 +1,7 @@
 package io.reactivestax.producer.service;
 
 import io.reactivestax.producer.util.ApplicationPropertiesUtils;
-import io.reactivestax.producer.util.messaging.inmemory.InMemoryQueueProvider;
+import io.reactivestax.producer.util.QueueProvider;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -9,10 +9,10 @@ import java.nio.file.Paths;
 import java.util.logging.Logger;
 
 public class ChunkFileGeneratorService implements Runnable, ChunkGeneratorService {
-Logger logger = Logger.getLogger(ChunkFileGeneratorService.class.getName());
+    Logger logger = Logger.getLogger(ChunkFileGeneratorService.class.getName());
 
     @Override
-    public void run(){
+    public void run() {
         try {
             generateChunks();
         } catch (InterruptedException e) {
@@ -31,7 +31,7 @@ Logger logger = Logger.getLogger(ChunkFileGeneratorService.class.getName());
         int tempChunkCount = 1;
         long tempLineCount = 0;
         long linesCountPerFile = numOfLines / chunksCount;
-        TradeService tradeService = new TradeService();
+        TradeService tradeService = TradeService.getInstance();
         String chunkFilePath = tradeService.buildFilePath(tempChunkCount, applicationPropertiesUtils.getChunkFilePathWithName());
         Files.createDirectories(Paths.get(applicationPropertiesUtils.getChunkDirectoryPath()));
         BufferedWriter writer = new BufferedWriter(new FileWriter(chunkFilePath));
@@ -45,12 +45,12 @@ Logger logger = Logger.getLogger(ChunkFileGeneratorService.class.getName());
                     tempChunkCount++;
                     tempLineCount = 0;
                     writer.close();
-                    InMemoryQueueProvider.getInstance().getChunkQueue().put(chunkFilePath);
+                    QueueProvider.getChunkQueue().put(chunkFilePath);
                     chunkFilePath = tradeService.buildFilePath(tempChunkCount, applicationPropertiesUtils.getChunkFilePathWithName());
                     writer = new BufferedWriter(new FileWriter(chunkFilePath));
                 }
             }
-            InMemoryQueueProvider.getInstance().getChunkQueue().put(chunkFilePath);
+            QueueProvider.getChunkQueue().put(chunkFilePath);
         } finally {
             writer.close();
         }

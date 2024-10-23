@@ -12,8 +12,7 @@ public class ProducerRunner {
         logger.info("Started trade producer project.");
         String rabbitmq = "rabbitmq";
         if (ApplicationPropertiesUtils.getInstance().getMessagingTechnology().equals(rabbitmq)) {
-            TradeService tradeService = new TradeService();
-            tradeService.startTradeProducer();
+            TradeService.getInstance().startTradeProducer();
         } else{
             logger.warning("Invalid messaging technology");
         }

@@ -13,9 +13,21 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 public class TradeService implements Submittable<ChunkFileProcessorService> {
+    private static TradeService instance;
     private ExecutorService chunkGeneratorExecutorService;
     private ExecutorService chunkProcessorExecutorService;
     Logger logger = Logger.getLogger(TradeService.class.getName());
+
+    private TradeService() {
+    }
+
+    public static synchronized TradeService getInstance() {
+        if (instance == null) {
+            instance = new TradeService();
+        }
+
+        return instance;
+    }
 
     public void startTradeProducer() {
         ApplicationPropertiesUtils applicationProperties = ApplicationPropertiesUtils.getInstance();
