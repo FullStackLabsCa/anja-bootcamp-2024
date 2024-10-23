@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 public class TradeService implements Submittable<ChunkFileProcessorService> {
-    private ExecutorService chunkGeneratorExecutorService;
+    private final ExecutorService chunkGeneratorExecutorService = Executors.newSingleThreadExecutor();
     private ExecutorService chunkProcessorExecutorService;
     Logger logger = Logger.getLogger(TradeService.class.getName());
 
@@ -24,7 +24,6 @@ public class TradeService implements Submittable<ChunkFileProcessorService> {
             long numOfLines = fileLineCounter(path);
             logger.info("Counting total number of lines in the file");
             applicationProperties.setTotalNoOfLines(numOfLines);
-            chunkGeneratorExecutorService = Executors.newSingleThreadExecutor();
             chunkProcessorExecutorService =
                     Executors.newFixedThreadPool(applicationProperties.getChunkProcessorThreadCount());
             chunkGeneratorExecutorService.submit(new ChunkFileGeneratorService());
@@ -35,7 +34,7 @@ public class TradeService implements Submittable<ChunkFileProcessorService> {
             logger.info("Started chunk processor.");
         } catch (IOException e) {
             logger.warning("File parsing failed...");
-        } finally {
+        }finally {
             chunkGeneratorExecutorService.shutdown();
             chunkProcessorExecutorService.shutdown();
         }

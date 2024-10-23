@@ -10,13 +10,12 @@ public class ConsumerRunner {
 
     public void start() {
         logger.info("Started trade consumer project.");
-        String consumer = "consumer";
-        String inMemory = "in-memory";
-        if (ApplicationPropertiesUtils.getInstance().getTradingAppMode().equals(consumer) && !ApplicationPropertiesUtils.getInstance().getMessagingTechnology().equals(inMemory)) {
+        String rabbitmq = "rabbitmq";
+        if (ApplicationPropertiesUtils.getInstance().getMessagingTechnology().equals(rabbitmq)) {
             TradeService tradeService = new TradeService();
             tradeService.startTradeConsumer();
-        } else{
-            logger.warning("Invalid trading mode / Invalid messaging technology");
+        } else {
+            logger.warning("Invalid messaging technology");
         }
     }
 
