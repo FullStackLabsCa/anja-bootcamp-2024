@@ -6,8 +6,6 @@ import com.rabbitmq.client.ConnectionFactory;
 import io.reactivestax.producer.util.ApplicationPropertiesUtils;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
@@ -69,35 +67,6 @@ public class RabbitMQChannelProvider {
     public Channel getSenderChannel() {
         if (channelThreadLocal.get() == null) {
             channelThreadLocal.set(getRabbitMQChannel());
-        }
-
-        return channelThreadLocal.get();
-    }
-
-    public Channel getReceiverChannel(String queueName) {
-        if (channelThreadLocal.get() == null) {
-            try {
-                String retryQueueName =
-                        applicationPropertiesUtils.getRetryQueueName() + queueName.substring(queueName.length() - 2);
-                Channel channel = getRabbitMQChannel();
-                if (channel != null) {
-                    channel.queueDeclare(applicationPropertiesUtils.getDlqName(), true, false, false, null);
-                    Map<String, Object> retryArgs = new HashMap<>();
-                    retryArgs.put("x-message-ttl", applicationPropertiesUtils.getRetryTTL());
-                    retryArgs.put("x-dead-letter-exchange", applicationPropertiesUtils.getQueueExchangeName());
-                    retryArgs.put("x-dead-letter-routing-key", queueName);
-                    channel.queueDeclare(retryQueueName, true, false, false, retryArgs);
-                    channel.queueBind(retryQueueName, applicationPropertiesUtils.getQueueExchangeName(), retryQueueName);
-                    Map<String, Object> mainQueueArgs = new HashMap<>();
-                    mainQueueArgs.put("x-dead-letter-exchange", applicationPropertiesUtils.getQueueExchangeName());
-                    mainQueueArgs.put("x-dead-letter-routing-key", retryQueueName);
-                    channel.queueDeclare(queueName, true, false, false, mainQueueArgs);
-                    channel.queueBind(queueName, applicationPropertiesUtils.getQueueExchangeName(), queueName);
-                    channelThreadLocal.set(channel);
-                }
-            } catch (IOException e) {
-                logger.warning("Error while getting message receiver channel.");
-            }
         }
 
         return channelThreadLocal.get();

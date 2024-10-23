@@ -19,7 +19,6 @@ public class ApplicationPropertiesUtils {
     private String filePath;
     private String chunkDirectoryPath;
     private String chunkFilePathWithName;
-    private int maxRetryCount;
     private String dbName;
     private String portNumber;
     private String username;
@@ -29,12 +28,8 @@ public class ApplicationPropertiesUtils {
     private String queuePassword;
     private String queueExchangeName;
     private String queueExchangeType;
-    private String dlqName;
-    private String retryQueueName;
-    private int retryTTL;
     private int chunkProcessorThreadCount;
     private int tradeProcessorQueueCount;
-    private int tradeProcessorThreadCount;
     private String tradeDistributionCriteria;
     private boolean tradeDistributionUseMap;
     private String tradeDistributionAlgorithm;
@@ -77,10 +72,8 @@ public class ApplicationPropertiesUtils {
             password = properties.getProperty("password");
             portNumber = properties.getProperty("port");
             numberOfChunks = Integer.parseInt(properties.getProperty("chunks.count"));
-            maxRetryCount = Integer.parseInt(properties.getProperty("max.retry.count"));
             chunkProcessorThreadCount = Integer.parseInt(properties.getProperty("chunk.processor.thread.count"));
             tradeProcessorQueueCount = Integer.parseInt(properties.getProperty("queue.count"));
-            tradeProcessorThreadCount = Integer.parseInt(properties.getProperty("trade.processor.thread.count"));
             tradeDistributionCriteria = properties.getProperty("trade.distribution.criteria");
             tradeDistributionUseMap = Boolean.parseBoolean(properties.getProperty("trade.distribution.use.map"));
             tradeDistributionAlgorithm = properties.getProperty("trade.distribution.algorithm");
@@ -91,10 +84,6 @@ public class ApplicationPropertiesUtils {
             queueExchangeType = properties.getProperty("queue.exchange.type");
             persistenceTechnology = properties.getProperty("persistence.technology");
             messagingTechnology = properties.getProperty("messaging.technology");
-            tradingAppMode = properties.getProperty("trading.app.mode");
-            dlqName = properties.getProperty("dlq.name");
-            retryQueueName = properties.getProperty("retry.queue.name");
-            retryTTL = Integer.parseInt(properties.getProperty("retry.ttl"));
         } catch (IOException e) {
             logger.warning("File not found Exception.");
             System.exit(1);

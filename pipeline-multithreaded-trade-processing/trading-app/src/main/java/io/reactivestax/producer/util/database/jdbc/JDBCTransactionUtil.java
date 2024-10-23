@@ -14,12 +14,12 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 
 public class JDBCTransactionUtil implements TransactionUtil, ConnectionUtil<Connection> {
-    private DataSource dataSource;
+    private static JDBCTransactionUtil instance;
     private final Logger logger = Logger.getLogger(JDBCTransactionUtil.class.getName());
     private final ThreadLocal<Connection> connectionHolder = new ThreadLocal<>();
-    private static JDBCTransactionUtil instance;
     private final ApplicationPropertiesUtils applicationPropertiesUtils =
             ApplicationPropertiesUtils.getInstance();
+    private DataSource dataSource;
 
     private JDBCTransactionUtil() {
         // private constructor to prevent instantiation

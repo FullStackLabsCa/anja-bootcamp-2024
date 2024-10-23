@@ -4,29 +4,27 @@ import io.reactivestax.producer.repository.TradePayloadRepository;
 import io.reactivestax.producer.type.entity.TradePayload;
 import io.reactivestax.producer.type.enums.ValidityStatus;
 import io.reactivestax.producer.util.ApplicationPropertiesUtils;
+import io.reactivestax.producer.util.QueueProvider;
 import io.reactivestax.producer.util.database.TransactionUtil;
 import io.reactivestax.producer.util.factory.BeanFactory;
 import io.reactivestax.producer.util.messaging.MessageSender;
 import io.reactivestax.producer.util.messaging.QueueDistributor;
-import io.reactivestax.producer.util.messaging.inmemory.InMemoryQueueProvider;
 import org.hibernate.HibernateException;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
 
 public class ChunkFileProcessorService implements Runnable, ChunkProcessorService {
     Logger logger = Logger.getLogger(ChunkFileProcessorService.class.getName());
-    LinkedBlockingQueue<String> chunkQueue = InMemoryQueueProvider.getInstance().getChunkQueue();
 
     @Override
     public void run() {
         try {
             while (true) {
-                String filePath = this.chunkQueue.take();
+                String filePath = QueueProvider.getChunkQueue().take();
                 if (!filePath.isEmpty()) {
                     processChunk(filePath);
                     break;

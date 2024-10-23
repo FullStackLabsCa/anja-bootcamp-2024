@@ -1,8 +1,5 @@
 package io.reactivestax.producer.util.database.hibernate;
 
-import io.reactivestax.producer.type.entity.JournalEntry;
-import io.reactivestax.producer.type.entity.Position;
-import io.reactivestax.producer.type.entity.SecuritiesReference;
 import io.reactivestax.producer.type.entity.TradePayload;
 import io.reactivestax.producer.util.database.ConnectionUtil;
 import io.reactivestax.producer.util.database.TransactionUtil;
@@ -36,9 +33,6 @@ public class HibernateTransactionUtil implements TransactionUtil, ConnectionUtil
         if (sessionFactory == null) {
             // Create the SessionFactory from hibernate-annotation.cfg.xml
             Configuration configuration = new Configuration();
-            configuration.addAnnotatedClass(JournalEntry.class);
-            configuration.addAnnotatedClass(Position.class);
-            configuration.addAnnotatedClass(SecuritiesReference.class);
             configuration.addAnnotatedClass(TradePayload.class);
             configuration.configure(resource);
             LOGGER.debug("Hibernate Annotation Configuration loaded");

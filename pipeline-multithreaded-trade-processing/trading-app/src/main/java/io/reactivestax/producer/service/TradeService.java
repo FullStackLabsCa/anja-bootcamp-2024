@@ -41,12 +41,6 @@ public class TradeService implements Submittable<ChunkFileProcessorService> {
         }
     }
 
-    public void startTradeConsumer() {
-        TradeProcessorSubmitterService tradeProcessorSubmitterService = new TradeProcessorSubmitterService();
-        tradeProcessorSubmitterService.submitTrade();
-        logger.info("Started trade processor.");
-    }
-
     public long fileLineCounter(String path) throws IOException {
         long lineCount;
         try (Stream<String> stream = Files.lines(Path.of(path), StandardCharsets.UTF_8).parallel()) {
