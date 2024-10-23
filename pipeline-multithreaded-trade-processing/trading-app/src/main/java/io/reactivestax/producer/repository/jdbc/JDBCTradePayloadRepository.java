@@ -1,7 +1,8 @@
 package io.reactivestax.producer.repository.jdbc;
 
+import io.reactivestax.producer.type.enums.ValidityStatus;
 import io.reactivestax.producer.repository.TradePayloadRepository;
-import io.reactivestax.producer.util.database.hibernate.entity.TradePayload;
+import io.reactivestax.producer.type.dto.TradePayload;
 import io.reactivestax.producer.util.database.jdbc.JDBCTransactionUtil;
 
 import java.sql.Connection;
@@ -29,16 +30,26 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
 
     @Override
     public void insertTradeRawPayload(TradePayload tradePayload) {
+        io.reactivestax.producer.repository.jdbc.entity.TradePayload tradePayloadEntity = prepareTradePayloadEntity(tradePayload);
         Connection connection = JDBCTransactionUtil.getInstance().getConnection();
         try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_TRADE_PAYLOAD)) {
-            preparedStatement.setString(1, tradePayload.getTradeNumber());
-            preparedStatement.setString(2, tradePayload.getValidityStatus().toString());
-            preparedStatement.setString(3, tradePayload.getPayload());
-            preparedStatement.setString(4, tradePayload.getJournalEntryStatus().toString());
-            preparedStatement.setString(5, tradePayload.getLookupStatus().toString());
+            preparedStatement.setString(1, tradePayloadEntity.getTradeNumber());
+            preparedStatement.setString(2, tradePayloadEntity.getValidityStatus().toString());
+            preparedStatement.setString(3, tradePayloadEntity.getPayload());
+            preparedStatement.setString(4, tradePayloadEntity.getJournalEntryStatus().toString());
+            preparedStatement.setString(5, tradePayloadEntity.getLookupStatus().toString());
             preparedStatement.execute();
         } catch (SQLException e) {
             logger.warning("Error while inserting raw trade payload.");
         }
+    }
+
+    private io.reactivestax.producer.repository.jdbc.entity.TradePayload prepareTradePayloadEntity(TradePayload tradePayload) {
+        io.reactivestax.producer.repository.jdbc.entity.TradePayload tradePayloadEntity =
+                new io.reactivestax.producer.repository.jdbc.entity.TradePayload();
+        tradePayloadEntity.setTradeNumber(tradePayload.getTradeNumber());
+        tradePayloadEntity.setPayload(tradePayload.getPayload());
+        tradePayloadEntity.setValidityStatus(ValidityStatus.valueOf(tradePayload.getValidityStatus()));
+        return tradePayloadEntity;
     }
 }

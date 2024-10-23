@@ -1,7 +1,8 @@
 package io.reactivestax.producer.repository.hibernate;
 
 import io.reactivestax.producer.repository.TradePayloadRepository;
-import io.reactivestax.producer.util.database.hibernate.entity.TradePayload;
+import io.reactivestax.producer.type.dto.TradePayload;
+import io.reactivestax.producer.type.enums.ValidityStatus;
 import io.reactivestax.producer.util.database.hibernate.HibernateTransactionUtil;
 import org.hibernate.Session;
 
@@ -21,6 +22,16 @@ public class HibernateTradePayloadRepository implements TradePayloadRepository {
     @Override
     public void insertTradeRawPayload(TradePayload tradePayload) {
         Session session = HibernateTransactionUtil.getInstance().getConnection();
-        session.persist(tradePayload);
+        io.reactivestax.producer.repository.hibernate.entity.TradePayload tradePayloadEntity =
+                prepareTradePayloadEntity(tradePayload);
+        session.persist(tradePayloadEntity);
+    }
+
+    private io.reactivestax.producer.repository.hibernate.entity.TradePayload prepareTradePayloadEntity(TradePayload tradePayload) {
+        io.reactivestax.producer.repository.hibernate.entity.TradePayload tradePayloadEntity = new io.reactivestax.producer.repository.hibernate.entity.TradePayload();
+        tradePayloadEntity.setTradeNumber(tradePayload.getTradeNumber());
+        tradePayloadEntity.setPayload(tradePayload.getPayload());
+        tradePayloadEntity.setValidityStatus(ValidityStatus.valueOf(tradePayload.getValidityStatus()));
+        return tradePayloadEntity;
     }
 }

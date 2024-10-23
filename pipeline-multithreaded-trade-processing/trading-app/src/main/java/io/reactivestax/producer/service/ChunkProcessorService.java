@@ -1,10 +1,10 @@
 package io.reactivestax.producer.service;
 
 import io.reactivestax.producer.repository.TradePayloadRepository;
+import io.reactivestax.producer.type.dto.TradePayload;
 import io.reactivestax.producer.type.enums.ValidityStatus;
 import io.reactivestax.producer.util.ApplicationPropertiesUtils;
 import io.reactivestax.producer.util.database.TransactionUtil;
-import io.reactivestax.producer.util.database.hibernate.entity.TradePayload;
 import io.reactivestax.producer.util.factory.BeanFactory;
 import io.reactivestax.producer.util.messaging.MessageSender;
 import io.reactivestax.producer.util.messaging.QueueDistributor;
@@ -57,7 +57,7 @@ public class ChunkProcessorService implements ChunkProcessor {
 
     private void submitValidTradePayloadsToQueue(TradePayload tradePayload, String[] transaction,
                                                  MessageSender messageSender) {
-        if (tradePayload.getValidityStatus().equals(ValidityStatus.VALID)) {
+        if (tradePayload.getValidityStatus().equals(ValidityStatus.VALID.toString())) {
             ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
             String queueName = applicationPropertiesUtils.getQueueExchangeName() + "_queue_"
                     + QueueDistributor.figureOutTheNextQueue(
@@ -75,9 +75,9 @@ public class ChunkProcessorService implements ChunkProcessor {
         TradePayload tradePayload = new TradePayload();
         tradePayload.setPayload(payload);
         tradePayload.setTradeNumber(transaction[0]);
-        tradePayload.setValidityStatus(ValidityStatus.VALID);
+        tradePayload.setValidityStatus(String.valueOf(ValidityStatus.VALID));
         if (transaction.length != 7) {
-            tradePayload.setValidityStatus(ValidityStatus.INVALID);
+            tradePayload.setValidityStatus(String.valueOf(ValidityStatus.INVALID));
         }
         return tradePayload;
     }
