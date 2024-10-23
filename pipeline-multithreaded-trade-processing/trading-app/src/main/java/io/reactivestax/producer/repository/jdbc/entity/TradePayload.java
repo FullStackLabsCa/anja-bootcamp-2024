@@ -1,4 +1,4 @@
-package io.reactivestax.producer.util.database.jdbc.entity;
+package io.reactivestax.producer.repository.jdbc.entity;
 
 import io.reactivestax.producer.type.enums.LookupStatus;
 import io.reactivestax.producer.type.enums.PostedStatus;
