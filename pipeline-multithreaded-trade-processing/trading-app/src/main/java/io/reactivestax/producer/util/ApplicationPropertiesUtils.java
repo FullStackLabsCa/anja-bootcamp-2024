@@ -35,7 +35,6 @@ public class ApplicationPropertiesUtils {
     private String tradeDistributionAlgorithm;
     private String persistenceTechnology;
     private String messagingTechnology;
-    private String tradingAppMode;
 
     private ApplicationPropertiesUtils(String applicationPropertiesFileName) {
         loadApplicationProperties(applicationPropertiesFileName);

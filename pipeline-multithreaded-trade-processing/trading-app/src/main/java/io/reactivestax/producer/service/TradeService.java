@@ -45,12 +45,19 @@ public class TradeService implements Submittable<ChunkFileProcessor> {
                 submitTask(new ChunkFileProcessor());
             }
             logger.info("Started chunk processor.");
+            addShutdownHook();
         } catch (IOException e) {
             logger.warning("File parsing failed...");
-        } finally {
-            chunkGeneratorExecutorService.shutdown();
-            chunkProcessorExecutorService.shutdown();
         }
+    }
+
+    private void addShutdownHook(){
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            logger.info("Shutdown signal received. Stopping consumer...");
+            chunkGeneratorExecutorService.shutdownNow();
+            chunkProcessorExecutorService.shutdownNow();
+            logger.info("Consumer stopped.");
+        }));
     }
 
     public long fileLineCounter(String path) throws IOException {

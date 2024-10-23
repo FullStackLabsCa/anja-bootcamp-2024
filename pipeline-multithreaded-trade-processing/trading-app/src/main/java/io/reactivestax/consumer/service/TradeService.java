@@ -3,63 +3,45 @@ package io.reactivestax.consumer.service;
 import io.reactivestax.consumer.util.ApplicationPropertiesUtils;
 import io.reactivestax.consumer.util.messaging.Submittable;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
-public class TradeService implements Submittable<ChunkFileProcessorService> {
-    private final ExecutorService chunkGeneratorExecutorService = Executors.newSingleThreadExecutor();
-    private ExecutorService chunkProcessorExecutorService;
+public class TradeService implements Submittable<FileTradeProcessor> {
+    private static TradeService instance;
+    private final ExecutorService tradeProcessorExecutorService = Executors.newFixedThreadPool(ApplicationPropertiesUtils.getInstance().getTradeProcessorThreadCount());
+    ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
     Logger logger = Logger.getLogger(TradeService.class.getName());
 
-    public void startTradeProducer() {
-        ApplicationPropertiesUtils applicationProperties = ApplicationPropertiesUtils.getInstance();
-        try {
-            String path = applicationProperties.getFilePath();
-            long numOfLines = fileLineCounter(path);
-            logger.info("Counting total number of lines in the file");
-            applicationProperties.setTotalNoOfLines(numOfLines);
-            chunkProcessorExecutorService =
-                    Executors.newFixedThreadPool(applicationProperties.getChunkProcessorThreadCount());
-            chunkGeneratorExecutorService.submit(new ChunkFileGeneratorService());
-            logger.info("Stated chunk generator.");
-            for (int i = 0; i < applicationProperties.getNumberOfChunks(); i++) {
-                submitTask(new ChunkFileProcessorService());
-            }
-            logger.info("Started chunk processor.");
-        } catch (IOException e) {
-            logger.warning("File parsing failed...");
-        }finally {
-            chunkGeneratorExecutorService.shutdown();
-            chunkProcessorExecutorService.shutdown();
+    private TradeService() {
+    }
+
+    public static synchronized TradeService getInstance() {
+        if (instance == null) {
+            instance = new TradeService();
         }
+
+        return instance;
     }
 
     public void startTradeConsumer() {
-        TradeProcessorSubmitterService tradeProcessorSubmitterService = new TradeProcessorSubmitterService();
-        tradeProcessorSubmitterService.submitTrade();
-        logger.info("Started trade processor.");
-    }
-
-    public long fileLineCounter(String path) throws IOException {
-        long lineCount;
-        try (Stream<String> stream = Files.lines(Path.of(path), StandardCharsets.UTF_8).parallel()) {
-            lineCount = stream.count();
+        for (int i = 0; i < this.applicationPropertiesUtils.getTradeProcessorQueueCount(); i++) {
+            submitTask(new FileTradeProcessor(applicationPropertiesUtils.getQueueExchangeName() + "_queue_" + i));
         }
-        return lineCount - 1;
+        logger.info("Started trade processor.");
+        addShutdownHook();
     }
 
-    public String buildFilePath(int chunkNumber, String chunkFilePathWithName) {
-        return chunkFilePathWithName + chunkNumber + ".csv";
+    private void addShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            logger.info("Shutdown signal received. Stopping consumer...");
+            tradeProcessorExecutorService.shutdownNow();
+            logger.info("Consumer stopped.");
+        }));
     }
 
     @Override
-    public void submitTask(ChunkFileProcessorService chunkProcessor) {
-        chunkProcessorExecutorService.submit(chunkProcessor);
+    public void submitTask(FileTradeProcessor chunkProcessor) {
+        tradeProcessorExecutorService.submit(chunkProcessor);
     }
 }

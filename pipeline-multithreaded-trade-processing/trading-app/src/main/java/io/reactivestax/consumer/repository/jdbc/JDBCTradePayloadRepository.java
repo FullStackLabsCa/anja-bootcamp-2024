@@ -34,21 +34,6 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
     }
 
     @Override
-    public void insertTradeRawPayload(TradePayload tradePayload) {
-        Connection connection = JDBCTransactionUtil.getInstance().getConnection();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_TRADE_PAYLOAD)) {
-            preparedStatement.setString(1, tradePayload.getTradeNumber());
-            preparedStatement.setString(2, tradePayload.getValidityStatus().toString());
-            preparedStatement.setString(3, tradePayload.getPayload());
-            preparedStatement.setString(4, tradePayload.getJournalEntryStatus().toString());
-            preparedStatement.setString(5, tradePayload.getLookupStatus().toString());
-            preparedStatement.execute();
-        } catch (SQLException e) {
-            throw new OptimisticLockingException(OPTIMISTIC_LOCKING_EXCEPTION_MESSAGE);
-        }
-    }
-
-    @Override
     public TradePayload readRawPayload(String tradeNumber) {
         TradePayload tradePayload = new TradePayload();
         Connection connection = JDBCTransactionUtil.getInstance().getConnection();

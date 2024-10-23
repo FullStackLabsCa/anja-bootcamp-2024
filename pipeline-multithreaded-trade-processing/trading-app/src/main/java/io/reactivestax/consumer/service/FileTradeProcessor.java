@@ -25,8 +25,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
 
-public class FileTradeProcessorService implements Callable<Void>, TradeProcessorService {
-    Logger logger = Logger.getLogger(FileTradeProcessorService.class.getName());
+public class FileTradeProcessor implements Callable<Void>, TradeProcessor {
+    Logger logger = Logger.getLogger(FileTradeProcessor.class.getName());
     String queueName;
     private final TradePayloadRepository tradePayloadRepository;
     private final TransactionUtil transactionUtil;
@@ -38,7 +38,7 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
 
     int count = 0;
 
-    public FileTradeProcessorService(String queueName) {
+    public FileTradeProcessor(String queueName) {
         this.queueName = queueName;
         this.transactionUtil = BeanFactory.getTransactionUtil();
         this.tradePayloadRepository = BeanFactory.getTradePayloadRepository();
@@ -68,51 +68,5 @@ public class FileTradeProcessorService implements Callable<Void>, TradeProcessor
         return null;
     }
 
-    @Override
-    public void processTrade(String tradeId) throws InterruptedException, IOException {
-        try {
-            transactionUtil.startTransaction();
-            TradePayload tradePayload = tradePayloadRepository.readRawPayload(tradeId);
-            String[] payloadArr = tradePayload.getPayload().split(",");
-            String cusip = payloadArr[3];
-            boolean validSecurity = lookupSecuritiesRepository.lookupSecurities(cusip);
-            tradePayloadRepository.updateTradePayloadLookupStatus(validSecurity, tradePayload.getId());
-            if (validSecurity) {
-                JournalEntry journalEntry = journalEntryTransaction(payloadArr, tradePayload.getId());
-                positionTransaction(journalEntry);
-            }
-            transactionUtil.commitTransaction();
-        } catch (HibernateException | OptimisticLockException | OptimisticLockingException e) {
-            logger.warning("Hibernate/Optimistic Lock exception detected.");
-            transactionUtil.rollbackTransaction();
-            transactionRetryer.retryTransaction(tradeId, queueName);
-        }
-    }
 
-    @Override
-    public JournalEntry journalEntryTransaction(String[] payloadArr, Long tradeId) {
-        JournalEntry journalEntry = new JournalEntry();
-        journalEntry.setTradeId(payloadArr[0]);
-        journalEntry.setAccountNumber(payloadArr[2]);
-        journalEntry.setSecurityCusip(payloadArr[3]);
-        journalEntry.setDirection(Direction.valueOf(payloadArr[4]));
-        journalEntry.setQuantity(Integer.parseInt(payloadArr[5]));
-        journalEntry.setTransactionTimestamp(Timestamp.valueOf(LocalDateTime.parse(payloadArr[1], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
-        Long journalEntryId = journalEntryRepository.insertIntoJournalEntry(journalEntry);
-        if(journalEntryId != null) journalEntry.setId(journalEntryId);
-        tradePayloadRepository.updateTradePayloadPostedStatus(tradeId);
-        return journalEntry;
-    }
-
-    @Override
-    public void positionTransaction(JournalEntry journalEntry) {
-        Position position = new Position();
-        PositionCompositeKey positionCompositeKey = new PositionCompositeKey();
-        positionCompositeKey.setAccountNumber(journalEntry.getAccountNumber());
-        positionCompositeKey.setSecurityCusip(journalEntry.getSecurityCusip());
-        position.setPositionCompositeKey(positionCompositeKey);
-        position.setHolding((long) (journalEntry.getDirection().equals(Direction.SELL) ? -journalEntry.getQuantity() : journalEntry.getQuantity()));
-        positionsRepository.upsertPosition(position);
-        journalEntryRepository.updateJournalEntryStatus(journalEntry.getId());
-    }
 }

@@ -21,12 +21,6 @@ public class HibernateTradePayloadRepository implements TradePayloadRepository {
     }
 
     @Override
-    public void insertTradeRawPayload(TradePayload tradePayload) {
-        Session session = HibernateTransactionUtil.getInstance().getConnection();
-        session.persist(tradePayload);
-    }
-
-    @Override
     public TradePayload readRawPayload(String tradeNumber) {
         Session session = HibernateTransactionUtil.getInstance().getConnection();
         return session.createQuery("from TradePayload tp where tp.tradeNumber = :tradeNumber", TradePayload.class)
