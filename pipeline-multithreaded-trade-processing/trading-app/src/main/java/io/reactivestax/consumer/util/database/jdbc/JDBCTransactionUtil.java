@@ -61,6 +61,7 @@ public class JDBCTransactionUtil implements TransactionUtil, ConnectionUtil<Conn
         config.setUsername(applicationPropertiesUtils.getUsername());
         config.setPassword(applicationPropertiesUtils.getPassword());
         config.setMaximumPoolSize(50); // Set max connections in pool
+        config.setMinimumIdle(15);
         config.setConnectionTimeout(30000); // Timeout in milliseconds
         config.setIdleTimeout(600000); // Idle timeout before connection is closed
 
