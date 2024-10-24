@@ -1,6 +1,8 @@
 package io.reactivestax.service;
 
+import io.reactivestax.repository.JournalEntryRepository;
 import io.reactivestax.repository.LookupSecuritiesRepository;
+import io.reactivestax.repository.PositionsRepository;
 import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.type.entity.JournalEntry;
 import io.reactivestax.type.entity.Position;
@@ -25,11 +27,15 @@ public class TradeProcessorService implements TradeProcessor {
     private final TransactionUtil transactionUtil;
     private final TradePayloadRepository tradePayloadRepository;
     private final LookupSecuritiesRepository lookupSecuritiesRepository;
+    private final JournalEntryRepository journalEntryRepository;
+    private final PositionsRepository positionsRepository;
 
     private TradeProcessorService() {
         transactionUtil = BeanFactory.getTransactionUtil();
         tradePayloadRepository = BeanFactory.getTradePayloadRepository();
         lookupSecuritiesRepository = BeanFactory.getLookupSecuritiesRepository();
+        journalEntryRepository = BeanFactory.getJournalEntryRepository();
+        positionsRepository = BeanFactory.getPositionsRepository();
     }
 
     public static synchronized TradeProcessorService getInstance() {
@@ -41,7 +47,7 @@ public class TradeProcessorService implements TradeProcessor {
     }
 
     @Override
-    public void processTrade(String tradeId) throws InterruptedException, IOException {
+    public void processTrade(String tradeId, String queueName) throws InterruptedException, IOException {
         try {
             transactionUtil.startTransaction();
             TradePayload tradePayload = tradePayloadRepository.readRawPayload(tradeId);
@@ -57,7 +63,7 @@ public class TradeProcessorService implements TradeProcessor {
         } catch (HibernateException | OptimisticLockException | OptimisticLockingException e) {
             logger.warning("Hibernate/Optimistic Lock exception detected.");
             transactionUtil.rollbackTransaction();
-            transactionRetryer.retryTransaction(tradeId, queueName);
+            BeanFactory.getTransactionRetryer().retryTransaction(tradeId, queueName);
         }
     }
 

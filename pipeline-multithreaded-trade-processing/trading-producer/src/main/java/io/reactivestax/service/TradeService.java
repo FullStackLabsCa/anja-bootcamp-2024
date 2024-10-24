@@ -1,7 +1,6 @@
 package io.reactivestax.service;
 
 import io.reactivestax.util.ApplicationPropertiesUtils;
-import io.reactivestax.util.messaging.Submittable;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -12,7 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-public class TradeService implements Submittable<ChunkFileProcessor> {
+public class TradeService {
     private static TradeService instance;
     private ExecutorService chunkGeneratorExecutorService;
     private ExecutorService chunkProcessorExecutorService;
@@ -42,7 +41,7 @@ public class TradeService implements Submittable<ChunkFileProcessor> {
             chunkGeneratorExecutorService.submit(new ChunkFileGenerator());
             logger.info("Stated chunk generator.");
             for (int i = 0; i < applicationProperties.getNumberOfChunks(); i++) {
-                submitTask(new ChunkFileProcessor());
+                chunkProcessorExecutorService.submit(new ChunkFileProcessor());
             }
             logger.info("Started chunk processor.");
             addShutdownHook();
@@ -70,10 +69,5 @@ public class TradeService implements Submittable<ChunkFileProcessor> {
 
     public String buildFilePath(int chunkNumber, String chunkFilePathWithName) {
         return chunkFilePathWithName + chunkNumber + ".csv";
-    }
-
-    @Override
-    public void submitTask(ChunkFileProcessor chunkProcessor) {
-        chunkProcessorExecutorService.submit(chunkProcessor);
     }
 }

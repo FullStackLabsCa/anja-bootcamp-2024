@@ -1,19 +1,16 @@
 package io.reactivestax.repository.jdbc;
 
+import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.type.entity.TradePayload;
 import io.reactivestax.type.enums.LookupStatus;
 import io.reactivestax.type.enums.PostedStatus;
 import io.reactivestax.type.enums.ValidityStatus;
 import io.reactivestax.type.exception.OptimisticLockingException;
-import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
 
 import java.sql.*;
 
 public class JDBCTradePayloadRepository implements TradePayloadRepository {
-    private static final String INSERT_TRADE_PAYLOAD = "Insert into trade_payloads (trade_number, validity_status, " +
-            "payload, je_status, lookup_status, created_timestamp, updated_timestamp) values(?, ?, ?, ?, ?, NOW(), " +
-            "NOW())";
     private static final String READ_RAW_PAYLOAD_QUERY = "Select id, trade_number, payload, validity_status, lookup_status, je_status, created_timestamp, updated_timestamp from trade_payloads where trade_number = ?";
     private static final String UPDATE_TRADE_PAYLOAD_LOOKUP_STATUS_QUERY = "Update trade_payloads set lookup_status =" +
             " ?, updated_timestamp = NOW() where id = ?";

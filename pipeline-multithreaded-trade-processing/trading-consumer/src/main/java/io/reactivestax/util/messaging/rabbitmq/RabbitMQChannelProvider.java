@@ -44,8 +44,7 @@ public class RabbitMQChannelProvider {
         Channel localChannel = null;
         try {
             localChannel = getRabbitMQConnection().createChannel();
-            localChannel.exchangeDeclare(applicationPropertiesUtils.getQueueExchangeName(),
-                    applicationPropertiesUtils.getQueueExchangeType());
+            localChannel.exchangeDeclare(applicationPropertiesUtils.getQueueExchangeName(), applicationPropertiesUtils.getQueueExchangeType());
             channelThreadLocal.set(localChannel);
         } catch (TimeoutException | IOException e) {
             logger.warning("Exception detected while creating channel.");
@@ -66,19 +65,11 @@ public class RabbitMQChannelProvider {
         }
     }
 
-    public Channel getSenderChannel() {
-        if (channelThreadLocal.get() == null) {
-            channelThreadLocal.set(getRabbitMQChannel());
-        }
-
-        return channelThreadLocal.get();
-    }
 
     public Channel getReceiverChannel(String queueName) {
         if (channelThreadLocal.get() == null) {
             try {
-                String retryQueueName =
-                        applicationPropertiesUtils.getRetryQueueName() + queueName.substring(queueName.length() - 2);
+                String retryQueueName = applicationPropertiesUtils.getRetryQueueName() + queueName.substring(queueName.length() - 2);
                 Channel channel = getRabbitMQChannel();
                 if (channel != null) {
                     channel.queueDeclare(applicationPropertiesUtils.getDlqName(), true, false, false, null);

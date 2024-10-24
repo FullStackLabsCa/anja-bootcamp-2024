@@ -1,15 +1,14 @@
 package io.reactivestax.repository.jdbc;
 
+import io.reactivestax.repository.PositionsRepository;
 import io.reactivestax.type.entity.Position;
 import io.reactivestax.type.entity.PositionCompositeKey;
 import io.reactivestax.type.exception.OptimisticLockingException;
-import io.reactivestax.repository.PositionsRepository;
 import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
 
 import java.sql.*;
 
 public class JDBCPositionsRepository implements PositionsRepository {
-
     private static final String SELECT_POSITIONS_QUERY = "Select version, created_timestamp, holding, " +
             "updated_timestamp, account_number, security_cusip from positions where account_number = ? and " +
             "security_cusip = ?";

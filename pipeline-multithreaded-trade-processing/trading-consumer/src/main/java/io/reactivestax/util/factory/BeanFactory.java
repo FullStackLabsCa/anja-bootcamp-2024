@@ -1,7 +1,5 @@
 package io.reactivestax.util.factory;
 
-import io.reactivestax.type.exception.InvalidMessagingTechnologyException;
-import io.reactivestax.type.exception.InvalidPersistenceTechnologyException;
 import io.reactivestax.repository.JournalEntryRepository;
 import io.reactivestax.repository.LookupSecuritiesRepository;
 import io.reactivestax.repository.PositionsRepository;
@@ -14,18 +12,15 @@ import io.reactivestax.repository.jdbc.JDBCJournalEntryRepository;
 import io.reactivestax.repository.jdbc.JDBCPositionsRepository;
 import io.reactivestax.repository.jdbc.JDBCSecuritiesReferenceRepository;
 import io.reactivestax.repository.jdbc.JDBCTradePayloadRepository;
+import io.reactivestax.type.exception.InvalidMessagingTechnologyException;
+import io.reactivestax.type.exception.InvalidPersistenceTechnologyException;
 import io.reactivestax.util.ApplicationPropertiesUtils;
 import io.reactivestax.util.database.TransactionUtil;
 import io.reactivestax.util.database.hibernate.HibernateTransactionUtil;
 import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
 import io.reactivestax.util.messaging.MessageReceiver;
-import io.reactivestax.util.messaging.MessageSender;
 import io.reactivestax.util.messaging.TransactionRetryer;
-import io.reactivestax.util.messaging.inmemory.InMemoryMessageReceiver;
-import io.reactivestax.util.messaging.inmemory.InMemoryMessageSender;
-import io.reactivestax.util.messaging.inmemory.InMemoryRetry;
 import io.reactivestax.util.messaging.rabbitmq.RabbitMQMessageReceiver;
-import io.reactivestax.util.messaging.rabbitmq.RabbitMQMessageSender;
 import io.reactivestax.util.messaging.rabbitmq.RabbitMQRetry;
 
 public class BeanFactory {
@@ -34,7 +29,6 @@ public class BeanFactory {
     }
 
     private static final String RABBITMQ_MESSAGING_TECHNOLOGY = "rabbitmq";
-    private static final String IN_MEMORY_MESSAGING_TECHNOLOGY = "in-memory";
 
     private static final String HIBERNATE_PERSISTENCE_TECHNOLOGY = "hibernate";
     private static final String JDBC_PERSISTENCE_TECHNOLOGY = "jdbc";
@@ -97,23 +91,10 @@ public class BeanFactory {
         }
     }
 
-    public static MessageSender getMessageSender() {
-        ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
-        if (RABBITMQ_MESSAGING_TECHNOLOGY.equals(applicationPropertiesUtils.getMessagingTechnology())) {
-            return RabbitMQMessageSender.getInstance();
-        } else if (IN_MEMORY_MESSAGING_TECHNOLOGY.equals(applicationPropertiesUtils.getMessagingTechnology())) {
-            return InMemoryMessageSender.getInstance();
-        } else {
-            throw new InvalidMessagingTechnologyException(INVALID_MESSAGING_TECHNOLOGY);
-        }
-    }
-
     public static MessageReceiver getMessageReceiver() {
         ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
         if (RABBITMQ_MESSAGING_TECHNOLOGY.equals(applicationPropertiesUtils.getMessagingTechnology())) {
             return RabbitMQMessageReceiver.getInstance();
-        } else if (IN_MEMORY_MESSAGING_TECHNOLOGY.equals(applicationPropertiesUtils.getMessagingTechnology())) {
-            return InMemoryMessageReceiver.getInstance();
         } else {
             throw new InvalidMessagingTechnologyException(INVALID_MESSAGING_TECHNOLOGY);
         }
@@ -123,8 +104,6 @@ public class BeanFactory {
         ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
         if (RABBITMQ_MESSAGING_TECHNOLOGY.equals(applicationPropertiesUtils.getMessagingTechnology())) {
             return RabbitMQRetry.getInstance();
-        } else if (IN_MEMORY_MESSAGING_TECHNOLOGY.equals(applicationPropertiesUtils.getMessagingTechnology())) {
-            return InMemoryRetry.getInstance();
         } else {
             throw new InvalidMessagingTechnologyException(INVALID_MESSAGING_TECHNOLOGY);
         }

@@ -1,13 +1,12 @@
 package io.reactivestax.service;
 
 import io.reactivestax.util.ApplicationPropertiesUtils;
-import io.reactivestax.util.messaging.Submittable;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
-public class TradeService implements Submittable<FileTradeProcessor> {
+public class TradeService {
     private static TradeService instance;
     private final ExecutorService tradeProcessorExecutorService = Executors.newFixedThreadPool(ApplicationPropertiesUtils.getInstance().getTradeProcessorThreadCount());
     ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
@@ -26,7 +25,8 @@ public class TradeService implements Submittable<FileTradeProcessor> {
 
     public void startTradeConsumer() {
         for (int i = 0; i < this.applicationPropertiesUtils.getTradeProcessorQueueCount(); i++) {
-            submitTask(new FileTradeProcessor(applicationPropertiesUtils.getQueueExchangeName() + "_queue_" + i));
+            tradeProcessorExecutorService.submit(new FileTradeProcessor(applicationPropertiesUtils.getQueueExchangeName() +
+                    "_queue_" + i));
         }
         logger.info("Started trade processor.");
         addShutdownHook();
@@ -38,10 +38,5 @@ public class TradeService implements Submittable<FileTradeProcessor> {
             tradeProcessorExecutorService.shutdownNow();
             logger.info("Consumer stopped.");
         }));
-    }
-
-    @Override
-    public void submitTask(FileTradeProcessor chunkProcessor) {
-        tradeProcessorExecutorService.submit(chunkProcessor);
     }
 }

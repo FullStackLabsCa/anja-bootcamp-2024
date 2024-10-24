@@ -12,8 +12,7 @@ public class ConsumerRunner {
         logger.info("Started trade consumer project.");
         String rabbitmq = "rabbitmq";
         if (ApplicationPropertiesUtils.getInstance().getMessagingTechnology().equals(rabbitmq)) {
-            TradeService tradeService = new TradeService();
-            tradeService.startTradeConsumer();
+            TradeService.getInstance().startTradeConsumer();
         } else {
             logger.warning("Invalid messaging technology");
         }
