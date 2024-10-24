@@ -1,4 +1,4 @@
-package io.reactivestax.consumer.type.entity;
+package io.reactivestax.type.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;

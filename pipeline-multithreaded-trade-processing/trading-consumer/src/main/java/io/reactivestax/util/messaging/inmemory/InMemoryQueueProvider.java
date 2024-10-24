@@ -1,6 +1,6 @@
-package io.reactivestax.consumer.util.messaging.inmemory;
+package io.reactivestax.util.messaging.inmemory;
 
-import io.reactivestax.consumer.util.ApplicationPropertiesUtils;
+import io.reactivestax.util.ApplicationPropertiesUtils;
 import lombok.Getter;
 
 import java.util.ArrayList;

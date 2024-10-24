@@ -1,10 +1,10 @@
-package io.reactivestax.consumer.util.messaging.rabbitmq;
+package io.reactivestax.util.messaging.rabbitmq;
 
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.GetResponse;
-import io.reactivestax.consumer.util.ApplicationPropertiesUtils;
-import io.reactivestax.consumer.util.messaging.TransactionRetryer;
+import io.reactivestax.util.ApplicationPropertiesUtils;
+import io.reactivestax.util.messaging.TransactionRetryer;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

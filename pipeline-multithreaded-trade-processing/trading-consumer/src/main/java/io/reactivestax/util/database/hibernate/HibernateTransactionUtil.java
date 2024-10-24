@@ -1,11 +1,11 @@
-package io.reactivestax.consumer.util.database.hibernate;
+package io.reactivestax.util.database.hibernate;
 
-import io.reactivestax.consumer.type.entity.JournalEntry;
-import io.reactivestax.consumer.type.entity.Position;
-import io.reactivestax.consumer.type.entity.SecuritiesReference;
-import io.reactivestax.consumer.type.entity.TradePayload;
-import io.reactivestax.consumer.util.database.ConnectionUtil;
-import io.reactivestax.consumer.util.database.TransactionUtil;
+import io.reactivestax.type.entity.JournalEntry;
+import io.reactivestax.type.entity.Position;
+import io.reactivestax.type.entity.SecuritiesReference;
+import io.reactivestax.type.entity.TradePayload;
+import io.reactivestax.util.database.ConnectionUtil;
+import io.reactivestax.util.database.TransactionUtil;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistry;

@@ -1,26 +1,17 @@
-package io.reactivestax.consumer.service;
+package io.reactivestax.service;
 
-import io.reactivestax.consumer.type.entity.JournalEntry;
-import io.reactivestax.consumer.type.entity.Position;
-import io.reactivestax.consumer.type.entity.PositionCompositeKey;
-import io.reactivestax.consumer.type.entity.TradePayload;
-import io.reactivestax.consumer.type.enums.Direction;
-import io.reactivestax.consumer.type.exception.OptimisticLockingException;
-import io.reactivestax.consumer.util.factory.BeanFactory;
-import io.reactivestax.consumer.repository.JournalEntryRepository;
-import io.reactivestax.consumer.repository.LookupSecuritiesRepository;
-import io.reactivestax.consumer.repository.PositionsRepository;
-import io.reactivestax.consumer.repository.TradePayloadRepository;
-import io.reactivestax.consumer.util.database.TransactionUtil;
-import io.reactivestax.consumer.util.messaging.MessageReceiver;
-import io.reactivestax.consumer.util.messaging.TransactionRetryer;
+import io.reactivestax.util.factory.BeanFactory;
+import io.reactivestax.repository.JournalEntryRepository;
+import io.reactivestax.repository.LookupSecuritiesRepository;
+import io.reactivestax.repository.PositionsRepository;
+import io.reactivestax.repository.TradePayloadRepository;
+import io.reactivestax.util.database.TransactionUtil;
+import io.reactivestax.util.messaging.MessageReceiver;
+import io.reactivestax.util.messaging.TransactionRetryer;
 import jakarta.persistence.OptimisticLockException;
 import org.hibernate.HibernateException;
 
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;

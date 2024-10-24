@@ -1,6 +1,6 @@
-package io.reactivestax.consumer.repository;
+package io.reactivestax.repository;
 
-import io.reactivestax.consumer.type.entity.TradePayload;
+import io.reactivestax.type.entity.TradePayload;
 
 public interface TradePayloadRepository {
     TradePayload readRawPayload(String tradeNumber);

@@ -1,8 +1,8 @@
-package io.reactivestax.consumer.type.entity;
+package io.reactivestax.type.entity;
 
-import io.reactivestax.consumer.type.enums.LookupStatus;
-import io.reactivestax.consumer.type.enums.PostedStatus;
-import io.reactivestax.consumer.type.enums.ValidityStatus;
+import io.reactivestax.type.enums.LookupStatus;
+import io.reactivestax.type.enums.PostedStatus;
+import io.reactivestax.type.enums.ValidityStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;

@@ -1,15 +1,15 @@
-package io.reactivestax.consumer.service;
+package io.reactivestax.service;
 
-import io.reactivestax.consumer.repository.LookupSecuritiesRepository;
-import io.reactivestax.consumer.repository.TradePayloadRepository;
-import io.reactivestax.consumer.type.entity.JournalEntry;
-import io.reactivestax.consumer.type.entity.Position;
-import io.reactivestax.consumer.type.entity.PositionCompositeKey;
-import io.reactivestax.consumer.type.entity.TradePayload;
-import io.reactivestax.consumer.type.enums.Direction;
-import io.reactivestax.consumer.type.exception.OptimisticLockingException;
-import io.reactivestax.consumer.util.database.TransactionUtil;
-import io.reactivestax.consumer.util.factory.BeanFactory;
+import io.reactivestax.repository.LookupSecuritiesRepository;
+import io.reactivestax.repository.TradePayloadRepository;
+import io.reactivestax.type.entity.JournalEntry;
+import io.reactivestax.type.entity.Position;
+import io.reactivestax.type.entity.PositionCompositeKey;
+import io.reactivestax.type.entity.TradePayload;
+import io.reactivestax.type.enums.Direction;
+import io.reactivestax.type.exception.OptimisticLockingException;
+import io.reactivestax.util.database.TransactionUtil;
+import io.reactivestax.util.factory.BeanFactory;
 import jakarta.persistence.OptimisticLockException;
 import org.hibernate.HibernateException;
 

@@ -1,4 +1,4 @@
-package io.reactivestax.consumer.type.exception;
+package io.reactivestax.type.exception;
 
 public class OptimisticLockingException extends RuntimeException {
     public OptimisticLockingException(String message, Throwable cause) {

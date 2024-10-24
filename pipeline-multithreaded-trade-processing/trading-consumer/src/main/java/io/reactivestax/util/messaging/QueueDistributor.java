@@ -1,4 +1,4 @@
-package io.reactivestax.consumer.util.messaging;
+package io.reactivestax.util.messaging;
 
 import java.util.Random;
 import java.util.concurrent.*;

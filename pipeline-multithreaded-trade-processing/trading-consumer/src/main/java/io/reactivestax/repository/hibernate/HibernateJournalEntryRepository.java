@@ -1,9 +1,9 @@
-package io.reactivestax.consumer.repository.hibernate;
+package io.reactivestax.repository.hibernate;
 
-import io.reactivestax.consumer.type.entity.JournalEntry;
-import io.reactivestax.consumer.type.enums.PostedStatus;
-import io.reactivestax.consumer.repository.JournalEntryRepository;
-import io.reactivestax.consumer.util.database.hibernate.HibernateTransactionUtil;
+import io.reactivestax.type.entity.JournalEntry;
+import io.reactivestax.type.enums.PostedStatus;
+import io.reactivestax.repository.JournalEntryRepository;
+import io.reactivestax.util.database.hibernate.HibernateTransactionUtil;
 import org.hibernate.Session;
 
 public class HibernateJournalEntryRepository implements JournalEntryRepository {

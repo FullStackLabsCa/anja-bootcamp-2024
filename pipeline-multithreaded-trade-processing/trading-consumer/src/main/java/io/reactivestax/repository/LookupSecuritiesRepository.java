@@ -1,4 +1,4 @@
-package io.reactivestax.consumer.repository;
+package io.reactivestax.repository;
 
 public interface LookupSecuritiesRepository {
     boolean lookupSecurities(String cusip);

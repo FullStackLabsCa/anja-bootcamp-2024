@@ -1,10 +1,10 @@
-package io.reactivestax.consumer.repository.hibernate;
+package io.reactivestax.repository.hibernate;
 
-import io.reactivestax.consumer.type.entity.TradePayload;
-import io.reactivestax.consumer.type.enums.LookupStatus;
-import io.reactivestax.consumer.type.enums.PostedStatus;
-import io.reactivestax.consumer.repository.TradePayloadRepository;
-import io.reactivestax.consumer.util.database.hibernate.HibernateTransactionUtil;
+import io.reactivestax.type.entity.TradePayload;
+import io.reactivestax.type.enums.LookupStatus;
+import io.reactivestax.type.enums.PostedStatus;
+import io.reactivestax.repository.TradePayloadRepository;
+import io.reactivestax.util.database.hibernate.HibernateTransactionUtil;
 import org.hibernate.Session;
 
 public class HibernateTradePayloadRepository implements TradePayloadRepository {

@@ -1,7 +1,7 @@
-package io.reactivestax.consumer.type.entity;
+package io.reactivestax.type.entity;
 
-import io.reactivestax.consumer.type.enums.Direction;
-import io.reactivestax.consumer.type.enums.PostedStatus;
+import io.reactivestax.type.enums.Direction;
+import io.reactivestax.type.enums.PostedStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;

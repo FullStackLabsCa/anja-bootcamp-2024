@@ -1,4 +1,4 @@
-package io.reactivestax.consumer.type.exception;
+package io.reactivestax.type.exception;
 
 public class InvalidPersistenceTechnologyException extends RuntimeException {
     public InvalidPersistenceTechnologyException(String message, Throwable cause) {

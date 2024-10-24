@@ -1,9 +1,9 @@
-package io.reactivestax.consumer.util.messaging.rabbitmq;
+package io.reactivestax.util.messaging.rabbitmq;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import io.reactivestax.consumer.util.ApplicationPropertiesUtils;
+import io.reactivestax.util.ApplicationPropertiesUtils;
 
 import java.io.IOException;
 import java.util.HashMap;

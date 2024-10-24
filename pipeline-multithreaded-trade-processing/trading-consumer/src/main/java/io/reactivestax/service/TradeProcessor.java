@@ -1,6 +1,6 @@
-package io.reactivestax.consumer.service;
+package io.reactivestax.service;
 
-import io.reactivestax.consumer.type.entity.JournalEntry;
+import io.reactivestax.type.entity.JournalEntry;
 
 import java.io.IOException;
 

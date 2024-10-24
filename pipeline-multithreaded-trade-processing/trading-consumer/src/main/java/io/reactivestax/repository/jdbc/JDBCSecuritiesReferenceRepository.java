@@ -1,8 +1,8 @@
-package io.reactivestax.consumer.repository.jdbc;
+package io.reactivestax.repository.jdbc;
 
-import io.reactivestax.consumer.type.exception.OptimisticLockingException;
-import io.reactivestax.consumer.repository.LookupSecuritiesRepository;
-import io.reactivestax.consumer.util.database.jdbc.JDBCTransactionUtil;
+import io.reactivestax.type.exception.OptimisticLockingException;
+import io.reactivestax.repository.LookupSecuritiesRepository;
+import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

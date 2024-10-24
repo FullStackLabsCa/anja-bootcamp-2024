@@ -1,4 +1,4 @@
-package io.reactivestax.consumer.util;
+package io.reactivestax.util;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;

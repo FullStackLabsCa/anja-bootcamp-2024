@@ -1,10 +1,10 @@
-package io.reactivestax.consumer.repository.jdbc;
+package io.reactivestax.repository.jdbc;
 
-import io.reactivestax.consumer.type.entity.Position;
-import io.reactivestax.consumer.type.entity.PositionCompositeKey;
-import io.reactivestax.consumer.type.exception.OptimisticLockingException;
-import io.reactivestax.consumer.repository.PositionsRepository;
-import io.reactivestax.consumer.util.database.jdbc.JDBCTransactionUtil;
+import io.reactivestax.type.entity.Position;
+import io.reactivestax.type.entity.PositionCompositeKey;
+import io.reactivestax.type.exception.OptimisticLockingException;
+import io.reactivestax.repository.PositionsRepository;
+import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
 
 import java.sql.*;
 

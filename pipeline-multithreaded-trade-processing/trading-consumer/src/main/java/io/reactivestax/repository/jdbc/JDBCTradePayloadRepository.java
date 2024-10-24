@@ -1,12 +1,12 @@
-package io.reactivestax.consumer.repository.jdbc;
+package io.reactivestax.repository.jdbc;
 
-import io.reactivestax.consumer.type.entity.TradePayload;
-import io.reactivestax.consumer.type.enums.LookupStatus;
-import io.reactivestax.consumer.type.enums.PostedStatus;
-import io.reactivestax.consumer.type.enums.ValidityStatus;
-import io.reactivestax.consumer.type.exception.OptimisticLockingException;
-import io.reactivestax.consumer.repository.TradePayloadRepository;
-import io.reactivestax.consumer.util.database.jdbc.JDBCTransactionUtil;
+import io.reactivestax.type.entity.TradePayload;
+import io.reactivestax.type.enums.LookupStatus;
+import io.reactivestax.type.enums.PostedStatus;
+import io.reactivestax.type.enums.ValidityStatus;
+import io.reactivestax.type.exception.OptimisticLockingException;
+import io.reactivestax.repository.TradePayloadRepository;
+import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
 
 import java.sql.*;
 

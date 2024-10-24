@@ -1,7 +1,7 @@
-package io.reactivestax.consumer.util.messaging.inmemory;
+package io.reactivestax.util.messaging.inmemory;
 
-import io.reactivestax.consumer.util.ApplicationPropertiesUtils;
-import io.reactivestax.consumer.util.messaging.TransactionRetryer;
+import io.reactivestax.util.ApplicationPropertiesUtils;
+import io.reactivestax.util.messaging.TransactionRetryer;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

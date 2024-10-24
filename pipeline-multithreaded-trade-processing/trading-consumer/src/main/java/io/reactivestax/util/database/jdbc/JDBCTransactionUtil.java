@@ -1,12 +1,12 @@
-package io.reactivestax.consumer.util.database.jdbc;
+package io.reactivestax.util.database.jdbc;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import io.reactivestax.consumer.type.exception.HikariCPConnectionException;
-import io.reactivestax.consumer.type.exception.TransactionHandlingException;
-import io.reactivestax.consumer.util.ApplicationPropertiesUtils;
-import io.reactivestax.consumer.util.database.ConnectionUtil;
-import io.reactivestax.consumer.util.database.TransactionUtil;
+import io.reactivestax.type.exception.HikariCPConnectionException;
+import io.reactivestax.type.exception.TransactionHandlingException;
+import io.reactivestax.util.ApplicationPropertiesUtils;
+import io.reactivestax.util.database.ConnectionUtil;
+import io.reactivestax.util.database.TransactionUtil;
 
 import javax.sql.DataSource;
 import java.sql.Connection;

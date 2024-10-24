@@ -1,6 +1,6 @@
-package io.reactivestax.consumer.util.messaging.inmemory;
+package io.reactivestax.util.messaging.inmemory;
 
-import io.reactivestax.consumer.util.messaging.MessageSender;
+import io.reactivestax.util.messaging.MessageSender;
 
 import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;

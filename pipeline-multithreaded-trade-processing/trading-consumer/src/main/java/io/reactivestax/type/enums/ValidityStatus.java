@@ -1,4 +1,4 @@
-package io.reactivestax.consumer.type.enums;
+package io.reactivestax.type.enums;
 
 public enum ValidityStatus {
     VALID, INVALID
