@@ -4,10 +4,9 @@ import io.reactivestax.repository.JournalEntryRepository;
 import io.reactivestax.repository.LookupSecuritiesRepository;
 import io.reactivestax.repository.PositionsRepository;
 import io.reactivestax.repository.TradePayloadRepository;
-import io.reactivestax.repository.hibernate.entity.JournalEntry;
-import io.reactivestax.repository.hibernate.entity.Position;
-import io.reactivestax.repository.hibernate.entity.PositionCompositeKey;
-import io.reactivestax.repository.hibernate.entity.TradePayload;
+import io.reactivestax.type.dto.JournalEntry;
+import io.reactivestax.type.dto.Position;
+import io.reactivestax.type.dto.TradePayload;
 import io.reactivestax.type.enums.Direction;
 import io.reactivestax.type.exception.OptimisticLockingException;
 import io.reactivestax.util.database.TransactionUtil;
@@ -16,9 +15,6 @@ import jakarta.persistence.OptimisticLockException;
 import org.hibernate.HibernateException;
 
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.logging.Logger;
 
 public class TradeProcessorService implements TradeProcessor {
@@ -73,9 +69,9 @@ public class TradeProcessorService implements TradeProcessor {
         journalEntry.setTradeId(payloadArr[0]);
         journalEntry.setAccountNumber(payloadArr[2]);
         journalEntry.setSecurityCusip(payloadArr[3]);
-        journalEntry.setDirection(Direction.valueOf(payloadArr[4]));
+        journalEntry.setDirection(payloadArr[4]);
         journalEntry.setQuantity(Integer.parseInt(payloadArr[5]));
-        journalEntry.setTransactionTimestamp(Timestamp.valueOf(LocalDateTime.parse(payloadArr[1], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
+        journalEntry.setTransactionTimestamp(payloadArr[1]);
         Long journalEntryId = journalEntryRepository.insertIntoJournalEntry(journalEntry);
         if (journalEntryId != null) journalEntry.setId(journalEntryId);
         tradePayloadRepository.updateTradePayloadPostedStatus(tradeId);
@@ -85,11 +81,9 @@ public class TradeProcessorService implements TradeProcessor {
     @Override
     public void positionTransaction(JournalEntry journalEntry) {
         Position position = new Position();
-        PositionCompositeKey positionCompositeKey = new PositionCompositeKey();
-        positionCompositeKey.setAccountNumber(journalEntry.getAccountNumber());
-        positionCompositeKey.setSecurityCusip(journalEntry.getSecurityCusip());
-        position.setPositionCompositeKey(positionCompositeKey);
-        position.setHolding((long) (journalEntry.getDirection().equals(Direction.SELL) ? -journalEntry.getQuantity() : journalEntry.getQuantity()));
+        position.setAccountNumber(journalEntry.getAccountNumber());
+        position.setSecurityCusip(journalEntry.getSecurityCusip());
+        position.setHolding((long) (journalEntry.getDirection().equals(Direction.SELL.toString()) ? -journalEntry.getQuantity() : journalEntry.getQuantity()));
         positionsRepository.upsertPosition(position);
         journalEntryRepository.updateJournalEntryStatus(journalEntry.getId());
     }

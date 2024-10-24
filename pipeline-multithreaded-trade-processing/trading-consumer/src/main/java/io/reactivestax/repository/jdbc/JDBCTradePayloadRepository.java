@@ -1,14 +1,16 @@
 package io.reactivestax.repository.jdbc;
 
 import io.reactivestax.repository.TradePayloadRepository;
-import io.reactivestax.repository.hibernate.entity.TradePayload;
+import io.reactivestax.type.dto.TradePayload;
 import io.reactivestax.type.enums.LookupStatus;
 import io.reactivestax.type.enums.PostedStatus;
-import io.reactivestax.type.enums.ValidityStatus;
 import io.reactivestax.type.exception.OptimisticLockingException;
 import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class JDBCTradePayloadRepository implements TradePayloadRepository {
     private static final String READ_RAW_PAYLOAD_QUERY = "Select id, trade_number, payload, validity_status, lookup_status, je_status, created_timestamp, updated_timestamp from trade_payloads where trade_number = ?";
@@ -41,11 +43,9 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
                 tradePayload.setId(resultSet.getLong("id"));
                 tradePayload.setTradeNumber(resultSet.getString("trade_number"));
                 tradePayload.setPayload(resultSet.getString("payload"));
-                tradePayload.setValidityStatus(ValidityStatus.valueOf(resultSet.getString("validity_status")));
-                tradePayload.setLookupStatus(LookupStatus.valueOf(resultSet.getString("lookup_status")));
-                tradePayload.setJournalEntryStatus(PostedStatus.valueOf(resultSet.getString("je_status")));
-                tradePayload.setCreatedTimestamp(Timestamp.valueOf(resultSet.getString("created_timestamp")));
-                tradePayload.setUpdatedTimestamp(Timestamp.valueOf(resultSet.getString("updated_timestamp")));
+                tradePayload.setValidityStatus(resultSet.getString("validity_status"));
+                tradePayload.setLookupStatus(resultSet.getString("lookup_status"));
+                tradePayload.setJournalEntryStatus(resultSet.getString("je_status"));
             }
         } catch (SQLException e) {
             throw new OptimisticLockingException(OPTIMISTIC_LOCKING_EXCEPTION_MESSAGE);

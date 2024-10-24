@@ -47,6 +47,7 @@ public class HibernateTradePayloadRepository implements TradePayloadRepository {
 
     private io.reactivestax.type.dto.TradePayload getTradePayloadDTO(TradePayload tradePayloadEntity) {
         io.reactivestax.type.dto.TradePayload tradePayload = new io.reactivestax.type.dto.TradePayload();
+        tradePayload.setId(tradePayloadEntity.getId());
         tradePayload.setTradeNumber(tradePayloadEntity.getTradeNumber());
         tradePayload.setPayload(tradePayloadEntity.getPayload());
         tradePayload.setLookupStatus(String.valueOf(tradePayloadEntity.getLookupStatus()));

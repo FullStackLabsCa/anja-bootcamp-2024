@@ -1,15 +1,12 @@
 package io.reactivestax.repository.jdbc;
 
-import io.reactivestax.repository.hibernate.entity.JournalEntry;
+import io.reactivestax.repository.JournalEntryRepository;
+import io.reactivestax.type.dto.JournalEntry;
 import io.reactivestax.type.enums.PostedStatus;
 import io.reactivestax.type.exception.OptimisticLockingException;
-import io.reactivestax.repository.JournalEntryRepository;
 import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class JDBCJournalEntryRepository implements JournalEntryRepository {
     private static final String INSERT_INTO_JOURNAL_ENTRY_QUERY = "Insert into journal_entry (trade_id, account_number, " +
@@ -37,10 +34,10 @@ public class JDBCJournalEntryRepository implements JournalEntryRepository {
             preparedStatement.setString(1, journalEntry.getTradeId());
             preparedStatement.setString(2, journalEntry.getAccountNumber());
             preparedStatement.setString(3, journalEntry.getSecurityCusip());
-            preparedStatement.setString(4, journalEntry.getDirection().toString());
+            preparedStatement.setString(4, journalEntry.getDirection());
             preparedStatement.setInt(5, journalEntry.getQuantity());
-            preparedStatement.setString(6, journalEntry.getPostedStatus().toString());
-            preparedStatement.setTimestamp(7, journalEntry.getTransactionTimestamp());
+            preparedStatement.setString(6, PostedStatus.NOT_POSTED.toString());
+            preparedStatement.setTimestamp(7, Timestamp.valueOf(journalEntry.getTransactionTimestamp()));
             preparedStatement.execute();
             try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {

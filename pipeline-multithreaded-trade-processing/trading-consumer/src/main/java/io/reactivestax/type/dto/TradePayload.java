@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class TradePayload {
+    private Long id;
     private String tradeNumber;
     private String payload;
     private String validityStatus;

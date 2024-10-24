@@ -1,6 +1,6 @@
 package io.reactivestax.service;
 
-import io.reactivestax.repository.hibernate.entity.JournalEntry;
+import io.reactivestax.type.dto.JournalEntry;
 
 import java.io.IOException;
 

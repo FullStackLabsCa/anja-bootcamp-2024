@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class JournalEntry {
+    private Long id;
     private String tradeId;
     private String accountNumber;
     private String securityCusip;

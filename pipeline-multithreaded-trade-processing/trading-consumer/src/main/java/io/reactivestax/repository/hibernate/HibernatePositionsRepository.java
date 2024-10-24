@@ -33,7 +33,7 @@ public class HibernatePositionsRepository implements PositionsRepository {
                     .getSingleResult();
             position1.setHolding(position1.getHolding() + position.getHolding());
         } catch (NoResultException e) {
-            session.persist(position);
+            session.persist(positionEntity);
         }
     }
 

@@ -28,7 +28,7 @@ public class HibernateJournalEntryRepository implements JournalEntryRepository {
         Session session = HibernateTransactionUtil.getInstance().getConnection();
         session.persist(journalEntryEntity);
 
-        return null;
+        return journalEntryEntity.getId();
     }
 
     @Override
