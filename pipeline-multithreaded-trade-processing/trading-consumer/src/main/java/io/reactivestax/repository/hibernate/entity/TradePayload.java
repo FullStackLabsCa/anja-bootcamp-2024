@@ -1,4 +1,4 @@
-package io.reactivestax.type.entity;
+package io.reactivestax.repository.hibernate.entity;
 
 import io.reactivestax.type.enums.LookupStatus;
 import io.reactivestax.type.enums.PostedStatus;

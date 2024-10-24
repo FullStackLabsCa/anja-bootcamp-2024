@@ -1,8 +1,8 @@
 package io.reactivestax.repository.jdbc;
 
 import io.reactivestax.repository.PositionsRepository;
-import io.reactivestax.type.entity.Position;
-import io.reactivestax.type.entity.PositionCompositeKey;
+import io.reactivestax.repository.hibernate.entity.Position;
+import io.reactivestax.repository.hibernate.entity.PositionCompositeKey;
 import io.reactivestax.type.exception.OptimisticLockingException;
 import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
 

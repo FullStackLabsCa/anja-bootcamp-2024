@@ -1,7 +1,7 @@
 package io.reactivestax.repository.jdbc;
 
 import io.reactivestax.repository.TradePayloadRepository;
-import io.reactivestax.type.entity.TradePayload;
+import io.reactivestax.repository.hibernate.entity.TradePayload;
 import io.reactivestax.type.enums.LookupStatus;
 import io.reactivestax.type.enums.PostedStatus;
 import io.reactivestax.type.enums.ValidityStatus;

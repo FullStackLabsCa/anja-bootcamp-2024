@@ -1,6 +1,6 @@
 package io.reactivestax.repository;
 
-import io.reactivestax.type.entity.JournalEntry;
+import io.reactivestax.type.dto.JournalEntry;
 
 public interface JournalEntryRepository {
     Long insertIntoJournalEntry(JournalEntry journalEntry);

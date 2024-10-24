@@ -1,9 +1,9 @@
 package io.reactivestax.util.database.hibernate;
 
-import io.reactivestax.type.entity.JournalEntry;
-import io.reactivestax.type.entity.Position;
-import io.reactivestax.type.entity.SecuritiesReference;
-import io.reactivestax.type.entity.TradePayload;
+import io.reactivestax.repository.hibernate.entity.JournalEntry;
+import io.reactivestax.repository.hibernate.entity.Position;
+import io.reactivestax.repository.hibernate.entity.SecuritiesReference;
+import io.reactivestax.repository.hibernate.entity.TradePayload;
 import io.reactivestax.util.database.ConnectionUtil;
 import io.reactivestax.util.database.TransactionUtil;
 import org.hibernate.Session;

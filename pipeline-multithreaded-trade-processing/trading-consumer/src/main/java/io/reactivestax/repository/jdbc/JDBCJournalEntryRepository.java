@@ -1,6 +1,6 @@
 package io.reactivestax.repository.jdbc;
 
-import io.reactivestax.type.entity.JournalEntry;
+import io.reactivestax.repository.hibernate.entity.JournalEntry;
 import io.reactivestax.type.enums.PostedStatus;
 import io.reactivestax.type.exception.OptimisticLockingException;
 import io.reactivestax.repository.JournalEntryRepository;

@@ -1,4 +1,4 @@
-package io.reactivestax.type.entity;
+package io.reactivestax.repository.hibernate.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
