@@ -163,4 +163,21 @@ public class ProducerJDBCTest {
         transactionUtil.rollbackTransaction();
         assertEquals(lineCount, count);
     }
+
+    @Test
+    public void testProcessChunkWithInvalidFilePath() throws SQLException {
+        transactionUtil.startTransaction();
+        chunkProcessorService.processChunk("wrongFilePath");
+        transactionUtil.startTransaction();
+        Connection connection = connectionUtil.getConnection();
+        int count = 0;
+        try (PreparedStatement preparedStatement = connection.prepareStatement("Select count(*) as count from trade_payloads")) {
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                count = resultSet.getInt("count");
+            }
+        }
+        transactionUtil.rollbackTransaction();
+        assertEquals(0, count);
+    }
 }

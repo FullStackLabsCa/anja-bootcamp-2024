@@ -3,8 +3,12 @@ package io.reactivestax;
 import io.reactivestax.service.ChunkGeneratorService;
 import io.reactivestax.service.ChunkProcessorService;
 import io.reactivestax.service.TradeService;
+import io.reactivestax.type.exception.InvalidMessagingTechnologyException;
+import io.reactivestax.type.exception.InvalidPersistenceTechnologyException;
 import io.reactivestax.util.ApplicationPropertiesUtils;
 import io.reactivestax.util.QueueProvider;
+import io.reactivestax.util.database.TransactionUtil;
+import io.reactivestax.util.factory.BeanFactory;
 import io.reactivestax.util.messaging.QueueDistributor;
 import org.junit.Assert;
 import org.junit.Before;
@@ -12,6 +16,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.junit.Assert.assertEquals;
@@ -23,6 +28,7 @@ public class ProducerTest {
     QueueDistributor queueDistributor;
     ChunkGeneratorService chunkGeneratorService;
     ChunkProcessorService chunkProcessorService;
+    TransactionUtil transactionUtil;
 
     @Before
     public void setUp() {
@@ -32,6 +38,7 @@ public class ProducerTest {
         tradeService = TradeService.getInstance();
         chunkGeneratorService = ChunkGeneratorService.getInstance();
         chunkProcessorService = ChunkProcessorService.getInstance();
+        transactionUtil = BeanFactory.getTransactionUtil();
     }
 
     @Test
@@ -94,5 +101,23 @@ public class ProducerTest {
         int queueNumber = queueDistributor.figureOutTheNextQueue("TDB_00000001", false, "random",
                 applicationPropertiesUtils.getTradeProcessorQueueCount());
         assertTrue(queueNumber >= 0 && queueNumber < applicationPropertiesUtils.getTradeProcessorQueueCount());
+    }
+
+    @Test(expected = InvalidPersistenceTechnologyException.class)
+    public void testGetTransactionUtilWithInvalidPersistenceTechnology(){
+        applicationPropertiesUtils.loadApplicationProperties("applicationTestWithInvalidProperties.properties");
+        BeanFactory.getTransactionUtil();
+    }
+
+    @Test(expected = InvalidPersistenceTechnologyException.class)
+    public void testGetTradePayloadRepositoryWithInvalidPersistenceTechnology(){
+        applicationPropertiesUtils.loadApplicationProperties("applicationTestWithInvalidProperties.properties");
+        BeanFactory.getTradePayloadRepository();
+    }
+
+    @Test(expected = InvalidMessagingTechnologyException.class)
+    public void testGetMessageSenderWithInvalidPersistenceTechnology(){
+        applicationPropertiesUtils.loadApplicationProperties("applicationTestWithInvalidProperties.properties");
+        BeanFactory.getMessageSender();
     }
 }

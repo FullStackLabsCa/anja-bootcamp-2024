@@ -124,4 +124,15 @@ public class ProducerHibernateTest {
         transactionUtil.rollbackTransaction();
         assertEquals(lineCount, tradePayloads.size());
     }
+
+    @Test
+    public void testProcessChunkWithInvalidFilePath() throws SQLException {
+        transactionUtil.startTransaction();
+        chunkProcessorService.processChunk("wrongFilePath");
+        transactionUtil.startTransaction();
+        Session session = connectionUtil.getConnection();
+        List<io.reactivestax.repository.hibernate.entity.TradePayload> tradePayloads = session.createQuery("from TradePayload", io.reactivestax.repository.hibernate.entity.TradePayload.class).getResultList();
+        transactionUtil.rollbackTransaction();
+        assertEquals(0, tradePayloads.size());
+    }
 }
