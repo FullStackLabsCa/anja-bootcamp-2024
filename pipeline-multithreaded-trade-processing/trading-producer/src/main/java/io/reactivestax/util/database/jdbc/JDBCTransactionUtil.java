@@ -57,9 +57,9 @@ public class JDBCTransactionUtil implements TransactionUtil, ConnectionUtil<Conn
 
     private void createDataSource() {
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:mysql://localhost:" + applicationPropertiesUtils.getPortNumber() + "/" + applicationPropertiesUtils.getDbName());
-        config.setUsername(applicationPropertiesUtils.getUsername());
-        config.setPassword(applicationPropertiesUtils.getPassword());
+        config.setJdbcUrl(applicationPropertiesUtils.getDbUrl());
+        config.setUsername(applicationPropertiesUtils.getDbUsername());
+        config.setPassword(applicationPropertiesUtils.getDbPassword());
         config.setMaximumPoolSize(50); // Set max connections in pool
         config.setMinimumIdle(15);
         config.setConnectionTimeout(30000); // Timeout in milliseconds

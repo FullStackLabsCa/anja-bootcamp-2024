@@ -102,6 +102,13 @@
       <artifactId>HikariCP</artifactId>
       <version>6.0.0</version>
     </dependency>
+    <!-- H2 Database -->
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <scope>test</scope>
+      <version>2.2.224</version> <!-- Choose the latest stable version -->
+    </dependency>
     <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
     <dependency>
       <groupId>mysql</groupId>
