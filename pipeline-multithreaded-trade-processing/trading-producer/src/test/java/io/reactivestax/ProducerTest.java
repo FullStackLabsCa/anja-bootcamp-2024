@@ -1,32 +1,43 @@
 package io.reactivestax;
 
 import io.reactivestax.service.ChunkGeneratorService;
+import io.reactivestax.service.ChunkProcessorService;
 import io.reactivestax.service.TradeService;
 import io.reactivestax.util.ApplicationPropertiesUtils;
+import io.reactivestax.util.QueueProvider;
+import io.reactivestax.util.messaging.QueueDistributor;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ProducerTest {
     ApplicationPropertiesUtils applicationPropertiesUtils;
     TradeService tradeService;
+    QueueDistributor queueDistributor;
+    ChunkGeneratorService chunkGeneratorService;
+    ChunkProcessorService chunkProcessorService;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance("applicationTest.properties");
         applicationPropertiesUtils.loadApplicationProperties("applicationTest.properties");
+        queueDistributor = QueueDistributor.getInstance();
         tradeService = TradeService.getInstance();
+        chunkGeneratorService = ChunkGeneratorService.getInstance();
+        chunkProcessorService = ChunkProcessorService.getInstance();
     }
 
     @Test
     public void testGenerateChunks() throws IOException, InterruptedException {
-        ApplicationPropertiesUtils.getInstance().setTotalNoOfLines(TradeService.getInstance().fileLineCounter(applicationPropertiesUtils.getFilePath()));
-        ChunkGeneratorService chunkGeneratorService = ChunkGeneratorService.getInstance();
+        applicationPropertiesUtils.setTotalNoOfLines(tradeService.fileLineCounter(applicationPropertiesUtils.getFilePath()));
+        QueueProvider.getInstance().setChunkQueue(new LinkedBlockingQueue<>(applicationPropertiesUtils.getNumberOfChunks()));
         chunkGeneratorService.generateChunks();
         File directory = new File(applicationPropertiesUtils.getChunkDirectoryPath());
         File[] files = directory.listFiles();
@@ -48,8 +59,40 @@ public class ProducerTest {
     }
 
     @Test
-    public void testBuildFilePath(){
+    public void testBuildFilePath() {
         String filePath = tradeService.buildFilePath(5, applicationPropertiesUtils.getChunkFilePathWithName());
-        Assert.assertEquals(applicationPropertiesUtils.getChunkFilePathWithName()+5+".csv", filePath);
+        Assert.assertEquals(applicationPropertiesUtils.getChunkFilePathWithName() + 5 + ".csv", filePath);
+    }
+
+    @Test
+    public void testGetQueueNumberNumberUsingRoundRobinAlgorithm() {
+        int queueNumber = queueDistributor.getQueueNumberNumberUsingAlgorithm("round-robin", applicationPropertiesUtils.getTradeProcessorQueueCount());
+        assertTrue(queueNumber >= 0 && queueNumber < applicationPropertiesUtils.getTradeProcessorQueueCount());
+    }
+
+    @Test
+    public void testGetQueueNumberNumberUsingRandomAlgorithm() {
+        int queueNumber = queueDistributor.getQueueNumberNumberUsingAlgorithm("random", applicationPropertiesUtils.getTradeProcessorQueueCount());
+        assertTrue(queueNumber >= 0 && queueNumber < applicationPropertiesUtils.getTradeProcessorQueueCount());
+    }
+
+    @Test
+    public void testFigureOutTheNextQueueUsingRoundRobinAlgorithmUseMapTrue() {
+        int queueNumber1 = queueDistributor.figureOutTheNextQueue("TDB_00000001", true, "round-robin", applicationPropertiesUtils.getTradeProcessorQueueCount());
+        int queueNumber2 = queueDistributor.figureOutTheNextQueue("TDB_00000001", true, "round-robin", applicationPropertiesUtils.getTradeProcessorQueueCount());
+        assertEquals(queueNumber1, queueNumber2);
+    }
+
+    @Test
+    public void testFigureOutTheNextQueueUsingRoundRobinAlgorithmUseMapFalse() {
+        int queueNumber = queueDistributor.figureOutTheNextQueue("TDB_00000001", true, "round-robin", applicationPropertiesUtils.getTradeProcessorQueueCount());
+        assertTrue(queueNumber >= 0 && queueNumber < applicationPropertiesUtils.getTradeProcessorQueueCount());
+    }
+
+    @Test
+    public void testFigureOutTheNextQueueUsingRandomAlgorithm() {
+        int queueNumber = queueDistributor.figureOutTheNextQueue("TDB_00000001", false, "random",
+                applicationPropertiesUtils.getTradeProcessorQueueCount());
+        assertTrue(queueNumber >= 0 && queueNumber < applicationPropertiesUtils.getTradeProcessorQueueCount());
     }
 }

@@ -5,16 +5,25 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public class QueueDistributor {
-    static ConcurrentMap<String, Integer> concurrentQueueDistributorMap = new ConcurrentHashMap<>();
+    private static QueueDistributor instance;
+    private final ConcurrentMap<String, Integer> concurrentQueueDistributorMap = new ConcurrentHashMap<>();
 
-    static int queueNumber = 0;
+    private int queueNumber = 0;
 
-    static Random random = new Random();
+    private final Random random = new Random();
 
     private QueueDistributor() {
     }
 
-    public static synchronized int figureOutTheNextQueue(String value, boolean useMap, String distAlgorithm, int queueCount) {
+    public static synchronized QueueDistributor getInstance() {
+        if (instance == null) {
+            instance = new QueueDistributor();
+        }
+
+        return instance;
+    }
+
+    public synchronized int figureOutTheNextQueue(String value, boolean useMap, String distAlgorithm, int queueCount) {
         int queue;
         if (useMap) {
             if (concurrentQueueDistributorMap.containsKey(value)) {
@@ -28,7 +37,7 @@ public class QueueDistributor {
         return queue;
     }
 
-    public static int getQueueNumberNumberUsingAlgorithm(String distAlgorithm, int queueCount) {
+    public int getQueueNumberNumberUsingAlgorithm(String distAlgorithm, int queueCount) {
         int queue = 0;
         if (distAlgorithm.equals("random")) {
             queue = random.nextInt(queueCount);

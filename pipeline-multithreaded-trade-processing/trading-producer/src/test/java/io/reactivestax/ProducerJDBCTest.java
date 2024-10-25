@@ -1,8 +1,12 @@
 package io.reactivestax;
 
 import io.reactivestax.repository.TradePayloadRepository;
+import io.reactivestax.service.ChunkGeneratorService;
+import io.reactivestax.service.ChunkProcessorService;
+import io.reactivestax.service.TradeService;
 import io.reactivestax.type.dto.TradePayload;
 import io.reactivestax.util.ApplicationPropertiesUtils;
+import io.reactivestax.util.QueueProvider;
 import io.reactivestax.util.database.ConnectionUtil;
 import io.reactivestax.util.database.TransactionUtil;
 import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
@@ -11,7 +15,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.sql.*;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
 
 import static org.junit.Assert.assertEquals;
@@ -20,6 +26,9 @@ public class ProducerJDBCTest {
     TradePayloadRepository tradePayloadRepository;
     ConnectionUtil<Connection> connectionUtil;
     TransactionUtil transactionUtil;
+    TradeService tradeService;
+    ChunkGeneratorService chunkGeneratorService;
+    ChunkProcessorService chunkProcessorService;
     ApplicationPropertiesUtils applicationPropertiesUtils;
     Logger logger = Logger.getLogger(ProducerJDBCTest.class.getName());
 
@@ -30,6 +39,9 @@ public class ProducerJDBCTest {
         connectionUtil = JDBCTransactionUtil.getInstance();
         tradePayloadRepository = BeanFactory.getTradePayloadRepository();
         transactionUtil = BeanFactory.getTransactionUtil();
+        tradeService = TradeService.getInstance();
+        chunkGeneratorService = ChunkGeneratorService.getInstance();
+        chunkProcessorService = ChunkProcessorService.getInstance();
         String[] sqlCommands = new String[]{
                 // Drop existing tables if they exist
                 "DROP TABLE IF EXISTS trade_payloads",
@@ -129,5 +141,26 @@ public class ProducerJDBCTest {
             transactionUtil.commitTransaction();
         }
         assertEquals(1, count);
+    }
+
+    @Test
+    public void testProcessChunk() throws IOException, InterruptedException, SQLException {
+        applicationPropertiesUtils.setTotalNoOfLines(tradeService.fileLineCounter(applicationPropertiesUtils.getFilePath()));
+        QueueProvider.getInstance().setChunkQueue(new LinkedBlockingQueue<>(applicationPropertiesUtils.getNumberOfChunks()));
+        chunkGeneratorService.generateChunks();
+        String chunkFilePath = tradeService.buildFilePath(1, applicationPropertiesUtils.getChunkFilePathWithName());
+        long lineCount = tradeService.fileLineCounter(chunkFilePath) + 1;
+        chunkProcessorService.processChunk(chunkFilePath);
+        transactionUtil.startTransaction();
+        Connection connection = connectionUtil.getConnection();
+        int count = 0;
+        try (PreparedStatement preparedStatement = connection.prepareStatement("Select count(*) as count from trade_payloads")) {
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                count = resultSet.getInt("count");
+            }
+        }
+        transactionUtil.rollbackTransaction();
+        assertEquals(lineCount, count);
     }
 }

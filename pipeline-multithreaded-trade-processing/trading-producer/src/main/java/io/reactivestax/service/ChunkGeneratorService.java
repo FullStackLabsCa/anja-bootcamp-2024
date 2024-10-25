@@ -45,12 +45,12 @@ public class ChunkGeneratorService implements ChunkGenerator {
                     tempChunkCount++;
                     tempLineCount = 0;
                     writer.close();
-                    QueueProvider.getChunkQueue().put(chunkFilePath);
+                    QueueProvider.getInstance().getChunkQueue().put(chunkFilePath);
                     chunkFilePath = tradeService.buildFilePath(tempChunkCount, applicationPropertiesUtils.getChunkFilePathWithName());
                     writer = new BufferedWriter(new FileWriter(chunkFilePath));
                 }
             }
-            QueueProvider.getChunkQueue().put(chunkFilePath);
+            QueueProvider.getInstance().getChunkQueue().put(chunkFilePath);
         } finally {
             writer.close();
         }

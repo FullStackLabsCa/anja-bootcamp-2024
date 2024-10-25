@@ -60,7 +60,7 @@ public class ChunkProcessorService implements ChunkProcessor {
         if (tradePayload.getValidityStatus().equals(ValidityStatus.VALID.toString())) {
             ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
             String queueName = applicationPropertiesUtils.getQueueExchangeName() + "_queue_"
-                    + QueueDistributor.figureOutTheNextQueue(
+                    + QueueDistributor.getInstance().figureOutTheNextQueue(
                     applicationPropertiesUtils.getTradeDistributionCriteria().equals("accountNumber")
                             ? transaction[2]
                             : tradePayload.getTradeNumber(),

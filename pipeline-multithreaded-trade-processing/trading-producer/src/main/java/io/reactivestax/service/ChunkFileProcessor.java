@@ -12,7 +12,7 @@ public class ChunkFileProcessor implements Runnable {
     public void run() {
         try {
             while (true) {
-                String filePath = QueueProvider.getChunkQueue().take();
+                String filePath = QueueProvider.getInstance().getChunkQueue().take();
                 if (!filePath.isEmpty()) {
                     ChunkProcessorService.getInstance().processChunk(filePath);
                     break;
