@@ -1,5 +1,6 @@
 package io.reactivestax;
 
+import io.reactivestax.service.ChunkFileGenerator;
 import io.reactivestax.service.ChunkGeneratorService;
 import io.reactivestax.service.ChunkProcessorService;
 import io.reactivestax.service.TradeService;
@@ -16,7 +17,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.junit.Assert.assertEquals;
@@ -46,17 +46,17 @@ public class ProducerTest {
         applicationPropertiesUtils.setTotalNoOfLines(tradeService.fileLineCounter(applicationPropertiesUtils.getFilePath()));
         QueueProvider.getInstance().setChunkQueue(new LinkedBlockingQueue<>(applicationPropertiesUtils.getNumberOfChunks()));
         chunkGeneratorService.generateChunks();
+        long fileCount = 0;
         File directory = new File(applicationPropertiesUtils.getChunkDirectoryPath());
         File[] files = directory.listFiles();
         if (files != null) {
-            long fileCount = 0;
             for (File file : files) {
                 if (file.isFile()) {
                     fileCount++;
                 }
             }
-            assertEquals(applicationPropertiesUtils.getNumberOfChunks(), fileCount);
         }
+        assertEquals(applicationPropertiesUtils.getNumberOfChunks(), fileCount);
     }
 
     @Test
@@ -104,20 +104,38 @@ public class ProducerTest {
     }
 
     @Test(expected = InvalidPersistenceTechnologyException.class)
-    public void testGetTransactionUtilWithInvalidPersistenceTechnology(){
+    public void testGetTransactionUtilWithInvalidPersistenceTechnology() {
         applicationPropertiesUtils.loadApplicationProperties("applicationTestWithInvalidProperties.properties");
         BeanFactory.getTransactionUtil();
     }
 
     @Test(expected = InvalidPersistenceTechnologyException.class)
-    public void testGetTradePayloadRepositoryWithInvalidPersistenceTechnology(){
+    public void testGetTradePayloadRepositoryWithInvalidPersistenceTechnology() {
         applicationPropertiesUtils.loadApplicationProperties("applicationTestWithInvalidProperties.properties");
         BeanFactory.getTradePayloadRepository();
     }
 
     @Test(expected = InvalidMessagingTechnologyException.class)
-    public void testGetMessageSenderWithInvalidPersistenceTechnology(){
+    public void testGetMessageSenderWithInvalidPersistenceTechnology() {
         applicationPropertiesUtils.loadApplicationProperties("applicationTestWithInvalidProperties.properties");
         BeanFactory.getMessageSender();
+    }
+
+    @Test
+    public void testChunkFileGeneratorRun() throws IOException {
+        applicationPropertiesUtils.setTotalNoOfLines(tradeService.fileLineCounter(applicationPropertiesUtils.getFilePath()));
+        ChunkFileGenerator chunkFileGenerator = new ChunkFileGenerator();
+        chunkFileGenerator.run();
+        long fileCount = 0;
+        File directory = new File(applicationPropertiesUtils.getChunkDirectoryPath());
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isFile()) {
+                    fileCount++;
+                }
+            }
+        }
+        assertEquals(applicationPropertiesUtils.getNumberOfChunks(), fileCount);
     }
 }
