@@ -1,6 +1,7 @@
 package io.reactivestax;
 
 import io.reactivestax.repository.TradePayloadRepository;
+import io.reactivestax.service.ChunkFileProcessor;
 import io.reactivestax.service.ChunkGeneratorService;
 import io.reactivestax.service.ChunkProcessorService;
 import io.reactivestax.service.TradeService;
@@ -134,5 +135,21 @@ public class ProducerHibernateTest {
         List<io.reactivestax.repository.hibernate.entity.TradePayload> tradePayloads = session.createQuery("from TradePayload", io.reactivestax.repository.hibernate.entity.TradePayload.class).getResultList();
         transactionUtil.rollbackTransaction();
         assertEquals(0, tradePayloads.size());
+    }
+
+    @Test
+    public void testChunkProcessorRun() throws IOException, InterruptedException {
+        applicationPropertiesUtils.setTotalNoOfLines(tradeService.fileLineCounter(applicationPropertiesUtils.getFilePath()));
+        QueueProvider.getInstance().setChunkQueue(new LinkedBlockingQueue<>(applicationPropertiesUtils.getNumberOfChunks()));
+        chunkGeneratorService.generateChunks();
+        String chunkFilePath = tradeService.buildFilePath(1, applicationPropertiesUtils.getChunkFilePathWithName());
+        long lineCount = tradeService.fileLineCounter(chunkFilePath) + 1;
+        ChunkFileProcessor chunkFileProcessor = new ChunkFileProcessor();
+        chunkFileProcessor.run();
+        transactionUtil.startTransaction();
+        Session session = connectionUtil.getConnection();
+        List<io.reactivestax.repository.hibernate.entity.TradePayload> tradePayloads = session.createQuery("from TradePayload", io.reactivestax.repository.hibernate.entity.TradePayload.class).getResultList();
+        transactionUtil.rollbackTransaction();
+        assertEquals(lineCount, tradePayloads.size());
     }
 }

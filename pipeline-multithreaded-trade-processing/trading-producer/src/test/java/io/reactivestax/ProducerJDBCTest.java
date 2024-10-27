@@ -1,6 +1,7 @@
 package io.reactivestax;
 
 import io.reactivestax.repository.TradePayloadRepository;
+import io.reactivestax.service.ChunkFileProcessor;
 import io.reactivestax.service.ChunkGeneratorService;
 import io.reactivestax.service.ChunkProcessorService;
 import io.reactivestax.service.TradeService;
@@ -11,12 +12,14 @@ import io.reactivestax.util.database.ConnectionUtil;
 import io.reactivestax.util.database.TransactionUtil;
 import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
 import io.reactivestax.util.factory.BeanFactory;
+import org.hibernate.Session;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.sql.*;
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
 
@@ -179,5 +182,27 @@ public class ProducerJDBCTest {
         }
         transactionUtil.rollbackTransaction();
         assertEquals(0, count);
+    }
+
+    @Test
+    public void testChunkProcessorRun() throws IOException, InterruptedException, SQLException {
+        applicationPropertiesUtils.setTotalNoOfLines(tradeService.fileLineCounter(applicationPropertiesUtils.getFilePath()));
+        QueueProvider.getInstance().setChunkQueue(new LinkedBlockingQueue<>(applicationPropertiesUtils.getNumberOfChunks()));
+        chunkGeneratorService.generateChunks();
+        String chunkFilePath = tradeService.buildFilePath(1, applicationPropertiesUtils.getChunkFilePathWithName());
+        long lineCount = tradeService.fileLineCounter(chunkFilePath) + 1;
+        ChunkFileProcessor chunkFileProcessor = new ChunkFileProcessor();
+        chunkFileProcessor.run();
+        transactionUtil.startTransaction();
+        Connection connection = connectionUtil.getConnection();
+        int count = 0;
+        try (PreparedStatement preparedStatement = connection.prepareStatement("Select count(*) as count from trade_payloads")) {
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                count = resultSet.getInt("count");
+            }
+        }
+        transactionUtil.rollbackTransaction();
+        assertEquals(lineCount, count);
     }
 }
