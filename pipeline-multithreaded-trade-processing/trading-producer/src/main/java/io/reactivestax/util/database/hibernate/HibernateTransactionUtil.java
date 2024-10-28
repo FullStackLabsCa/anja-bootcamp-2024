@@ -30,10 +30,10 @@ public class HibernateTransactionUtil implements TransactionUtil, ConnectionUtil
         return instance;
     }
 
-    private static synchronized SessionFactory buildSessionFactory(String resource) {
+    private static synchronized SessionFactory buildSessionFactory() {
         if (sessionFactory == null) {
             Configuration configuration = getConfiguration();
-            configuration.configure(resource);
+            configuration.configure(HibernateTransactionUtil.DEFAULT_RESOURCE);
             LOGGER.debug("Hibernate Annotation Configuration loaded");
 
             StandardServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
@@ -59,7 +59,7 @@ public class HibernateTransactionUtil implements TransactionUtil, ConnectionUtil
     }
 
     public static SessionFactory getSessionFactory() {
-        return buildSessionFactory(DEFAULT_RESOURCE);
+        return buildSessionFactory();
     }
 
     @Override

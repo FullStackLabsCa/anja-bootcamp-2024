@@ -13,10 +13,8 @@ public class ApplicationPropertiesUtils {
     private final Logger logger = Logger.getLogger(ApplicationPropertiesUtils.class.getName());
 
     private int maxRetryCount;
-    private String dbName;
-    private String portNumber;
-    private String username;
-    private String password;
+    private String dbUsername;
+    private String dbPassword;
     private String queueHost;
     private String queueUsername;
     private String queuePassword;
@@ -57,10 +55,8 @@ public class ApplicationPropertiesUtils {
                 System.exit(1);
             }
             properties.load(input);
-            dbName = properties.getProperty("db.name");
-            username = properties.getProperty("username");
-            password = properties.getProperty("password");
-            portNumber = properties.getProperty("port");
+            dbUsername = properties.getProperty("username");
+            dbPassword = properties.getProperty("password");
             maxRetryCount = Integer.parseInt(properties.getProperty("max.retry.count"));
             tradeProcessorQueueCount = Integer.parseInt(properties.getProperty("queue.count"));
             tradeProcessorThreadCount = Integer.parseInt(properties.getProperty("trade.processor.thread.count"));

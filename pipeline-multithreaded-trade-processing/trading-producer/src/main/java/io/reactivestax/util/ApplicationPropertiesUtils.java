@@ -72,8 +72,8 @@ public class ApplicationPropertiesUtils {
             hibernateDBCreationMode = properties.getProperty("hibernate.hbm2ddl.auto");
             dbDriverClass = properties.getProperty("db.driver.class");
             dbUrl = properties.getProperty("db.url");
-            dbUsername = properties.getProperty("username");
-            dbPassword = properties.getProperty("password");
+            dbUsername = properties.getProperty("db.username");
+            dbPassword = properties.getProperty("db.password");
             numberOfChunks = Integer.parseInt(properties.getProperty("chunks.count"));
             chunkProcessorThreadCount = Integer.parseInt(properties.getProperty("chunk.processor.thread.count"));
             tradeProcessorQueueCount = Integer.parseInt(properties.getProperty("queue.count"));
