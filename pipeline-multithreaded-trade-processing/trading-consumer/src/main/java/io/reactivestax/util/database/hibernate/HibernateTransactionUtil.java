@@ -33,15 +33,11 @@ public class HibernateTransactionUtil implements TransactionUtil, ConnectionUtil
         return instance;
     }
 
-    private static synchronized SessionFactory buildSessionFactory(String resource) {
+    private static synchronized SessionFactory buildSessionFactory() {
         if (sessionFactory == null) {
             // Create the SessionFactory from hibernate-annotation.cfg.xml
-            Configuration configuration = new Configuration();
-            configuration.addAnnotatedClass(JournalEntry.class);
-            configuration.addAnnotatedClass(Position.class);
-            configuration.addAnnotatedClass(SecuritiesReference.class);
-            configuration.addAnnotatedClass(TradePayload.class);
-            configuration.configure(resource);
+            Configuration configuration = getConfiguration();
+            configuration.configure(HibernateTransactionUtil.DEFAULT_RESOURCE);
             LOGGER.debug("Hibernate Annotation Configuration loaded");
 
             StandardServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
@@ -64,15 +60,14 @@ public class HibernateTransactionUtil implements TransactionUtil, ConnectionUtil
         configuration.setProperty("hibernate.dialect", applicationPropertiesUtils.getHibernateDialect());
         configuration.setProperty("hibernate.hbm2ddl.auto", applicationPropertiesUtils.getHibernateDBCreationMode());
         configuration.addAnnotatedClass(TradePayload.class);
+        configuration.addAnnotatedClass(JournalEntry.class);
+        configuration.addAnnotatedClass(Position.class);
+        configuration.addAnnotatedClass(SecuritiesReference.class);
         return configuration;
     }
 
     public static SessionFactory getSessionFactory() {
-        return buildSessionFactory(DEFAULT_RESOURCE);
-    }
-
-    public static SessionFactory getSessionFactory(String resource) {
-        return buildSessionFactory(resource);
+        return buildSessionFactory();
     }
 
     @Override

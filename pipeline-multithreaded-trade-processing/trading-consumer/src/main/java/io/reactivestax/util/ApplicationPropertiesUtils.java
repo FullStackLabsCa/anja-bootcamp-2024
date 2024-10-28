@@ -13,8 +13,12 @@ public class ApplicationPropertiesUtils {
     private final Logger logger = Logger.getLogger(ApplicationPropertiesUtils.class.getName());
 
     private int maxRetryCount;
+    private String dbDriverClass;
+    private String dbUrl;
     private String dbUsername;
     private String dbPassword;
+    private String hibernateDialect;
+    private String hibernateDBCreationMode;
     private String queueHost;
     private String queueUsername;
     private String queuePassword;
@@ -55,8 +59,12 @@ public class ApplicationPropertiesUtils {
                 System.exit(1);
             }
             properties.load(input);
-            dbUsername = properties.getProperty("username");
-            dbPassword = properties.getProperty("password");
+            dbUsername = properties.getProperty("db.username");
+            dbPassword = properties.getProperty("db.password");
+            hibernateDialect = properties.getProperty("hibernate.dialect");
+            hibernateDBCreationMode = properties.getProperty("hibernate.hbm2ddl.auto");
+            dbDriverClass = properties.getProperty("db.driver.class");
+            dbUrl = properties.getProperty("db.url");
             maxRetryCount = Integer.parseInt(properties.getProperty("max.retry.count"));
             tradeProcessorQueueCount = Integer.parseInt(properties.getProperty("queue.count"));
             tradeProcessorThreadCount = Integer.parseInt(properties.getProperty("trade.processor.thread.count"));
