@@ -18,6 +18,4 @@ public class ConsumerTest {
         tradeService = TradeService.getInstance();
         transactionUtil = BeanFactory.getTransactionUtil();
     }
-
-
 }

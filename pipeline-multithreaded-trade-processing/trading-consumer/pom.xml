@@ -67,6 +67,13 @@
       <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
+    <!-- H2 Database -->
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <scope>test</scope>
+      <version>2.2.224</version> <!-- Choose the latest stable version -->
+    </dependency>
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-core</artifactId>

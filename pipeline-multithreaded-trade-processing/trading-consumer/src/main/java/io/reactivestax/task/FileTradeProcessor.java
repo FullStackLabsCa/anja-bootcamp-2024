@@ -1,5 +1,6 @@
-package io.reactivestax.service;
+package io.reactivestax.task;
 
+import io.reactivestax.service.TradeProcessorService;
 import io.reactivestax.util.factory.BeanFactory;
 import io.reactivestax.util.messaging.MessageReceiver;
 

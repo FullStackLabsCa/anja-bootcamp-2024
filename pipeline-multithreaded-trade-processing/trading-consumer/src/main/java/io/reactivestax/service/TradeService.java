@@ -1,5 +1,6 @@
 package io.reactivestax.service;
 
+import io.reactivestax.task.FileTradeProcessor;
 import io.reactivestax.util.ApplicationPropertiesUtils;
 
 import java.util.concurrent.ExecutorService;

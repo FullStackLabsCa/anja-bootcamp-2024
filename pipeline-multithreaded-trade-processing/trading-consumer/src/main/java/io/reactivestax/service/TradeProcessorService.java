@@ -4,6 +4,7 @@ import io.reactivestax.repository.JournalEntryRepository;
 import io.reactivestax.repository.LookupSecuritiesRepository;
 import io.reactivestax.repository.PositionsRepository;
 import io.reactivestax.repository.TradePayloadRepository;
+import io.reactivestax.task.TradeProcessor;
 import io.reactivestax.type.dto.JournalEntry;
 import io.reactivestax.type.dto.Position;
 import io.reactivestax.type.dto.TradePayload;
