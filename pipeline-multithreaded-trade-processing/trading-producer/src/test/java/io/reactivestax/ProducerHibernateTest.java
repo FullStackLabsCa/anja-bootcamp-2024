@@ -1,7 +1,7 @@
 package io.reactivestax;
 
 import io.reactivestax.repository.TradePayloadRepository;
-import io.reactivestax.service.ChunkFileProcessor;
+import io.reactivestax.task.ChunkFileProcessor;
 import io.reactivestax.service.ChunkGeneratorService;
 import io.reactivestax.service.ChunkProcessorService;
 import io.reactivestax.service.TradeService;

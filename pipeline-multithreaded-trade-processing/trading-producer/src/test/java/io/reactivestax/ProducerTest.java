@@ -1,6 +1,6 @@
 package io.reactivestax;
 
-import io.reactivestax.service.ChunkFileGenerator;
+import io.reactivestax.task.ChunkFileGenerator;
 import io.reactivestax.service.ChunkGeneratorService;
 import io.reactivestax.service.ChunkProcessorService;
 import io.reactivestax.service.TradeService;

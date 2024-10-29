@@ -1,4 +1,6 @@
-package io.reactivestax.service;
+package io.reactivestax.task;
+
+import io.reactivestax.service.ChunkGeneratorService;
 
 import java.io.IOException;
 import java.util.logging.Logger;

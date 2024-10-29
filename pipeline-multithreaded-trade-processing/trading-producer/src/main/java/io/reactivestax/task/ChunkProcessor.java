@@ -1,4 +1,4 @@
-package io.reactivestax.service;
+package io.reactivestax.task;
 
 import java.sql.SQLException;
 

@@ -1,5 +1,6 @@
 package io.reactivestax.service;
 
+import io.reactivestax.task.ChunkGenerator;
 import io.reactivestax.util.ApplicationPropertiesUtils;
 import io.reactivestax.util.QueueProvider;
 

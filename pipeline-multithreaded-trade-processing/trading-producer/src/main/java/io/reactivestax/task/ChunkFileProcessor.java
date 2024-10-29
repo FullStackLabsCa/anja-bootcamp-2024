@@ -1,5 +1,6 @@
-package io.reactivestax.service;
+package io.reactivestax.task;
 
+import io.reactivestax.service.ChunkProcessorService;
 import io.reactivestax.util.QueueProvider;
 
 import java.sql.SQLException;

@@ -1,6 +1,7 @@
 package io.reactivestax.service;
 
 import io.reactivestax.repository.TradePayloadRepository;
+import io.reactivestax.task.ChunkProcessor;
 import io.reactivestax.type.dto.TradePayload;
 import io.reactivestax.type.enums.ValidityStatus;
 import io.reactivestax.util.ApplicationPropertiesUtils;
