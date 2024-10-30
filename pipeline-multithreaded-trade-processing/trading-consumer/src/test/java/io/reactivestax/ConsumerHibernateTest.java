@@ -210,4 +210,27 @@ public class ConsumerHibernateTest {
                 positionDto.getAccountNumber()).setParameter("securityCusip", positionDto.getSecurityCusip()).getSingleResult();
         Assert.assertNotNull(position);
     }
+
+    @Test
+    public void testUpdatePosition(){
+        io.reactivestax.type.dto.Position positionDto1 = new io.reactivestax.type.dto.Position();
+        positionDto1.setAccountNumber(journalEntryDto1.getAccountNumber());
+        positionDto1.setSecurityCusip(journalEntryDto1.getSecurityCusip());
+        positionDto1.setHolding((long) journalEntryDto1.getQuantity());
+        transactionUtil.startTransaction();
+        positionsRepository.upsertPosition(positionDto1);
+        transactionUtil.commitTransaction();
+        io.reactivestax.type.dto.Position positionDto2 = new io.reactivestax.type.dto.Position();
+        positionDto2.setAccountNumber(journalEntryDto2.getAccountNumber());
+        positionDto2.setSecurityCusip(journalEntryDto2.getSecurityCusip());
+        positionDto2.setHolding((long) journalEntryDto2.getQuantity());
+        transactionUtil.startTransaction();
+        positionsRepository.upsertPosition(positionDto2);
+        transactionUtil.commitTransaction();
+        Session session = connectionUtil.getConnection();
+        Position position = session.createQuery("from Position where positionCompositeKey.accountNumber = :accountNumber " +
+                "and positionCompositeKey.securityCusip = :securityCusip", Position.class).setParameter("accountNumber",
+                positionDto1.getAccountNumber()).setParameter("securityCusip", positionDto1.getSecurityCusip()).getSingleResult();
+        Assert.assertEquals(1, position.getVersion());
+    }
 }
