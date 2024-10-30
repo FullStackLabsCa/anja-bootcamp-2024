@@ -1,8 +1,11 @@
 package io.reactivestax;
 
 import io.reactivestax.repository.JournalEntryRepository;
+import io.reactivestax.repository.LookupSecuritiesRepository;
+import io.reactivestax.repository.PositionsRepository;
 import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.repository.hibernate.entity.JournalEntry;
+import io.reactivestax.repository.hibernate.entity.Position;
 import io.reactivestax.repository.hibernate.entity.SecuritiesReference;
 import io.reactivestax.repository.hibernate.entity.TradePayload;
 import io.reactivestax.service.TradeService;
@@ -30,8 +33,12 @@ import java.util.logging.Logger;
 public class ConsumerHibernateTest {
     TradePayloadRepository tradePayloadRepository;
     JournalEntryRepository journalEntryRepository;
+    LookupSecuritiesRepository lookupSecuritiesRepository;
+    PositionsRepository positionsRepository;
     ConnectionUtil<Session> connectionUtil;
     TransactionUtil transactionUtil;
+    io.reactivestax.type.dto.JournalEntry journalEntryDto1 = new io.reactivestax.type.dto.JournalEntry();
+    io.reactivestax.type.dto.JournalEntry journalEntryDto2 = new io.reactivestax.type.dto.JournalEntry();
     ApplicationPropertiesUtils applicationPropertiesUtils;
     TradeService tradeService;
     Logger logger = Logger.getLogger(ConsumerHibernateTest.class.getName());
@@ -44,7 +51,21 @@ public class ConsumerHibernateTest {
         connectionUtil = HibernateTransactionUtil.getInstance();
         tradePayloadRepository = BeanFactory.getTradePayloadRepository();
         journalEntryRepository = BeanFactory.getJournalEntryRepository();
+        lookupSecuritiesRepository = BeanFactory.getLookupSecuritiesRepository();
+        positionsRepository = BeanFactory.getPositionsRepository();
         transactionUtil = BeanFactory.getTransactionUtil();
+        journalEntryDto1.setTradeId("TDB_000001");
+        journalEntryDto1.setAccountNumber("TDB_CUST_5214938");
+        journalEntryDto1.setSecurityCusip("TSLA");
+        journalEntryDto1.setQuantity(1);
+        journalEntryDto1.setDirection(Direction.BUY.name());
+        journalEntryDto1.setTransactionTimestamp("2024-09-19 22:16:18");
+        journalEntryDto2.setTradeId("TDB_000002");
+        journalEntryDto2.setAccountNumber("TDB_CUST_5214938");
+        journalEntryDto2.setSecurityCusip("TSLA");
+        journalEntryDto2.setQuantity(1);
+        journalEntryDto2.setDirection(Direction.BUY.name());
+        journalEntryDto2.setTransactionTimestamp("2024-09-19 22:16:18");
         transactionUtil.startTransaction();
         String[] cusipArray = {"AAPL", "GOOGL", "AMZN", "MSFT", "TSLA", "NFLX", "FB", "NVDA", "JPM", "VISA", "MA", "BAC", "DIS", "INTC", "CSCO", "ORCL", "WMT", "T", "VZ", "ADBE", "CRM", "PYPL", "PFE", "XOM", "UNH"};
         for (String cusip : cusipArray) {
@@ -133,7 +154,7 @@ public class ConsumerHibernateTest {
     }
 
     @Test
-    public void testInsertIntoJournalEntry(){
+    public void testInsertIntoJournalEntry() {
         io.reactivestax.type.dto.JournalEntry journalEntryDto = new io.reactivestax.type.dto.JournalEntry();
         journalEntryDto.setTradeId("TDB_000001");
         journalEntryDto.setAccountNumber("TDB_CUST_5214938");
@@ -141,13 +162,52 @@ public class ConsumerHibernateTest {
         journalEntryDto.setQuantity(1);
         journalEntryDto.setDirection(Direction.BUY.name());
         journalEntryDto.setTransactionTimestamp("2024-09-19 22:16:18");
-        journalEntryRepository.insertIntoJournalEntry(journalEntryDto);
         transactionUtil.startTransaction();
-        Session session= connectionUtil.getConnection();
-        JournalEntry journalEntry =
-                session.createQuery("from JournalEntry where tradeId = :tradeId", JournalEntry.class).setParameter("tradeId",
-                journalEntryDto.getTradeId()).getSingleResult();
-        transactionUtil.rollbackTransaction();
+        Long entryId = journalEntryRepository.insertIntoJournalEntry(journalEntryDto);
+        transactionUtil.commitTransaction();
+        Session session = connectionUtil.getConnection();
+        JournalEntry journalEntry = session.get(JournalEntry.class, entryId);
         Assert.assertEquals(journalEntryDto.getAccountNumber(), journalEntry.getAccountNumber());
+    }
+
+    @Test
+    public void testUpdateJournalEntryStatus() {
+        transactionUtil.startTransaction();
+        Long entryId = journalEntryRepository.insertIntoJournalEntry(journalEntryDto1);
+        transactionUtil.commitTransaction();
+        transactionUtil.startTransaction();
+        journalEntryRepository.updateJournalEntryStatus(entryId);
+        transactionUtil.commitTransaction();
+        Session session = connectionUtil.getConnection();
+        JournalEntry journalEntry = session.get(JournalEntry.class, entryId);
+        Assert.assertEquals(PostedStatus.POSTED, journalEntry.getPostedStatus());
+    }
+
+    @Test
+    public void testLookupSecuritiesWithExistingCusip() {
+        boolean exist = lookupSecuritiesRepository.lookupSecurities("TSLA");
+        Assert.assertTrue(exist);
+    }
+
+    @Test
+    public void testLookupSecuritiesWithNonExistingCusip() {
+        boolean exist = lookupSecuritiesRepository.lookupSecurities("V");
+        Assert.assertFalse(exist);
+    }
+
+    @Test
+    public void testInsertPosition() {
+        io.reactivestax.type.dto.Position positionDto = new io.reactivestax.type.dto.Position();
+        positionDto.setAccountNumber(journalEntryDto1.getAccountNumber());
+        positionDto.setSecurityCusip(journalEntryDto1.getSecurityCusip());
+        positionDto.setHolding((long) journalEntryDto1.getQuantity());
+        transactionUtil.startTransaction();
+        positionsRepository.upsertPosition(positionDto);
+        transactionUtil.commitTransaction();
+        Session session = connectionUtil.getConnection();
+        Position position = session.createQuery("from Position where positionCompositeKey.accountNumber = :accountNumber " +
+                "and positionCompositeKey.securityCusip = :securityCusip", Position.class).setParameter("accountNumber",
+                positionDto.getAccountNumber()).setParameter("securityCusip", positionDto.getSecurityCusip()).getSingleResult();
+        Assert.assertNotNull(position);
     }
 }
