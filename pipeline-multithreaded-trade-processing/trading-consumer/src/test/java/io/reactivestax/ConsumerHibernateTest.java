@@ -1,9 +1,12 @@
 package io.reactivestax;
 
+import io.reactivestax.repository.JournalEntryRepository;
 import io.reactivestax.repository.TradePayloadRepository;
+import io.reactivestax.repository.hibernate.entity.JournalEntry;
 import io.reactivestax.repository.hibernate.entity.SecuritiesReference;
 import io.reactivestax.repository.hibernate.entity.TradePayload;
 import io.reactivestax.service.TradeService;
+import io.reactivestax.type.enums.Direction;
 import io.reactivestax.type.enums.LookupStatus;
 import io.reactivestax.type.enums.PostedStatus;
 import io.reactivestax.util.ApplicationPropertiesUtils;
@@ -26,6 +29,7 @@ import java.util.logging.Logger;
 
 public class ConsumerHibernateTest {
     TradePayloadRepository tradePayloadRepository;
+    JournalEntryRepository journalEntryRepository;
     ConnectionUtil<Session> connectionUtil;
     TransactionUtil transactionUtil;
     ApplicationPropertiesUtils applicationPropertiesUtils;
@@ -39,6 +43,7 @@ public class ConsumerHibernateTest {
         applicationPropertiesUtils.loadApplicationProperties("applicationHibernateTest.properties");
         connectionUtil = HibernateTransactionUtil.getInstance();
         tradePayloadRepository = BeanFactory.getTradePayloadRepository();
+        journalEntryRepository = BeanFactory.getJournalEntryRepository();
         transactionUtil = BeanFactory.getTransactionUtil();
         transactionUtil.startTransaction();
         String[] cusipArray = {"AAPL", "GOOGL", "AMZN", "MSFT", "TSLA", "NFLX", "FB", "NVDA", "JPM", "VISA", "MA", "BAC", "DIS", "INTC", "CSCO", "ORCL", "WMT", "T", "VZ", "ADBE", "CRM", "PYPL", "PFE", "XOM", "UNH"};
@@ -111,6 +116,11 @@ public class ConsumerHibernateTest {
         Assert.assertEquals(LookupStatus.PASS, tradePayload.getLookupStatus());
     }
 
+    @Test(expected = NullPointerException.class)
+    public void testUpdateTradePayloadLookupStatusWithInvalidId() {
+        tradePayloadRepository.updateTradePayloadLookupStatus(true, 0L);
+    }
+
     @Test
     public void testUpdateTradePayloadPostedStatus() {
         Long id = tradePayloadList.get(0).getId();
@@ -120,5 +130,24 @@ public class ConsumerHibernateTest {
         TradePayload tradePayload = session.get(TradePayload.class, id);
         session.getTransaction().rollback();
         Assert.assertEquals(PostedStatus.POSTED, tradePayload.getJournalEntryStatus());
+    }
+
+    @Test
+    public void testInsertIntoJournalEntry(){
+        io.reactivestax.type.dto.JournalEntry journalEntryDto = new io.reactivestax.type.dto.JournalEntry();
+        journalEntryDto.setTradeId("TDB_000001");
+        journalEntryDto.setAccountNumber("TDB_CUST_5214938");
+        journalEntryDto.setSecurityCusip("TSLA");
+        journalEntryDto.setQuantity(1);
+        journalEntryDto.setDirection(Direction.BUY.name());
+        journalEntryDto.setTransactionTimestamp("2024-09-19 22:16:18");
+        journalEntryRepository.insertIntoJournalEntry(journalEntryDto);
+        transactionUtil.startTransaction();
+        Session session= connectionUtil.getConnection();
+        JournalEntry journalEntry =
+                session.createQuery("from JournalEntry where tradeId = :tradeId", JournalEntry.class).setParameter("tradeId",
+                journalEntryDto.getTradeId()).getSingleResult();
+        transactionUtil.rollbackTransaction();
+        Assert.assertEquals(journalEntryDto.getAccountNumber(), journalEntry.getAccountNumber());
     }
 }
