@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
@@ -41,6 +42,7 @@ public class ChunkGeneratorService implements ChunkGenerator {
         int chunksCount = applicationPropertiesUtils.getNumberOfChunks();
         long numOfLinesPerFile = Math.round((float) numOfLines / chunksCount);
         TradeService tradeService = TradeService.getInstance();
+        Files.createDirectories(Paths.get(applicationPropertiesUtils.getChunkDirectoryPath()));
         try (BufferedReader reader =
                      Files.newBufferedReader(Path.of(path), StandardCharsets.UTF_8)) {
             AtomicReference<String> line = new AtomicReference<>(reader.readLine());
@@ -59,6 +61,7 @@ public class ChunkGeneratorService implements ChunkGenerator {
                     });
                     QueueProvider.getInstance().getChunkQueue().put(chunkFilePath);
                 } catch (IOException | InterruptedException e) {
+                    e.printStackTrace();
                     logger.warning("Exception while creating chunks.");
                     Thread.currentThread().interrupt();
                 }

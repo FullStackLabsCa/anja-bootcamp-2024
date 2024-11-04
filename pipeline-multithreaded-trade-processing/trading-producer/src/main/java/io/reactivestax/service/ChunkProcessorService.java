@@ -11,11 +11,13 @@ import io.reactivestax.util.messaging.MessageSender;
 import io.reactivestax.util.messaging.QueueDistributor;
 import org.hibernate.HibernateException;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 public class ChunkProcessorService implements ChunkProcessor {
     private static ChunkProcessorService instance;
@@ -38,18 +40,17 @@ public class ChunkProcessorService implements ChunkProcessor {
         MessageSender messageSender = BeanFactory.getMessageSender();
         TradePayloadRepository tradePayloadRepository = BeanFactory.getTradePayloadRepository();
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-            String payload;
-            while ((payload = reader.readLine()) != null) {
+        try (Stream<String> lines = Files.lines(Path.of(filePath), StandardCharsets.UTF_8)) {
+
+            lines.filter(line -> !line.trim().isEmpty()).forEach(payload -> {
                 String[] transaction = payload.split(",");
                 TradePayload tradePayload = prepareTradePayload(payload, transaction);
-
                 transactionUtil.startTransaction();
                 tradePayloadRepository.insertTradeRawPayload(tradePayload);
                 transactionUtil.commitTransaction();
-
                 submitValidTradePayloadsToQueue(tradePayload, transaction, messageSender);
-            }
+            });
+
         } catch (IOException | HibernateException e) {
             transactionUtil.rollbackTransaction();
             logger.warning("Exception detected in Chunk Processor.");

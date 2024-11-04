@@ -1,5 +1,6 @@
 package io.reactivestax.service;
 
+import com.rabbitmq.client.UnblockedCallback;
 import io.reactivestax.task.ChunkFileGenerator;
 import io.reactivestax.task.ChunkFileProcessor;
 import io.reactivestax.util.ApplicationPropertiesUtils;
