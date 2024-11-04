@@ -10,7 +10,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class TradeService {
@@ -24,7 +26,8 @@ public class TradeService {
 
     public static synchronized TradeService getInstance() {
         if (instance == null) {
-            instance = new TradeService();
+            Supplier<TradeService> tradeServiceSupplier = TradeService::new;
+            instance = tradeServiceSupplier.get();
         }
 
         return instance;
@@ -42,9 +45,7 @@ public class TradeService {
                     Executors.newFixedThreadPool(applicationProperties.getChunkProcessorThreadCount());
             chunkGeneratorExecutorService.submit(new ChunkFileGenerator());
             logger.info("Stated chunk generator.");
-            for (int i = 0; i < applicationProperties.getNumberOfChunks(); i++) {
-                chunkProcessorExecutorService.submit(new ChunkFileProcessor());
-            }
+            IntStream.range(0, applicationProperties.getNumberOfChunks()).forEach(i -> chunkProcessorExecutorService.submit(new ChunkFileProcessor()));
             logger.info("Started chunk processor.");
             addShutdownHook();
         } catch (IOException e) {
@@ -64,9 +65,9 @@ public class TradeService {
     public long fileLineCounter(String path) throws IOException {
         long lineCount;
         try (Stream<String> stream = Files.lines(Path.of(path), StandardCharsets.UTF_8).parallel()) {
-            lineCount = stream.count();
+            lineCount = stream.count() - 1;
         }
-        return lineCount - 1;
+        return lineCount;
     }
 
     public String buildFilePath(int chunkNumber, String chunkFilePathWithName) {
