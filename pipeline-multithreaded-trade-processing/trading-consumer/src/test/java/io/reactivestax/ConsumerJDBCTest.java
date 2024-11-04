@@ -9,6 +9,7 @@ import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
 import io.reactivestax.util.factory.BeanFactory;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -118,6 +119,20 @@ public class ConsumerJDBCTest {
                 ('PFE'),
                 ('XOM'),
                 ('UNH')
+                """,
+                """
+                Insert into trade_payloads (trade_number, payload, validity_status, lookup_status, je_status, created_timestamp, updated_timestamp)
+                values
+                ('TDB_000001' ,'TDB_000001,2024-09-19 22:16:18,TDB_CUST_5214938,TSLA,BUY,1,638.02', 'VALID', 'NOT_CHECKED', 'NOT_POSTED', NOW(), NOW()),
+                ('TDB_000002' ,'TDB_000002,2024-09-19 22:16:18,TDB_CUST_5214938,V,BUY,1,638.02', 'INVALID', 'NOT_CHECKED', 'NOT_POSTED', NOW(), NOW()),
+                ('TDB_000003' ,'TDB_000003,2024-09-19 22:16:18,TDB_CUST_5214938,TSLA,BUY,1,638.02', 'VALID', 'NOT_CHECKED', 'NOT_POSTED', NOW(), NOW()),
+                ('TDB_000004' ,'TDB_000004,2024-09-19 22:16:18,TDB_CUST_5214938,TSLA,BUY,1,638.02', 'VALID', 'NOT_CHECKED', 'NOT_POSTED', NOW(), NOW()),
+                ('TDB_000005' ,'TDB_000005,2024-09-19 22:16:18,TDB_CUST_5214938,TSLA,BUY,1,638.02', 'VALID', 'NOT_CHECKED', 'NOT_POSTED', NOW(), NOW()),
+                ('TDB_000006' ,'TDB_000006,2024-09-19 22:16:18,TDB_CUST_5214938,TSLA,BUY,1,638.02', 'VALID', 'NOT_CHECKED', 'NOT_POSTED', NOW(), NOW()),
+                ('TDB_000007' ,'TDB_000007,2024-09-19 22:16:18,TDB_CUST_5214938,TSLA,BUY,1,638.02', 'VALID', 'NOT_CHECKED', 'NOT_POSTED', NOW(), NOW()),
+                ('TDB_000008' ,'TDB_000008,2024-09-19 22:16:18,TDB_CUST_5214938,TSLA,BUY,1,638.02', 'VALID', 'NOT_CHECKED', 'NOT_POSTED', NOW(), NOW()),
+                ('TDB_000009' ,'TDB_000009,2024-09-19 22:16:18,TDB_CUST_5214938,TSLA,BUY,1,638.02', 'VALID', 'NOT_CHECKED', 'NOT_POSTED', NOW(), NOW()),
+                ('TDB_000010' ,'TDB_000010,2024-09-19 22:16:18,TDB_CUST_5214938,TSLA,BUY,1,638.02', 'VALID', 'NOT_CHECKED', 'NOT_POSTED', NOW(), NOW())
                 """
         };
         transactionUtil.startTransaction();
@@ -144,5 +159,10 @@ public class ConsumerJDBCTest {
         }
         transactionUtil.commitTransaction();
         logger.info("All tables dropped successfully.");
+    }
+
+    @Test
+    public void test(){
+
     }
 }
