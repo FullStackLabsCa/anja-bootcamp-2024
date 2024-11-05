@@ -3,7 +3,7 @@ package io.reactivestax.repository.jdbc;
 import io.reactivestax.repository.JournalEntryRepository;
 import io.reactivestax.type.dto.JournalEntry;
 import io.reactivestax.type.enums.PostedStatus;
-import io.reactivestax.type.exception.OptimisticLockingException;
+import io.reactivestax.type.exception.QueryFailedException;
 import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
 
 import java.sql.*;
@@ -47,7 +47,7 @@ public class JDBCJournalEntryRepository implements JournalEntryRepository {
                 }
             }
         } catch (Exception e) {
-            throw new OptimisticLockingException("Optimistic locking", e);
+            throw new QueryFailedException("Failed to insert into journal entry.");
         }
 
         return id;
@@ -59,9 +59,12 @@ public class JDBCJournalEntryRepository implements JournalEntryRepository {
         try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_JOURNAL_ENTRY_STATUS_QUERY)) {
             preparedStatement.setString(1, PostedStatus.POSTED.toString());
             preparedStatement.setLong(2, journalEntryId);
-            preparedStatement.execute();
+            int executed = preparedStatement.executeUpdate();
+            if (executed == 0) {
+                throw new SQLException();
+            }
         } catch (SQLException e) {
-            throw new OptimisticLockingException("Optimistic locking", e);
+            throw new QueryFailedException("Failed to update journal entry.");
         }
     }
 }

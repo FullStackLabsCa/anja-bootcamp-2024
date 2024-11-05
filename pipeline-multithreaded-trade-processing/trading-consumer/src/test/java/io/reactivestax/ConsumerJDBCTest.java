@@ -1,28 +1,40 @@
 package io.reactivestax;
 
+import io.reactivestax.repository.JournalEntryRepository;
+import io.reactivestax.repository.LookupSecuritiesRepository;
+import io.reactivestax.repository.PositionsRepository;
 import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.service.TradeService;
+import io.reactivestax.service.TradeTestService;
+import io.reactivestax.type.dto.JournalEntry;
+import io.reactivestax.type.enums.PostedStatus;
+import io.reactivestax.type.exception.QueryFailedException;
 import io.reactivestax.util.ApplicationPropertiesUtils;
 import io.reactivestax.util.database.ConnectionUtil;
 import io.reactivestax.util.database.TransactionUtil;
 import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
 import io.reactivestax.util.factory.BeanFactory;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.logging.Logger;
 
 public class ConsumerJDBCTest {
-    TradePayloadRepository tradePayloadRepository;
-    ConnectionUtil<Connection> connectionUtil;
-    TransactionUtil transactionUtil;
-    TradeService tradeService;
-    ApplicationPropertiesUtils applicationPropertiesUtils;
+    private TradePayloadRepository tradePayloadRepository;
+    private JournalEntryRepository journalEntryRepository;
+    private LookupSecuritiesRepository lookupSecuritiesRepository;
+    private PositionsRepository positionsRepository;
+    private ConnectionUtil<Connection> connectionUtil;
+    private TransactionUtil transactionUtil;
+    private TradeService tradeService;
+    private ApplicationPropertiesUtils applicationPropertiesUtils;
+    private final TradeTestService tradeTestService = TradeTestService.getInstance();
+    private final io.reactivestax.type.dto.JournalEntry journalEntryDto1 = tradeTestService.getJournalEntryDto1();
+    private final io.reactivestax.type.dto.JournalEntry journalEntryDto2 =
+            tradeTestService.getJournalEntryDto2();
     Logger logger = Logger.getLogger(ConsumerJDBCTest.class.getName());
 
     @Before
@@ -31,6 +43,9 @@ public class ConsumerJDBCTest {
         applicationPropertiesUtils.loadApplicationProperties("applicationJDBCTest.properties");
         connectionUtil = JDBCTransactionUtil.getInstance();
         tradePayloadRepository = BeanFactory.getTradePayloadRepository();
+        journalEntryRepository = BeanFactory.getJournalEntryRepository();
+        lookupSecuritiesRepository = BeanFactory.getLookupSecuritiesRepository();
+        positionsRepository = BeanFactory.getPositionsRepository();
         transactionUtil = BeanFactory.getTransactionUtil();
         tradeService = TradeService.getInstance();
         String[] sqlCommands = new String[]{
@@ -162,7 +177,42 @@ public class ConsumerJDBCTest {
     }
 
     @Test
-    public void test(){
+    public void testInsertIntoJournalEntry() {
+        Long expected = 2L;
+        journalEntryRepository.insertIntoJournalEntry(journalEntryDto1);
+        Long id2 = journalEntryRepository.insertIntoJournalEntry(journalEntryDto2);
+        Assert.assertEquals(expected, id2);
+    }
 
+    @Test(expected = QueryFailedException.class)
+    public void testInsertIntoJournalEntryWithInvalidData() {
+        journalEntryRepository.insertIntoJournalEntry(journalEntryDto1);
+        journalEntryRepository.insertIntoJournalEntry(new JournalEntry());
+    }
+
+    @Test
+    public void testUpdateJournalEntryStatus() {
+        Long id = journalEntryRepository.insertIntoJournalEntry(journalEntryDto1);
+        String postedStatus = "";
+        journalEntryRepository.updateJournalEntryStatus(id);
+        transactionUtil.startTransaction();
+        String sql = "Select posted_status from journal_entry where id = ?";
+        Connection connection = connectionUtil.getConnection();
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setLong(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                postedStatus = resultSet.getString("posted_status");
+            }
+            transactionUtil.commitTransaction();
+        } catch (SQLException e) {
+            transactionUtil.rollbackTransaction();
+        }
+        Assert.assertEquals(postedStatus, PostedStatus.POSTED.name());
+    }
+
+    @Test(expected = QueryFailedException.class)
+    public void testUpdateJournalEntryStatusWithInvalidId() {
+        journalEntryRepository.updateJournalEntryStatus(3L);
     }
 }

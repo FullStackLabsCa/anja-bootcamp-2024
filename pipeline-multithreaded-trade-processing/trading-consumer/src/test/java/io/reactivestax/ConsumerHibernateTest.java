@@ -9,6 +9,7 @@ import io.reactivestax.repository.hibernate.entity.Position;
 import io.reactivestax.repository.hibernate.entity.SecuritiesReference;
 import io.reactivestax.repository.hibernate.entity.TradePayload;
 import io.reactivestax.service.TradeService;
+import io.reactivestax.service.TradeTestService;
 import io.reactivestax.type.enums.Direction;
 import io.reactivestax.type.enums.LookupStatus;
 import io.reactivestax.type.enums.PostedStatus;
@@ -31,18 +32,19 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class ConsumerHibernateTest {
-    TradePayloadRepository tradePayloadRepository;
-    JournalEntryRepository journalEntryRepository;
-    LookupSecuritiesRepository lookupSecuritiesRepository;
-    PositionsRepository positionsRepository;
-    ConnectionUtil<Session> connectionUtil;
-    TransactionUtil transactionUtil;
-    io.reactivestax.type.dto.JournalEntry journalEntryDto1 = new io.reactivestax.type.dto.JournalEntry();
-    io.reactivestax.type.dto.JournalEntry journalEntryDto2 = new io.reactivestax.type.dto.JournalEntry();
-    ApplicationPropertiesUtils applicationPropertiesUtils;
-    TradeService tradeService;
-    Logger logger = Logger.getLogger(ConsumerHibernateTest.class.getName());
-    List<TradePayload> tradePayloadList = new ArrayList<>();
+    private TradePayloadRepository tradePayloadRepository;
+    private JournalEntryRepository journalEntryRepository;
+    private LookupSecuritiesRepository lookupSecuritiesRepository;
+    private PositionsRepository positionsRepository;
+    private ConnectionUtil<Session> connectionUtil;
+    private TransactionUtil transactionUtil;
+    private final TradeTestService tradeTestService = TradeTestService.getInstance();
+    private final io.reactivestax.type.dto.JournalEntry journalEntryDto1 = tradeTestService.getJournalEntryDto1();
+    private final io.reactivestax.type.dto.JournalEntry journalEntryDto2 = tradeTestService.getJournalEntryDto2();
+    private ApplicationPropertiesUtils applicationPropertiesUtils;
+    private TradeService tradeService;
+    private Logger logger = Logger.getLogger(ConsumerHibernateTest.class.getName());
+    private final List<TradePayload> tradePayloadList = new ArrayList<>();
 
     @Before
     public void setUp() {
@@ -54,18 +56,6 @@ public class ConsumerHibernateTest {
         lookupSecuritiesRepository = BeanFactory.getLookupSecuritiesRepository();
         positionsRepository = BeanFactory.getPositionsRepository();
         transactionUtil = BeanFactory.getTransactionUtil();
-        journalEntryDto1.setTradeId("TDB_000001");
-        journalEntryDto1.setAccountNumber("TDB_CUST_5214938");
-        journalEntryDto1.setSecurityCusip("TSLA");
-        journalEntryDto1.setQuantity(1);
-        journalEntryDto1.setDirection(Direction.BUY.name());
-        journalEntryDto1.setTransactionTimestamp("2024-09-19 22:16:18");
-        journalEntryDto2.setTradeId("TDB_000002");
-        journalEntryDto2.setAccountNumber("TDB_CUST_5214938");
-        journalEntryDto2.setSecurityCusip("TSLA");
-        journalEntryDto2.setQuantity(1);
-        journalEntryDto2.setDirection(Direction.BUY.name());
-        journalEntryDto2.setTransactionTimestamp("2024-09-19 22:16:18");
         transactionUtil.startTransaction();
         String[] cusipArray = {"AAPL", "GOOGL", "AMZN", "MSFT", "TSLA", "NFLX", "FB", "NVDA", "JPM", "VISA", "MA", "BAC", "DIS", "INTC", "CSCO", "ORCL", "WMT", "T", "VZ", "ADBE", "CRM", "PYPL", "PFE", "XOM", "UNH"};
         for (String cusip : cusipArray) {
@@ -212,7 +202,7 @@ public class ConsumerHibernateTest {
     }
 
     @Test
-    public void testUpdatePosition(){
+    public void testUpdatePosition() {
         io.reactivestax.type.dto.Position positionDto1 = new io.reactivestax.type.dto.Position();
         positionDto1.setAccountNumber(journalEntryDto1.getAccountNumber());
         positionDto1.setSecurityCusip(journalEntryDto1.getSecurityCusip());

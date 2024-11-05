@@ -10,6 +10,7 @@ import io.reactivestax.type.dto.Position;
 import io.reactivestax.type.dto.TradePayload;
 import io.reactivestax.type.enums.Direction;
 import io.reactivestax.type.exception.OptimisticLockingException;
+import io.reactivestax.type.exception.QueryFailedException;
 import io.reactivestax.util.database.TransactionUtil;
 import io.reactivestax.util.factory.BeanFactory;
 import jakarta.persistence.OptimisticLockException;
@@ -57,8 +58,8 @@ public class TradeProcessorService implements TradeProcessor {
                 positionTransaction(journalEntry);
             }
             transactionUtil.commitTransaction();
-        } catch (HibernateException | OptimisticLockException | OptimisticLockingException e) {
-            logger.warning("Hibernate/Optimistic Lock exception detected.");
+        } catch (HibernateException | OptimisticLockException | OptimisticLockingException | QueryFailedException e) {
+            logger.warning("Hibernate/SQL/Optimistic Lock exception detected.");
             transactionUtil.rollbackTransaction();
             BeanFactory.getTransactionRetryer().retryTransaction(tradeId, queueName);
         }
