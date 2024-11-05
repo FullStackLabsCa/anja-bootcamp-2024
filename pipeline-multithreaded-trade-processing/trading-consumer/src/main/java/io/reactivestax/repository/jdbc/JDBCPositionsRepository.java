@@ -53,7 +53,7 @@ public class JDBCPositionsRepository implements PositionsRepository {
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 version = resultSet.getInt("version");
-            }
+            } else throw new SQLException();
 
             return version;
         } catch (SQLException e) {
@@ -81,7 +81,7 @@ public class JDBCPositionsRepository implements PositionsRepository {
             preparedStatement.setString(4, position.getSecurityCusip());
             int affectedRows = preparedStatement.executeUpdate();
             if (affectedRows == 0) {
-                throw new OptimisticLockingException("Optimistic lock");
+                throw new SQLException("Optimistic lock");
             }
         }
     }

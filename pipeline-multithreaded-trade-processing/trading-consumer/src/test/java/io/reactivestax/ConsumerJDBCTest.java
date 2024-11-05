@@ -7,7 +7,9 @@ import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.service.TradeService;
 import io.reactivestax.service.TradeTestService;
 import io.reactivestax.type.dto.JournalEntry;
+import io.reactivestax.type.dto.Position;
 import io.reactivestax.type.enums.PostedStatus;
+import io.reactivestax.type.exception.OptimisticLockingException;
 import io.reactivestax.type.exception.QueryFailedException;
 import io.reactivestax.util.ApplicationPropertiesUtils;
 import io.reactivestax.util.database.ConnectionUtil;
@@ -20,6 +22,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.sql.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
 public class ConsumerJDBCTest {
@@ -32,10 +38,12 @@ public class ConsumerJDBCTest {
     private TradeService tradeService;
     private ApplicationPropertiesUtils applicationPropertiesUtils;
     private final TradeTestService tradeTestService = TradeTestService.getInstance();
-    private final io.reactivestax.type.dto.JournalEntry journalEntryDto1 = tradeTestService.getJournalEntryDto1();
-    private final io.reactivestax.type.dto.JournalEntry journalEntryDto2 =
+    private final JournalEntry journalEntryDto1 = tradeTestService.getJournalEntryDto1();
+    private final JournalEntry journalEntryDto2 =
             tradeTestService.getJournalEntryDto2();
-    Logger logger = Logger.getLogger(ConsumerJDBCTest.class.getName());
+    private final Logger logger = Logger.getLogger(ConsumerJDBCTest.class.getName());
+    private final int threadCount = 30;
+    private final ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
 
     @Before
     public void setUp() {
@@ -214,5 +222,106 @@ public class ConsumerJDBCTest {
     @Test(expected = QueryFailedException.class)
     public void testUpdateJournalEntryStatusWithInvalidId() {
         journalEntryRepository.updateJournalEntryStatus(3L);
+    }
+
+    @Test
+    public void testInsertPosition() {
+        int version = -1;
+        Position positionDto = new Position();
+        positionDto.setAccountNumber(journalEntryDto1.getAccountNumber());
+        positionDto.setSecurityCusip(journalEntryDto1.getSecurityCusip());
+        positionDto.setHolding((long) journalEntryDto1.getQuantity());
+        transactionUtil.startTransaction();
+        positionsRepository.upsertPosition(positionDto);
+        String sql = "Select version from positions where account_number = ? and security_cusip = ?";
+        Connection connection = connectionUtil.getConnection();
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, positionDto.getAccountNumber());
+            preparedStatement.setString(2, positionDto.getSecurityCusip());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                version = resultSet.getInt("version");
+            }
+            transactionUtil.commitTransaction();
+        } catch (SQLException e) {
+            transactionUtil.rollbackTransaction();
+        }
+
+        Assert.assertEquals(0, version);
+    }
+
+    @Test
+    public void testUpsertPosition() {
+        int version = -1;
+        Position positionDto1 = new Position();
+        positionDto1.setAccountNumber(journalEntryDto1.getAccountNumber());
+        positionDto1.setSecurityCusip(journalEntryDto1.getSecurityCusip());
+        positionDto1.setHolding((long) journalEntryDto1.getQuantity());
+        transactionUtil.startTransaction();
+        positionsRepository.upsertPosition(positionDto1);
+        transactionUtil.commitTransaction();
+        Position positionDto2 = new Position();
+        positionDto2.setAccountNumber(journalEntryDto2.getAccountNumber());
+        positionDto2.setSecurityCusip(journalEntryDto2.getSecurityCusip());
+        positionDto2.setHolding((long) journalEntryDto2.getQuantity());
+        transactionUtil.startTransaction();
+        positionsRepository.upsertPosition(positionDto2);
+        transactionUtil.commitTransaction();
+        String sql = "Select version from positions where account_number = ? and security_cusip = ?";
+        Connection connection = connectionUtil.getConnection();
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, positionDto1.getAccountNumber());
+            preparedStatement.setString(2, positionDto1.getSecurityCusip());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                version = resultSet.getInt("version");
+            }
+            transactionUtil.commitTransaction();
+        } catch (SQLException e) {
+            transactionUtil.rollbackTransaction();
+        }
+
+        Assert.assertEquals(1, version);
+    }
+
+    @Test(expected = OptimisticLockingException.class)
+    public void testUpsertPositionWithOptimisticLock() throws Exception {
+        AtomicReference<Exception> exception = new AtomicReference<>();
+        Position positionDto = new Position();
+        positionDto.setAccountNumber(journalEntryDto1.getAccountNumber());
+        positionDto.setSecurityCusip(journalEntryDto1.getSecurityCusip());
+        positionDto.setHolding((long) journalEntryDto1.getQuantity());
+        positionsRepository.upsertPosition(positionDto);
+        CountDownLatch countDownLatch = new CountDownLatch(threadCount);
+        for (int i = 0; i < threadCount; i++) {
+            executorService.submit(() -> {
+                try {
+                    positionsRepository.upsertPosition(positionDto);
+                    countDownLatch.countDown();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    exception.set(e);
+                    System.out.println("exception detected");
+                }
+            });
+        }
+        countDownLatch.await();
+        executorService.shutdownNow();
+        int version = -1;
+        String sql = "Select version from positions where account_number = ? and security_cusip = ?";
+        Connection connection = connectionUtil.getConnection();
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, positionDto.getAccountNumber());
+            preparedStatement.setString(2, positionDto.getSecurityCusip());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                version = resultSet.getInt("version");
+            }
+            transactionUtil.commitTransaction();
+        } catch (SQLException e) {
+            transactionUtil.rollbackTransaction();
+        }
+        System.out.println(version);
+        throw exception.get();
     }
 }
