@@ -28,6 +28,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 public class ConsumerHibernateTest {
@@ -117,8 +118,9 @@ public class ConsumerHibernateTest {
 
     @Test
     public void testReadRawPayloadWithValidTradeNumber() {
-        io.reactivestax.type.dto.TradePayload tradePayloadDto = tradePayloadRepository.readRawPayload("TDB_000001");
-        Assert.assertEquals("TDB_000001,2024-09-19 22:16:18,TDB_CUST_5214938,TSLA,BUY,1,638.02", tradePayloadDto.getPayload());
+        Optional<io.reactivestax.type.dto.TradePayload> optionalTradePayloadDto = tradePayloadRepository.readRawPayload("TDB_000001");
+        Assert.assertEquals("TDB_000001,2024-09-19 22:16:18,TDB_CUST_5214938,TSLA,BUY,1,638.02",
+                optionalTradePayloadDto.map(tradePayloadDto -> tradePayloadDto.getPayload()));
     }
 
     @Test(expected = NoResultException.class)

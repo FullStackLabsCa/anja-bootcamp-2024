@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 
 public class JDBCTradePayloadRepository implements TradePayloadRepository {
     private static final String READ_RAW_PAYLOAD_QUERY = "Select id, trade_number, payload, validity_status, lookup_status, je_status, created_timestamp, updated_timestamp from trade_payloads where trade_number = ?";
@@ -33,7 +34,7 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
     }
 
     @Override
-    public TradePayload readRawPayload(String tradeNumber) {
+    public Optional<TradePayload> readRawPayload(String tradeNumber) {
         TradePayload tradePayload = new TradePayload();
         Connection connection = JDBCTransactionUtil.getInstance().getConnection();
         try (PreparedStatement preparedStatement = connection.prepareStatement(READ_RAW_PAYLOAD_QUERY)) {
@@ -50,8 +51,7 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
         } catch (SQLException e) {
             throw new OptimisticLockingException(OPTIMISTIC_LOCKING_EXCEPTION_MESSAGE);
         }
-
-        return tradePayload;
+        return Optional.ofNullable(tradePayload);
     }
 
     @Override

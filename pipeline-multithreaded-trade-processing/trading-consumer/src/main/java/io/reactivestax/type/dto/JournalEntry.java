@@ -1,8 +1,10 @@
 package io.reactivestax.type.dto;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class JournalEntry {
     private Long id;
     private String tradeId;
