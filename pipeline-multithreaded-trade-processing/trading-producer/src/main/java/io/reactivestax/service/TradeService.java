@@ -1,6 +1,5 @@
 package io.reactivestax.service;
 
-import com.rabbitmq.client.UnblockedCallback;
 import io.reactivestax.task.ChunkFileGenerator;
 import io.reactivestax.task.ChunkFileProcessor;
 import io.reactivestax.util.ApplicationPropertiesUtils;
@@ -73,5 +72,9 @@ public class TradeService {
 
     public String buildFilePath(int chunkNumber, String chunkFilePathWithName) {
         return chunkFilePathWithName + chunkNumber + ".csv";
+    }
+
+    public void readFileAndExecute(){
+
     }
 }
