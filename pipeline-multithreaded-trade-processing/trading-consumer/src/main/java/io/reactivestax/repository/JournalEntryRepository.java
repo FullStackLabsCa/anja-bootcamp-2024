@@ -2,8 +2,10 @@ package io.reactivestax.repository;
 
 import io.reactivestax.type.dto.JournalEntry;
 
+import java.util.Optional;
+
 public interface JournalEntryRepository {
-    Long insertIntoJournalEntry(JournalEntry journalEntry);
+    Optional<Long> insertIntoJournalEntry(JournalEntry journalEntry);
 
     void updateJournalEntryStatus(Long journalEntryId);
 }

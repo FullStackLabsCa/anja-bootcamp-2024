@@ -10,7 +10,6 @@ import io.reactivestax.type.dto.Position;
 import io.reactivestax.type.dto.TradePayload;
 import io.reactivestax.type.enums.Direction;
 import io.reactivestax.type.exception.OptimisticLockingException;
-import io.reactivestax.type.exception.QueryFailedException;
 import io.reactivestax.util.database.TransactionUtil;
 import io.reactivestax.util.factory.BeanFactory;
 import jakarta.persistence.OptimisticLockException;
@@ -58,15 +57,14 @@ public class TradeProcessorService implements TradeProcessor {
                 positionTransaction(journalEntry);
             }
             transactionUtil.commitTransaction();
-        } catch (HibernateException | OptimisticLockException | OptimisticLockingException | QueryFailedException e) {
+        } catch (HibernateException | OptimisticLockException | OptimisticLockingException e) {
             logger.warning("Hibernate/SQL/Optimistic Lock exception detected.");
             transactionUtil.rollbackTransaction();
             BeanFactory.getTransactionRetryer().retryTransaction(tradeId, queueName);
         }
     }
 
-    @Override
-    public JournalEntry journalEntryTransaction(String[] payloadArr, Long tradeId) {
+    private JournalEntry journalEntryTransaction(String[] payloadArr, Long tradeId) {
         JournalEntry journalEntry = new JournalEntry();
         journalEntry.setTradeId(payloadArr[0]);
         journalEntry.setAccountNumber(payloadArr[2]);
@@ -74,14 +72,12 @@ public class TradeProcessorService implements TradeProcessor {
         journalEntry.setDirection(payloadArr[4]);
         journalEntry.setQuantity(Integer.parseInt(payloadArr[5]));
         journalEntry.setTransactionTimestamp(payloadArr[1]);
-        Long journalEntryId = journalEntryRepository.insertIntoJournalEntry(journalEntry);
-        if (journalEntryId != null) journalEntry.setId(journalEntryId);
+        journalEntryRepository.insertIntoJournalEntry(journalEntry).ifPresent(journalEntry::setId);
         tradePayloadRepository.updateTradePayloadPostedStatus(tradeId);
         return journalEntry;
     }
 
-    @Override
-    public void positionTransaction(JournalEntry journalEntry) {
+    private void positionTransaction(JournalEntry journalEntry) {
         Position position = new Position();
         position.setAccountNumber(journalEntry.getAccountNumber());
         position.setSecurityCusip(journalEntry.getSecurityCusip());

@@ -2,6 +2,7 @@ package io.reactivestax.repository.jdbc;
 
 import io.reactivestax.type.exception.OptimisticLockingException;
 import io.reactivestax.repository.LookupSecuritiesRepository;
+import io.reactivestax.type.exception.QueryFailedException;
 import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
 
 import java.sql.Connection;
@@ -32,7 +33,7 @@ public class JDBCSecuritiesReferenceRepository implements LookupSecuritiesReposi
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) validSecurity = true;
         } catch (SQLException e) {
-            throw new OptimisticLockingException("Optimistic locking", e);
+            throw new QueryFailedException("Lookup Securities Failed");
         }
 
         return validSecurity;

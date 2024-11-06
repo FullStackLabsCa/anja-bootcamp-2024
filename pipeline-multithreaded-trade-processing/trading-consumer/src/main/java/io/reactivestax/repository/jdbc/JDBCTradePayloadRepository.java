@@ -4,7 +4,7 @@ import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.type.dto.TradePayload;
 import io.reactivestax.type.enums.LookupStatus;
 import io.reactivestax.type.enums.PostedStatus;
-import io.reactivestax.type.exception.OptimisticLockingException;
+import io.reactivestax.type.exception.QueryFailedException;
 import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
 
 import java.sql.Connection;
@@ -18,7 +18,6 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
             " ?, updated_timestamp = NOW() where id = ?";
     private static final String UPDATE_TRADE_PAYLOAD_POSTED_STATUS_QUERY = "Update trade_payloads set je_status = ?, " +
             "updated_timestamp = NOW() where id = ?";
-    private static final String OPTIMISTIC_LOCKING_EXCEPTION_MESSAGE = "Optimistic locking exception.";
     private static JDBCTradePayloadRepository instance;
 
     private JDBCTradePayloadRepository() {
@@ -48,7 +47,7 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
                 tradePayload.setJournalEntryStatus(resultSet.getString("je_status"));
             }
         } catch (SQLException e) {
-            throw new OptimisticLockingException(OPTIMISTIC_LOCKING_EXCEPTION_MESSAGE);
+            throw new QueryFailedException("Read raw payload failed.");
         }
 
         return tradePayload;
@@ -62,7 +61,7 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
             preparedStatement.setLong(2, tradeId);
             preparedStatement.execute();
         } catch (SQLException e) {
-            throw new OptimisticLockingException(OPTIMISTIC_LOCKING_EXCEPTION_MESSAGE);
+            throw new QueryFailedException("Update trade payload lookup status failed.");
         }
     }
 
@@ -74,7 +73,7 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
             preparedStatement.setLong(2, tradeId);
             preparedStatement.execute();
         } catch (SQLException e) {
-            throw new OptimisticLockingException(OPTIMISTIC_LOCKING_EXCEPTION_MESSAGE);
+            throw new QueryFailedException("Update trade payload posted status failed.");
         }
     }
 }
