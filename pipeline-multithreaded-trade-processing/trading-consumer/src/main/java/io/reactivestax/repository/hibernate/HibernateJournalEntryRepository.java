@@ -2,7 +2,6 @@ package io.reactivestax.repository.hibernate;
 
 import java.sql.Timestamp;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import org.hibernate.Session;
 
@@ -30,8 +29,6 @@ public class HibernateJournalEntryRepository implements JournalEntryRepository {
         JournalEntry journalEntryEntity = getJournalEntryEntity(journalEntry);
         Session session = HibernateTransactionUtil.getInstance().getConnection();
         session.persist(journalEntryEntity);
-        Stream.of(journalEntryEntity);
-        Optional.ofNullable(journalEntryEntity.getId());
         return Optional.ofNullable(journalEntryEntity.getId());
     }
 

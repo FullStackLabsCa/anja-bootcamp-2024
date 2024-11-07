@@ -1,5 +1,16 @@
 package io.reactivestax;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.logging.Logger;
+
+import org.hibernate.Session;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import io.reactivestax.repository.JournalEntryRepository;
 import io.reactivestax.repository.LookupSecuritiesRepository;
 import io.reactivestax.repository.PositionsRepository;
@@ -20,16 +31,6 @@ import io.reactivestax.util.factory.BeanFactory;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaDelete;
-import org.hibernate.Session;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.logging.Logger;
 
 public class ConsumerHibernateTest {
     TradePayloadRepository tradePayloadRepository;
@@ -165,20 +166,20 @@ public class ConsumerHibernateTest {
         journalEntryDto.setDirection(Direction.BUY.name());
         journalEntryDto.setTransactionTimestamp("2024-09-19 22:16:18");
         transactionUtil.startTransaction();
-        Long entryId = journalEntryRepository.insertIntoJournalEntry(journalEntryDto);
+        Optional<Long> entryId = journalEntryRepository.insertIntoJournalEntry(journalEntryDto);
         transactionUtil.commitTransaction();
         Session session = connectionUtil.getConnection();
-        JournalEntry journalEntry = session.get(JournalEntry.class, entryId);
+        JournalEntry journalEntry = session.get(JournalEntry.class, entryId.get());
         Assert.assertEquals(journalEntryDto.getAccountNumber(), journalEntry.getAccountNumber());
     }
 
     @Test
     public void testUpdateJournalEntryStatus() {
         transactionUtil.startTransaction();
-        Long entryId = journalEntryRepository.insertIntoJournalEntry(journalEntryDto1);
+        Optional<Long> entryId = journalEntryRepository.insertIntoJournalEntry(journalEntryDto1);
         transactionUtil.commitTransaction();
         transactionUtil.startTransaction();
-        journalEntryRepository.updateJournalEntryStatus(entryId);
+        journalEntryRepository.updateJournalEntryStatus(entryId.get());
         transactionUtil.commitTransaction();
         Session session = connectionUtil.getConnection();
         JournalEntry journalEntry = session.get(JournalEntry.class, entryId);
