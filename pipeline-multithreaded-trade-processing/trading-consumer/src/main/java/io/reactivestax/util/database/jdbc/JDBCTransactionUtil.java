@@ -1,17 +1,19 @@
 package io.reactivestax.util.database.jdbc;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.logging.Logger;
+
+import javax.sql.DataSource;
+
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+
 import io.reactivestax.type.exception.HikariCPConnectionException;
 import io.reactivestax.type.exception.TransactionHandlingException;
 import io.reactivestax.util.ApplicationPropertiesUtils;
 import io.reactivestax.util.database.ConnectionUtil;
 import io.reactivestax.util.database.TransactionUtil;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.logging.Logger;
 
 public class JDBCTransactionUtil implements TransactionUtil, ConnectionUtil<Connection> {
     private DataSource dataSource;
@@ -49,13 +51,13 @@ public class JDBCTransactionUtil implements TransactionUtil, ConnectionUtil<Conn
 
     private synchronized DataSource getHikariDataSource() {
         if (dataSource == null) {
-            createDataSource();
+            return createDataSource();
         }
         // Configure the HikariCP connection pool
         return dataSource;
     }
 
-    private void createDataSource() {
+    public HikariDataSource createDataSource() {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(applicationPropertiesUtils.getDbUrl());
         config.setUsername(applicationPropertiesUtils.getDbUsername());
@@ -66,7 +68,7 @@ public class JDBCTransactionUtil implements TransactionUtil, ConnectionUtil<Conn
         config.setIdleTimeout(600000); // Idle timeout before connection is closed
 
         // Create the HikariCP data source
-        dataSource = new HikariDataSource(config);
+        return new HikariDataSource(config);
     }
 
     @Override

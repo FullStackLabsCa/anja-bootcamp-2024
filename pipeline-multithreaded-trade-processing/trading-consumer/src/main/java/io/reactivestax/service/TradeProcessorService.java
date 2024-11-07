@@ -1,5 +1,11 @@
 package io.reactivestax.service;
 
+import java.io.IOException;
+import java.util.Optional;
+import java.util.logging.Logger;
+
+import org.hibernate.HibernateException;
+
 import io.reactivestax.repository.JournalEntryRepository;
 import io.reactivestax.repository.LookupSecuritiesRepository;
 import io.reactivestax.repository.PositionsRepository;
@@ -7,26 +13,34 @@ import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.task.TradeProcessor;
 import io.reactivestax.type.dto.JournalEntry;
 import io.reactivestax.type.dto.Position;
-import io.reactivestax.type.dto.TradePayload;
+import io.reactivestax.type.dto.TradePayloadDTO;
 import io.reactivestax.type.enums.Direction;
 import io.reactivestax.type.exception.OptimisticLockingException;
 import io.reactivestax.util.database.TransactionUtil;
 import io.reactivestax.util.factory.BeanFactory;
 import jakarta.persistence.OptimisticLockException;
-import org.hibernate.HibernateException;
-
-import java.io.IOException;
-import java.util.Optional;
-import java.util.logging.Logger;
 
 public class TradeProcessorService implements TradeProcessor {
     private static TradeProcessorService instance;
     Logger logger = Logger.getLogger(TradeProcessorService.class.getName());
-    private final TransactionUtil transactionUtil;
-    private final TradePayloadRepository tradePayloadRepository;
-    private final LookupSecuritiesRepository lookupSecuritiesRepository;
-    private final JournalEntryRepository journalEntryRepository;
-    private final PositionsRepository positionsRepository;
+    private TransactionUtil transactionUtil;
+    private TradePayloadRepository tradePayloadRepository;
+    private LookupSecuritiesRepository lookupSecuritiesRepository;
+    private JournalEntryRepository journalEntryRepository;
+    private PositionsRepository positionsRepository;
+
+    // Constructor with dependency injection
+    public TradeProcessorService(TransactionUtil transactionUtil,
+    TradePayloadRepository tradePayloadRepository,
+    LookupSecuritiesRepository lookupSecuritiesRepository,
+    JournalEntryRepository journalEntryRepository,
+    PositionsRepository positionsRepository) {
+    this.transactionUtil = transactionUtil;
+    this.tradePayloadRepository = tradePayloadRepository;
+    this.lookupSecuritiesRepository = lookupSecuritiesRepository;
+    this.journalEntryRepository = journalEntryRepository;
+    this.positionsRepository = positionsRepository;
+    }
 
     private TradeProcessorService() {
         transactionUtil = BeanFactory.getTransactionUtil();
@@ -44,16 +58,33 @@ public class TradeProcessorService implements TradeProcessor {
         return instance;
     }
 
+    // Setter methods for dependency injection
+    public void setTransactionUtil(TransactionUtil transactionUtil) {
+        this.transactionUtil = transactionUtil;
+    }
+
+    public void setTradePayloadRepository(TradePayloadRepository tradePayloadRepository) {
+        this.tradePayloadRepository = tradePayloadRepository;
+    }
+
+    public void setLookupSecuritiesRepository(LookupSecuritiesRepository lookupSecuritiesRepository) {
+        this.lookupSecuritiesRepository = lookupSecuritiesRepository;
+    }
+
+    public void setJournalEntryRepository(JournalEntryRepository journalEntryRepository) {
+        this.journalEntryRepository = journalEntryRepository;
+    }
+
+    public void setPositionsRepository(PositionsRepository positionsRepository) {
+        this.positionsRepository = positionsRepository;
+    }
+
     @Override
     public void processTrade(String tradeId, String queueName) throws InterruptedException, IOException {
         try {
             transactionUtil.startTransaction();
-
-            Optional<TradePayload> optionalTradePayload = tradePayloadRepository.readRawPayload(tradeId);
-            optionalTradePayload.ifPresent(
-                    tradePayload -> processTradePayload(tradePayload, tradeId, queueName)
-            );
-
+            Optional<TradePayloadDTO> optionalTradePayload = tradePayloadRepository.readRawPayload(tradeId);
+            optionalTradePayload.ifPresent(this::processTradePayload);
             transactionUtil.commitTransaction();
         } catch (HibernateException | OptimisticLockException | OptimisticLockingException e) {
             logger.warning("Hibernate/Optimistic Lock exception detected.");
@@ -62,13 +93,13 @@ public class TradeProcessorService implements TradeProcessor {
         }
     }
 
-    private void processTradePayload(TradePayload tradePayload, String tradeId, String queueName) {
-        String[] payloadArr = tradePayload.getPayload().split(",");
+    void processTradePayload(TradePayloadDTO tradePayloadDTO) {
+        String[] payloadArr = tradePayloadDTO.getPayload().split(",");
         String cusip = payloadArr[3];
         boolean validSecurity = lookupSecuritiesRepository.lookupSecurities(cusip);
-        tradePayloadRepository.updateTradePayloadLookupStatus(validSecurity, tradePayload.getId());
+        tradePayloadRepository.updateTradePayloadLookupStatus(validSecurity, tradePayloadDTO.getId());
         if (validSecurity) {
-            JournalEntry journalEntry = journalEntryTransaction(payloadArr, tradePayload.getId());
+            JournalEntry journalEntry = journalEntryTransaction(payloadArr, tradePayloadDTO.getId());
             positionTransaction(journalEntry);
         }
     }
@@ -96,7 +127,9 @@ public class TradeProcessorService implements TradeProcessor {
         Position position = new Position();
         position.setAccountNumber(journalEntry.getAccountNumber());
         position.setSecurityCusip(journalEntry.getSecurityCusip());
-        position.setHolding((long) (journalEntry.getDirection().equals(Direction.SELL.toString()) ? -journalEntry.getQuantity() : journalEntry.getQuantity()));
+        position.setHolding(
+                (long) (journalEntry.getDirection().equals(Direction.SELL.toString()) ? -journalEntry.getQuantity()
+                        : journalEntry.getQuantity()));
         positionsRepository.upsertPosition(position);
         journalEntryRepository.updateJournalEntryStatus(journalEntry.getId());
     }

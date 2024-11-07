@@ -1,10 +1,11 @@
-package io.reactivestax;
+package io.reactivestax.repository;
+
+import org.junit.Before;
 
 import io.reactivestax.service.TradeService;
 import io.reactivestax.util.ApplicationPropertiesUtils;
 import io.reactivestax.util.database.TransactionUtil;
 import io.reactivestax.util.factory.BeanFactory;
-import org.junit.Before;
 
 public class ConsumerTest {
     ApplicationPropertiesUtils applicationPropertiesUtils;

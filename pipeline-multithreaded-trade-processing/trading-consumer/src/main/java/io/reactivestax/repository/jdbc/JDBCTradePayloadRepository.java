@@ -1,17 +1,17 @@
 package io.reactivestax.repository.jdbc;
 
-import io.reactivestax.repository.TradePayloadRepository;
-import io.reactivestax.type.dto.TradePayload;
-import io.reactivestax.type.enums.LookupStatus;
-import io.reactivestax.type.enums.PostedStatus;
-import io.reactivestax.type.exception.OptimisticLockingException;
-import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
+
+import io.reactivestax.repository.TradePayloadRepository;
+import io.reactivestax.type.dto.TradePayloadDTO;
+import io.reactivestax.type.enums.LookupStatus;
+import io.reactivestax.type.enums.PostedStatus;
+import io.reactivestax.type.exception.OptimisticLockingException;
+import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
 
 public class JDBCTradePayloadRepository implements TradePayloadRepository {
     private static final String READ_RAW_PAYLOAD_QUERY = "Select id, trade_number, payload, validity_status, lookup_status, je_status, created_timestamp, updated_timestamp from trade_payloads where trade_number = ?";
@@ -34,8 +34,8 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
     }
 
     @Override
-    public Optional<TradePayload> readRawPayload(String tradeNumber) {
-        TradePayload tradePayload = new TradePayload();
+    public Optional<TradePayloadDTO> readRawPayload(String tradeNumber) {
+        TradePayloadDTO tradePayload = new TradePayloadDTO();
         Connection connection = JDBCTransactionUtil.getInstance().getConnection();
         try (PreparedStatement preparedStatement = connection.prepareStatement(READ_RAW_PAYLOAD_QUERY)) {
             preparedStatement.setString(1, tradeNumber);
@@ -57,7 +57,8 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
     @Override
     public void updateTradePayloadLookupStatus(boolean lookupStatus, Long tradeId) {
         Connection connection = JDBCTransactionUtil.getInstance().getConnection();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_TRADE_PAYLOAD_LOOKUP_STATUS_QUERY)) {
+        try (PreparedStatement preparedStatement = connection
+                .prepareStatement(UPDATE_TRADE_PAYLOAD_LOOKUP_STATUS_QUERY)) {
             preparedStatement.setString(1, String.valueOf(lookupStatus ? LookupStatus.PASS : LookupStatus.FAIL));
             preparedStatement.setLong(2, tradeId);
             preparedStatement.execute();
@@ -69,7 +70,8 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
     @Override
     public void updateTradePayloadPostedStatus(Long tradeId) {
         Connection connection = JDBCTransactionUtil.getInstance().getConnection();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_TRADE_PAYLOAD_POSTED_STATUS_QUERY)) {
+        try (PreparedStatement preparedStatement = connection
+                .prepareStatement(UPDATE_TRADE_PAYLOAD_POSTED_STATUS_QUERY)) {
             preparedStatement.setString(1, String.valueOf(PostedStatus.POSTED));
             preparedStatement.setLong(2, tradeId);
             preparedStatement.execute();

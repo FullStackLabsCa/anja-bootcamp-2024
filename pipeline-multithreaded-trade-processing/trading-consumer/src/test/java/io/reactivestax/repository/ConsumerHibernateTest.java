@@ -1,4 +1,4 @@
-package io.reactivestax;
+package io.reactivestax.repository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,10 +11,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import io.reactivestax.repository.JournalEntryRepository;
-import io.reactivestax.repository.LookupSecuritiesRepository;
-import io.reactivestax.repository.PositionsRepository;
-import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.repository.hibernate.entity.JournalEntry;
 import io.reactivestax.repository.hibernate.entity.Position;
 import io.reactivestax.repository.hibernate.entity.SecuritiesReference;
@@ -69,7 +65,8 @@ public class ConsumerHibernateTest {
         journalEntryDto2.setDirection(Direction.BUY.name());
         journalEntryDto2.setTransactionTimestamp("2024-09-19 22:16:18");
         transactionUtil.startTransaction();
-        String[] cusipArray = {"AAPL", "GOOGL", "AMZN", "MSFT", "TSLA", "NFLX", "FB", "NVDA", "JPM", "VISA", "MA", "BAC", "DIS", "INTC", "CSCO", "ORCL", "WMT", "T", "VZ", "ADBE", "CRM", "PYPL", "PFE", "XOM", "UNH"};
+        String[] cusipArray = { "AAPL", "GOOGL", "AMZN", "MSFT", "TSLA", "NFLX", "FB", "NVDA", "JPM", "VISA", "MA",
+                "BAC", "DIS", "INTC", "CSCO", "ORCL", "WMT", "T", "VZ", "ADBE", "CRM", "PYPL", "PFE", "XOM", "UNH" };
         for (String cusip : cusipArray) {
             SecuritiesReference securitiesReference = new SecuritiesReference();
             securitiesReference.setCusip(cusip);
@@ -103,23 +100,25 @@ public class ConsumerHibernateTest {
         transactionUtil.startTransaction();
         Session session = connectionUtil.getConnection();
         CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
-        CriteriaDelete<io.reactivestax.repository.hibernate.entity.TradePayload> criteriaDeleteTradePayload = criteriaBuilder.createCriteriaDelete(io.reactivestax.repository.hibernate.entity.TradePayload.class);
+        CriteriaDelete<io.reactivestax.repository.hibernate.entity.TradePayload> criteriaDeleteTradePayload = criteriaBuilder
+                .createCriteriaDelete(io.reactivestax.repository.hibernate.entity.TradePayload.class);
         session.createMutationQuery(criteriaDeleteTradePayload).executeUpdate();
-        CriteriaDelete<io.reactivestax.repository.hibernate.entity.JournalEntry> criteriaDeleteJournalEntry =
-                criteriaBuilder.createCriteriaDelete(io.reactivestax.repository.hibernate.entity.JournalEntry.class);
+        CriteriaDelete<io.reactivestax.repository.hibernate.entity.JournalEntry> criteriaDeleteJournalEntry = criteriaBuilder
+                .createCriteriaDelete(io.reactivestax.repository.hibernate.entity.JournalEntry.class);
         session.createMutationQuery(criteriaDeleteJournalEntry).executeUpdate();
-        CriteriaDelete<io.reactivestax.repository.hibernate.entity.Position> criteriaDeletePositions =
-                criteriaBuilder.createCriteriaDelete(io.reactivestax.repository.hibernate.entity.Position.class);
+        CriteriaDelete<io.reactivestax.repository.hibernate.entity.Position> criteriaDeletePositions = criteriaBuilder
+                .createCriteriaDelete(io.reactivestax.repository.hibernate.entity.Position.class);
         session.createMutationQuery(criteriaDeletePositions).executeUpdate();
-        CriteriaDelete<io.reactivestax.repository.hibernate.entity.SecuritiesReference> criteriaDeleteSecuritiesReference =
-                criteriaBuilder.createCriteriaDelete(io.reactivestax.repository.hibernate.entity.SecuritiesReference.class);
+        CriteriaDelete<io.reactivestax.repository.hibernate.entity.SecuritiesReference> criteriaDeleteSecuritiesReference = criteriaBuilder
+                .createCriteriaDelete(io.reactivestax.repository.hibernate.entity.SecuritiesReference.class);
         session.createMutationQuery(criteriaDeleteSecuritiesReference).executeUpdate();
         transactionUtil.commitTransaction();
     }
 
     @Test
     public void testReadRawPayloadWithValidTradeNumber() {
-        Optional<io.reactivestax.type.dto.TradePayload> optionalTradePayloadDto = tradePayloadRepository.readRawPayload("TDB_000001");
+        Optional<io.reactivestax.type.dto.TradePayloadDTO> optionalTradePayloadDto = tradePayloadRepository
+                .readRawPayload("TDB_000001");
         Assert.assertEquals("TDB_000001,2024-09-19 22:16:18,TDB_CUST_5214938,TSLA,BUY,1,638.02",
                 optionalTradePayloadDto.map(tradePayloadDto -> tradePayloadDto.getPayload()));
     }
@@ -208,14 +207,17 @@ public class ConsumerHibernateTest {
         positionsRepository.upsertPosition(positionDto);
         transactionUtil.commitTransaction();
         Session session = connectionUtil.getConnection();
-        Position position = session.createQuery("from Position where positionCompositeKey.accountNumber = :accountNumber " +
-                "and positionCompositeKey.securityCusip = :securityCusip", Position.class).setParameter("accountNumber",
-                positionDto.getAccountNumber()).setParameter("securityCusip", positionDto.getSecurityCusip()).getSingleResult();
+        Position position = session
+                .createQuery("from Position where positionCompositeKey.accountNumber = :accountNumber " +
+                        "and positionCompositeKey.securityCusip = :securityCusip", Position.class)
+                .setParameter("accountNumber",
+                        positionDto.getAccountNumber())
+                .setParameter("securityCusip", positionDto.getSecurityCusip()).getSingleResult();
         Assert.assertNotNull(position);
     }
 
     @Test
-    public void testUpdatePosition(){
+    public void testUpdatePosition() {
         io.reactivestax.type.dto.Position positionDto1 = new io.reactivestax.type.dto.Position();
         positionDto1.setAccountNumber(journalEntryDto1.getAccountNumber());
         positionDto1.setSecurityCusip(journalEntryDto1.getSecurityCusip());
@@ -231,9 +233,12 @@ public class ConsumerHibernateTest {
         positionsRepository.upsertPosition(positionDto2);
         transactionUtil.commitTransaction();
         Session session = connectionUtil.getConnection();
-        Position position = session.createQuery("from Position where positionCompositeKey.accountNumber = :accountNumber " +
-                "and positionCompositeKey.securityCusip = :securityCusip", Position.class).setParameter("accountNumber",
-                positionDto1.getAccountNumber()).setParameter("securityCusip", positionDto1.getSecurityCusip()).getSingleResult();
+        Position position = session
+                .createQuery("from Position where positionCompositeKey.accountNumber = :accountNumber " +
+                        "and positionCompositeKey.securityCusip = :securityCusip", Position.class)
+                .setParameter("accountNumber",
+                        positionDto1.getAccountNumber())
+                .setParameter("securityCusip", positionDto1.getSecurityCusip()).getSingleResult();
         Assert.assertEquals(1, position.getVersion());
     }
 }
