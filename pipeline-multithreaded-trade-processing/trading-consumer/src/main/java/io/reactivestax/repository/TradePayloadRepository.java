@@ -2,8 +2,10 @@ package io.reactivestax.repository;
 
 import io.reactivestax.type.dto.TradePayload;
 
+import java.util.Optional;
+
 public interface TradePayloadRepository {
-    TradePayload readRawPayload(String tradeNumber);
+    Optional<TradePayload> readRawPayload(String tradeNumber);
 
     void updateTradePayloadLookupStatus(boolean lookupStatus, Long tradeId);
 

@@ -1,13 +1,21 @@
 package io.reactivestax.repository.jdbc;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Optional;
+
 import io.reactivestax.repository.JournalEntryRepository;
 import io.reactivestax.type.dto.JournalEntry;
 import io.reactivestax.type.enums.PostedStatus;
+import io.reactivestax.type.exception.JournalEntryCreationException;
 import io.reactivestax.type.exception.OptimisticLockingException;
 import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
+import lombok.extern.slf4j.Slf4j;
 
-import java.sql.*;
-
+@Slf4j
 public class JDBCJournalEntryRepository implements JournalEntryRepository {
     private static final String INSERT_INTO_JOURNAL_ENTRY_QUERY = "Insert into journal_entry (trade_id, account_number, " +
             "security_cusip, direction, quantity, posted_status, transaction_timestamp, created_timestamp, updated_timestamp) values(?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
@@ -27,7 +35,7 @@ public class JDBCJournalEntryRepository implements JournalEntryRepository {
     }
 
     @Override
-    public Long insertIntoJournalEntry(JournalEntry journalEntry) {
+    public Optional<Long> insertIntoJournalEntry(JournalEntry journalEntry) {
         Long id = null;
         Connection connection = JDBCTransactionUtil.getInstance().getConnection();
         try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_INTO_JOURNAL_ENTRY_QUERY, PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -42,15 +50,16 @@ public class JDBCJournalEntryRepository implements JournalEntryRepository {
             try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     id = generatedKeys.getLong(1);
+                    // return Optional.of(id);
                 } else {
-                    throw new SQLException("Inserting record failed, no ID obtained.");
+                    log.error("Inserting record failed, no ID obtained.");
+                    return Optional.empty();
                 }
             }
-        } catch (Exception e) {
-            throw new OptimisticLockingException("Optimistic locking", e);
+        } catch (SQLException e) {
+            throw new JournalEntryCreationException("Journal Entry Creation failed", e);
         }
-
-        return id;
+        return Optional.ofNullable(id);
     }
 
     @Override

@@ -7,6 +7,8 @@ import io.reactivestax.type.enums.PostedStatus;
 import io.reactivestax.util.database.hibernate.HibernateTransactionUtil;
 import org.hibernate.Session;
 
+import java.util.Optional;
+
 public class HibernateTradePayloadRepository implements TradePayloadRepository {
     private static HibernateTradePayloadRepository instance;
 
@@ -22,13 +24,16 @@ public class HibernateTradePayloadRepository implements TradePayloadRepository {
     }
 
     @Override
-    public io.reactivestax.type.dto.TradePayload readRawPayload(String tradeNumber) {
+    public Optional<io.reactivestax.type.dto.TradePayload> readRawPayload(String tradeNumber) {
         Session session = HibernateTransactionUtil.getInstance().getConnection();
-        TradePayload tradePayloadEntity = session.createQuery("from TradePayload tp where tp.tradeNumber = :tradeNumber", TradePayload.class)
+        Optional<io.reactivestax.repository.hibernate.entity.TradePayload> optionalTradePayload = session
+                .createQuery("from TradePayload tp where tp.tradeNumber = :tradeNumber"
+                        , io.reactivestax.repository.hibernate.entity.TradePayload.class)
                 .setParameter("tradeNumber", tradeNumber)
-                .getSingleResult();
+                .stream()
+                .findFirst();
 
-        return getTradePayloadDTO(tradePayloadEntity);
+        return getTradePayloadDTO(optionalTradePayload);
     }
 
     @Override
@@ -45,15 +50,17 @@ public class HibernateTradePayloadRepository implements TradePayloadRepository {
         tradePayload.setJournalEntryStatus(PostedStatus.POSTED);
     }
 
-    private io.reactivestax.type.dto.TradePayload getTradePayloadDTO(TradePayload tradePayloadEntity) {
-        io.reactivestax.type.dto.TradePayload tradePayload = new io.reactivestax.type.dto.TradePayload();
-        tradePayload.setId(tradePayloadEntity.getId());
-        tradePayload.setTradeNumber(tradePayloadEntity.getTradeNumber());
-        tradePayload.setPayload(tradePayloadEntity.getPayload());
-        tradePayload.setLookupStatus(String.valueOf(tradePayloadEntity.getLookupStatus()));
-        tradePayload.setValidityStatus(String.valueOf(tradePayloadEntity.getValidityStatus()));
-        tradePayload.setJournalEntryStatus(String.valueOf(tradePayloadEntity.getJournalEntryStatus()));
-
-        return tradePayload;
+    private Optional<io.reactivestax.type.dto.TradePayload>
+                     getTradePayloadDTO(Optional<TradePayload> optionalTradePayloadEntity) {
+        return optionalTradePayloadEntity.map(tradePayloadEntity -> {
+            io.reactivestax.type.dto.TradePayload tradePayload = new io.reactivestax.type.dto.TradePayload();
+            tradePayload.setId(tradePayloadEntity.getId());
+            tradePayload.setTradeNumber(tradePayloadEntity.getTradeNumber());
+            tradePayload.setPayload(tradePayloadEntity.getPayload());
+            tradePayload.setLookupStatus(String.valueOf(tradePayloadEntity.getLookupStatus()));
+            tradePayload.setValidityStatus(String.valueOf(tradePayloadEntity.getValidityStatus()));
+            tradePayload.setJournalEntryStatus(String.valueOf(tradePayloadEntity.getJournalEntryStatus()));
+            return tradePayload;
+        });
     }
 }

@@ -16,6 +16,7 @@ import jakarta.persistence.OptimisticLockException;
 import org.hibernate.HibernateException;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 public class TradeProcessorService implements TradeProcessor {
@@ -47,15 +48,12 @@ public class TradeProcessorService implements TradeProcessor {
     public void processTrade(String tradeId, String queueName) throws InterruptedException, IOException {
         try {
             transactionUtil.startTransaction();
-            TradePayload tradePayload = tradePayloadRepository.readRawPayload(tradeId);
-            String[] payloadArr = tradePayload.getPayload().split(",");
-            String cusip = payloadArr[3];
-            boolean validSecurity = lookupSecuritiesRepository.lookupSecurities(cusip);
-            tradePayloadRepository.updateTradePayloadLookupStatus(validSecurity, tradePayload.getId());
-            if (validSecurity) {
-                JournalEntry journalEntry = journalEntryTransaction(payloadArr, tradePayload.getId());
-                positionTransaction(journalEntry);
-            }
+
+            Optional<TradePayload> optionalTradePayload = tradePayloadRepository.readRawPayload(tradeId);
+            optionalTradePayload.ifPresent(
+                    tradePayload -> processTradePayload(tradePayload, tradeId, queueName)
+            );
+
             transactionUtil.commitTransaction();
         } catch (HibernateException | OptimisticLockException | OptimisticLockingException e) {
             logger.warning("Hibernate/Optimistic Lock exception detected.");
@@ -64,17 +62,31 @@ public class TradeProcessorService implements TradeProcessor {
         }
     }
 
+    private void processTradePayload(TradePayload tradePayload, String tradeId, String queueName) {
+        String[] payloadArr = tradePayload.getPayload().split(",");
+        String cusip = payloadArr[3];
+        boolean validSecurity = lookupSecuritiesRepository.lookupSecurities(cusip);
+        tradePayloadRepository.updateTradePayloadLookupStatus(validSecurity, tradePayload.getId());
+        if (validSecurity) {
+            JournalEntry journalEntry = journalEntryTransaction(payloadArr, tradePayload.getId());
+            positionTransaction(journalEntry);
+        }
+    }
+
     @Override
     public JournalEntry journalEntryTransaction(String[] payloadArr, Long tradeId) {
-        JournalEntry journalEntry = new JournalEntry();
-        journalEntry.setTradeId(payloadArr[0]);
-        journalEntry.setAccountNumber(payloadArr[2]);
-        journalEntry.setSecurityCusip(payloadArr[3]);
-        journalEntry.setDirection(payloadArr[4]);
-        journalEntry.setQuantity(Integer.parseInt(payloadArr[5]));
-        journalEntry.setTransactionTimestamp(payloadArr[1]);
-        Long journalEntryId = journalEntryRepository.insertIntoJournalEntry(journalEntry);
-        if (journalEntryId != null) journalEntry.setId(journalEntryId);
+        JournalEntry journalEntry = JournalEntry.builder()
+                .tradeId(payloadArr[0])
+                .accountNumber(payloadArr[2])
+                .securityCusip(payloadArr[3])
+                .direction(payloadArr[4])
+                .quantity(Integer.parseInt(payloadArr[5]))
+                .transactionTimestamp(payloadArr[1])
+                .build();
+
+        Optional<Long> optionalJournalEntryId = journalEntryRepository.insertIntoJournalEntry(journalEntry);
+        optionalJournalEntryId
+                .ifPresent(journalEntry::setId);
         tradePayloadRepository.updateTradePayloadPostedStatus(tradeId);
         return journalEntry;
     }
