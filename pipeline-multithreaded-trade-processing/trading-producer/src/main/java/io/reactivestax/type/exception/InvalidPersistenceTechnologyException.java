@@ -1,7 +1,9 @@
 package io.reactivestax.type.exception;
 
+import io.reactivestax.util.Constants;
+
 public class InvalidPersistenceTechnologyException extends RuntimeException {
-    public InvalidPersistenceTechnologyException(String message) {
-        super(message);
+    public InvalidPersistenceTechnologyException() {
+        super(Constants.INVALID_PERSISTENCE_TECHNOLOGY);
     }
 }
