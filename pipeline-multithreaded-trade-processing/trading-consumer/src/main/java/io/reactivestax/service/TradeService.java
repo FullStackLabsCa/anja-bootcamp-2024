@@ -6,6 +6,7 @@ import io.reactivestax.util.ApplicationPropertiesUtils;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
+import java.util.stream.IntStream;
 
 public class TradeService {
     private static TradeService instance;
@@ -25,10 +26,9 @@ public class TradeService {
     }
 
     public void startTradeConsumer() {
-        for (int i = 0; i < this.applicationPropertiesUtils.getTradeProcessorQueueCount(); i++) {
-            tradeProcessorExecutorService.submit(new FileTradeProcessor(applicationPropertiesUtils.getQueueExchangeName() +
-                    "_queue_" + i));
-        }
+        IntStream.range(0, this.applicationPropertiesUtils.getTradeProcessorQueueCount())
+                .forEach(i -> new FileTradeProcessor(applicationPropertiesUtils.getQueueExchangeName() +
+                        "_queue_" + i));
         logger.info("Started trade processor.");
         addShutdownHook();
     }
