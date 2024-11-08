@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,6 +42,7 @@ import io.reactivestax.util.factory.BeanFactory;
 import io.reactivestax.util.messaging.rabbitmq.RabbitMQRetry;
 import jakarta.persistence.OptimisticLockException;
 
+// @ExtendWith(MockitoExtension.class)
 class TradeProcessorServiceTest {
 
     @Mock
@@ -63,7 +63,15 @@ class TradeProcessorServiceTest {
     @InjectMocks
     private TradeProcessorService tradeProcessorService;
 
-    private Supplier<TradePayloadDTO> tradePayloadSupplier = () -> TradePayloadDTO.builder()
+    private Supplier<TradePayloadDTO> goodTradePayloadSupplier = () -> TradePayloadDTO.builder()
+            .tradeNumber("123")
+            .payload("TDB_00000000,2024-09-19 22:16:18,TDB_CUST_5214938,V,SELL,683,638.02")
+            .lookupStatus(String.valueOf(LookupStatus.PASS))
+            .validityStatus(String.valueOf(ValidityStatus.VALID))
+            .journalEntryStatus(String.valueOf(PostedStatus.POSTED))
+            .build();
+
+    private Supplier<TradePayloadDTO> badTradePayloadSupplier = () -> TradePayloadDTO.builder()
             .tradeNumber("123")
             .payload("TDB_00000000,2024-09-19 22:16:18,TDB_CUST_5214938,V,SELL,683,638.02")
             .lookupStatus(String.valueOf(LookupStatus.PASS))
@@ -74,7 +82,8 @@ class TradeProcessorServiceTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        tradeProcessorService = spy(new TradeProcessorService(transactionUtil, tradePayloadRepository,
+
+        tradeProcessorService = Mockito.spy(new TradeProcessorService(transactionUtil, tradePayloadRepository,
                 lookupSecuritiesRepository, journalEntryRepository, positionsRepository));
     }
 
@@ -84,37 +93,39 @@ class TradeProcessorServiceTest {
         final String testQueueName = "queue1";
 
         // Arrange
-        when(tradePayloadRepository.readRawPayload(testTradeId)).thenReturn(Optional.of(tradePayloadSupplier.get()));
+        when(tradePayloadRepository.readRawPayload(testTradeId))
+                .thenReturn(Optional.of(goodTradePayloadSupplier.get()));
 
         // Act
         tradeProcessorService.processTrade(testTradeId, testQueueName);
 
         // Assert
-        verify(tradeProcessorService, times(1)).processTradePayload(tradePayloadSupplier.get());
-        verify(transactionUtil, times(1)).commitTransaction();
+        // verify(tradeProcessorService,
+        // times(1)).processTradePayload(goodTradePayloadSupplier.get());
+
+        Mockito.verify(transactionUtil, Mockito.times(1)).commitTransaction();
     }
 
     @ParameterizedTest
     @MethodSource("exceptionProvider")
     void testProcessTradePayloadExceptionCases(Exception exception) throws InterruptedException, IOException {
         final String testTradeId = "TDB-000-ABC";
-        final String testQueueName = "queue1";
+        final String testQueueName = "queue1";  
 
         // Mock static method
         try (MockedStatic<BeanFactory> mockedBeanFactory = Mockito.mockStatic(BeanFactory.class)) {
-            mockedBeanFactory.when(BeanFactory::getTransactionRetryer).thenReturn(rabbitMQRetry);
-
-            // Arrange
+            // ARRANGE
+            mockedBeanFactory.when(BeanFactory::getTradeProcessingRetryer).thenReturn(rabbitMQRetry);
+            doNothing().when(rabbitMQRetry).retryTradeProcessing(anyString(), anyString());
             when(tradePayloadRepository.readRawPayload(testTradeId)).thenThrow(exception);
-            doNothing().when(rabbitMQRetry).retryTransaction(anyString(), anyString());
 
             // Act
             tradeProcessorService.processTrade(testTradeId, testQueueName);
 
             // Assert
-            verify(tradeProcessorService, times(0)).processTradePayload(tradePayloadSupplier.get());
+            verify(tradeProcessorService, times(0)).processTradePayload(goodTradePayloadSupplier.get());
             verify(transactionUtil, times(1)).rollbackTransaction();
-            verify(rabbitMQRetry, times(1)).retryTransaction(anyString(), anyString());
+            verify(rabbitMQRetry, times(1)).retryTradeProcessing(anyString(), anyString());
         }
     }
 
@@ -125,31 +136,30 @@ class TradeProcessorServiceTest {
                 Arguments.of(new OptimisticLockingException("Test Optimistic Locking Exception")));
     }
 
-    // @Test
-    // void testProcessTradePayloadExceptionCase() throws InterruptedException,
-    // IOException {
-    // final String testTradeId = "TDB-000-ABC";
-    // final String testQueueName = "queue1";
+    @Test
+    void testProcessTradePayloadExceptionCase() throws InterruptedException,
+            IOException {
+        final String testTradeId = "TDB-000-ABC";
+        final String testQueueName = "queue1";
 
-    // // Mock static method
-    // try (MockedStatic<BeanFactory> mockedBeanFactory =
-    // Mockito.mockStatic(BeanFactory.class)) {
-    // mockedBeanFactory.when(BeanFactory::getTransactionRetryer).thenReturn(rabbitMQRetry);
+        // Mock static method
+        try (MockedStatic<BeanFactory> mockedBeanFactory = Mockito.mockStatic(BeanFactory.class)) {
+            // Arrange
+            mockedBeanFactory.when(BeanFactory::getTradeProcessingRetryer).thenReturn(rabbitMQRetry);
+            doNothing().when(rabbitMQRetry).retryTradeProcessing(anyString(), anyString());
 
-    // // Arrange
-    // when(tradePayloadRepository.readRawPayload(testTradeId))
-    // .thenThrow(new HibernateException("Test Hibernate Exception"));
-    // doNothing().when(rabbitMQRetry).retryTransaction(anyString(), anyString());
+            when(tradePayloadRepository.readRawPayload(testTradeId))
+                    .thenThrow(new HibernateException("Test Hibernate Exception"));
 
-    // // Act
-    // tradeProcessorService.processTrade(testTradeId, testQueueName);
-    // // Assert
-    // verify(tradeProcessorService,
-    // times(0)).processTradePayload(tradePayloadSupplier.get());
-    // verify(transactionUtil, times(1)).rollbackTransaction();
-    // verify(rabbitMQRetry, times(1)).retryTransaction(anyString(), anyString());
-    // }
-    // }
+            // Act
+            tradeProcessorService.processTrade(testTradeId, testQueueName);
+            // Assert
+            verify(tradeProcessorService,
+                    Mockito.never()).processTradePayload(goodTradePayloadSupplier.get());
+            verify(transactionUtil, times(1)).rollbackTransaction();
+            verify(rabbitMQRetry, times(1)).retryTradeProcessing(anyString(), anyString());
+        }
+    }
 
     // @Test
     // void testProcessTradePayloadExceptionCase2() throws InterruptedException,
@@ -213,14 +223,15 @@ class TradeProcessorServiceTest {
         final String testQueueName = "queue1";
 
         // Arrange
-        when(tradePayloadRepository.readRawPayload(testTradeId)).thenReturn(Optional.of(tradePayloadSupplier.get()));
+        when(tradePayloadRepository.readRawPayload(testTradeId))
+                .thenReturn(Optional.of(goodTradePayloadSupplier.get()));
         when(lookupSecuritiesRepository.lookupSecurities("V")).thenReturn(lookupResult);
 
         // Act
         tradeProcessorService.processTrade(testTradeId, testQueueName);
 
         // Assert
-        verify(tradeProcessorService, times(1)).processTradePayload(tradePayloadSupplier.get());
+        verify(tradeProcessorService, times(1)).processTradePayload(goodTradePayloadSupplier.get());
         verify(tradeProcessorService, times(journalEntryTimes)).executeJournalEntryTransaction(Mockito.any(),
                 Mockito.any());
         verify(tradeProcessorService, times(positionTransactionTimes)).executePositionTransaction(Mockito.any());

@@ -37,25 +37,29 @@ public class BeanFactory {
     public static TransactionUtil getTransactionUtil() {
         ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
 
-        //AFTER
+        // AFTER
         Map<String, Supplier<TransactionUtil>> transactionUtilMap = new HashMap<>();
         transactionUtilMap.put(Constants.HIBERNATE_PERSISTENCE_TECHNOLOGY, HibernateTransactionUtil::getInstance);
         transactionUtilMap.put(Constants.JDBC_PERSISTENCE_TECHNOLOGY, JDBCTransactionUtil::getInstance);
 
-        Optional<String> optionalPersistenceTechnology = Optional.ofNullable(applicationPropertiesUtils.getPersistenceTechnology());
+        Optional<String> optionalPersistenceTechnology = Optional
+                .ofNullable(applicationPropertiesUtils.getPersistenceTechnology());
         return optionalPersistenceTechnology
                 .map(transactionUtilMap::get)
                 .map(Supplier::get)
                 .orElseThrow(InvalidPersistenceTechnologyException::new);
 
-        //BEFORE        
-        // if (Constants.HIBERNATE_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology())) {
-        //     return HibernateTransactionUtil.getInstance();
+        // BEFORE
+        // if
+        // (Constants.HIBERNATE_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology()))
+        // {
+        // return HibernateTransactionUtil.getInstance();
         // } else if (Constants.JDBC_PERSISTENCE_TECHNOLOGY
-        //         .equals(applicationPropertiesUtils.getPersistenceTechnology())) {
-        //     return JDBCTransactionUtil.getInstance();
+        // .equals(applicationPropertiesUtils.getPersistenceTechnology())) {
+        // return JDBCTransactionUtil.getInstance();
         // } else {
-        //     throw new InvalidPersistenceTechnologyException(Constants.INVALID_PERSISTENCE_TECHNOLOGY);
+        // throw new
+        // InvalidPersistenceTechnologyException(Constants.INVALID_PERSISTENCE_TECHNOLOGY);
         // }
     }
 
@@ -116,7 +120,7 @@ public class BeanFactory {
         }
     }
 
-    public static TransactionRetryer getTransactionRetryer() {
+    public static TransactionRetryer getTradeProcessingRetryer() {
         ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
         if (Constants.RABBITMQ_MESSAGING_TECHNOLOGY.equals(applicationPropertiesUtils.getMessagingTechnology())) {
             return RabbitMQRetry.getInstance();

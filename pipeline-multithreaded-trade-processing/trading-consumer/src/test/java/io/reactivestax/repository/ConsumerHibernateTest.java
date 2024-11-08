@@ -120,7 +120,7 @@ public class ConsumerHibernateTest {
         Optional<io.reactivestax.type.dto.TradePayloadDTO> optionalTradePayloadDto = tradePayloadRepository
                 .readRawPayload("TDB_000001");
         Assert.assertEquals("TDB_000001,2024-09-19 22:16:18,TDB_CUST_5214938,TSLA,BUY,1,638.02",
-                optionalTradePayloadDto.map(tradePayloadDto -> tradePayloadDto.getPayload()));
+                optionalTradePayloadDto.get().getPayload());
     }
 
     @Test(expected = NoResultException.class)

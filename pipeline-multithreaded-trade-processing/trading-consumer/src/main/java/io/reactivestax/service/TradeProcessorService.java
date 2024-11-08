@@ -58,27 +58,6 @@ public class TradeProcessorService implements TradeProcessor {
         return instance;
     }
 
-    // Setter methods for dependency injection
-    public void setTransactionUtil(TransactionUtil transactionUtil) {
-        this.transactionUtil = transactionUtil;
-    }
-
-    public void setTradePayloadRepository(TradePayloadRepository tradePayloadRepository) {
-        this.tradePayloadRepository = tradePayloadRepository;
-    }
-
-    public void setLookupSecuritiesRepository(LookupSecuritiesRepository lookupSecuritiesRepository) {
-        this.lookupSecuritiesRepository = lookupSecuritiesRepository;
-    }
-
-    public void setJournalEntryRepository(JournalEntryRepository journalEntryRepository) {
-        this.journalEntryRepository = journalEntryRepository;
-    }
-
-    public void setPositionsRepository(PositionsRepository positionsRepository) {
-        this.positionsRepository = positionsRepository;
-    }
-
     @Override
     public void processTrade(String tradeId, String queueName) throws InterruptedException, IOException {
         try {
@@ -89,7 +68,7 @@ public class TradeProcessorService implements TradeProcessor {
         } catch (HibernateException | OptimisticLockException | OptimisticLockingException e) {
             logger.warning("Hibernate/Optimistic Lock exception detected.");
             transactionUtil.rollbackTransaction();
-            BeanFactory.getTransactionRetryer().retryTransaction(tradeId, queueName);
+            BeanFactory.getTradeProcessingRetryer().retryTradeProcessing(tradeId, queueName);
         }
     }
 

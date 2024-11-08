@@ -1,16 +1,17 @@
 package io.reactivestax.util.messaging.rabbitmq;
 
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.GetResponse;
-import io.reactivestax.util.ApplicationPropertiesUtils;
-import io.reactivestax.util.messaging.TransactionRetryer;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.GetResponse;
+
+import io.reactivestax.util.ApplicationPropertiesUtils;
+import io.reactivestax.util.messaging.TransactionRetryer;
 
 public class RabbitMQRetry implements TransactionRetryer {
     private static RabbitMQRetry instance;
@@ -28,7 +29,7 @@ public class RabbitMQRetry implements TransactionRetryer {
     }
 
     @Override
-    public void retryTransaction(String tradeId, String queueName) {
+    public void retryTradeProcessing(String tradeId, String queueName) {
         String retryHeader = "x-retry-count";
         GetResponse getResponse = RabbitMQMessageReceiver.getInstance().getResponse();
         Map<String, Object> headers = getResponse.getProps().getHeaders();
