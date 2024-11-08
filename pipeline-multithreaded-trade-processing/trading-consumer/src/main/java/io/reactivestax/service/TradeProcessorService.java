@@ -29,19 +29,6 @@ public class TradeProcessorService implements TradeProcessor {
     private JournalEntryRepository journalEntryRepository;
     private PositionsRepository positionsRepository;
 
-    // Constructor with dependency injection
-    public TradeProcessorService(TransactionUtil transactionUtil,
-            TradePayloadRepository tradePayloadRepository,
-            LookupSecuritiesRepository lookupSecuritiesRepository,
-            JournalEntryRepository journalEntryRepository,
-            PositionsRepository positionsRepository) {
-        this.transactionUtil = transactionUtil;
-        this.tradePayloadRepository = tradePayloadRepository;
-        this.lookupSecuritiesRepository = lookupSecuritiesRepository;
-        this.journalEntryRepository = journalEntryRepository;
-        this.positionsRepository = positionsRepository;
-    }
-
     private TradeProcessorService() {
         transactionUtil = BeanFactory.getTransactionUtil();
         tradePayloadRepository = BeanFactory.getTradePayloadRepository();
@@ -54,7 +41,6 @@ public class TradeProcessorService implements TradeProcessor {
         if (instance == null) {
             instance = new TradeProcessorService();
         }
-
         return instance;
     }
 
