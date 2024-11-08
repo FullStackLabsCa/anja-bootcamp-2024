@@ -1,0 +1,13 @@
+When tradeProcessor receives a tradeId from the Queue, 
+    - then it should fetch the trade details from the trade repository
+        - if the cusip is found in the securityReferenceLookup
+            - then it should insert the journalEntry in the journal repository
+            - then it should upsert the position in the Positions table 
+            - then it should update the trade status in the trade repository
+        - else it should log the error
+
+
+
+
+
+        
