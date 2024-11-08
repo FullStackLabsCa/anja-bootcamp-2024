@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -91,6 +92,11 @@ class TradeProcessorServiceTest {
                 // Arrange
                 when(tradePayloadRepository.readRawPayload(testTradeId))
                                 .thenReturn(Optional.of(goodTradePayloadSupplier.get()));
+
+                // if tradePayloadRepository was a spy , then do this syntax
+                // to avoid calling the real method readRawPayload.
+                // doReturn(Optional.of(goodTradePayloadSupplier.get()))
+                // .when(tradePayloadRepository).readRawPayload(Mockito.anyString());
 
                 // Act
                 tradeProcessorService.processTrade(testTradeId, testQueueName);
@@ -213,8 +219,9 @@ class TradeProcessorServiceTest {
 
         @ParameterizedTest
         @MethodSource("securityReferenceLookupProvider")
-        void testProcessTradePayloadBasedOnSecurityReferenceLookup(boolean lookupResult, int journalEntryTimes,
-                        int positionTransactionTimes) throws InterruptedException, IOException {
+        void testProcessTradePayloadBasedOnSecurityReferenceLookup(boolean lookupResult,
+                        int journalEntryCreationCallCount,
+                        int positionUpsertCallCount) throws InterruptedException, IOException {
                 final String testTradeId = "TDB-000-ABC";
                 final String testQueueName = "queue1";
 
@@ -228,9 +235,10 @@ class TradeProcessorServiceTest {
 
                 // Assert
                 verify(tradeProcessorService, times(1)).processTradePayload(goodTradePayloadSupplier.get());
-                verify(tradeProcessorService, times(journalEntryTimes)).executeJournalEntryTransaction(Mockito.any(),
+                verify(tradeProcessorService, times(journalEntryCreationCallCount)).executeJournalEntryTransaction(
+                                Mockito.any(),
                                 Mockito.any());
-                verify(tradeProcessorService, times(positionTransactionTimes))
+                verify(tradeProcessorService, times(positionUpsertCallCount))
                                 .executePositionTransaction(Mockito.any());
         }
 
@@ -287,7 +295,7 @@ class TradeProcessorServiceTest {
         // }
 
         @Test
-        void testSaveJournalEntry() {
+        void testExecuteJournalEntryTransaction() {
                 String[] payloadArr = { "123", "2024-09-19 22:16:18", "TDB_CUST_5214938", "CUSIP123", "SELL", "100" };
                 Long tradeId = 1L;
 
@@ -318,7 +326,7 @@ class TradeProcessorServiceTest {
         }
 
         @Test
-        void testPositionTransaction() {
+        void testExecutePositionTransaction() {
                 // Arrange
                 JournalEntryDTO journalEntryDTO = JournalEntryDTO.builder()
                                 .id(1L)
@@ -339,6 +347,8 @@ class TradeProcessorServiceTest {
                 // Assert
                 verify(positionsRepository, times(1)).upsertPosition(any(PositionDTO.class));
                 verify(journalEntryRepository, times(1)).updateJournalEntryStatus(journalEntryDTO.getId());
+
+                verify(positionsRepository, times(1)).upsertPosition(expectedPositionDTO);
 
                 // Additional assertions to verify the Position object
                 ArgumentCaptor<PositionDTO> positionCaptor = ArgumentCaptor.forClass(PositionDTO.class);
