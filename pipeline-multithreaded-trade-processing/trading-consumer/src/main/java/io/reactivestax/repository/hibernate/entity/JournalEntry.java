@@ -1,13 +1,21 @@
 package io.reactivestax.repository.hibernate.entity;
 
-import io.reactivestax.type.enums.Direction;
-import io.reactivestax.type.enums.PostedStatus;
-import jakarta.persistence.*;
-import lombok.Data;
+import java.sql.Timestamp;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.sql.Timestamp;
+import io.reactivestax.type.enums.Direction;
+import io.reactivestax.type.enums.PostedStatus;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
 
 @Data
 @Entity

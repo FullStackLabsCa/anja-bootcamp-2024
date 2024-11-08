@@ -1,13 +1,13 @@
 package io.reactivestax.repository.jdbc;
 
-import io.reactivestax.repository.PositionsRepository;
-import io.reactivestax.type.exception.OptimisticLockingException;
-import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import io.reactivestax.repository.PositionsRepository;
+import io.reactivestax.type.exception.OptimisticLockingException;
+import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
 
 public class JDBCPositionsRepository implements PositionsRepository {
     private static final String SELECT_POSITIONS_QUERY = "Select version, created_timestamp, holding, " +
@@ -32,13 +32,14 @@ public class JDBCPositionsRepository implements PositionsRepository {
     }
 
     @Override
-    public void upsertPosition(io.reactivestax.type.dto.Position position) {
+    public void upsertPosition(io.reactivestax.type.dto.PositionDTO position) {
         try {
             Integer positionVersion = selectPositionVersion(position.getAccountNumber(), position.getSecurityCusip());
             if (positionVersion != null) {
                 position.setVersion(positionVersion);
                 updatePosition(position);
-            } else insertPosition(position);
+            } else
+                insertPosition(position);
         } catch (SQLException e) {
             throw new OptimisticLockingException("Optimistic locking", e);
         }
@@ -61,7 +62,7 @@ public class JDBCPositionsRepository implements PositionsRepository {
         }
     }
 
-    private void insertPosition(io.reactivestax.type.dto.Position position) throws SQLException {
+    private void insertPosition(io.reactivestax.type.dto.PositionDTO position) throws SQLException {
         Connection connection = JDBCTransactionUtil.getInstance().getConnection();
         try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_POSITIONS_QUERY)) {
             preparedStatement.setString(1, position.getAccountNumber());
@@ -72,7 +73,7 @@ public class JDBCPositionsRepository implements PositionsRepository {
         }
     }
 
-    private void updatePosition(io.reactivestax.type.dto.Position position) throws SQLException {
+    private void updatePosition(io.reactivestax.type.dto.PositionDTO position) throws SQLException {
         Connection connection = JDBCTransactionUtil.getInstance().getConnection();
         try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_POSITIONS_QUERY)) {
             preparedStatement.setLong(1, position.getHolding());

@@ -1,7 +1,7 @@
 package io.reactivestax.repository;
 
-import io.reactivestax.type.dto.Position;
+import io.reactivestax.type.dto.PositionDTO;
 
 public interface PositionsRepository {
-    void upsertPosition(Position position);
+    void upsertPosition(PositionDTO position);
 }

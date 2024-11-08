@@ -1,11 +1,12 @@
 package io.reactivestax.repository.hibernate;
 
+import org.hibernate.Session;
+
 import io.reactivestax.repository.PositionsRepository;
 import io.reactivestax.repository.hibernate.entity.Position;
 import io.reactivestax.repository.hibernate.entity.PositionCompositeKey;
 import io.reactivestax.util.database.hibernate.HibernateTransactionUtil;
 import jakarta.persistence.NoResultException;
-import org.hibernate.Session;
 
 public class HibernatePositionsRepository implements PositionsRepository {
     private static HibernatePositionsRepository instance;
@@ -21,11 +22,12 @@ public class HibernatePositionsRepository implements PositionsRepository {
     }
 
     @Override
-    public void upsertPosition(io.reactivestax.type.dto.Position position) {
+    public void upsertPosition(io.reactivestax.type.dto.PositionDTO position) {
         Position positionEntity = getPositionEntity(position);
         Session session = HibernateTransactionUtil.getInstance().getConnection();
         try {
-            Position position1 = session.createQuery("from Position p where p.positionCompositeKey.accountNumber = :accountNumber and p" +
+            Position position1 = session
+                    .createQuery("from Position p where p.positionCompositeKey.accountNumber = :accountNumber and p" +
                             ".positionCompositeKey.securityCusip = " +
                             ":securityCusip", Position.class)
                     .setParameter("accountNumber", positionEntity.getPositionCompositeKey().getAccountNumber())
@@ -37,7 +39,7 @@ public class HibernatePositionsRepository implements PositionsRepository {
         }
     }
 
-    private Position getPositionEntity(io.reactivestax.type.dto.Position position) {
+    private Position getPositionEntity(io.reactivestax.type.dto.PositionDTO position) {
         PositionCompositeKey positionCompositeKey = new PositionCompositeKey();
         positionCompositeKey.setAccountNumber(position.getAccountNumber());
         positionCompositeKey.setSecurityCusip(position.getSecurityCusip());

@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 import java.util.Optional;
 
 import io.reactivestax.repository.JournalEntryRepository;
-import io.reactivestax.type.dto.JournalEntry;
+import io.reactivestax.type.dto.JournalEntryDTO;
 import io.reactivestax.type.enums.PostedStatus;
 import io.reactivestax.type.exception.JournalEntryCreationException;
 import io.reactivestax.type.exception.OptimisticLockingException;
@@ -17,7 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class JDBCJournalEntryRepository implements JournalEntryRepository {
-    private static final String INSERT_INTO_JOURNAL_ENTRY_QUERY = "Insert into journal_entry (trade_id, account_number, " +
+    private static final String INSERT_INTO_JOURNAL_ENTRY_QUERY = "Insert into journal_entry (trade_id, account_number, "
+            +
             "security_cusip, direction, quantity, posted_status, transaction_timestamp, created_timestamp, updated_timestamp) values(?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
     private static final String UPDATE_JOURNAL_ENTRY_STATUS_QUERY = "Update journal_entry set posted_status = ?, " +
             "updated_timestamp = NOW() where id = ?";
@@ -35,10 +36,11 @@ public class JDBCJournalEntryRepository implements JournalEntryRepository {
     }
 
     @Override
-    public Optional<Long> insertIntoJournalEntry(JournalEntry journalEntry) {
+    public Optional<Long> saveJournalEntry(JournalEntryDTO journalEntry) {
         Long id = null;
         Connection connection = JDBCTransactionUtil.getInstance().getConnection();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_INTO_JOURNAL_ENTRY_QUERY, PreparedStatement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_INTO_JOURNAL_ENTRY_QUERY,
+                PreparedStatement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, journalEntry.getTradeId());
             preparedStatement.setString(2, journalEntry.getAccountNumber());
             preparedStatement.setString(3, journalEntry.getSecurityCusip());

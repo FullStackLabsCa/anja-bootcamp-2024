@@ -25,7 +25,7 @@ public class HibernateJournalEntryRepository implements JournalEntryRepository {
     }
 
     @Override
-    public Optional<Long> insertIntoJournalEntry(io.reactivestax.type.dto.JournalEntry journalEntry) {
+    public Optional<Long> saveJournalEntry(io.reactivestax.type.dto.JournalEntryDTO journalEntry) {
         JournalEntry journalEntryEntity = getJournalEntryEntity(journalEntry);
         Session session = HibernateTransactionUtil.getInstance().getConnection();
         session.persist(journalEntryEntity);
@@ -39,7 +39,7 @@ public class HibernateJournalEntryRepository implements JournalEntryRepository {
         journalEntry.setPostedStatus(PostedStatus.POSTED);
     }
 
-    private JournalEntry getJournalEntryEntity(io.reactivestax.type.dto.JournalEntry journalEntry) {
+    private JournalEntry getJournalEntryEntity(io.reactivestax.type.dto.JournalEntryDTO journalEntry) {
         JournalEntry journalEntryEntity = new JournalEntry();
         journalEntryEntity.setTradeId(journalEntry.getTradeId());
         journalEntryEntity.setAccountNumber(journalEntry.getAccountNumber());

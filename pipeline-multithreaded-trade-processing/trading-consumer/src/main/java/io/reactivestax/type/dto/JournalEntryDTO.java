@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class JournalEntry {
+public class JournalEntryDTO {
     private Long id;
     private String tradeId;
     private String accountNumber;

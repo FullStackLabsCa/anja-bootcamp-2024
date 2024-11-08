@@ -35,8 +35,8 @@ public class ConsumerHibernateTest {
     PositionsRepository positionsRepository;
     ConnectionUtil<Session> connectionUtil;
     TransactionUtil transactionUtil;
-    io.reactivestax.type.dto.JournalEntry journalEntryDto1 = new io.reactivestax.type.dto.JournalEntry();
-    io.reactivestax.type.dto.JournalEntry journalEntryDto2 = new io.reactivestax.type.dto.JournalEntry();
+    io.reactivestax.type.dto.JournalEntryDTO journalEntryDto1 = new io.reactivestax.type.dto.JournalEntryDTO();
+    io.reactivestax.type.dto.JournalEntryDTO journalEntryDto2 = new io.reactivestax.type.dto.JournalEntryDTO();
     ApplicationPropertiesUtils applicationPropertiesUtils;
     TradeService tradeService;
     Logger logger = Logger.getLogger(ConsumerHibernateTest.class.getName());
@@ -157,7 +157,7 @@ public class ConsumerHibernateTest {
 
     @Test
     public void testInsertIntoJournalEntry() {
-        io.reactivestax.type.dto.JournalEntry journalEntryDto = new io.reactivestax.type.dto.JournalEntry();
+        io.reactivestax.type.dto.JournalEntryDTO journalEntryDto = new io.reactivestax.type.dto.JournalEntryDTO();
         journalEntryDto.setTradeId("TDB_000001");
         journalEntryDto.setAccountNumber("TDB_CUST_5214938");
         journalEntryDto.setSecurityCusip("TSLA");
@@ -165,7 +165,7 @@ public class ConsumerHibernateTest {
         journalEntryDto.setDirection(Direction.BUY.name());
         journalEntryDto.setTransactionTimestamp("2024-09-19 22:16:18");
         transactionUtil.startTransaction();
-        Optional<Long> entryId = journalEntryRepository.insertIntoJournalEntry(journalEntryDto);
+        Optional<Long> entryId = journalEntryRepository.saveJournalEntry(journalEntryDto);
         transactionUtil.commitTransaction();
         Session session = connectionUtil.getConnection();
         JournalEntry journalEntry = session.get(JournalEntry.class, entryId.get());
@@ -175,7 +175,7 @@ public class ConsumerHibernateTest {
     @Test
     public void testUpdateJournalEntryStatus() {
         transactionUtil.startTransaction();
-        Optional<Long> entryId = journalEntryRepository.insertIntoJournalEntry(journalEntryDto1);
+        Optional<Long> entryId = journalEntryRepository.saveJournalEntry(journalEntryDto1);
         transactionUtil.commitTransaction();
         transactionUtil.startTransaction();
         journalEntryRepository.updateJournalEntryStatus(entryId.get());
@@ -199,7 +199,7 @@ public class ConsumerHibernateTest {
 
     @Test
     public void testInsertPosition() {
-        io.reactivestax.type.dto.Position positionDto = new io.reactivestax.type.dto.Position();
+        io.reactivestax.type.dto.PositionDTO positionDto = new io.reactivestax.type.dto.PositionDTO();
         positionDto.setAccountNumber(journalEntryDto1.getAccountNumber());
         positionDto.setSecurityCusip(journalEntryDto1.getSecurityCusip());
         positionDto.setHolding((long) journalEntryDto1.getQuantity());
@@ -218,14 +218,14 @@ public class ConsumerHibernateTest {
 
     @Test
     public void testUpdatePosition() {
-        io.reactivestax.type.dto.Position positionDto1 = new io.reactivestax.type.dto.Position();
+        io.reactivestax.type.dto.PositionDTO positionDto1 = new io.reactivestax.type.dto.PositionDTO();
         positionDto1.setAccountNumber(journalEntryDto1.getAccountNumber());
         positionDto1.setSecurityCusip(journalEntryDto1.getSecurityCusip());
         positionDto1.setHolding((long) journalEntryDto1.getQuantity());
         transactionUtil.startTransaction();
         positionsRepository.upsertPosition(positionDto1);
         transactionUtil.commitTransaction();
-        io.reactivestax.type.dto.Position positionDto2 = new io.reactivestax.type.dto.Position();
+        io.reactivestax.type.dto.PositionDTO positionDto2 = new io.reactivestax.type.dto.PositionDTO();
         positionDto2.setAccountNumber(journalEntryDto2.getAccountNumber());
         positionDto2.setSecurityCusip(journalEntryDto2.getSecurityCusip());
         positionDto2.setHolding((long) journalEntryDto2.getQuantity());

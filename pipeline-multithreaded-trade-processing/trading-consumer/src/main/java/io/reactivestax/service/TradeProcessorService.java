@@ -11,8 +11,8 @@ import io.reactivestax.repository.LookupSecuritiesRepository;
 import io.reactivestax.repository.PositionsRepository;
 import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.task.TradeProcessor;
-import io.reactivestax.type.dto.JournalEntry;
-import io.reactivestax.type.dto.Position;
+import io.reactivestax.type.dto.JournalEntryDTO;
+import io.reactivestax.type.dto.PositionDTO;
 import io.reactivestax.type.dto.TradePayloadDTO;
 import io.reactivestax.type.enums.Direction;
 import io.reactivestax.type.exception.OptimisticLockingException;
@@ -31,15 +31,15 @@ public class TradeProcessorService implements TradeProcessor {
 
     // Constructor with dependency injection
     public TradeProcessorService(TransactionUtil transactionUtil,
-    TradePayloadRepository tradePayloadRepository,
-    LookupSecuritiesRepository lookupSecuritiesRepository,
-    JournalEntryRepository journalEntryRepository,
-    PositionsRepository positionsRepository) {
-    this.transactionUtil = transactionUtil;
-    this.tradePayloadRepository = tradePayloadRepository;
-    this.lookupSecuritiesRepository = lookupSecuritiesRepository;
-    this.journalEntryRepository = journalEntryRepository;
-    this.positionsRepository = positionsRepository;
+            TradePayloadRepository tradePayloadRepository,
+            LookupSecuritiesRepository lookupSecuritiesRepository,
+            JournalEntryRepository journalEntryRepository,
+            PositionsRepository positionsRepository) {
+        this.transactionUtil = transactionUtil;
+        this.tradePayloadRepository = tradePayloadRepository;
+        this.lookupSecuritiesRepository = lookupSecuritiesRepository;
+        this.journalEntryRepository = journalEntryRepository;
+        this.positionsRepository = positionsRepository;
     }
 
     private TradeProcessorService() {
@@ -99,14 +99,14 @@ public class TradeProcessorService implements TradeProcessor {
         boolean validSecurity = lookupSecuritiesRepository.lookupSecurities(cusip);
         tradePayloadRepository.updateTradePayloadLookupStatus(validSecurity, tradePayloadDTO.getId());
         if (validSecurity) {
-            JournalEntry journalEntry = journalEntryTransaction(payloadArr, tradePayloadDTO.getId());
-            positionTransaction(journalEntry);
+            JournalEntryDTO journalEntry = executeJournalEntryTransaction(payloadArr, tradePayloadDTO.getId());
+            executePositionTransaction(journalEntry);
         }
     }
 
     @Override
-    public JournalEntry journalEntryTransaction(String[] payloadArr, Long tradeId) {
-        JournalEntry journalEntry = JournalEntry.builder()
+    public JournalEntryDTO executeJournalEntryTransaction(String[] payloadArr, Long tradeId) {
+        JournalEntryDTO journalEntry = JournalEntryDTO.builder()
                 .tradeId(payloadArr[0])
                 .accountNumber(payloadArr[2])
                 .securityCusip(payloadArr[3])
@@ -115,7 +115,7 @@ public class TradeProcessorService implements TradeProcessor {
                 .transactionTimestamp(payloadArr[1])
                 .build();
 
-        Optional<Long> optionalJournalEntryId = journalEntryRepository.insertIntoJournalEntry(journalEntry);
+        Optional<Long> optionalJournalEntryId = journalEntryRepository.saveJournalEntry(journalEntry);
         optionalJournalEntryId
                 .ifPresent(journalEntry::setId);
         tradePayloadRepository.updateTradePayloadPostedStatus(tradeId);
@@ -123,14 +123,14 @@ public class TradeProcessorService implements TradeProcessor {
     }
 
     @Override
-    public void positionTransaction(JournalEntry journalEntry) {
-        Position position = new Position();
-        position.setAccountNumber(journalEntry.getAccountNumber());
-        position.setSecurityCusip(journalEntry.getSecurityCusip());
-        position.setHolding(
+    public void executePositionTransaction(JournalEntryDTO journalEntry) {
+        PositionDTO positionDTO = new PositionDTO();
+        positionDTO.setAccountNumber(journalEntry.getAccountNumber());
+        positionDTO.setSecurityCusip(journalEntry.getSecurityCusip());
+        positionDTO.setHolding(
                 (long) (journalEntry.getDirection().equals(Direction.SELL.toString()) ? -journalEntry.getQuantity()
                         : journalEntry.getQuantity()));
-        positionsRepository.upsertPosition(position);
+        positionsRepository.upsertPosition(positionDTO);
         journalEntryRepository.updateJournalEntryStatus(journalEntry.getId());
     }
 }
