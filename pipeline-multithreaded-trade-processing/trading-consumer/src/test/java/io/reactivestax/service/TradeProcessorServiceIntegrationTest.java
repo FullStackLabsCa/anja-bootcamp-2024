@@ -1,7 +1,6 @@
 package io.reactivestax.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -62,7 +61,7 @@ class TradeProcessorServiceIntegrationTest {
                 tradePayloadRepository = BeanFactory.getTradePayloadRepository();
                 transactionUtil = BeanFactory.getTransactionUtil();
 
-                // tradeProcessorService = TradeProcessorService.getInstance();
+                tradeProcessorService = TradeProcessorService.getInstance();
         }
 
         @Test
@@ -73,9 +72,9 @@ class TradeProcessorServiceIntegrationTest {
                 // this is to simulate a pre-saved raw tradepayload, that trade processor will
                 // pickup and process
                 tradePayloadRepository.saveTradePayload(DTOSuppliers.goodTradePayloadDTOSupplier.get());
-                when(lookupSecuritiesRepository.lookupSecurities(
-                                DTOSuppliers.goodTradePayloadDTOSupplier.get().getPayload().split(",")[3]))
-                                .thenReturn(true);
+                // when(lookupSecuritiesRepository.lookupSecurities(
+                // DTOSuppliers.goodTradePayloadDTOSupplier.get().getPayload().split(",")[3]))
+                // .thenReturn(true);
                 // when(journalEntryRepository.saveJournalEntry(goodTradePayloadDTOSupplier.get()))
                 // .thenReturn(TradePayloadDTO.builder().build());
                 // when(positionsRepository.savePosition(goodTradePayloadDTOSupplier.get()))
@@ -88,6 +87,7 @@ class TradeProcessorServiceIntegrationTest {
                 Optional<TradePayloadDTO> result = tradePayloadRepository.readRawPayload(
                                 DTOSuppliers.GOOD_TRADE_PAYLOAD_TRADE_NUMBER);
                 assertEquals(true, result.isPresent());
-                assertEquals(DTOSuppliers.goodTradePayloadDTOSupplier.get().getTradeNumber(), result.get().getTradeNumber());
+                assertEquals(DTOSuppliers.goodTradePayloadDTOSupplier.get().getTradeNumber(),
+                                result.get().getTradeNumber());
         }
 }
