@@ -89,7 +89,7 @@ class TradeProcessorServiceTest {
                 // Arrange
                 when(tradePayloadRepository.readRawPayload(testTradeId))
                                 .thenReturn(Optional.of(goodTradePayloadSupplier.get()));
-
+                doNothing().when(tradeProcessorService).processTradePayload(any());
                 // if tradePayloadRepository was a spy , then do this syntax
                 // to avoid calling the real method readRawPayload.
                 // doReturn(Optional.of(goodTradePayloadSupplier.get()))

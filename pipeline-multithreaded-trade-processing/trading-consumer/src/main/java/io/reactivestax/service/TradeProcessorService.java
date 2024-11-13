@@ -19,9 +19,12 @@ import io.reactivestax.type.exception.OptimisticLockingException;
 import io.reactivestax.util.database.TransactionUtil;
 import io.reactivestax.util.factory.BeanFactory;
 import jakarta.persistence.OptimisticLockException;
+import lombok.Setter;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
+@Setter
 public class TradeProcessorService implements TradeProcessor {
     private static TradeProcessorService instance;
     Logger logger = Logger.getLogger(TradeProcessorService.class.getName());
@@ -51,9 +54,13 @@ public class TradeProcessorService implements TradeProcessor {
         logger.info(() -> String.format("Processing trade  -->: %s", tradeId));
         try {
             transactionUtil.startTransaction();
+            logger.info(() -> "stage 1");
             Optional<TradePayloadDTO> optionalTradePayload = tradePayloadRepository.readRawPayload(tradeId);
+            logger.info(() -> "stage 2");
             optionalTradePayload.ifPresent(this::processTradePayload);
+            logger.info(() -> "stage 3");
             transactionUtil.commitTransaction();
+            logger.info(() -> "stage 4");
         } catch (HibernateException | OptimisticLockException | OptimisticLockingException e) {
             logger.warning("Hibernate/Optimistic Lock exception detected.");
             transactionUtil.rollbackTransaction();
@@ -64,6 +71,7 @@ public class TradeProcessorService implements TradeProcessor {
     void processTradePayload(TradePayloadDTO tradePayloadDTO) {
         String[] payloadArr = tradePayloadDTO.getPayload().split(",");
         String cusip = payloadArr[3];
+        logger.info(() -> "Processing trade payload for CUSIP: " + cusip);
         boolean validSecurity = lookupSecuritiesRepository.lookupSecurities(cusip);
         logger.info(() -> String.format("Security lookup for CUSIP: %s is %s", cusip, validSecurity));
         tradePayloadRepository.updateTradePayloadLookupStatus(validSecurity, tradePayloadDTO.getId());

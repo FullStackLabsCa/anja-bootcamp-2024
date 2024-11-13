@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.util.Optional;
 
 import io.reactivestax.repository.JournalEntryRepository;
+import io.reactivestax.repository.hibernate.entity.JournalEntry;
 import io.reactivestax.type.dto.JournalEntryDTO;
 import io.reactivestax.type.enums.PostedStatus;
 import io.reactivestax.type.exception.JournalEntryCreationException;
@@ -74,5 +75,15 @@ public class JDBCJournalEntryRepository implements JournalEntryRepository {
         } catch (SQLException e) {
             throw new OptimisticLockingException("Optimistic locking", e);
         }
+    }
+
+    @Override
+    public JournalEntry findJournalEntryByJournalEntryId(Long journalEntryId) {
+        return null;
+    }
+
+    @Override
+    public JournalEntry findJournalEntryByJournalEntry(JournalEntryDTO journalEntryDTO) {
+        return null;
     }
 }

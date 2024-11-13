@@ -3,6 +3,7 @@ package io.reactivestax.repository.hibernate;
 import java.sql.Timestamp;
 import java.util.Optional;
 
+import lombok.extern.log4j.Log4j2;
 import org.hibernate.Session;
 
 import io.reactivestax.repository.JournalEntryRepository;
@@ -11,8 +12,15 @@ import io.reactivestax.type.enums.Direction;
 import io.reactivestax.type.enums.PostedStatus;
 import io.reactivestax.util.database.hibernate.HibernateTransactionUtil;
 
+@Log4j2
 public class HibernateJournalEntryRepository implements JournalEntryRepository {
     private static HibernateJournalEntryRepository instance;
+    private static final String JOURNAL_ENTRY_QUERY = """
+            from JournalEntry where tradeId = :tradeId
+            and accountNumber = :accountNumber and securityCusip = :securityCusip
+            and direction = :direction and quantity = :quantity
+            
+            """;
 
     private HibernateJournalEntryRepository() {
     }
@@ -37,6 +45,26 @@ public class HibernateJournalEntryRepository implements JournalEntryRepository {
         Session session = HibernateTransactionUtil.getInstance().getConnection();
         JournalEntry journalEntry = session.get(JournalEntry.class, journalEntryId);
         journalEntry.setPostedStatus(PostedStatus.POSTED);
+    }
+
+    @Override
+    public JournalEntry findJournalEntryByJournalEntryId(Long journalEntryId) {
+        Session session = HibernateTransactionUtil.getInstance().getConnection();
+        return session.get(JournalEntry.class, journalEntryId);
+    }
+
+    @Override
+    public JournalEntry findJournalEntryByJournalEntry(io.reactivestax.type.dto.JournalEntryDTO journalEntryDTO) {
+        log.info(() -> "Finding journal entry by journal entry");
+        Session session = HibernateTransactionUtil.getInstance().getConnection();
+        return session.createQuery(JOURNAL_ENTRY_QUERY, JournalEntry.class)
+                .setParameter("tradeId", journalEntryDTO.getTradeId())
+                .setParameter("accountNumber", journalEntryDTO.getAccountNumber())
+                .setParameter("securityCusip", journalEntryDTO.getSecurityCusip())
+                .setParameter("direction", Direction.valueOf(journalEntryDTO.getDirection()))
+                .setParameter("quantity", journalEntryDTO.getQuantity())
+                //.setParameter("transactionTimestamp", journalEntryDTO.getTransactionTimestamp())
+                .uniqueResult();
     }
 
     private JournalEntry getJournalEntryEntity(io.reactivestax.type.dto.JournalEntryDTO journalEntry) {
