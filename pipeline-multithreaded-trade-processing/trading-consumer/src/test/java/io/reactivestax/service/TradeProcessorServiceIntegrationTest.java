@@ -1,6 +1,7 @@
 package io.reactivestax.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.spy;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -12,7 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.reactivestax.repository.JournalEntryRepository;
@@ -47,7 +47,7 @@ class TradeProcessorServiceIntegrationTest {
         ApplicationPropertiesUtils applicationPropertiesUtils;
 
         @InjectMocks
-        @Spy
+        // @Spy
         private TradeProcessorService tradeProcessorService;
 
         @BeforeEach
@@ -61,7 +61,7 @@ class TradeProcessorServiceIntegrationTest {
                 tradePayloadRepository = BeanFactory.getTradePayloadRepository();
                 transactionUtil = BeanFactory.getTransactionUtil();
 
-                tradeProcessorService = TradeProcessorService.getInstance();
+                tradeProcessorService = spy(TradeProcessorService.getInstance());
         }
 
         @Test
