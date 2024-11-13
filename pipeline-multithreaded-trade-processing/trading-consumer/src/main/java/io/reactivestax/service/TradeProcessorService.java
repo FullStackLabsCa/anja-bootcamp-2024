@@ -19,7 +19,9 @@ import io.reactivestax.type.exception.OptimisticLockingException;
 import io.reactivestax.util.database.TransactionUtil;
 import io.reactivestax.util.factory.BeanFactory;
 import jakarta.persistence.OptimisticLockException;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public class TradeProcessorService implements TradeProcessor {
     private static TradeProcessorService instance;
     Logger logger = Logger.getLogger(TradeProcessorService.class.getName());
@@ -46,6 +48,7 @@ public class TradeProcessorService implements TradeProcessor {
 
     @Override
     public void processTrade(String tradeId, String queueName) throws InterruptedException, IOException {
+        logger.info(() -> String.format("Processing trade  -->: %s", tradeId));
         try {
             transactionUtil.startTransaction();
             Optional<TradePayloadDTO> optionalTradePayload = tradePayloadRepository.readRawPayload(tradeId);
@@ -62,15 +65,20 @@ public class TradeProcessorService implements TradeProcessor {
         String[] payloadArr = tradePayloadDTO.getPayload().split(",");
         String cusip = payloadArr[3];
         boolean validSecurity = lookupSecuritiesRepository.lookupSecurities(cusip);
+        logger.info(() -> String.format("Security lookup for CUSIP: %s is %s", cusip, validSecurity));
         tradePayloadRepository.updateTradePayloadLookupStatus(validSecurity, tradePayloadDTO.getId());
         if (validSecurity) {
+            logger.info(() -> "validSecurity = true ");
             JournalEntryDTO journalEntry = executeJournalEntryTransaction(payloadArr, tradePayloadDTO.getId());
             executePositionTransaction(journalEntry);
+        } else {
+            logger.info(() -> "validSecurity = false ");
         }
     }
 
     @Override
     public JournalEntryDTO executeJournalEntryTransaction(String[] payloadArr, Long tradeId) {
+        logger.info(() -> "Executing Journal Entry Transaction");
         JournalEntryDTO journalEntry = JournalEntryDTO.builder()
                 .tradeId(payloadArr[0])
                 .accountNumber(payloadArr[2])
@@ -82,7 +90,10 @@ public class TradeProcessorService implements TradeProcessor {
 
         Optional<Long> optionalJournalEntryId = journalEntryRepository.saveJournalEntry(journalEntry);
         optionalJournalEntryId
-                .ifPresent(journalEntry::setId);
+                .ifPresentOrElse(journalEntryId -> {
+                    logger.info(() -> "Journal Entry saved with ID: " + journalEntryId);
+                    journalEntry.setId(journalEntryId);
+                }, () -> logger.warning("Journal Entry not saved"));
         tradePayloadRepository.updateTradePayloadPostedStatus(tradeId);
         return journalEntry;
     }

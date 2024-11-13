@@ -10,4 +10,6 @@ public interface TradePayloadRepository {
     void updateTradePayloadLookupStatus(boolean lookupStatus, Long tradeId);
 
     void updateTradePayloadPostedStatus(Long tradeId);
+
+    void saveTradePayload(TradePayloadDTO tradePayloadDTO);
 }

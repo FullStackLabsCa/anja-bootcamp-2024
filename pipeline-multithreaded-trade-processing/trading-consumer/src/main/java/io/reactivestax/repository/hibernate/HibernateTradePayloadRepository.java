@@ -6,8 +6,10 @@ import org.hibernate.Session;
 
 import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.repository.hibernate.entity.TradePayload;
+import io.reactivestax.type.dto.TradePayloadDTO;
 import io.reactivestax.type.enums.LookupStatus;
 import io.reactivestax.type.enums.PostedStatus;
+import io.reactivestax.type.enums.ValidityStatus;
 import io.reactivestax.util.database.hibernate.HibernateTransactionUtil;
 
 public class HibernateTradePayloadRepository implements TradePayloadRepository {
@@ -27,14 +29,14 @@ public class HibernateTradePayloadRepository implements TradePayloadRepository {
     @Override
     public Optional<io.reactivestax.type.dto.TradePayloadDTO> readRawPayload(String tradeNumber) {
         Session session = HibernateTransactionUtil.getInstance().getConnection();
-        Optional<io.reactivestax.repository.hibernate.entity.TradePayload> optionalTradePayload = session
+        Optional<TradePayload> first = session
                 .createQuery("from TradePayload tp where tp.tradeNumber = :tradeNumber",
                         io.reactivestax.repository.hibernate.entity.TradePayload.class)
                 .setParameter("tradeNumber", tradeNumber)
                 .stream()
                 .findFirst();
 
-        return getTradePayloadDTO(optionalTradePayload);
+        return getTradePayloadDTO(first);
     }
 
     @Override
@@ -64,4 +66,21 @@ public class HibernateTradePayloadRepository implements TradePayloadRepository {
             return tradePayload;
         });
     }
+
+    @Override
+    public void saveTradePayload(TradePayloadDTO tradePayloadDTO) {
+        Session session = HibernateTransactionUtil.getInstance().getConnection();
+        session.persist(
+                Optional.of(tradePayloadDTO)
+                        .map(trdPayloadDTO -> TradePayload.builder()
+                                .tradeNumber(trdPayloadDTO.getTradeNumber())
+                                .payload(trdPayloadDTO.getPayload())
+                                .lookupStatus(LookupStatus.valueOf(trdPayloadDTO.getLookupStatus()))
+                                .validityStatus(ValidityStatus.valueOf(trdPayloadDTO.getValidityStatus()))
+                                .journalEntryStatus(PostedStatus.valueOf(trdPayloadDTO.getJournalEntryStatus()))
+                                .build())
+                        .get());
+
+    }
+
 }

@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Optional;
 
 import io.reactivestax.repository.TradePayloadRepository;
@@ -11,6 +12,7 @@ import io.reactivestax.type.dto.TradePayloadDTO;
 import io.reactivestax.type.enums.LookupStatus;
 import io.reactivestax.type.enums.PostedStatus;
 import io.reactivestax.type.exception.OptimisticLockingException;
+import io.reactivestax.type.exception.TradePayloadSaveRuntimeException;
 import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
 
 public class JDBCTradePayloadRepository implements TradePayloadRepository {
@@ -77,6 +79,32 @@ public class JDBCTradePayloadRepository implements TradePayloadRepository {
             preparedStatement.execute();
         } catch (SQLException e) {
             throw new OptimisticLockingException(OPTIMISTIC_LOCKING_EXCEPTION_MESSAGE);
+        }
+    }
+
+    @Override
+    public void saveTradePayload(TradePayloadDTO tradePayloadDTO) {
+        String sql = """
+                INSERT INTO trade_payload (trade_number,
+                                    payload, validity_status, lookup_status,
+                                    je_status, created_timestamp, updated_timestamp) VALUES (?, ?, ?, ?,?, ?, ?)
+                    """;
+
+        try (Connection connection = JDBCTransactionUtil.getInstance().getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+            preparedStatement.setString(1, tradePayloadDTO.getTradeNumber());
+            preparedStatement.setString(2, tradePayloadDTO.getPayload());
+            preparedStatement.setString(3, tradePayloadDTO.getValidityStatus());
+            preparedStatement.setString(4, tradePayloadDTO.getLookupStatus());
+            preparedStatement.setString(5, tradePayloadDTO.getJournalEntryStatus());
+            Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
+            preparedStatement.setTimestamp(6, currentTimestamp);
+            preparedStatement.setTimestamp(7, currentTimestamp);
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new TradePayloadSaveRuntimeException("Error saving trade payload", e);
         }
     }
 }
