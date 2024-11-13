@@ -4,15 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="06e38ffe-585d-4f3c-8cb2-0c3337a79945" name="Changes" comment="updating to use Java 8 features">
+    <list default="true" id="06e38ffe-585d-4f3c-8cb2-0c3337a79945" name="Changes" comment="integration test working for TradeProcessorService">
+      <change afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/resources/log4j.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/repository/JournalEntryRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/repository/JournalEntryRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/repository/hibernate/HibernateJournalEntryRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/repository/hibernate/HibernateJournalEntryRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/repository/jdbc/JDBCJournalEntryRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/repository/jdbc/JDBCJournalEntryRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/service/TradeProcessorService.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/service/TradeProcessorService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/resources/applicationHibernateH2Test.properties" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/resources/applicationHibernateRabbitMQH2Test.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,9 +50,9 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "JUnit.TradeProcessorServiceIntegrationTest.executor": "Debug",
-    "JUnit.TradeProcessorServiceIntegrationTest.testProcessTradePayloadCalledOnce.executor": "Debug",
-    "JUnit.TradeProcessorServiceTest.executor": "Coverage",
+    "JUnit.TradeProcessorServiceIntegrationTest.executor": "Run",
+    "JUnit.TradeProcessorServiceIntegrationTest.testProcessTradePayloadCalledOnce.executor": "Run",
+    "JUnit.TradeProcessorServiceTest.executor": "Run",
     "JUnit.TradeProcessorServiceTest.testProcessTradePayloadCalledOnce.executor": "Debug",
     "JUnit.io.reactivestax in trading-consumer.executor": "Coverage",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -81,7 +76,7 @@
       <recent name="io.reactivestax.type.exception" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.TradeProcessorServiceIntegrationTest.testProcessTradePayloadCalledOnce">
+  <component name="RunManager" selected="JUnit.TradeProcessorServiceIntegrationTest">
     <configuration name="TradeProcessorServiceIntegrationTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="trading-consumer" />
       <extension name="coverage">
@@ -160,10 +155,10 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.TradeProcessorServiceIntegrationTest.testProcessTradePayloadCalledOnce" />
-        <item itemvalue="JUnit.TradeProcessorServiceTest.testProcessTradePayloadCalledOnce" />
         <item itemvalue="JUnit.TradeProcessorServiceIntegrationTest" />
+        <item itemvalue="JUnit.TradeProcessorServiceIntegrationTest.testProcessTradePayloadCalledOnce" />
         <item itemvalue="JUnit.TradeProcessorServiceTest" />
+        <item itemvalue="JUnit.TradeProcessorServiceTest.testProcessTradePayloadCalledOnce" />
         <item itemvalue="JUnit.io.reactivestax in trading-consumer" />
       </list>
     </recent_temporary>
@@ -185,12 +180,21 @@
       <option name="project" value="LOCAL" />
       <updated>1730844199311</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="integration test working for TradeProcessorService">
+      <option name="closed" value="true" />
+      <created>1731526162442</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1731526162442</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="updating to use Java 8 features" />
-    <option name="LAST_COMMIT_MESSAGE" value="updating to use Java 8 features" />
+    <MESSAGE value="integration test working for TradeProcessorService" />
+    <option name="LAST_COMMIT_MESSAGE" value="integration test working for TradeProcessorService" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -245,7 +249,7 @@
         </line-breakpoint>
         <line-breakpoint type="java-line">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java</url>
-          <line>95</line>
+          <line>97</line>
           <option name="timeStamp" value="16" />
         </line-breakpoint>
         <line-breakpoint type="java-line">
@@ -258,12 +262,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java</url>
-          <line>107</line>
+          <line>113</line>
           <option name="timeStamp" value="19" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java</url>
-          <line>118</line>
+          <line>124</line>
           <option name="timeStamp" value="20" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -273,7 +277,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java</url>
-          <line>116</line>
+          <line>122</line>
           <option name="timeStamp" value="22" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">

@@ -67,10 +67,11 @@ class TradeProcessorServiceIntegrationTest {
 
         applicationPropertiesUtils = ApplicationPropertiesUtils
                 .getInstance("applicationHibernateRabbitMQH2Test.properties");
-        applicationPropertiesUtils.loadApplicationProperties("applicationHibernateRabbitMQH2Test.properties");
+        //applicationPropertiesUtils.loadApplicationProperties("applicationHibernateRabbitMQH2Test.properties");
+
+        transactionUtil = BeanFactory.getTransactionUtil();
 
         tradePayloadRepository = BeanFactory.getTradePayloadRepository();
-        transactionUtil = BeanFactory.getTransactionUtil();
         journalEntryRepository = BeanFactory.getJournalEntryRepository();
         positionsRepository = BeanFactory.getPositionsRepository();
 
@@ -88,6 +89,7 @@ class TradeProcessorServiceIntegrationTest {
         // this is to simulate a pre-saved raw tradepayload, that trade processor will
         // pickup and process
         tradePayloadRepository.saveTradePayload(goodTradePayloadDTOSupplier.get());
+        //
         String[] payloadArray = goodTradePayloadDTOSupplier.get().getPayload().split(",");
         String testCUSIP = payloadArray[3];
         when(lookupSecuritiesRepositoryMock.lookupSecurities(testCUSIP)).thenReturn(true);
@@ -99,12 +101,16 @@ class TradeProcessorServiceIntegrationTest {
         Optional<TradePayloadDTO> optionalTradePayload = tradePayloadRepository.readRawPayload(
                 GOOD_TRADE_PAYLOAD_TRADE_NUMBER);
         assertEquals(true, optionalTradePayload.isPresent());
+        //pending assert for ensuring status update is done as well or not
+
         assertEquals(goodTradePayloadDTOSupplier.get().getTradeNumber(),
                 optionalTradePayload.get().getTradeNumber());
         verify(lookupSecuritiesRepositoryMock, times(1)).lookupSecurities(testCUSIP);
         verify(tradeProcessorServiceSpy, times(1))
                 .processTrade(any(), any());
 
+
+        //journalEntry Assertions
         JournalEntryDTO journalEntryDTO = JournalEntryDTO.builder()
                 .tradeId(payloadArray[0])
                 .accountNumber(payloadArray[2])
@@ -113,7 +119,7 @@ class TradeProcessorServiceIntegrationTest {
                 .quantity(Integer.parseInt(payloadArray[5]))
                 .transactionTimestamp(payloadArray[1])
                 .build();
-        //
+
         JournalEntry returnedJournalEntry = journalEntryRepository.findJournalEntryByJournalEntry(journalEntryDTO);
 
         assertEquals(journalEntryDTO.getTradeId(),returnedJournalEntry.getTradeId());
@@ -121,5 +127,9 @@ class TradeProcessorServiceIntegrationTest {
         assertEquals(journalEntryDTO.getSecurityCusip(),returnedJournalEntry.getSecurityCusip());
         assertEquals(Direction.valueOf(journalEntryDTO.getDirection()),returnedJournalEntry.getDirection());
         assertEquals(journalEntryDTO.getQuantity(),returnedJournalEntry.getQuantity());
+
+        //position assertions
+        //pending..
+
     }
 }
