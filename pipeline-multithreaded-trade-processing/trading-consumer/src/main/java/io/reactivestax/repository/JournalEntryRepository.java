@@ -12,6 +12,6 @@ public interface JournalEntryRepository {
 
     JournalEntry findJournalEntryByJournalEntryId(Long journalEntryId);
 
-    JournalEntry findJournalEntryByJournalEntry(io.reactivestax.type.dto.JournalEntryDTO journalEntryDTO);
+    JournalEntry findJournalEntryByJournalEntryDetails(io.reactivestax.type.dto.JournalEntryDTO journalEntryDTO);
 
 }

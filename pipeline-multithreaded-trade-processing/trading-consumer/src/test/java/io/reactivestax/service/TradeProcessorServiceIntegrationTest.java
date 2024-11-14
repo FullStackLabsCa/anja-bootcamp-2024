@@ -2,6 +2,7 @@ package io.reactivestax.service;
 
 import io.reactivestax.repository.JournalEntryRepository;
 import io.reactivestax.repository.LookupSecuritiesRepository;
+import io.reactivestax.repository.PositionsRepository;
 import io.reactivestax.repository.TradePayloadRepository;
 import io.reactivestax.repository.hibernate.entity.JournalEntry;
 import io.reactivestax.repository.hibernate.entity.Position;
@@ -23,13 +24,9 @@ import lombok.extern.log4j.Log4j2;
 import org.hibernate.Session;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -39,36 +36,36 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 @Log4j2
 class TradeProcessorServiceIntegrationTest {
 
+    public static final String APPLICATION_HIBERNATE_RABBIT_MQH_2_TEST_PROPERTIES = "applicationHibernateRabbitMQH2Test.properties";
     private TradePayloadRepository tradePayloadRepository;
     private LookupSecuritiesRepository lookupSecuritiesRepository;
     private JournalEntryRepository journalEntryRepository;
+    private PositionsRepository  positionsRepository;
 
     ApplicationPropertiesUtils applicationPropertiesUtils;
 
-    @InjectMocks
-    private TradeProcessorService tradeProcessorServiceSpy;
+    private TradeProcessorService tradeProcessorService;
 
     @BeforeEach
     public void setUp() throws SQLException {
-        MockitoAnnotations.openMocks(this);
         applicationPropertiesUtils = ApplicationPropertiesUtils
-                .getInstance("applicationHibernateRabbitMQH2Test.properties");
-        applicationPropertiesUtils.loadApplicationProperties("applicationHibernateRabbitMQH2Test.properties");
+                .getInstance(APPLICATION_HIBERNATE_RABBIT_MQH_2_TEST_PROPERTIES);
+        applicationPropertiesUtils.loadApplicationProperties(APPLICATION_HIBERNATE_RABBIT_MQH_2_TEST_PROPERTIES);
         // these are just needed for test setup work, tradeProcessorService is getting its dependencies from BeanFactory calls in its private constructor
         tradePayloadRepository = BeanFactory.getTradePayloadRepository();
-        journalEntryRepository = BeanFactory.getJournalEntryRepository();
         lookupSecuritiesRepository = BeanFactory.getLookupSecuritiesRepository();
+
+        journalEntryRepository = BeanFactory.getJournalEntryRepository();
+        positionsRepository = BeanFactory.getPositionsRepository();
+
         //
         loadSampleSecuritiesIntoReferenceTable();
         //
-        TradeProcessorService tradeProcessorService = TradeProcessorService.getInstance();
-        tradeProcessorServiceSpy = spy(tradeProcessorService);
+        tradeProcessorService = TradeProcessorService.getInstance();
         log.info(() -> "TradeProcessorServiceIntegrationTest setup done");
     }
 
@@ -122,7 +119,7 @@ class TradeProcessorServiceIntegrationTest {
         String securityCUSIP = payloadRecord.securityCusip();
 
         // Act
-        tradeProcessorServiceSpy.processTrade(payloadRecord.tradeId(), testQueueName);
+        tradeProcessorService.processTrade(payloadRecord.tradeId(), testQueueName);
 
         // Assert
         Optional<TradePayloadDTO> optionalTradePayload = tradePayloadRepository.readRawPayload(payloadRecord.tradeId());
@@ -135,11 +132,10 @@ class TradeProcessorServiceIntegrationTest {
             assertEquals(tradePayloadDTO.getJournalEntryStatus(), PostedStatus.POSTED.name());
         });
 
-        //pending assert for ensuring status update is done as well or not
 
         assertEquals(tradePayloadSupplier.get().getTradeNumber(), optionalTradePayload.get().getTradeNumber());
         assertTrue(lookupSecuritiesRepository.lookupSecurities(securityCUSIP));
-        verify(tradeProcessorServiceSpy, times(1)).processTrade(any(), any());
+        //verify(tradeProcessorServiceSpy, times(1)).processTrade(any(), any());
 
 
         //journalEntry Assertions
@@ -152,13 +148,13 @@ class TradeProcessorServiceIntegrationTest {
                 .transactionTimestamp(payloadRecord.transactionTimestamp())
                 .build();
 
-        JournalEntry returnedJournalEntry = journalEntryRepository.findJournalEntryByJournalEntry(journalEntryDTO);
-        assertNotNull(returnedJournalEntry);
-        assertEquals(journalEntryDTO.getTradeId(), returnedJournalEntry.getTradeId());
-        assertEquals(journalEntryDTO.getAccountNumber(), returnedJournalEntry.getAccountNumber());
-        assertEquals(journalEntryDTO.getSecurityCusip(), returnedJournalEntry.getSecurityCusip());
-        assertEquals(Direction.valueOf(journalEntryDTO.getDirection()), returnedJournalEntry.getDirection());
-        assertEquals(journalEntryDTO.getQuantity(), returnedJournalEntry.getQuantity());
+        JournalEntry journalEntryFromDB = journalEntryRepository.findJournalEntryByJournalEntryDetails(journalEntryDTO);
+        assertNotNull(journalEntryFromDB);
+        assertEquals(journalEntryDTO.getTradeId(), journalEntryFromDB.getTradeId());
+        assertEquals(journalEntryDTO.getAccountNumber(), journalEntryFromDB.getAccountNumber());
+        assertEquals(journalEntryDTO.getSecurityCusip(), journalEntryFromDB.getSecurityCusip());
+        assertEquals(Direction.valueOf(journalEntryDTO.getDirection()), journalEntryFromDB.getDirection());
+        assertEquals(journalEntryDTO.getQuantity(), journalEntryFromDB.getQuantity());
 
         //position assertions
         PositionDTO positionDTO = PositionDTO.builder()
@@ -167,11 +163,12 @@ class TradeProcessorServiceIntegrationTest {
                 .holding((long) journalEntryDTO.getQuantity())
                 .build();
 
-        Position returnedPosition = BeanFactory.getPositionsRepository().findPositionByPositionDetails(positionDTO);
-        assertNotNull(returnedPosition);
-        assertEquals(positionDTO.getAccountNumber(), returnedPosition.getPositionCompositeKey().getAccountNumber());
-        assertEquals(positionDTO.getSecurityCusip(), returnedPosition.getPositionCompositeKey().getSecurityCusip());
-        assertEquals(positionDTO.getHolding(), Direction.SELL.name().equals(payloadRecord.direction()) ? (-1) * returnedPosition.getHolding() : returnedPosition.getHolding());
+        Position positionRecordFromDB = positionsRepository.findPositionByPositionDetails(positionDTO);
+        assertNotNull(positionRecordFromDB);
+        assertEquals(positionDTO.getAccountNumber(), positionRecordFromDB.getPositionCompositeKey().getAccountNumber());
+        assertEquals(positionDTO.getSecurityCusip(), positionRecordFromDB.getPositionCompositeKey().getSecurityCusip());
+        assertEquals(positionDTO.getHolding(),
+                Direction.SELL.name().equals(payloadRecord.direction()) ? (-1) * positionRecordFromDB.getHolding() : positionRecordFromDB.getHolding());
 
     }
 

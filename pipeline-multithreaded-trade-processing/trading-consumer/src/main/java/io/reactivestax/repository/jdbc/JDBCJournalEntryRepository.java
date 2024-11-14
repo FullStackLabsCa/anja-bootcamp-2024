@@ -83,7 +83,7 @@ public class JDBCJournalEntryRepository implements JournalEntryRepository {
     }
 
     @Override
-    public JournalEntry findJournalEntryByJournalEntry(JournalEntryDTO journalEntryDTO) {
+    public JournalEntry findJournalEntryByJournalEntryDetails(JournalEntryDTO journalEntryDTO) {
         return null;
     }
 }

@@ -44,7 +44,7 @@ import io.reactivestax.util.messaging.rabbitmq.RabbitMQRetry;
 import jakarta.persistence.OptimisticLockException;
 
 @ExtendWith(MockitoExtension.class)
-class TradeProcessorServiceTest {
+class TradeProcessorServiceMockTest {
 
         @Mock
         private TransactionUtil transactionUtil;

@@ -54,7 +54,7 @@ public class HibernateJournalEntryRepository implements JournalEntryRepository {
     }
 
     @Override
-    public JournalEntry findJournalEntryByJournalEntry(io.reactivestax.type.dto.JournalEntryDTO journalEntryDTO) {
+    public JournalEntry findJournalEntryByJournalEntryDetails(io.reactivestax.type.dto.JournalEntryDTO journalEntryDTO) {
         log.info(() -> "Finding journal entry by journal entry");
         Session session = HibernateTransactionUtil.getInstance().getConnection();
         return session.createQuery(JOURNAL_ENTRY_QUERY, JournalEntry.class)
