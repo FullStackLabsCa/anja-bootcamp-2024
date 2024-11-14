@@ -14,7 +14,9 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 import io.reactivestax.repository.hibernate.entity.JournalEntry;
+import io.reactivestax.repository.hibernate.entity.Position;
 import io.reactivestax.type.dto.JournalEntryDTO;
+import io.reactivestax.type.dto.PositionDTO;
 import io.reactivestax.type.enums.Direction;
 import io.reactivestax.util.database.hibernate.HibernateTransactionUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -85,28 +87,24 @@ class TradeProcessorServiceIntegrationTest {
         final String testQueueName = "queue1";
 
         // Arrange
-        // this is to simulate a pre-saved raw tradepayload, that trade processor will
-        // pickup and process
+        // this is to simulate a pre-saved raw tradePayLoad, that trade processor will
+        // pick up and process
         tradePayloadRepository.saveTradePayload(goodTradePayloadDTOSupplier.get());
         //
         String[] payloadArray = goodTradePayloadDTOSupplier.get().getPayload().split(",");
         String testCUSIP = payloadArray[3];
-//        when(lookupSecuritiesRepository.lookupSecurities(testCUSIP)).thenReturn(true);
 
         // Act
         tradeProcessorServiceSpy.processTrade(GOOD_TRADE_PAYLOAD_TRADE_NUMBER, testQueueName);
 
         // Assert
-        Optional<TradePayloadDTO> optionalTradePayload = tradePayloadRepository.readRawPayload(
-                GOOD_TRADE_PAYLOAD_TRADE_NUMBER);
+        Optional<TradePayloadDTO> optionalTradePayload = tradePayloadRepository.readRawPayload(GOOD_TRADE_PAYLOAD_TRADE_NUMBER);
         assertTrue(optionalTradePayload.isPresent());
         //pending assert for ensuring status update is done as well or not
 
-        assertEquals(goodTradePayloadDTOSupplier.get().getTradeNumber(),
-                optionalTradePayload.get().getTradeNumber());
+        assertEquals(goodTradePayloadDTOSupplier.get().getTradeNumber(),optionalTradePayload.get().getTradeNumber());
         assertTrue(lookupSecuritiesRepository.lookupSecurities(testCUSIP));
-        verify(tradeProcessorServiceSpy, times(1))
-                .processTrade(any(), any());
+        verify(tradeProcessorServiceSpy, times(1)).processTrade(any(), any());
 
 
         //journalEntry Assertions
@@ -128,7 +126,17 @@ class TradeProcessorServiceIntegrationTest {
         assertEquals(journalEntryDTO.getQuantity(), returnedJournalEntry.getQuantity());
 
         //position assertions
-        //pending..
+        PositionDTO positionDTO = PositionDTO.builder()
+                .accountNumber(journalEntryDTO.getAccountNumber())
+                .securityCusip(journalEntryDTO.getSecurityCusip())
+                .holding((long) journalEntryDTO.getQuantity())
+                .build();
+
+        Position returnedPosition = BeanFactory.getPositionsRepository().findPositionByPositionDetails(positionDTO);
+        assertNotNull(returnedPosition);
+        assertEquals(positionDTO.getAccountNumber(), returnedPosition.getPositionCompositeKey().getAccountNumber());
+        assertEquals(positionDTO.getSecurityCusip(), returnedPosition.getPositionCompositeKey().getSecurityCusip());
+        assertEquals(positionDTO.getHolding(), (-1)*returnedPosition.getHolding());
 
     }
 }

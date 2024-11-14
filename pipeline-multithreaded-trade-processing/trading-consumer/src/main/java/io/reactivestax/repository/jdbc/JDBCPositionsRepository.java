@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import io.reactivestax.repository.PositionsRepository;
+import io.reactivestax.repository.hibernate.entity.Position;
+import io.reactivestax.type.dto.PositionDTO;
 import io.reactivestax.type.exception.OptimisticLockingException;
 import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
 
@@ -43,6 +45,11 @@ public class JDBCPositionsRepository implements PositionsRepository {
         } catch (SQLException e) {
             throw new OptimisticLockingException("Optimistic locking", e);
         }
+    }
+
+    @Override
+    public Position findPositionByPositionDetails(PositionDTO positionDTO) {
+        return null;
     }
 
     private Integer selectPositionVersion(String accountNumber, String cusip) {

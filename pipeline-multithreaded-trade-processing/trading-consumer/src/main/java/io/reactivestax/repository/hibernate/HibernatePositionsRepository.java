@@ -1,5 +1,6 @@
 package io.reactivestax.repository.hibernate;
 
+import io.reactivestax.type.dto.PositionDTO;
 import org.hibernate.Session;
 
 import io.reactivestax.repository.PositionsRepository;
@@ -37,6 +38,24 @@ public class HibernatePositionsRepository implements PositionsRepository {
         } catch (NoResultException e) {
             session.persist(positionEntity);
         }
+    }
+
+    @Override
+    public Position findPositionByPositionDetails(PositionDTO positionDTO) {
+        Position positionEntity = getPositionEntity(positionDTO);
+        Session session = HibernateTransactionUtil.getInstance().getConnection();
+        try {
+            return session
+                    .createQuery("from Position p where p.positionCompositeKey.accountNumber = :accountNumber and p" +
+                            ".positionCompositeKey.securityCusip = " +
+                            ":securityCusip", Position.class)
+                    .setParameter("accountNumber", positionEntity.getPositionCompositeKey().getAccountNumber())
+                    .setParameter("securityCusip", positionEntity.getPositionCompositeKey().getSecurityCusip())
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            session.persist(positionEntity);
+        }
+        return positionEntity;
     }
 
     private Position getPositionEntity(io.reactivestax.type.dto.PositionDTO position) {

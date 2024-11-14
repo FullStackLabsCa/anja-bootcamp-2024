@@ -4,12 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="06e38ffe-585d-4f3c-8cb2-0c3337a79945" name="Changes" comment="integration test working for TradeProcessorService">
+    <list default="true" id="06e38ffe-585d-4f3c-8cb2-0c3337a79945" name="Changes" comment="updated .gitignore file">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/repository/LookupSecuritiesRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/repository/LookupSecuritiesRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/repository/hibernate/HibernateSecuritiesReferenceRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/repository/hibernate/HibernateSecuritiesReferenceRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/repository/jdbc/JDBCSecuritiesReferenceRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/repository/jdbc/JDBCSecuritiesReferenceRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/util/factory/BeanFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/util/factory/BeanFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/repository/PositionsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/repository/PositionsRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/repository/hibernate/HibernatePositionsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/repository/hibernate/HibernatePositionsRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/repository/jdbc/JDBCPositionsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/repository/jdbc/JDBCPositionsRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/type/dto/PositionDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/type/dto/PositionDTO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -53,7 +54,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "JUnit.TradeProcessorServiceIntegrationTest.executor": "Debug",
+    "JUnit.TradeProcessorServiceIntegrationTest.executor": "Run",
     "JUnit.TradeProcessorServiceIntegrationTest.testProcessTradePayloadCalledOnce.executor": "Run",
     "JUnit.TradeProcessorServiceTest.executor": "Run",
     "JUnit.TradeProcessorServiceTest.testProcessTradePayloadCalledOnce.executor": "Debug",
@@ -199,13 +200,31 @@
       <option name="project" value="LOCAL" />
       <updated>1731534604113</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="removed the mock for LookupSecuritiesRepository as well">
+      <option name="closed" value="true" />
+      <created>1731559235492</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1731559235492</updated>
+    </task>
+    <task id="LOCAL-00005" summary="updated .gitignore file">
+      <option name="closed" value="true" />
+      <created>1731559860322</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1731559860322</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="updating to use Java 8 features" />
     <MESSAGE value="integration test working for TradeProcessorService" />
-    <option name="LAST_COMMIT_MESSAGE" value="integration test working for TradeProcessorService" />
+    <MESSAGE value="removed the mock for LookupSecuritiesRepository as well" />
+    <MESSAGE value="updated .gitignore file" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated .gitignore file" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -260,7 +279,7 @@
         </line-breakpoint>
         <line-breakpoint type="java-line">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java</url>
-          <line>96</line>
+          <line>97</line>
           <option name="timeStamp" value="16" />
         </line-breakpoint>
         <line-breakpoint type="java-line">
@@ -273,12 +292,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java</url>
-          <line>112</line>
+          <line>110</line>
           <option name="timeStamp" value="19" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java</url>
-          <line>123</line>
+          <line>121</line>
           <option name="timeStamp" value="20" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -288,7 +307,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java</url>
-          <line>121</line>
+          <line>119</line>
           <option name="timeStamp" value="22" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -301,12 +320,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java</url>
-          <line>56</line>
+          <line>58</line>
           <option name="timeStamp" value="25" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java</url>
-          <line>66</line>
+          <line>68</line>
           <properties>
             <option name="lambda-ordinal" value="-1" />
           </properties>
@@ -314,12 +333,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java</url>
-          <line>64</line>
+          <line>66</line>
           <option name="timeStamp" value="27" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-field">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java</url>
-          <line>49</line>
+          <line>51</line>
           <properties field="tradeProcessorServiceSpy" class="io.reactivestax.service.TradeProcessorServiceIntegrationTest" />
           <option name="timeStamp" value="24" />
         </line-breakpoint>
