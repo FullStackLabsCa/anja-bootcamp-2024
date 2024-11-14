@@ -29,4 +29,13 @@ public class HibernateSecuritiesReferenceRepository implements LookupSecuritiesR
 
         return !cusipList.isEmpty();
     }
+
+    @Override
+    public boolean saveSecurity(String cusip) {
+        Session session = HibernateTransactionUtil.getInstance().getConnection();
+        SecuritiesReference securitiesReference = new SecuritiesReference();
+        securitiesReference.setCusip(cusip);
+        session.persist(securitiesReference);
+        return true;
+    }
 }

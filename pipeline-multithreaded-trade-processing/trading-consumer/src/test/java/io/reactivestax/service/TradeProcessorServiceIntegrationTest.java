@@ -2,7 +2,7 @@ package io.reactivestax.service;
 
 import static io.reactivestax.suppliers.dto.DTOSuppliers.GOOD_TRADE_PAYLOAD_TRADE_NUMBER;
 import static io.reactivestax.suppliers.dto.DTOSuppliers.goodTradePayloadDTOSupplier;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -16,13 +16,13 @@ import java.util.Optional;
 import io.reactivestax.repository.hibernate.entity.JournalEntry;
 import io.reactivestax.type.dto.JournalEntryDTO;
 import io.reactivestax.type.enums.Direction;
+import io.reactivestax.util.database.hibernate.HibernateTransactionUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.reactivestax.repository.JournalEntryRepository;
@@ -40,45 +40,44 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 class TradeProcessorServiceIntegrationTest {
 
-    @Mock
-    private TransactionUtil transactionUtil;
-    @Mock
     private TradePayloadRepository tradePayloadRepository;
-    @Mock
-    private LookupSecuritiesRepository lookupSecuritiesRepositoryMock;
-//    @Spy
+    private LookupSecuritiesRepository lookupSecuritiesRepository;
     private JournalEntryRepository journalEntryRepository;
-//    @Mock
-    private PositionsRepository positionsRepository;
-    @Mock
-    private BeanFactory beanFactory;
-    @Mock
-    private RabbitMQRetry rabbitMQRetry;
 
     ApplicationPropertiesUtils applicationPropertiesUtils;
 
     @InjectMocks
-    // @Spy
     private TradeProcessorService tradeProcessorServiceSpy;
 
     @BeforeEach
     public void setUp() throws SQLException {
         MockitoAnnotations.openMocks(this);
-
         applicationPropertiesUtils = ApplicationPropertiesUtils
                 .getInstance("applicationHibernateRabbitMQH2Test.properties");
-        //applicationPropertiesUtils.loadApplicationProperties("applicationHibernateRabbitMQH2Test.properties");
-
-        transactionUtil = BeanFactory.getTransactionUtil();
-
+        applicationPropertiesUtils.loadApplicationProperties("applicationHibernateRabbitMQH2Test.properties");
+        // these are just needed for test setup work, tradeProcessorService is getting its dependencies from BeanFactory calls in its private constructor
         tradePayloadRepository = BeanFactory.getTradePayloadRepository();
         journalEntryRepository = BeanFactory.getJournalEntryRepository();
-        positionsRepository = BeanFactory.getPositionsRepository();
-
+        lookupSecuritiesRepository = BeanFactory.getLookupSecuritiesRepository();
+        //
+        loadSampleSecuritiesIntoReferenceTable();
+        //
         TradeProcessorService tradeProcessorService = TradeProcessorService.getInstance();
         tradeProcessorServiceSpy = spy(tradeProcessorService);
-        tradeProcessorServiceSpy.setLookupSecuritiesRepository(lookupSecuritiesRepositoryMock);
         log.info(() -> "TradeProcessorServiceIntegrationTest setup done");
+    }
+
+    private void loadSampleSecuritiesIntoReferenceTable() {
+        String[] cusipArray = {"AAPL", "GOOGL", "AMZN", "MSFT", "TSLA", "NFLX", "FB", "NVDA", "JPM", "VISA", "MA",
+                "BAC", "DIS", "INTC", "CSCO", "ORCL", "WMT", "T", "VZ", "ADBE", "CRM", "PYPL", "PFE", "XOM", "UNH", "V"};
+        HibernateTransactionUtil.getInstance().startTransaction();
+        for (String cusip : cusipArray) {
+            lookupSecuritiesRepository.saveSecurity(cusip);
+            System.out.println("Loaded sample security: " + cusip);
+            log.info(() -> "Loaded sample security: " + cusip);
+
+        }
+        HibernateTransactionUtil.getInstance().commitTransaction();
     }
 
     @Test
@@ -92,7 +91,7 @@ class TradeProcessorServiceIntegrationTest {
         //
         String[] payloadArray = goodTradePayloadDTOSupplier.get().getPayload().split(",");
         String testCUSIP = payloadArray[3];
-        when(lookupSecuritiesRepositoryMock.lookupSecurities(testCUSIP)).thenReturn(true);
+//        when(lookupSecuritiesRepository.lookupSecurities(testCUSIP)).thenReturn(true);
 
         // Act
         tradeProcessorServiceSpy.processTrade(GOOD_TRADE_PAYLOAD_TRADE_NUMBER, testQueueName);
@@ -100,12 +99,12 @@ class TradeProcessorServiceIntegrationTest {
         // Assert
         Optional<TradePayloadDTO> optionalTradePayload = tradePayloadRepository.readRawPayload(
                 GOOD_TRADE_PAYLOAD_TRADE_NUMBER);
-        assertEquals(true, optionalTradePayload.isPresent());
+        assertTrue(optionalTradePayload.isPresent());
         //pending assert for ensuring status update is done as well or not
 
         assertEquals(goodTradePayloadDTOSupplier.get().getTradeNumber(),
                 optionalTradePayload.get().getTradeNumber());
-        verify(lookupSecuritiesRepositoryMock, times(1)).lookupSecurities(testCUSIP);
+        assertTrue(lookupSecuritiesRepository.lookupSecurities(testCUSIP));
         verify(tradeProcessorServiceSpy, times(1))
                 .processTrade(any(), any());
 
@@ -121,12 +120,12 @@ class TradeProcessorServiceIntegrationTest {
                 .build();
 
         JournalEntry returnedJournalEntry = journalEntryRepository.findJournalEntryByJournalEntry(journalEntryDTO);
-
-        assertEquals(journalEntryDTO.getTradeId(),returnedJournalEntry.getTradeId());
-        assertEquals(journalEntryDTO.getAccountNumber(),returnedJournalEntry.getAccountNumber());
-        assertEquals(journalEntryDTO.getSecurityCusip(),returnedJournalEntry.getSecurityCusip());
-        assertEquals(Direction.valueOf(journalEntryDTO.getDirection()),returnedJournalEntry.getDirection());
-        assertEquals(journalEntryDTO.getQuantity(),returnedJournalEntry.getQuantity());
+        assertNotNull(returnedJournalEntry);
+        assertEquals(journalEntryDTO.getTradeId(), returnedJournalEntry.getTradeId());
+        assertEquals(journalEntryDTO.getAccountNumber(), returnedJournalEntry.getAccountNumber());
+        assertEquals(journalEntryDTO.getSecurityCusip(), returnedJournalEntry.getSecurityCusip());
+        assertEquals(Direction.valueOf(journalEntryDTO.getDirection()), returnedJournalEntry.getDirection());
+        assertEquals(journalEntryDTO.getQuantity(), returnedJournalEntry.getQuantity());
 
         //position assertions
         //pending..

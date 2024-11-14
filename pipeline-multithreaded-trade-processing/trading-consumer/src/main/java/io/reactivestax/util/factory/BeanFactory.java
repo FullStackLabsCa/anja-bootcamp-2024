@@ -48,19 +48,6 @@ public class BeanFactory {
                 .map(transactionUtilMap::get)
                 .map(Supplier::get)
                 .orElseThrow(InvalidPersistenceTechnologyException::new);
-
-        // BEFORE
-        // if
-        // (Constants.HIBERNATE_PERSISTENCE_TECHNOLOGY.equals(applicationPropertiesUtils.getPersistenceTechnology()))
-        // {
-        // return HibernateTransactionUtil.getInstance();
-        // } else if (Constants.JDBC_PERSISTENCE_TECHNOLOGY
-        // .equals(applicationPropertiesUtils.getPersistenceTechnology())) {
-        // return JDBCTransactionUtil.getInstance();
-        // } else {
-        // throw new
-        // InvalidPersistenceTechnologyException(Constants.INVALID_PERSISTENCE_TECHNOLOGY);
-        // }
     }
 
     public static TradePayloadRepository getTradePayloadRepository() {

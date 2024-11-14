@@ -37,4 +37,9 @@ public class JDBCSecuritiesReferenceRepository implements LookupSecuritiesReposi
 
         return validSecurity;
     }
+
+    @Override
+    public boolean saveSecurity(String cusip) {
+        return false;
+    }
 }
