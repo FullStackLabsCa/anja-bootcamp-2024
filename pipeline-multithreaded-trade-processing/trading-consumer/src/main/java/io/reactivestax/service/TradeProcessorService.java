@@ -20,7 +20,6 @@ import io.reactivestax.util.database.TransactionUtil;
 import io.reactivestax.util.factory.BeanFactory;
 import jakarta.persistence.OptimisticLockException;
 import lombok.Setter;
-import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
