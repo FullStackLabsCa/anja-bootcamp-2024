@@ -11,6 +11,9 @@ import io.reactivestax.type.dto.JournalEntryDTO;
 import io.reactivestax.type.dto.PositionDTO;
 import io.reactivestax.type.dto.TradePayloadDTO;
 import io.reactivestax.type.enums.Direction;
+import io.reactivestax.type.enums.LookupStatus;
+import io.reactivestax.type.enums.PostedStatus;
+import io.reactivestax.type.enums.ValidityStatus;
 import io.reactivestax.util.ApplicationPropertiesUtils;
 import io.reactivestax.util.database.hibernate.HibernateTransactionUtil;
 import io.reactivestax.util.factory.BeanFactory;
@@ -124,6 +127,14 @@ class TradeProcessorServiceIntegrationTest {
         // Assert
         Optional<TradePayloadDTO> optionalTradePayload = tradePayloadRepository.readRawPayload(payloadRecord.tradeId());
         assertTrue(optionalTradePayload.isPresent());
+        optionalTradePayload.ifPresent(tradePayloadDTO -> {
+            assertEquals(tradePayloadDTO.getTradeNumber(), payloadRecord.tradeId());
+            assertEquals(tradePayloadDTO.getPayload(), tradePayloadSupplier.get().getPayload());
+            assertEquals(tradePayloadDTO.getLookupStatus(), LookupStatus.PASS.name());
+            assertEquals(tradePayloadDTO.getValidityStatus(), ValidityStatus.VALID.name());
+            assertEquals(tradePayloadDTO.getJournalEntryStatus(), PostedStatus.POSTED.name());
+        });
+
         //pending assert for ensuring status update is done as well or not
 
         assertEquals(tradePayloadSupplier.get().getTradeNumber(), optionalTradePayload.get().getTradeNumber());

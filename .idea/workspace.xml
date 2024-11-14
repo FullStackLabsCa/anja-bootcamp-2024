@@ -4,11 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="06e38ffe-585d-4f3c-8cb2-0c3337a79945" name="Changes" comment="added position assertions as well">
+    <list default="true" id="06e38ffe-585d-4f3c-8cb2-0c3337a79945" name="Changes" comment="cleaned up the code more. &#10;added parameterized tests for 100% coverage">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/service/TradeProcessorService.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/service/TradeProcessorService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/resources/log4j.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/resources/log4j.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/suppliers/dto/DTOSuppliers.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/suppliers/dto/DTOSuppliers.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,6 +54,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
     "JUnit.TradeProcessorServiceIntegrationTest and 1 more.executor": "Coverage",
     "JUnit.TradeProcessorServiceIntegrationTest.executor": "Run",
     "JUnit.TradeProcessorServiceIntegrationTest.testProcessTradePayloadCalledOnce.executor": "Run",
@@ -61,6 +62,8 @@
     "JUnit.TradeProcessorServiceTest.executor": "Run",
     "JUnit.TradeProcessorServiceTest.testProcessTradePayloadCalledOnce.executor": "Debug",
     "JUnit.io.reactivestax in trading-consumer.executor": "Coverage",
+    "JUnit.reactivestax in trading-consumer.executor": "Run",
+    "JUnit.reactivestax in trading-producer.executor": "Coverage",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SONARLINT_PRECOMMIT_ANALYSIS": "true",
     "git-widget-placeholder": "#16 on version-4.1.8-java8-features",
@@ -82,7 +85,7 @@
       <recent name="io.reactivestax.type.exception" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.TradeProcessorServiceIntegrationTest and 1 more">
+  <component name="RunManager" selected="JUnit.TradeProcessorServiceIntegrationTest.testProcessTradePayloadForSellAndBuyTrade">
     <configuration name="TradeProcessorServiceIntegrationTest and 1 more" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="trading-consumer" />
       <option name="TEST_OBJECT" value="pattern" />
@@ -109,22 +112,6 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="TradeProcessorServiceIntegrationTest.testProcessTradePayloadCalledOnce" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="trading-consumer" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="io.reactivestax.service.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="io.reactivestax.service" />
-      <option name="MAIN_CLASS_NAME" value="io.reactivestax.service.TradeProcessorServiceIntegrationTest" />
-      <option name="METHOD_NAME" value="testProcessTradePayloadCalledOnce" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="TradeProcessorServiceIntegrationTest.testProcessTradePayloadForSellAndBuyTrade" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="trading-consumer" />
       <extension name="coverage">
@@ -141,28 +128,29 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="TradeProcessorServiceTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="reactivestax in trading-consumer" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="trading-consumer" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="io.reactivestax.service.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="io.reactivestax.service" />
-      <option name="MAIN_CLASS_NAME" value="io.reactivestax.service.TradeProcessorServiceTest" />
-      <option name="TEST_OBJECT" value="class" />
+      <option name="TEST_OBJECT" value="directory" />
+      <dir value="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="reactivestax in trading-producer" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="trading-producer" />
+      <option name="TEST_OBJECT" value="directory" />
+      <dir value="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/java/io/reactivestax" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.TradeProcessorServiceIntegrationTest and 1 more" />
         <item itemvalue="JUnit.TradeProcessorServiceIntegrationTest.testProcessTradePayloadForSellAndBuyTrade" />
+        <item itemvalue="JUnit.reactivestax in trading-producer" />
+        <item itemvalue="JUnit.reactivestax in trading-consumer" />
+        <item itemvalue="JUnit.TradeProcessorServiceIntegrationTest and 1 more" />
         <item itemvalue="JUnit.TradeProcessorServiceIntegrationTest" />
-        <item itemvalue="JUnit.TradeProcessorServiceIntegrationTest.testProcessTradePayloadCalledOnce" />
-        <item itemvalue="JUnit.TradeProcessorServiceTest" />
       </list>
     </recent_temporary>
   </component>
@@ -231,7 +219,15 @@
       <option name="project" value="LOCAL" />
       <updated>1731559939584</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="cleaned up the code more. &#10;added parameterized tests for 100% coverage">
+      <option name="closed" value="true" />
+      <created>1731561512583</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1731561512583</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -240,7 +236,8 @@
     <MESSAGE value="removed the mock for LookupSecuritiesRepository as well" />
     <MESSAGE value="updated .gitignore file" />
     <MESSAGE value="added position assertions as well" />
-    <option name="LAST_COMMIT_MESSAGE" value="added position assertions as well" />
+    <MESSAGE value="cleaned up the code more. &#10;added parameterized tests for 100% coverage" />
+    <option name="LAST_COMMIT_MESSAGE" value="cleaned up the code more. &#10;added parameterized tests for 100% coverage" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -295,7 +292,7 @@
         </line-breakpoint>
         <line-breakpoint type="java-line">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java</url>
-          <line>121</line>
+          <line>124</line>
           <option name="timeStamp" value="16" />
         </line-breakpoint>
         <line-breakpoint type="java-line">
@@ -308,12 +305,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java</url>
-          <line>134</line>
+          <line>145</line>
           <option name="timeStamp" value="19" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java</url>
-          <line>145</line>
+          <line>156</line>
           <option name="timeStamp" value="20" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -323,7 +320,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java</url>
-          <line>143</line>
+          <line>154</line>
           <option name="timeStamp" value="22" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -336,12 +333,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java</url>
-          <line>58</line>
+          <line>61</line>
           <option name="timeStamp" value="25" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java</url>
-          <line>68</line>
+          <line>71</line>
           <properties>
             <option name="lambda-ordinal" value="-1" />
           </properties>
@@ -349,12 +346,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java</url>
-          <line>66</line>
+          <line>69</line>
           <option name="timeStamp" value="27" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-field">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/TradeProcessorServiceIntegrationTest.java</url>
-          <line>51</line>
+          <line>54</line>
           <properties field="tradeProcessorServiceSpy" class="io.reactivestax.service.TradeProcessorServiceIntegrationTest" />
           <option name="timeStamp" value="24" />
         </line-breakpoint>
@@ -362,7 +359,8 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/anja_bootcamp_2024$TradeProcessorServiceIntegrationTest_and_1_more.ic" NAME="TradeProcessorServiceIntegrationTest and 1 more Coverage Results" MODIFIED="1731561460286" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
+    <SUITE FILE_PATH="coverage/anja_bootcamp_2024$TradeProcessorServiceIntegrationTest_and_1_more.ic" NAME="TradeProcessorServiceIntegrationTest and 1 more Coverage Results" MODIFIED="1731561615867" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
+    <SUITE FILE_PATH="coverage/anja_bootcamp_2024$reactivestax_in_trading_producer.ic" NAME="reactivestax in trading-producer Coverage Results" MODIFIED="1731562023875" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
     <SUITE FILE_PATH="coverage/anja_bootcamp_2024$TradeProcessorServiceIntegrationTest_testProcessTradePayloadCalledOnce.ic" NAME="TradeProcessorServiceIntegrationTest.testProcessTradePayloadCalledOnce Coverage Results" MODIFIED="1731513854415" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>io.reactivestax.service.*</FILTER>
     </SUITE>

@@ -98,7 +98,7 @@ public class TradeProcessorService implements TradeProcessor {
         Optional<Long> optionalJournalEntryId = journalEntryRepository.saveJournalEntry(journalEntry);
         optionalJournalEntryId
                 .ifPresentOrElse(journalEntryId -> {
-                    logger.info(() -> "Journal Entry saved with ID: " + journalEntryId);
+                    logger.info(() -> String.format("Journal Entry saved with ID: %s ", journalEntryId));
                     journalEntry.setId(journalEntryId);
                 }, () -> logger.warning("Journal Entry not saved"));
         tradePayloadRepository.updateTradePayloadPostedStatus(tradeId);
@@ -111,8 +111,8 @@ public class TradeProcessorService implements TradeProcessor {
         positionDTO.setAccountNumber(journalEntry.getAccountNumber());
         positionDTO.setSecurityCusip(journalEntry.getSecurityCusip());
         positionDTO.setHolding(
-                (long) (journalEntry.getDirection().equals(Direction.SELL.toString()) ? -journalEntry.getQuantity()
-                        : journalEntry.getQuantity()));
+                (long) (Direction.SELL.toString().equals(journalEntry.getDirection()) ?
+                        -journalEntry.getQuantity() : journalEntry.getQuantity()));
         positionsRepository.upsertPosition(positionDTO);
         journalEntryRepository.updateJournalEntryStatus(journalEntry.getId());
     }

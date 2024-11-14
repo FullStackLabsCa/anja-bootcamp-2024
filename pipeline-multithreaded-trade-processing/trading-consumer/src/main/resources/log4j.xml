@@ -1,50 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="ERROR">
-    <!--    status-->
-    <!--    This controls the internal logging of Log4j2 itself (not your application logs).-->
-    <!--    The default is ERROR, which logs only errors in Log4j2 configuration or execution.-->
-    <!--    Suggested Change: Leave this as WARN for troubleshooting or set it to ERROR in production to reduce overhead.-->
     <Appenders>
-        <!--        Console appender with an asynchronous appender for better performance:-->
         <Async name="AsyncConsole">
             <AppenderRef ref="Console" />
         </Async>
-        <!--        Configures the root logger, which applies to all loggers in your application unless overridden.-->
         <Console name="Console" target="SYSTEM_OUT">
-            <!--            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n" />-->
-            <!--            name="Console": Identifies the appender.-->
-            <!--            target="SYSTEM_OUT": Logs to standard output (console/terminal).-->
-            <!--            Pattern Explanation:-->
-
-            <!--            %d{yyyy-MM-dd HH:mm:ss}: Timestamp in yyyy-MM-dd HH:mm:ss format.-->
-            <!--            [%t]: Thread name generating the log message.-->
-            <!--            %-5level: Log level (e.g., INFO, ERROR), left-aligned with 5-character width.-->
-            <!--            %logger{36}: Logger name, truncated to 36 characters if needed.-->
-            <!--            %msg: The actual log message.-->
-            <!--            %n: Newline Character-->
             <PatternLayout pattern="%d{HH:mm:ss} %-5level - %msg%n" />
         </Console>
+        <!-- File appender to log to a local file -->
+        <File name="File" fileName="/Users/robinbajaj/source/github-student-code/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/logs/app.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n" />
+        </File>
     </Appenders>
     <Loggers>
-        <!-- Custom logger for detailed debugging in specific packages -->
-        <!--        <Logger name="com.example.service" level="debug" additivity="false">-->
-        <!--            <AppenderRef ref="AsyncConsole" />-->
-        <!--        </Logger>-->
         <Root level="info">
             <AppenderRef ref="Console" />
-
-            <!--            FATAL: Indicates a critical issue that causes the application to abort.-->
-            <!--            Example: Database connection failure.-->
-            <!--            ERROR: Signals an error that allows the application to continue running but might affect functionality.-->
-            <!--            Example: An exception during file processing.-->
-            <!--            WARN: Represents a potentially harmful situation or an important issue that should be noted.-->
-            <!--            Example: Deprecated API usage or low disk space.-->
-            <!--            INFO: Provides informational messages about application progress.-->
-            <!--            Example: "Application started successfully."-->
-            <!--            DEBUG: Used for debugging and gives detailed information useful for diagnosing issues.-->
-            <!--            Example: Detailed flow of a function or method.-->
-            <!--            TRACE: The most detailed level, used to trace program execution step-by-step.-->
-            <!--            Example: Entry and exit points of each method.-->
+            <AppenderRef ref="File" />
         </Root>
     </Loggers>
 </Configuration>
