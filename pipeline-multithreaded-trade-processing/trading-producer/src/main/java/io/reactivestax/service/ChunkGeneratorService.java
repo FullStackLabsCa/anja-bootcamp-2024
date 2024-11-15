@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 import static io.reactivestax.util.GeneralUtils.logTheExceptionTrace;
 import static java.nio.file.Files.lines;
 
-@Log4j2
+//@Log4j2
 public class ChunkGeneratorService implements ChunkGenerator {
 
     private static ChunkGeneratorService instance;
@@ -34,10 +34,7 @@ public class ChunkGeneratorService implements ChunkGenerator {
     public void generateChunks() throws IOException, InterruptedException {
         ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
 
-        String tradeFilePath = applicationPropertiesUtils.getFilePath();
-        long totalNoOfLinesInTradeFile = obtainTotalNoOfLinesInTradeFile(tradeFilePath);
-        int tradeRecordChunksCount = applicationPropertiesUtils.getNumberOfChunks();
-        long linesCountPerChunkFile = totalNoOfLinesInTradeFile / tradeRecordChunksCount;
+        TradeFileChunkDetailsRecord tradeFileChunkDetailsRecord = getCalculateTotalNumberOfLinesPerChunk(applicationPropertiesUtils);
         TradeService tradeService = TradeService.getInstance();
 
         int tempChunkCount = 1;
@@ -46,7 +43,7 @@ public class ChunkGeneratorService implements ChunkGenerator {
         BufferedWriter writer = new BufferedWriter(new FileWriter(tradeChunkFilePath));
 
         long tempLineCount = 0;
-        try (InputStream inputStream = ApplicationPropertiesUtils.class.getClassLoader().getResourceAsStream(tradeFilePath);
+        try (InputStream inputStream = ApplicationPropertiesUtils.class.getClassLoader().getResourceAsStream(tradeFileChunkDetailsRecord.tradeFilePath());
              BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             //skipping header
             String line = reader.readLine();
@@ -55,7 +52,7 @@ public class ChunkGeneratorService implements ChunkGenerator {
                 writer.write(line);
                 writer.newLine();
                 tempLineCount++;
-                if (tempLineCount == linesCountPerChunkFile && tempChunkCount != tradeRecordChunksCount) {
+                if (tempLineCount == tradeFileChunkDetailsRecord.linesCountPerChunkFile() && tempChunkCount != tradeFileChunkDetailsRecord.tradeRecordChunksCount()) {
                     tempChunkCount++;
                     tempLineCount = 0;
                     writer.close();
@@ -68,6 +65,17 @@ public class ChunkGeneratorService implements ChunkGenerator {
         } finally {
             writer.close();
         }
+    }
+
+    private TradeFileChunkDetailsRecord getCalculateTotalNumberOfLinesPerChunk(ApplicationPropertiesUtils applicationPropertiesUtils) {
+        String tradeFilePath = applicationPropertiesUtils.getFilePath();
+        long totalNoOfLinesInTradeFile = obtainTotalNoOfLinesInTradeFile(tradeFilePath);
+        int tradeRecordChunksCount = applicationPropertiesUtils.getNumberOfChunks();
+        long linesCountPerChunkFile = totalNoOfLinesInTradeFile / tradeRecordChunksCount;
+        return new TradeFileChunkDetailsRecord(tradeFilePath, tradeRecordChunksCount, linesCountPerChunkFile);
+    }
+
+    private record TradeFileChunkDetailsRecord(String tradeFilePath, int tradeRecordChunksCount, long linesCountPerChunkFile) {
     }
 
     private long obtainTotalNoOfLinesInTradeFile(String tradeFilePath) {

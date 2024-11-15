@@ -4,24 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="06e38ffe-585d-4f3c-8cb2-0c3337a79945" name="Changes" comment="some more changes">
-      <change afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/main/java/io/reactivestax/service/FileProcessor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/service/FileProcessorTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/main/java/io/reactivestax/service/FileProcessor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/main/java/io/reactivestax/type/exception/FileNotFoundRuntimeException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/main/java/io/reactivestax/util/GeneralUtils.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/java/io/reactivestax/service/ChunkGeneratorServiceTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/java/io/reactivestax/service/FileProcessorTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/resources/applicationHibernateRabbitMQH2Test.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+    <list default="true" id="06e38ffe-585d-4f3c-8cb2-0c3337a79945" name="Changes" comment="writing tests that mock bufferedWriter, Files API methods">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trade-analytics-app/target/classes/io/reactivestax/App.class" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trade-analytics-app/target/classes/io/reactivestax/App.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trade-analytics-app/target/test-classes/io/reactivestax/AppTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trade-analytics-app/target/test-classes/io/reactivestax/AppTest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/suppliers/dto/DTOSuppliers.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/suppliers/dto/DTOSuppliers.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/main/java/io/reactivestax/service/ChunkGeneratorService.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/main/java/io/reactivestax/service/ChunkGeneratorService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/main/java/io/reactivestax/service/TradeService.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/main/java/io/reactivestax/service/TradeService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/main/java/io/reactivestax/task/ChunkFileGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/main/java/io/reactivestax/task/ChunkFileGenerationRunnable.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/java/io/reactivestax/ProducerHibernateTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/java/io/reactivestax/ProducerHibernateTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/java/io/reactivestax/ProducerJDBCTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/java/io/reactivestax/ProducerJDBCTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/java/io/reactivestax/ProducerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/java/io/reactivestax/ProducerTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/java/io/reactivestax/service/FileProcessorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/java/io/reactivestax/service/FileProcessorTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,7 +87,7 @@
     "git-widget-placeholder": "#16 on version-4.1.8-java8-features",
     "kotlin-language-version-configured": "true",
     "last_directory_selection": "/Users/robinbajaj/source/github-student-code/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trading-producer/src/main/java/io/reactivestax/util",
-    "last_opened_file_path": "/Users/robinbajaj/source/github-student-code/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trading-producer/src/test/resources",
+    "last_opened_file_path": "/Users/robinbajaj/source/github-student-code/anja-bootcamp-2024/pipeline-multithreaded-trade-processing/trade-analytics-app",
     "project.structure.last.edited": "Project",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.2",
@@ -113,6 +104,7 @@
       <recent name="io.reactivestax.type.exception" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trade-analytics-app" />
       <recent name="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/resources" />
     </key>
     <key name="MoveMembersDialog.RECENTS_KEY">
@@ -295,7 +287,15 @@
       <option name="project" value="LOCAL" />
       <updated>1731605986831</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="writing tests that mock bufferedWriter, Files API methods">
+      <option name="closed" value="true" />
+      <created>1731687863736</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1731687863736</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -307,7 +307,8 @@
     <MESSAGE value="cleaned up the code more. &#10;added parameterized tests for 100% coverage" />
     <MESSAGE value="added more asserts for payload status" />
     <MESSAGE value="some more changes" />
-    <option name="LAST_COMMIT_MESSAGE" value="some more changes" />
+    <MESSAGE value="writing tests that mock bufferedWriter, Files API methods" />
+    <option name="LAST_COMMIT_MESSAGE" value="writing tests that mock bufferedWriter, Files API methods" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -421,7 +422,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/main/java/io/reactivestax/service/ChunkGeneratorService.java</url>
-          <line>42</line>
+          <line>39</line>
           <option name="timeStamp" value="31" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -431,7 +432,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/main/java/io/reactivestax/service/ChunkGeneratorService.java</url>
-          <line>40</line>
+          <line>37</line>
           <option name="timeStamp" value="33" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-field">

@@ -36,7 +36,7 @@ public interface DTOSuppliers {
 
     Supplier<TradePayloadDTO> badTradePayloadDTOSupplier = () -> TradePayloadDTO.builder()
             .tradeNumber("TDB_00000000")
-            .payload("TDB_00000000,2024-09-19 22:16:18,TDB_CUST_5214938,V,SELL,683,638.02")
+            .payload("asdfgasdg2346098askldfmasldfjkasdkljfasdlkfjasdljkf")
             .lookupStatus(String.valueOf(LookupStatus.PASS))
             .validityStatus(String.valueOf(ValidityStatus.VALID))
             .journalEntryStatus(String.valueOf(PostedStatus.POSTED))

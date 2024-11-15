@@ -116,7 +116,7 @@ public class ProducerHibernateTest {
         applicationPropertiesUtils.setTotalNoOfLines(tradeService.fileLineCounter(applicationPropertiesUtils.getFilePath()));
         QueueProvider.getInstance().setChunkQueue(new LinkedBlockingQueue<>(applicationPropertiesUtils.getNumberOfChunks()));
         chunkGeneratorService.generateChunks();
-        String chunkFilePath = tradeService.buildFilePath(1, applicationPropertiesUtils.getChunkFilePathWithName());
+        String chunkFilePath = tradeService.buildNextChunkFilePath(1, applicationPropertiesUtils.getChunkFilePathWithName());
         long lineCount = tradeService.fileLineCounter(chunkFilePath) + 1;
         chunkProcessorService.processChunk(chunkFilePath);
         transactionUtil.startTransaction();
@@ -142,7 +142,7 @@ public class ProducerHibernateTest {
         applicationPropertiesUtils.setTotalNoOfLines(tradeService.fileLineCounter(applicationPropertiesUtils.getFilePath()));
         QueueProvider.getInstance().setChunkQueue(new LinkedBlockingQueue<>(applicationPropertiesUtils.getNumberOfChunks()));
         chunkGeneratorService.generateChunks();
-        String chunkFilePath = tradeService.buildFilePath(1, applicationPropertiesUtils.getChunkFilePathWithName());
+        String chunkFilePath = tradeService.buildNextChunkFilePath(1, applicationPropertiesUtils.getChunkFilePathWithName());
         long lineCount = tradeService.fileLineCounter(chunkFilePath) + 1;
         ChunkFileProcessor chunkFileProcessor = new ChunkFileProcessor();
         chunkFileProcessor.run();

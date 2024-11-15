@@ -36,27 +36,31 @@ public class FileProcessorTest {
     void testWriteToFile() throws IOException, InterruptedException {
         try (MockedConstruction<FileWriter> mockedFileWriter = Mockito.mockConstruction(FileWriter.class);
              MockedConstruction<BufferedWriter> mockedBufferedWriter = Mockito.mockConstruction(BufferedWriter.class);
-             /*MockedStatic<Files> filesMockedStatic = mockStatic(Files.class)*/){
+             MockedStatic<Files> filesMockedStatic = mockStatic(Files.class)){
 
-            // Create an instance of the class under test
-            FileProcessor fileProcessor = new FileProcessor();
+//            // Create an instance of the class under test
+//            FileProcessor fileProcessor = new FileProcessor();
+//
+//            // Call the method that uses BufferedWriter and FileWriter
+//            fileProcessor.writeToFile("path/to/file.txt", "Hello, World!");
 
-            // Call the method that uses BufferedWriter and FileWriter
-            fileProcessor.writeToFile("path/to/file.txt", "Hello, World!");
+//            // Verify that BufferedWriter's write method was called with the expected content
+//            BufferedWriter mockBufferedWriter = mockedBufferedWriter.constructed().get(0);
+//            verify(mockBufferedWriter).write("Hello, World!");
+//
+//            // Verify that BufferedWriter's close method was called due to try-with-resources
+//            verify(mockBufferedWriter).close();
+//            ///
 
-            // Verify that BufferedWriter's write method was called with the expected content
             BufferedWriter mockBufferedWriter = mockedBufferedWriter.constructed().get(0);
-            verify(mockBufferedWriter).write("Hello, World!");
-
-            // Verify that BufferedWriter's close method was called due to try-with-resources
-            verify(mockBufferedWriter).close();
-            ///
-
             ChunkGeneratorService chunkGeneratorService = ChunkGeneratorService.getInstance();
             chunkGeneratorService.generateChunks();
             // Mock Files.createDirectories to do nothing
-//            filesMockedStatic.when(() -> Files.createDirectories(any())).thenReturn(null);
+            filesMockedStatic.when(() -> Files.createDirectories(any())).thenReturn(null);
+            // Verify that BufferedWriter's write method was called with the expected content
+            verify(mockBufferedWriter).write("TDB_000001,2024-09-19 22:16:18,TDB_CUST_5214938,TSLA,BUY,1,638.02");
 
+            verify(mockBufferedWriter).close();
 
         }
     }
