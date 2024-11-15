@@ -5,6 +5,7 @@ import io.reactivestax.util.QueueProvider;
 import net.bytebuddy.dynamic.scaffold.MethodGraph;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -38,21 +39,36 @@ public class ChunkGeneratorServiceTest {
              MockedStatic<QueueProvider> queueProviderMockedStatic = mockStatic(QueueProvider.class);
              MockedStatic<TradeService> tradeServiceMockedStatic = mockStatic(TradeService.class)) {
 
-            // Mock Files.createDirectories to do nothing
+            // Mock Files.createDirectories to do nothing, because we do not want to create
+            // chunk Dir and create Chunks for REAL. they will get mocked.
             filesMockedStatic.when(() -> Files.createDirectories(any())).thenReturn(null);
 
+            //tradeService mocked to get a tradeChunkFilePath to be verified later
             TradeService tradeServiceMock = mock(TradeService.class);
             tradeServiceMockedStatic.when(TradeService::getInstance).thenReturn(tradeServiceMock);
-            String tradeChunkFilePath = "samplePath";
-            when(tradeServiceMock.buildNextChunkFilePath(anyInt(), anyString())).thenReturn(tradeChunkFilePath);
 
-            // Mock QueueProvider.getInstance().getChunkQueue() to return a new LinkedBlockingQueue
+            String tradeChunkFilePath = "samplePath";
+            when(tradeServiceMock.buildNextChunkFilePath(anyInt(), anyString()))
+                    .thenReturn("sampleChunkFile1")
+                    .thenReturn("sampleChunkFile2")
+                    .thenReturn("sampleChunkFile3")
+                    .thenReturn("sampleChunkFile4")
+                    .thenReturn("sampleChunkFile5")
+                    .thenReturn("sampleChunkFile6")
+                    .thenReturn("sampleChunkFile7")
+                    .thenReturn("sampleChunkFile8")
+                    .thenReturn("sampleChunkFile9")
+                    .thenReturn("sampleChunkFile10");
+
+            //Example of chained methods getting mocked.
+            // Mock QueueProvider.getInstance().getChunkQueue().put() to return a new LinkedBlockingQueue
             QueueProvider mockQueueProvider = mock(QueueProvider.class);
             queueProviderMockedStatic.when(QueueProvider::getInstance).thenReturn(mockQueueProvider);
             // Mock getChunkQueue to return a new LinkedBlockingQueue
             LinkedBlockingQueue<String> mockedLinkedBlockingQueue = mock(LinkedBlockingQueue.class);
             when(mockQueueProvider.getChunkQueue()).thenReturn(mockedLinkedBlockingQueue);
             doNothing().when(mockedLinkedBlockingQueue).put(tradeChunkFilePath);
+
 
             // Create an instance of the class under test
             ChunkGeneratorService chunkGeneratorService = ChunkGeneratorService.getInstance();
@@ -70,8 +86,19 @@ public class ChunkGeneratorServiceTest {
             verify(mockBufferedWriter, times(1000)).write(anyString());
             verify(mockBufferedWriter).close();
 
-            //verify queue put
-            verify(mockedLinkedBlockingQueue, times(10)).put(tradeChunkFilePath);
+            InOrder inOrder = inOrder(mockedLinkedBlockingQueue);
+            inOrder.verify(mockedLinkedBlockingQueue).put("sampleChunkFile1");
+            inOrder.verify(mockedLinkedBlockingQueue).put("sampleChunkFile2");
+            inOrder.verify(mockedLinkedBlockingQueue).put("sampleChunkFile3");
+            inOrder.verify(mockedLinkedBlockingQueue).put("sampleChunkFile4");
+            inOrder.verify(mockedLinkedBlockingQueue).put("sampleChunkFile5");
+            inOrder.verify(mockedLinkedBlockingQueue).put("sampleChunkFile6");
+            inOrder.verify(mockedLinkedBlockingQueue).put("sampleChunkFile7");
+            inOrder.verify(mockedLinkedBlockingQueue).put("sampleChunkFile8");
+            inOrder.verify(mockedLinkedBlockingQueue).put("sampleChunkFile9");
+            inOrder.verify(mockedLinkedBlockingQueue).put("sampleChunkFile10");
+
+            verify(mockedLinkedBlockingQueue, times(10)).put(anyString());
         }
     }
 }

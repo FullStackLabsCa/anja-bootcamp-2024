@@ -4,7 +4,6 @@ import io.reactivestax.task.ChunkGenerator;
 import io.reactivestax.type.exception.FileNotFoundRuntimeException;
 import io.reactivestax.util.ApplicationPropertiesUtils;
 import io.reactivestax.util.QueueProvider;
-import lombok.extern.log4j.Log4j2;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -34,7 +33,7 @@ public class ChunkGeneratorService implements ChunkGenerator {
     public void generateChunks() throws IOException, InterruptedException {
         ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
 
-        TradeFileChunkDetailsRecord tradeFileChunkDetailsRecord = getCalculateTotalNumberOfLinesPerChunk(applicationPropertiesUtils);
+        TradeFileChunkDetailsRecord tradeFileChunkDetailsRecord = calculateTotalNumberOfLinesPerChunk(applicationPropertiesUtils);
         TradeService tradeService = TradeService.getInstance();
 
         int tempChunkCount = 1;
@@ -66,7 +65,7 @@ public class ChunkGeneratorService implements ChunkGenerator {
         }
     }
 
-    private TradeFileChunkDetailsRecord getCalculateTotalNumberOfLinesPerChunk(ApplicationPropertiesUtils applicationPropertiesUtils) {
+    private TradeFileChunkDetailsRecord calculateTotalNumberOfLinesPerChunk(ApplicationPropertiesUtils applicationPropertiesUtils) {
         String tradeFilePath = applicationPropertiesUtils.getFilePath();
         long totalNoOfLinesInTradeFile = obtainTotalNoOfLinesInTradeFile(tradeFilePath);
         int tradeRecordChunksCount = applicationPropertiesUtils.getNumberOfChunks();

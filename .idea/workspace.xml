@@ -4,11 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="06e38ffe-585d-4f3c-8cb2-0c3337a79945" name="Changes" comment="put badTradePayloadDTOSupplier example">
+    <list default="true" id="06e38ffe-585d-4f3c-8cb2-0c3337a79945" name="Changes" comment="buffered Reader / writer mock tests">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/main/java/io/reactivestax/service/ChunkGeneratorService.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/main/java/io/reactivestax/service/ChunkGeneratorService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/java/io/reactivestax/service/ChunkGeneratorServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/java/io/reactivestax/service/ChunkGeneratorServiceTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/java/io/reactivestax/service/FileProcessorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/java/io/reactivestax/service/FileProcessorTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,6 +48,10 @@
     &quot;accountId&quot;: &quot;b7a22024-1621-4e04-a071-410ac2e47eaa&quot;
   }
 }</component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="jar:///Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home/lib/src.zip!/java.base/java/util/Properties.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$MAVEN_REPOSITORY$/org/mockito/mockito-core/5.5.0/mockito-core-5.5.0-sources.jar!/org/mockito/stubbing/Stubber.java" root0="SKIP_INSPECTION" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 5
 }</component>
@@ -309,7 +312,15 @@
       <option name="project" value="LOCAL" />
       <updated>1731688664168</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="buffered Reader / writer mock tests">
+      <option name="closed" value="true" />
+      <created>1731695400770</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1731695400770</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -323,7 +334,8 @@
     <MESSAGE value="some more changes" />
     <MESSAGE value="writing tests that mock bufferedWriter, Files API methods" />
     <MESSAGE value="put badTradePayloadDTOSupplier example" />
-    <option name="LAST_COMMIT_MESSAGE" value="put badTradePayloadDTOSupplier example" />
+    <MESSAGE value="buffered Reader / writer mock tests" />
+    <option name="LAST_COMMIT_MESSAGE" value="buffered Reader / writer mock tests" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -437,22 +449,22 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/main/java/io/reactivestax/service/ChunkGeneratorService.java</url>
-          <line>39</line>
+          <line>38</line>
           <option name="timeStamp" value="31" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/main/java/io/reactivestax/service/ChunkGeneratorService.java</url>
-          <line>34</line>
+          <line>33</line>
           <option name="timeStamp" value="32" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/main/java/io/reactivestax/service/ChunkGeneratorService.java</url>
-          <line>37</line>
+          <line>36</line>
           <option name="timeStamp" value="33" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/main/java/io/reactivestax/service/ChunkGeneratorService.java</url>
-          <line>47</line>
+          <line>46</line>
           <option name="timeStamp" value="34" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-field">
