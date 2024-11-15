@@ -36,7 +36,7 @@ public interface DTOSuppliers {
 
     Supplier<TradePayloadDTO> badTradePayloadDTOSupplier = () -> TradePayloadDTO.builder()
             .tradeNumber("TDB_00000000")
-            .payload("asdfgasdg2346098askldfmasldfjkasdkljfasdlkfjasdljkf")
+            .payload("asdfgasdg2346098askldfmasldfjkasdkljfasdlkfjasdljkf") //this should be handled with proper tests
             .lookupStatus(String.valueOf(LookupStatus.PASS))
             .validityStatus(String.valueOf(ValidityStatus.VALID))
             .journalEntryStatus(String.valueOf(PostedStatus.POSTED))

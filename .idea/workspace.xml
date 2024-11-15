@@ -4,15 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="06e38ffe-585d-4f3c-8cb2-0c3337a79945" name="Changes" comment="writing tests that mock bufferedWriter, Files API methods">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trade-analytics-app/target/classes/io/reactivestax/App.class" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trade-analytics-app/target/classes/io/reactivestax/App.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trade-analytics-app/target/test-classes/io/reactivestax/AppTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trade-analytics-app/target/test-classes/io/reactivestax/AppTest.class" afterDir="false" />
+    <list default="true" id="06e38ffe-585d-4f3c-8cb2-0c3337a79945" name="Changes" comment="put badTradePayloadDTOSupplier example">
       <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/suppliers/dto/DTOSuppliers.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-consumer/src/test/java/io/reactivestax/suppliers/dto/DTOSuppliers.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/main/java/io/reactivestax/service/ChunkGeneratorService.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/main/java/io/reactivestax/service/ChunkGeneratorService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/java/io/reactivestax/ProducerHibernateTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/java/io/reactivestax/ProducerHibernateTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/java/io/reactivestax/ProducerJDBCTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/java/io/reactivestax/ProducerJDBCTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/java/io/reactivestax/service/FileProcessorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/java/io/reactivestax/service/FileProcessorTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -295,7 +288,15 @@
       <option name="project" value="LOCAL" />
       <updated>1731687863736</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="put badTradePayloadDTOSupplier example">
+      <option name="closed" value="true" />
+      <created>1731688640616</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1731688640616</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -308,7 +309,8 @@
     <MESSAGE value="added more asserts for payload status" />
     <MESSAGE value="some more changes" />
     <MESSAGE value="writing tests that mock bufferedWriter, Files API methods" />
-    <option name="LAST_COMMIT_MESSAGE" value="writing tests that mock bufferedWriter, Files API methods" />
+    <MESSAGE value="put badTradePayloadDTOSupplier example" />
+    <option name="LAST_COMMIT_MESSAGE" value="put badTradePayloadDTOSupplier example" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
