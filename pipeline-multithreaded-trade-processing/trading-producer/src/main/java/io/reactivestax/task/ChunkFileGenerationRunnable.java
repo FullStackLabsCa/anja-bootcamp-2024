@@ -5,8 +5,8 @@ import io.reactivestax.service.ChunkGeneratorService;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-public class ChunkFileGenerator implements Runnable {
-    Logger logger = Logger.getLogger(ChunkFileGenerator.class.getName());
+public class ChunkFileGenerationRunnable implements Runnable {
+    Logger logger = Logger.getLogger(ChunkFileGenerationRunnable.class.getName());
 
     @Override
     public void run() {

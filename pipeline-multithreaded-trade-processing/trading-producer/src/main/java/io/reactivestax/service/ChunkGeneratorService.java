@@ -1,13 +1,20 @@
 package io.reactivestax.service;
 
 import io.reactivestax.task.ChunkGenerator;
+import io.reactivestax.type.exception.FileNotFoundRuntimeException;
 import io.reactivestax.util.ApplicationPropertiesUtils;
 import io.reactivestax.util.QueueProvider;
+import lombok.extern.log4j.Log4j2;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.stream.Stream;
 
+import static io.reactivestax.util.GeneralUtils.logTheExceptionTrace;
+import static java.nio.file.Files.lines;
+
+@Log4j2
 public class ChunkGeneratorService implements ChunkGenerator {
 
     private static ChunkGeneratorService instance;
@@ -26,34 +33,52 @@ public class ChunkGeneratorService implements ChunkGenerator {
     @Override
     public void generateChunks() throws IOException, InterruptedException {
         ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
-        long numOfLines = applicationPropertiesUtils.getTotalNoOfLines();
-        String path = applicationPropertiesUtils.getFilePath();
-        int chunksCount = applicationPropertiesUtils.getNumberOfChunks();
-        int tempChunkCount = 1;
-        long tempLineCount = 0;
-        long linesCountPerFile = numOfLines / chunksCount;
+
+        String tradeFilePath = applicationPropertiesUtils.getFilePath();
+        long totalNoOfLinesInTradeFile = obtainTotalNoOfLinesInTradeFile(tradeFilePath);
+        int tradeRecordChunksCount = applicationPropertiesUtils.getNumberOfChunks();
+        long linesCountPerChunkFile = totalNoOfLinesInTradeFile / tradeRecordChunksCount;
         TradeService tradeService = TradeService.getInstance();
-        String chunkFilePath = tradeService.buildFilePath(tempChunkCount, applicationPropertiesUtils.getChunkFilePathWithName());
+
+        int tempChunkCount = 1;
+        String tradeChunkFilePath = tradeService.buildNextChunkFilePath(tempChunkCount, applicationPropertiesUtils.getChunkFilePathWithName());
         Files.createDirectories(Paths.get(applicationPropertiesUtils.getChunkDirectoryPath()));
-        BufferedWriter writer = new BufferedWriter(new FileWriter(chunkFilePath));
-        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(tradeChunkFilePath));
+
+        long tempLineCount = 0;
+        try (InputStream inputStream = ApplicationPropertiesUtils.class.getClassLoader().getResourceAsStream(tradeFilePath);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            //skipping header
             String line = reader.readLine();
+            //
             while ((line = reader.readLine()) != null) {
                 writer.write(line);
                 writer.newLine();
                 tempLineCount++;
-                if (tempLineCount == linesCountPerFile && tempChunkCount != chunksCount) {
+                if (tempLineCount == linesCountPerChunkFile && tempChunkCount != tradeRecordChunksCount) {
                     tempChunkCount++;
                     tempLineCount = 0;
                     writer.close();
-                    QueueProvider.getInstance().getChunkQueue().put(chunkFilePath);
-                    chunkFilePath = tradeService.buildFilePath(tempChunkCount, applicationPropertiesUtils.getChunkFilePathWithName());
-                    writer = new BufferedWriter(new FileWriter(chunkFilePath));
+                    QueueProvider.getInstance().getChunkQueue().put(tradeChunkFilePath);
+                    tradeChunkFilePath = tradeService.buildNextChunkFilePath(tempChunkCount, applicationPropertiesUtils.getChunkFilePathWithName());
+                    writer = new BufferedWriter(new FileWriter(tradeChunkFilePath));
                 }
             }
-            QueueProvider.getInstance().getChunkQueue().put(chunkFilePath);
+            QueueProvider.getInstance().getChunkQueue().put(tradeChunkFilePath);
         } finally {
             writer.close();
         }
     }
+
+    private long obtainTotalNoOfLinesInTradeFile(String tradeFilePath) {
+        try (InputStream inputStream = ApplicationPropertiesUtils.class.getClassLoader().getResourceAsStream(tradeFilePath);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+             Stream<String> lines = reader.lines()) {
+            return lines.count();
+        } catch (IOException e) {
+            logTheExceptionTrace(e);
+            throw new FileNotFoundRuntimeException(String.format("File with name %s not found", tradeFilePath));
+        }
+    }
+
 }

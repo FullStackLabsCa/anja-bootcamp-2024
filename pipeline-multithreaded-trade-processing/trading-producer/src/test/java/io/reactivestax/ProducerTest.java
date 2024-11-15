@@ -1,6 +1,6 @@
 package io.reactivestax;
 
-import io.reactivestax.task.ChunkFileGenerator;
+import io.reactivestax.task.ChunkFileGenerationRunnable;
 import io.reactivestax.service.ChunkGeneratorService;
 import io.reactivestax.service.ChunkProcessorService;
 import io.reactivestax.service.TradeService;
@@ -67,7 +67,7 @@ public class ProducerTest {
 
     @Test
     public void testBuildFilePath() {
-        String filePath = tradeService.buildFilePath(5, applicationPropertiesUtils.getChunkFilePathWithName());
+        String filePath = tradeService.buildNextChunkFilePath(5, applicationPropertiesUtils.getChunkFilePathWithName());
         Assert.assertEquals(applicationPropertiesUtils.getChunkFilePathWithName() + 5 + ".csv", filePath);
     }
 
@@ -124,8 +124,8 @@ public class ProducerTest {
     @Test
     public void testChunkFileGeneratorRun() throws IOException {
         applicationPropertiesUtils.setTotalNoOfLines(tradeService.fileLineCounter(applicationPropertiesUtils.getFilePath()));
-        ChunkFileGenerator chunkFileGenerator = new ChunkFileGenerator();
-        chunkFileGenerator.run();
+        ChunkFileGenerationRunnable chunkFileGenerationRunnable = new ChunkFileGenerationRunnable();
+        chunkFileGenerationRunnable.run();
         long fileCount = 0;
         File directory = new File(applicationPropertiesUtils.getChunkDirectoryPath());
         File[] files = directory.listFiles();

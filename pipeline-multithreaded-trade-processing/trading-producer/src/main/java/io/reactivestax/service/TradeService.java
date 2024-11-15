@@ -1,6 +1,6 @@
 package io.reactivestax.service;
 
-import io.reactivestax.task.ChunkFileGenerator;
+import io.reactivestax.task.ChunkFileGenerationRunnable;
 import io.reactivestax.task.ChunkFileProcessor;
 import io.reactivestax.util.ApplicationPropertiesUtils;
 
@@ -40,7 +40,7 @@ public class TradeService {
             chunkGeneratorExecutorService = Executors.newSingleThreadExecutor();
             chunkProcessorExecutorService =
                     Executors.newFixedThreadPool(applicationProperties.getChunkProcessorThreadCount());
-            chunkGeneratorExecutorService.submit(new ChunkFileGenerator());
+            chunkGeneratorExecutorService.submit(new ChunkFileGenerationRunnable());
             logger.info("Stated chunk generator.");
             for (int i = 0; i < applicationProperties.getNumberOfChunks(); i++) {
                 chunkProcessorExecutorService.submit(new ChunkFileProcessor());
@@ -69,7 +69,7 @@ public class TradeService {
         return lineCount - 1;
     }
 
-    public String buildFilePath(int chunkNumber, String chunkFilePathWithName) {
+    public String buildNextChunkFilePath(int chunkNumber, String chunkFilePathWithName) {
         return chunkFilePathWithName + chunkNumber + ".csv";
     }
 }
