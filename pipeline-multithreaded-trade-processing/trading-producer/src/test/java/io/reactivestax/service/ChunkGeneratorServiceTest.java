@@ -76,15 +76,52 @@ public class ChunkGeneratorServiceTest {
             chunkGeneratorService.generateChunks();
 
             // Verify that BufferedWriter's write method was called with the expected content
-            BufferedWriter mockBufferedWriter = mockedBufferedWriter.constructed().get(0);
-            verify(mockBufferedWriter).write("TDB_000001,2024-09-19 22:16:18,TDB_CUST_5214938,TSLA,BUY,1,638.02");
-            verify(mockBufferedWriter).write("TDB_000002,2024-09-19 22:16:18,TDB_CUST_5214938,V,BUY,1,638.02");
-            verify(mockBufferedWriter).write("TDB_000003,2024-09-19 22:16:18,TDB_CUST_5214938,V,BUY,1,638.02");
-            verify(mockBufferedWriter).write("TDB_000004,2024-09-19 22:16:18,TDB_CUST_5214938,TSLABUY,1,638.02");
-            verify(mockBufferedWriter).write("TDB_000005,2024-09-19 22:16:18,TDB_CUST_5214938,TSLA,BUY,1,638.02");
-            verify(mockBufferedWriter).write("TDB_000006,2024-09-19 22:16:18,TDB_CUST_5214938,TSLA,BUY,1,638.02");
-            verify(mockBufferedWriter, times(1000)).write(anyString());
-            verify(mockBufferedWriter).close();
+            BufferedWriter mockBufferedWriter0 = mockedBufferedWriter.constructed().get(0);
+            verify(mockBufferedWriter0).write("TDB_000001,2024-09-19 22:16:18,TDB_CUST_5214938,TSLA,BUY,1,638.02");
+            verify(mockBufferedWriter0).write("TDB_000002,2024-09-19 22:16:18,TDB_CUST_5214938,V,BUY,1,638.02");
+            verify(mockBufferedWriter0).write("TDB_000003,2024-09-19 22:16:18,TDB_CUST_5214938,V,BUY,1,638.02");
+            verify(mockBufferedWriter0).write("TDB_000004,2024-09-19 22:16:18,TDB_CUST_5214938,TSLABUY,1,638.02");
+            verify(mockBufferedWriter0).write("TDB_000005,2024-09-19 22:16:18,TDB_CUST_5214938,TSLA,BUY,1,638.02");
+            verify(mockBufferedWriter0).write("TDB_000006,2024-09-19 22:16:18,TDB_CUST_5214938,TSLA,BUY,1,638.02");
+            verify(mockBufferedWriter0, times(1000)).write(anyString());
+            verify(mockBufferedWriter0).close();
+
+            BufferedWriter mockBufferedWriter1 = mockedBufferedWriter.constructed().get(1);
+            verify(mockBufferedWriter1, times(1000)).write(anyString());
+            verify(mockBufferedWriter1).close();
+
+            BufferedWriter mockBufferedWriter2 = mockedBufferedWriter.constructed().get(2);
+            verify(mockBufferedWriter2, times(1000)).write(anyString());
+            verify(mockBufferedWriter2).close();
+
+            BufferedWriter mockBufferedWriter3 = mockedBufferedWriter.constructed().get(3);
+            verify(mockBufferedWriter3, times(1000)).write(anyString());
+            verify(mockBufferedWriter3).close();
+
+            BufferedWriter mockBufferedWriter4 = mockedBufferedWriter.constructed().get(4);
+            verify(mockBufferedWriter4, times(1000)).write(anyString());
+            verify(mockBufferedWriter4).close();
+
+            BufferedWriter mockBufferedWriter5 = mockedBufferedWriter.constructed().get(5);
+            verify(mockBufferedWriter5, times(1000)).write(anyString());
+            verify(mockBufferedWriter5).close();
+
+            BufferedWriter mockBufferedWriter6 = mockedBufferedWriter.constructed().get(6);
+            verify(mockBufferedWriter6, times(1000)).write(anyString());
+            verify(mockBufferedWriter6).close();
+
+            BufferedWriter mockBufferedWriter7 = mockedBufferedWriter.constructed().get(7);
+            verify(mockBufferedWriter7, times(1000)).write(anyString());
+            verify(mockBufferedWriter7).close();
+
+            BufferedWriter mockBufferedWriter8 = mockedBufferedWriter.constructed().get(8);
+            verify(mockBufferedWriter8, times(1000)).write(anyString());
+            verify(mockBufferedWriter8).close();
+
+            BufferedWriter mockBufferedWriter9 = mockedBufferedWriter.constructed().get(9);
+            verify(mockBufferedWriter9, times(1005)).write(anyString());
+            verify(mockBufferedWriter9).close();
+
 
             InOrder inOrder = inOrder(mockedLinkedBlockingQueue);
             inOrder.verify(mockedLinkedBlockingQueue).put("sampleChunkFile1");
