@@ -41,7 +41,6 @@ public class ChunkGeneratorService implements ChunkGenerator {
         String tradeChunkFilePath = tradeService.buildNextChunkFilePath(tempChunkCount, applicationPropertiesUtils.getChunkFilePathWithName());
         Files.createDirectories(Paths.get(applicationPropertiesUtils.getChunkDirectoryPath()));
         BufferedWriter writer = new BufferedWriter(new FileWriter(tradeChunkFilePath));
-
         long tempLineCount = 0;
         try (InputStream inputStream = ApplicationPropertiesUtils.class.getClassLoader().getResourceAsStream(tradeFileChunkDetailsRecord.tradeFilePath());
              BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
@@ -75,7 +74,8 @@ public class ChunkGeneratorService implements ChunkGenerator {
         return new TradeFileChunkDetailsRecord(tradeFilePath, tradeRecordChunksCount, linesCountPerChunkFile);
     }
 
-    private record TradeFileChunkDetailsRecord(String tradeFilePath, int tradeRecordChunksCount, long linesCountPerChunkFile) {
+    private record TradeFileChunkDetailsRecord(String tradeFilePath, int tradeRecordChunksCount,
+                                               long linesCountPerChunkFile) {
     }
 
     private long obtainTotalNoOfLinesInTradeFile(String tradeFilePath) {
