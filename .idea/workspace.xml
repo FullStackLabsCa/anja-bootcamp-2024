@@ -7,7 +7,6 @@
     <list default="true" id="06e38ffe-585d-4f3c-8cb2-0c3337a79945" name="Changes" comment="mock construction based tests.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/java/io/reactivestax/service/ChunkGeneratorServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/java/io/reactivestax/service/ChunkGeneratorServiceTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/resources/trades_10000_sameAccountAndPosition.csv" beforeDir="false" afterPath="$PROJECT_DIR$/pipeline-multithreaded-trade-processing/trading-producer/src/test/resources/trades_10000_sameAccountAndPosition.csv" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -328,7 +327,15 @@
       <option name="project" value="LOCAL" />
       <updated>1731699129624</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="mock construction based tests.">
+      <option name="closed" value="true" />
+      <created>1731699702814</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1731699702814</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -492,6 +499,9 @@
       <FILTER>io.reactivestax.service.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/anja_bootcamp_2024$TradeProcessorServiceIntegrationTest_testProcessTradePayloadCalledOnce.ic" NAME="TradeProcessorServiceIntegrationTest.testProcessTradePayloadCalledOnce Coverage Results" MODIFIED="1731513854415" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>io.reactivestax.service.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/anja_bootcamp_2024$ChunkGeneratorServiceTest_testWriteToFile.ic" NAME="ChunkGeneratorServiceTest.testWriteToFile Coverage Results" MODIFIED="1731699786552" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>io.reactivestax.service.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/anja_bootcamp_2024$TradeProcessorServiceIntegrationTest.ic" NAME="TradeProcessorServiceIntegrationTest Coverage Results" MODIFIED="1731560083736" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

@@ -86,37 +86,11 @@ public class ChunkGeneratorServiceTest {
             verify(mockBufferedWriter0, times(1000)).write(anyString());
             verify(mockBufferedWriter0).close();
 
-            BufferedWriter mockBufferedWriter1 = mockedBufferedWriter.constructed().get(1);
-            verify(mockBufferedWriter1, times(1000)).write(anyString());
-            verify(mockBufferedWriter1).close();
-
-            BufferedWriter mockBufferedWriter2 = mockedBufferedWriter.constructed().get(2);
-            verify(mockBufferedWriter2, times(1000)).write(anyString());
-            verify(mockBufferedWriter2).close();
-
-            BufferedWriter mockBufferedWriter3 = mockedBufferedWriter.constructed().get(3);
-            verify(mockBufferedWriter3, times(1000)).write(anyString());
-            verify(mockBufferedWriter3).close();
-
-            BufferedWriter mockBufferedWriter4 = mockedBufferedWriter.constructed().get(4);
-            verify(mockBufferedWriter4, times(1000)).write(anyString());
-            verify(mockBufferedWriter4).close();
-
-            BufferedWriter mockBufferedWriter5 = mockedBufferedWriter.constructed().get(5);
-            verify(mockBufferedWriter5, times(1000)).write(anyString());
-            verify(mockBufferedWriter5).close();
-
-            BufferedWriter mockBufferedWriter6 = mockedBufferedWriter.constructed().get(6);
-            verify(mockBufferedWriter6, times(1000)).write(anyString());
-            verify(mockBufferedWriter6).close();
-
-            BufferedWriter mockBufferedWriter7 = mockedBufferedWriter.constructed().get(7);
-            verify(mockBufferedWriter7, times(1000)).write(anyString());
-            verify(mockBufferedWriter7).close();
-
-            BufferedWriter mockBufferedWriter8 = mockedBufferedWriter.constructed().get(8);
-            verify(mockBufferedWriter8, times(1000)).write(anyString());
-            verify(mockBufferedWriter8).close();
+            for (int i = 1; i <= 8; i++) {
+                BufferedWriter mockBufferedWriter = mockedBufferedWriter.constructed().get(i);
+                verify(mockBufferedWriter, times(1000)).write(anyString());
+                verify(mockBufferedWriter).close();
+            }
 
             BufferedWriter mockBufferedWriter9 = mockedBufferedWriter.constructed().get(9);
             verify(mockBufferedWriter9, times(1005)).write(anyString());
