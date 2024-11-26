@@ -73,8 +73,4 @@ public class TradeService {
     public String buildFilePath(int chunkNumber, String chunkFilePathWithName) {
         return chunkFilePathWithName + chunkNumber + ".csv";
     }
-
-    public void readFileAndExecute(){
-
-    }
 }

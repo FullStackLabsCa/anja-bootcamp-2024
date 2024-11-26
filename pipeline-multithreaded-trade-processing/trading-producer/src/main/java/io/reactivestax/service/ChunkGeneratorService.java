@@ -43,29 +43,36 @@ public class ChunkGeneratorService implements ChunkGenerator {
         long numOfLinesPerFile = Math.round((float) numOfLines / chunksCount);
         TradeService tradeService = TradeService.getInstance();
         Files.createDirectories(Paths.get(applicationPropertiesUtils.getChunkDirectoryPath()));
+        readAndWriteToChunk(path, chunksCount, tradeService, applicationPropertiesUtils, numOfLinesPerFile);
+    }
+
+    private void readAndWriteToChunk(String path, int chunksCount, TradeService tradeService, ApplicationPropertiesUtils applicationPropertiesUtils, long numOfLinesPerFile) throws IOException {
         try (BufferedReader reader =
                      Files.newBufferedReader(Path.of(path), StandardCharsets.UTF_8)) {
             AtomicReference<String> line = new AtomicReference<>(reader.readLine());
             IntStream.range(1, chunksCount + 1).forEach(fileNumber -> {
                 String chunkFilePath = tradeService.buildFilePath(fileNumber,
                         applicationPropertiesUtils.getChunkFilePathWithName());
-                try (BufferedWriter writer = Files.newBufferedWriter(Path.of(chunkFilePath))) {
-                    LongStream.range(0, numOfLinesPerFile).forEach(lineNumber -> {
-                        try {
-                            line.set(reader.readLine());
-                            writer.write(line.get() != null ? line.get() : "");
-                            writer.newLine();
-                        } catch (IOException e) {
-                            logger.warning("IO Exception.");
-                        }
-                    });
-                    QueueProvider.getInstance().getChunkQueue().put(chunkFilePath);
-                } catch (IOException | InterruptedException e) {
-                    e.printStackTrace();
-                    logger.warning("Exception while creating chunks.");
-                    Thread.currentThread().interrupt();
+                writeToChunk(numOfLinesPerFile, chunkFilePath, line, reader);
+            });
+        }
+    }
+
+    private void writeToChunk(long numOfLinesPerFile, String chunkFilePath, AtomicReference<String> line, BufferedReader reader) {
+        try (BufferedWriter writer = Files.newBufferedWriter(Path.of(chunkFilePath))) {
+            LongStream.range(0, numOfLinesPerFile).forEach(lineNumber -> {
+                try {
+                    line.set(reader.readLine());
+                    writer.write(line.get() != null ? line.get() : "");
+                    writer.newLine();
+                } catch (IOException e) {
+                    logger.warning("IO Exception.");
                 }
             });
+            QueueProvider.getInstance().getChunkQueue().put(chunkFilePath);
+        } catch (IOException | InterruptedException e) {
+            logger.warning("Exception while creating chunks.");
+            Thread.currentThread().interrupt();
         }
     }
 }

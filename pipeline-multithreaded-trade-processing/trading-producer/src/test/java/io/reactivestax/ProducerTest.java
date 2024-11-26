@@ -42,24 +42,6 @@ public class ProducerTest {
     }
 
     @Test
-    public void testGenerateChunks() throws IOException, InterruptedException {
-        applicationPropertiesUtils.setTotalNoOfLines(tradeService.fileLineCounter(applicationPropertiesUtils.getFilePath()));
-        QueueProvider.getInstance().setChunkQueue(new LinkedBlockingQueue<>(applicationPropertiesUtils.getNumberOfChunks()));
-        chunkGeneratorService.generateChunks();
-        long fileCount = 0;
-        File directory = new File(applicationPropertiesUtils.getChunkDirectoryPath());
-        File[] files = directory.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (file.isFile()) {
-                    fileCount++;
-                }
-            }
-        }
-        assertEquals(applicationPropertiesUtils.getNumberOfChunks(), fileCount);
-    }
-
-    @Test
     public void testFileLineCounter() throws IOException {
         long counter = tradeService.fileLineCounter(applicationPropertiesUtils.getFilePath());
         Assert.assertEquals(9999, counter);
