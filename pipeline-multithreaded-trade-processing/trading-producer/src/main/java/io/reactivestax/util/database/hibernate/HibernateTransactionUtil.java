@@ -6,8 +6,6 @@ import io.reactivestax.util.database.ConnectionUtil;
 import io.reactivestax.util.database.TransactionUtil;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.boot.registry.StandardServiceRegistry;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,15 +31,8 @@ public class HibernateTransactionUtil implements TransactionUtil, ConnectionUtil
     private static synchronized SessionFactory buildSessionFactory() {
         if (sessionFactory == null) {
             Configuration configuration = getConfiguration();
-            configuration.configure(HibernateTransactionUtil.DEFAULT_RESOURCE);
             LOGGER.debug("Hibernate Annotation Configuration loaded");
-
-            StandardServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
-                    .applySettings(configuration.getProperties())
-                    .build();
-            LOGGER.debug("Hibernate Annotation serviceRegistry created");
-
-            sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+            sessionFactory = configuration.configure(HibernateTransactionUtil.DEFAULT_RESOURCE).buildSessionFactory();
         }
         return sessionFactory;
     }
