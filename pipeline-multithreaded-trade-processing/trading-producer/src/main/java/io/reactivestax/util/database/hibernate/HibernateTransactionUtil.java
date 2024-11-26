@@ -43,7 +43,6 @@ public class HibernateTransactionUtil implements TransactionUtil, ConnectionUtil
                 .setProperty("hibernate.connection.url", applicationPropertiesUtils.getDbUrl())
                 .setProperty("hibernate.connection.username", applicationPropertiesUtils.getDbUsername())
                 .setProperty("hibernate.connection.password", applicationPropertiesUtils.getDbPassword())
-                .setProperty("hibernate.dialect", applicationPropertiesUtils.getHibernateDialect())
                 .setProperty("hibernate.hbm2ddl.auto", applicationPropertiesUtils.getHibernateDBCreationMode())
                 .addAnnotatedClass(TradePayload.class);
     }
