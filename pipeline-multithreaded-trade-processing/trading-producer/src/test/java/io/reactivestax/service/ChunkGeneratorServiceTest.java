@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.junit.Assert.assertEquals;
@@ -26,7 +27,7 @@ public class ChunkGeneratorServiceTest {
     }
 
     @After
-    public void tearDown(){
+    public void tearDown() {
         File directory = new File(applicationPropertiesUtils.getChunkDirectoryPath());
         boolean delete = directory.delete();
         System.out.println(delete);
@@ -37,16 +38,9 @@ public class ChunkGeneratorServiceTest {
         applicationPropertiesUtils.setTotalNoOfLines(tradeService.fileLineCounter(applicationPropertiesUtils.getFilePath()));
         QueueProvider.getInstance().setChunkQueue(new LinkedBlockingQueue<>(applicationPropertiesUtils.getNumberOfChunks()));
         chunkGeneratorService.generateChunks();
-        long fileCount = 0;
         File directory = new File(applicationPropertiesUtils.getChunkDirectoryPath());
-        File[] files = directory.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (file.isFile()) {
-                    fileCount++;
-                }
-            }
-        }
-        assertEquals(applicationPropertiesUtils.getNumberOfChunks(), fileCount);
+        Optional<File[]> files = Optional.ofNullable(directory.listFiles());
+        Optional<Integer> optionalCount = files.map(files1 -> files1.length);
+        assertEquals(Optional.of(applicationPropertiesUtils.getNumberOfChunks()), optionalCount);
     }
 }

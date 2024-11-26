@@ -5,10 +5,10 @@ import lombok.Setter;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
+@Setter
+@Getter
 public class QueueProvider {
     private static QueueProvider instance;
-    @Getter
-    @Setter
     private LinkedBlockingQueue<String> chunkQueue;
 
     private QueueProvider() {
