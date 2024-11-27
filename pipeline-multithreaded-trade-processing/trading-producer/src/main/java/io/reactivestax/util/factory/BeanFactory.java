@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 
 
 public class BeanFactory {
-    private static ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
+    private static final ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
 
     private BeanFactory() {
     }

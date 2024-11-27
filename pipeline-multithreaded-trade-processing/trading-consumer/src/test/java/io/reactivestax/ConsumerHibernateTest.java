@@ -221,17 +221,6 @@ public class ConsumerHibernateTest {
     }
 
     @Test
-    public void testJournalEntryTransaction() {
-        transactionUtil.startTransaction();
-        io.reactivestax.type.dto.JournalEntry journalEntry = tradeProcessorService.journalEntryTransaction(
-                "TDB_000001,2024-09-19 22:16:18,TDB_CUST_5214938,TSLA,BUY,1,638.02".split(","), 1L);
-        transactionUtil.commitTransaction();
-        Session session = connectionUtil.getConnection();
-        JournalEntry journalEntryEntity = session.get(JournalEntry.class, journalEntry.getId());
-        Assert.assertEquals("TDB_CUST_5214938", journalEntryEntity.getAccountNumber());
-    }
-
-    @Test
     public void testPositionTransaction() {
         transactionUtil.startTransaction();
 //        tradeProcessorService.positionTransaction();

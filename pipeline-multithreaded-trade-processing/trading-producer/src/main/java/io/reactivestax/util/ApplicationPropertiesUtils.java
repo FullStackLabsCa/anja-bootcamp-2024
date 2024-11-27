@@ -1,5 +1,6 @@
 package io.reactivestax.util;
 
+import io.reactivestax.type.exception.SystemInitializationException;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -50,10 +51,7 @@ public class ApplicationPropertiesUtils {
     }
 
     public static synchronized ApplicationPropertiesUtils getInstance() {
-        if (instance == null) {
-            instance = new ApplicationPropertiesUtils("application.properties");
-        }
-        return instance;
+        return getInstance("application.properties");
     }
 
     public void loadApplicationProperties(String applicationPropertiesFileName) {
@@ -62,7 +60,7 @@ public class ApplicationPropertiesUtils {
                 .getResourceAsStream(applicationPropertiesFileName)) {
             if (input == null) {
                 logger.warning("Sorry, unable to find application.properties");
-                System.exit(1);
+                throw new IOException("Empty application.properties file");
             }
             properties.load(input);
             filePath = properties.getProperty("file.path");
@@ -88,8 +86,7 @@ public class ApplicationPropertiesUtils {
             persistenceTechnology = properties.getProperty("persistence.technology");
             messagingTechnology = properties.getProperty("messaging.technology");
         } catch (IOException e) {
-            logger.warning("File not found Exception.");
-            System.exit(1);
+            throw new SystemInitializationException(e.getMessage());
         }
     }
 }

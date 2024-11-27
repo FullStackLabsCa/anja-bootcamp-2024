@@ -27,8 +27,8 @@ public class TradeService {
 
     public void startTradeConsumer() {
         IntStream.range(0, this.applicationPropertiesUtils.getTradeProcessorQueueCount())
-                .forEach(i -> new FileTradeProcessor(applicationPropertiesUtils.getQueueExchangeName() +
-                        "_queue_" + i));
+                .forEach(i -> tradeProcessorExecutorService.submit(new FileTradeProcessor(applicationPropertiesUtils.getQueueExchangeName() +
+                        "_queue_" + i)));
         logger.info("Started trade processor.");
         addShutdownHook();
     }

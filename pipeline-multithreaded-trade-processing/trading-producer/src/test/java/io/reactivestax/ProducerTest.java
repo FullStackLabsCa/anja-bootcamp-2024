@@ -52,37 +52,7 @@
 //        Assert.assertEquals(applicationPropertiesUtils.getChunkFilePathWithName() + 5 + ".csv", filePath);
 //    }
 //
-//    @Test
-//    public void testGetQueueNumberNumberUsingRoundRobinAlgorithm() {
-//        int queueNumber = queueDistributor.getQueueNumberNumberUsingAlgorithm("round-robin", applicationPropertiesUtils.getTradeProcessorQueueCount());
-//        assertTrue(queueNumber >= 0 && queueNumber < applicationPropertiesUtils.getTradeProcessorQueueCount());
-//    }
 //
-//    @Test
-//    public void testGetQueueNumberNumberUsingRandomAlgorithm() {
-//        int queueNumber = queueDistributor.getQueueNumberNumberUsingAlgorithm("random", applicationPropertiesUtils.getTradeProcessorQueueCount());
-//        assertTrue(queueNumber >= 0 && queueNumber < applicationPropertiesUtils.getTradeProcessorQueueCount());
-//    }
-//
-//    @Test
-//    public void testFigureOutTheNextQueueUsingRoundRobinAlgorithmUseMapTrue() {
-//        int queueNumber1 = queueDistributor.figureOutTheNextQueue("TDB_00000001", true, "round-robin", applicationPropertiesUtils.getTradeProcessorQueueCount());
-//        int queueNumber2 = queueDistributor.figureOutTheNextQueue("TDB_00000001", true, "round-robin", applicationPropertiesUtils.getTradeProcessorQueueCount());
-//        assertEquals(queueNumber1, queueNumber2);
-//    }
-//
-//    @Test
-//    public void testFigureOutTheNextQueueUsingRoundRobinAlgorithmUseMapFalse() {
-//        int queueNumber = queueDistributor.figureOutTheNextQueue("TDB_00000001", true, "round-robin", applicationPropertiesUtils.getTradeProcessorQueueCount());
-//        assertTrue(queueNumber >= 0 && queueNumber < applicationPropertiesUtils.getTradeProcessorQueueCount());
-//    }
-//
-//    @Test
-//    public void testFigureOutTheNextQueueUsingRandomAlgorithm() {
-//        int queueNumber = queueDistributor.figureOutTheNextQueue("TDB_00000001", false, "random",
-//                applicationPropertiesUtils.getTradeProcessorQueueCount());
-//        assertTrue(queueNumber >= 0 && queueNumber < applicationPropertiesUtils.getTradeProcessorQueueCount());
-//    }
 //
 //
 //    @Test
