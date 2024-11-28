@@ -13,7 +13,7 @@ import java.util.concurrent.Executors;
 import static org.junit.jupiter.api.Assertions.*;
 
 class HibernateTransactionUtilTest {
-    HibernateTransactionUtil hibernateTransactionUtil;
+    private HibernateTransactionUtil hibernateTransactionUtil;
 
     @BeforeEach
     void setUp() {

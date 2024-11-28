@@ -7,25 +7,23 @@ import io.reactivestax.util.database.ConnectionUtil;
 import io.reactivestax.util.database.TransactionUtil;
 import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
 import io.reactivestax.util.factory.BeanFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.sql.*;
 import java.util.logging.Logger;
 
-import static org.junit.Assert.assertEquals;
+class JDBCTradePayloadRepositoryTest {
+    private TradePayloadRepository tradePayloadRepository;
+    private ConnectionUtil<Connection> connectionUtil;
+    private TransactionUtil transactionUtil;
+    private final Logger logger = Logger.getLogger(JDBCTradePayloadRepositoryTest.class.getName());
 
-public class JDBCTradePayloadRepositoryTest {
-    TradePayloadRepository tradePayloadRepository;
-    ConnectionUtil<Connection> connectionUtil;
-    TransactionUtil transactionUtil;
-    ApplicationPropertiesUtils applicationPropertiesUtils;
-    Logger logger = Logger.getLogger(JDBCTradePayloadRepositoryTest.class.getName());
-
-    @Before
-    public void setUp() {
-        applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance("applicationJDBCTest.properties");
+    @BeforeEach
+    void setUp() {
+        ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance("applicationJDBCTest.properties");
         applicationPropertiesUtils.loadApplicationProperties("applicationJDBCTest.properties");
         connectionUtil = JDBCTransactionUtil.getInstance();
         tradePayloadRepository = BeanFactory.getTradePayloadRepository();
@@ -63,8 +61,8 @@ public class JDBCTradePayloadRepositoryTest {
         }
     }
 
-    @After
-    public void cleanUp() throws SQLException {
+    @AfterEach
+    void cleanUp() throws SQLException {
         String dropTableSQL = "drop all objects";
         transactionUtil.startTransaction();
         Connection connection = connectionUtil.getConnection();
@@ -76,7 +74,7 @@ public class JDBCTradePayloadRepositoryTest {
     }
 
     @Test
-    public void testInsertRawPayloadWithTwoDifferentRecords() throws SQLException {
+    void testInsertRawPayloadWithTwoDifferentRecords() throws SQLException {
         int count = 0;
         transactionUtil.startTransaction();
         TradePayload tradePayload1 = new TradePayload();
@@ -98,11 +96,11 @@ public class JDBCTradePayloadRepositoryTest {
                 System.out.println(count);
             }
         }
-        assertEquals(2, count);
+        Assertions.assertEquals(2, count);
     }
 
     @Test
-    public void testInsertRawPayloadWithTwoSameRecords() throws SQLException {
+    void testInsertRawPayloadWithTwoSameRecords() throws SQLException {
         int count = 0;
         TradePayload tradePayload1 = new TradePayload();
         tradePayload1.setPayload("TDB_00000001,2024-09-25 06:58:37,TDB_CUST_2517563,TSLA,SELL,45,1480.82");
@@ -128,7 +126,7 @@ public class JDBCTradePayloadRepositoryTest {
             }
             transactionUtil.commitTransaction();
         }
-        assertEquals(1, count);
+        Assertions.assertEquals(1, count);
     }
 
 }

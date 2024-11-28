@@ -1,4 +1,16 @@
 package io.reactivestax.task;
 
-public class ChunkFileProcessorTest {
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
+class ChunkFileProcessorTest {
+
+
+
+    @Test
+    void testRun(){
+
+    }
 }

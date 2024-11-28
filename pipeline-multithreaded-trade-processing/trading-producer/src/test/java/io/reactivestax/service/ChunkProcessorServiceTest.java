@@ -1,4 +1,4 @@
 package io.reactivestax.service;
 
-public class ChunkProcessorServiceTest {
+class ChunkProcessorServiceTest {
 }

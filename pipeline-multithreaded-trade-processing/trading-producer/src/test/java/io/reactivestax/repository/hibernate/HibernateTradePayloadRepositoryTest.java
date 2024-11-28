@@ -1,9 +1,6 @@
 package io.reactivestax.repository.hibernate;
 
 import io.reactivestax.repository.TradePayloadRepository;
-import io.reactivestax.service.ChunkGeneratorService;
-import io.reactivestax.service.ChunkProcessorService;
-import io.reactivestax.service.TradeService;
 import io.reactivestax.type.dto.TradePayload;
 import io.reactivestax.util.ApplicationPropertiesUtils;
 import io.reactivestax.util.database.ConnectionUtil;
@@ -13,38 +10,31 @@ import io.reactivestax.util.factory.BeanFactory;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaDelete;
 import org.hibernate.Session;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.logging.Logger;
 
-public class HibernateTradePayloadRepositoryTest {
-    TradePayloadRepository tradePayloadRepository;
-    ConnectionUtil<Session> connectionUtil;
-    TransactionUtil transactionUtil;
-    ApplicationPropertiesUtils applicationPropertiesUtils;
-    TradeService tradeService;
-    ChunkGeneratorService chunkGeneratorService;
-    ChunkProcessorService chunkProcessorService;
-    Logger logger = Logger.getLogger(HibernateTradePayloadRepositoryTest.class.getName());
+class HibernateTradePayloadRepositoryTest {
+    private TradePayloadRepository tradePayloadRepository;
+    private ConnectionUtil<Session> connectionUtil;
+    private TransactionUtil transactionUtil;
+    private final Logger logger = Logger.getLogger(HibernateTradePayloadRepositoryTest.class.getName());
 
-    @Before
-    public void setUp() {
-        applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance("applicationHibernateTest.properties");
+    @BeforeEach
+    void setUp() {
+        ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance("applicationHibernateTest.properties");
         applicationPropertiesUtils.loadApplicationProperties("applicationHibernateTest.properties");
         connectionUtil = HibernateTransactionUtil.getInstance();
         tradePayloadRepository = BeanFactory.getTradePayloadRepository();
         transactionUtil = BeanFactory.getTransactionUtil();
-        tradeService = TradeService.getInstance();
-        chunkGeneratorService = ChunkGeneratorService.getInstance();
-        chunkProcessorService = ChunkProcessorService.getInstance();
     }
 
-    @After
-    public void cleanUp() {
+    @AfterEach
+    void cleanUp() {
         Session session = connectionUtil.getConnection();
         session.beginTransaction();
         CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
@@ -55,7 +45,7 @@ public class HibernateTradePayloadRepositoryTest {
     }
 
     @Test
-    public void testInsertRawPayloadWithTwoDifferentRecords() {
+    void testInsertRawPayloadWithTwoDifferentRecords() {
         transactionUtil.startTransaction();
         TradePayload tradePayload1 = new TradePayload();
         tradePayload1.setPayload("TDB_00000001,2024-09-25 06:58:37,TDB_CUST_2517563,TSLA,SELL,45,1480.82");
@@ -74,11 +64,11 @@ public class HibernateTradePayloadRepositoryTest {
         List<io.reactivestax.repository.hibernate.entity.TradePayload> tradePayloadList = session.createQuery("from " +
                         "TradePayload",
                 io.reactivestax.repository.hibernate.entity.TradePayload.class).getResultList();
-        Assert.assertEquals(2, tradePayloadList.size());
+        Assertions.assertEquals(2, tradePayloadList.size());
     }
 
     @Test
-    public void testInsertRawPayloadWithTwoSameRecords() {
+    void testInsertRawPayloadWithTwoSameRecords() {
         TradePayload tradePayload1 = new TradePayload();
         tradePayload1.setPayload("TDB_00000001,2024-09-25 06:58:37,TDB_CUST_2517563,TSLA,SELL,45,1480.82");
         tradePayload1.setTradeNumber("TDB_00000001");
@@ -101,6 +91,6 @@ public class HibernateTradePayloadRepositoryTest {
         List<io.reactivestax.repository.hibernate.entity.TradePayload> tradePayloadList = session.createQuery("from " +
                         "TradePayload",
                 io.reactivestax.repository.hibernate.entity.TradePayload.class).getResultList();
-        Assert.assertEquals(1, tradePayloadList.size());
+        Assertions.assertEquals(1, tradePayloadList.size());
     }
 }

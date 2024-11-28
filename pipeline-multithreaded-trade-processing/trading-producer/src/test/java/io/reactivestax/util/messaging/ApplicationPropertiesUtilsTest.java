@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ApplicationPropertiesUtilsTest {
 
-    ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance("applicationTest.properties");
+    private ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance("applicationTest.properties");
 
     @Test
     void testApplicationPropertiesUtilsGetMethodsWithValidFile() {

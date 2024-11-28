@@ -23,7 +23,7 @@ class ChunkFileGeneratorTest {
     private final ChunkFileGenerator chunkFileGenerator = new ChunkFileGenerator();
 
     @Test
-    void testChunkFileGeneratorRun() throws IOException, InterruptedException {
+    void testRun() throws IOException, InterruptedException {
         try (MockedStatic<ChunkGeneratorService> chunkGeneratorServiceMockedStatic =
                      mockStatic(ChunkGeneratorService.class)) {
             chunkGeneratorServiceMockedStatic.when(ChunkGeneratorService::getInstance).thenReturn(chunkGeneratorServiceMock);
@@ -34,7 +34,7 @@ class ChunkFileGeneratorTest {
     }
 
     @Test
-    void testChunkFileGeneratorRunWithIOException() throws IOException, InterruptedException {
+    void testRunWithIOException() throws IOException, InterruptedException {
         try (MockedStatic<ChunkGeneratorService> chunkGeneratorServiceMockedStatic =
                      mockStatic(ChunkGeneratorService.class)) {
             chunkGeneratorServiceMockedStatic.when(ChunkGeneratorService::getInstance).thenReturn(chunkGeneratorServiceMock);
@@ -46,7 +46,7 @@ class ChunkFileGeneratorTest {
     }
 
     @Test
-    void testChunkFileGeneratorRunWithInterruptedException() throws IOException, InterruptedException {
+    void testRunWithInterruptedException() throws IOException, InterruptedException {
         try (MockedStatic<ChunkGeneratorService> chunkGeneratorServiceMockedStatic =
                      mockStatic(ChunkGeneratorService.class)) {
             chunkGeneratorServiceMockedStatic.when(ChunkGeneratorService::getInstance).thenReturn(chunkGeneratorServiceMock);

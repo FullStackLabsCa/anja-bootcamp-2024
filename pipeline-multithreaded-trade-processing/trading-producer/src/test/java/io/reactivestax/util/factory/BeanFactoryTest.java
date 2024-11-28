@@ -18,18 +18,18 @@ import static org.mockito.Mockito.mockStatic;
 class BeanFactoryTest {
 
     @Mock
-    ApplicationPropertiesUtils applicationPropertiesUtilsMocked;
+    private ApplicationPropertiesUtils applicationPropertiesUtilsMock;
 
     @AfterEach
     void tearDown() {
-        Mockito.reset(applicationPropertiesUtilsMocked);
+        Mockito.reset(applicationPropertiesUtilsMock);
     }
 
     @Test
     void testGetTransactionUtilWithInvalidPersistenceTechnology() {
         try (MockedStatic<ApplicationPropertiesUtils> applicationPropertiesUtilsMockedStatic =
                      mockStatic(ApplicationPropertiesUtils.class)) {
-            applicationPropertiesUtilsMockedStatic.when(ApplicationPropertiesUtils::getInstance).thenReturn(applicationPropertiesUtilsMocked);
+            applicationPropertiesUtilsMockedStatic.when(ApplicationPropertiesUtils::getInstance).thenReturn(applicationPropertiesUtilsMock);
             assertThrows(InvalidPersistenceTechnologyException.class, BeanFactory::getTransactionUtil);
         }
     }
@@ -38,7 +38,7 @@ class BeanFactoryTest {
     void testGetTradePayloadRepositoryWithInvalidPersistenceTechnology() {
         try (MockedStatic<ApplicationPropertiesUtils> applicationPropertiesUtilsMockedStatic =
                      mockStatic(ApplicationPropertiesUtils.class)) {
-            applicationPropertiesUtilsMockedStatic.when(ApplicationPropertiesUtils::getInstance).thenReturn(applicationPropertiesUtilsMocked);
+            applicationPropertiesUtilsMockedStatic.when(ApplicationPropertiesUtils::getInstance).thenReturn(applicationPropertiesUtilsMock);
             assertThrows(InvalidPersistenceTechnologyException.class, BeanFactory::getTradePayloadRepository);
         }
     }
@@ -47,7 +47,7 @@ class BeanFactoryTest {
     void testGetMessageSenderWithInvalidMessagingTechnology() {
         try (MockedStatic<ApplicationPropertiesUtils> applicationPropertiesUtilsMockedStatic =
                      mockStatic(ApplicationPropertiesUtils.class)) {
-            applicationPropertiesUtilsMockedStatic.when(ApplicationPropertiesUtils::getInstance).thenReturn(applicationPropertiesUtilsMocked);
+            applicationPropertiesUtilsMockedStatic.when(ApplicationPropertiesUtils::getInstance).thenReturn(applicationPropertiesUtilsMock);
             assertThrows(InvalidMessagingTechnologyException.class, BeanFactory::getMessageSender);
         }
     }

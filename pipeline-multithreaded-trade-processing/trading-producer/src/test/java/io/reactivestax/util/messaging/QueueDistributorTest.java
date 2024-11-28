@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class QueueDistributorTest {
 
-    QueueDistributor queueDistributor;
+    private QueueDistributor queueDistributor;
 
     @BeforeEach
     void setUp() {
