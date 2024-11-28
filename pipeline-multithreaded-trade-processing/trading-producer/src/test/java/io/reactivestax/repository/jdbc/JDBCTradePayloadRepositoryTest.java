@@ -16,7 +16,7 @@ import java.sql.*;
 import java.util.logging.Logger;
 
 class JDBCTradePayloadRepositoryTest {
-    private TradePayloadRepository tradePayloadRepository;
+    private TradePayloadRepository jdbcTradePayloadRepository;
     private ConnectionUtil<Connection> connectionUtil;
     private TransactionUtil transactionUtil;
     private final Logger logger = Logger.getLogger(JDBCTradePayloadRepositoryTest.class.getName());
@@ -26,8 +26,8 @@ class JDBCTradePayloadRepositoryTest {
         ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance("applicationJDBCTest.properties");
         applicationPropertiesUtils.loadApplicationProperties("applicationJDBCTest.properties");
         connectionUtil = JDBCTransactionUtil.getInstance();
-        tradePayloadRepository = BeanFactory.getTradePayloadRepository();
-        transactionUtil = BeanFactory.getTransactionUtil();
+        jdbcTradePayloadRepository = JDBCTradePayloadRepository.getInstance();
+        transactionUtil = JDBCTransactionUtil.getInstance();
         String[] sqlCommands = new String[]{
                 // Drop existing tables if they exist
                 "DROP TABLE IF EXISTS trade_payloads",
@@ -82,12 +82,12 @@ class JDBCTradePayloadRepositoryTest {
         tradePayload1.setTradeNumber("TDB_00000001");
         tradePayload1.setValidityStatus("VALID");
         transactionUtil.commitTransaction();
-        tradePayloadRepository.insertTradeRawPayload(tradePayload1);
+        jdbcTradePayloadRepository.insertTradeRawPayload(tradePayload1);
         TradePayload tradePayload2 = new TradePayload();
         tradePayload2.setPayload("TDB_00000002,2024-09-25 06:58:37,TDB_CUST_2517563,V,SELL,45,1480.82");
         tradePayload2.setTradeNumber("TDB_00000002");
         tradePayload2.setValidityStatus("INVALID");
-        tradePayloadRepository.insertTradeRawPayload(tradePayload2);
+        jdbcTradePayloadRepository.insertTradeRawPayload(tradePayload2);
         Connection connection = connectionUtil.getConnection();
         try (PreparedStatement preparedStatement = connection.prepareStatement(" Select count(*) as count from trade_payloads")) {
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -107,14 +107,14 @@ class JDBCTradePayloadRepositoryTest {
         tradePayload1.setTradeNumber("TDB_00000001");
         tradePayload1.setValidityStatus("VALID");
         transactionUtil.startTransaction();
-        tradePayloadRepository.insertTradeRawPayload(tradePayload1);
+        jdbcTradePayloadRepository.insertTradeRawPayload(tradePayload1);
         transactionUtil.commitTransaction();
         TradePayload tradePayload2 = new TradePayload();
         tradePayload2.setPayload("TDB_00000001,2024-09-25 06:58:37,TDB_CUST_2517563,TSLA,SELL,45,1480.82");
         tradePayload2.setTradeNumber("TDB_00000001");
         tradePayload2.setValidityStatus("VALID");
         transactionUtil.startTransaction();
-        tradePayloadRepository.insertTradeRawPayload(tradePayload2);
+        jdbcTradePayloadRepository.insertTradeRawPayload(tradePayload2);
         transactionUtil.commitTransaction();
         transactionUtil.startTransaction();
         Connection connection = connectionUtil.getConnection();

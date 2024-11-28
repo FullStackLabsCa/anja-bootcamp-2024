@@ -1,11 +1,13 @@
 package io.reactivestax.task;
 
 import io.reactivestax.service.ChunkGeneratorService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
@@ -21,6 +23,11 @@ class ChunkFileGeneratorTest {
 
     @InjectMocks
     private final ChunkFileGenerator chunkFileGenerator = new ChunkFileGenerator();
+
+    @AfterEach
+    void tearDown() {
+        Mockito.reset(chunkGeneratorServiceMock);
+    }
 
     @Test
     void testRun() throws IOException, InterruptedException {

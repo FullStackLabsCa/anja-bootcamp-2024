@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 
 public class ChunkFileProcessor implements Runnable {
-    Logger logger = Logger.getLogger(ChunkFileProcessor.class.getName());
+    private final Logger logger = Logger.getLogger(ChunkFileProcessor.class.getName());
 
     @Override
     public void run() {
