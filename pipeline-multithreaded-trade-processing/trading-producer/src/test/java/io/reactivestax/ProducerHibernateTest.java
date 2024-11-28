@@ -70,56 +70,6 @@
 //    }
 //
 //    @Test
-//    public void testInsertRawPayloadWithTwoDifferentRecords() {
-//        transactionUtil.startTransaction();
-//        TradePayload tradePayload1 = new TradePayload();
-//        tradePayload1.setPayload("TDB_00000001,2024-09-25 06:58:37,TDB_CUST_2517563,TSLA,SELL,45,1480.82");
-//        tradePayload1.setTradeNumber("TDB_00000001");
-//        tradePayload1.setValidityStatus("VALID");
-//        tradePayloadRepository.insertTradeRawPayload(tradePayload1);
-//        transactionUtil.commitTransaction();
-//        transactionUtil.startTransaction();
-//        TradePayload tradePayload2 = new TradePayload();
-//        tradePayload2.setPayload("TDB_00000002,2024-09-25 06:58:37,TDB_CUST_2517563,V,SELL,45,1480.82");
-//        tradePayload2.setTradeNumber("TDB_00000002");
-//        tradePayload2.setValidityStatus("INVALID");
-//        tradePayloadRepository.insertTradeRawPayload(tradePayload2);
-//        transactionUtil.commitTransaction();
-//        Session session = connectionUtil.getConnection();
-//        List<io.reactivestax.repository.hibernate.entity.TradePayload> tradePayloadList = session.createQuery("from " +
-//                        "TradePayload",
-//                io.reactivestax.repository.hibernate.entity.TradePayload.class).getResultList();
-//        Assert.assertEquals(2, tradePayloadList.size());
-//    }
-//
-//    @Test
-//    public void testInsertRawPayloadWithTwoSameRecords() {
-//        TradePayload tradePayload1 = new TradePayload();
-//        tradePayload1.setPayload("TDB_00000001,2024-09-25 06:58:37,TDB_CUST_2517563,TSLA,SELL,45,1480.82");
-//        tradePayload1.setTradeNumber("TDB_00000001");
-//        tradePayload1.setValidityStatus("VALID");
-//        transactionUtil.startTransaction();
-//        tradePayloadRepository.insertTradeRawPayload(tradePayload1);
-//        transactionUtil.commitTransaction();
-//        transactionUtil.startTransaction();
-//        TradePayload tradePayload2 = new TradePayload();
-//        tradePayload2.setPayload("TDB_00000001,2024-09-25 06:58:37,TDB_CUST_2517563,TSLA,SELL,45,1480.82");
-//        tradePayload2.setTradeNumber("TDB_00000001");
-//        tradePayload2.setValidityStatus("VALID");
-//        try {
-//            tradePayloadRepository.insertTradeRawPayload(tradePayload2);
-//        } catch (Exception e) {
-//            logger.warning("Insertion failed.");
-//        }
-//        transactionUtil.commitTransaction();
-//        Session session = connectionUtil.getConnection();
-//        List<io.reactivestax.repository.hibernate.entity.TradePayload> tradePayloadList = session.createQuery("from " +
-//                        "TradePayload",
-//                io.reactivestax.repository.hibernate.entity.TradePayload.class).getResultList();
-//        Assert.assertEquals(1, tradePayloadList.size());
-//    }
-//
-//    @Test
 //    public void testProcessChunk() throws IOException, InterruptedException, SQLException {
 //        applicationPropertiesUtils.setTotalNoOfLines(tradeService.fileLineCounter(applicationPropertiesUtils.getFilePath()));
 //        QueueProvider.getInstance().setChunkQueue(new LinkedBlockingQueue<>(applicationPropertiesUtils.getNumberOfChunks()));

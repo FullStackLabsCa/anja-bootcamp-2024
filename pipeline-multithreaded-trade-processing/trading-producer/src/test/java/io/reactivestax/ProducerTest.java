@@ -39,37 +39,4 @@
 //        chunkProcessorService = ChunkProcessorService.getInstance();
 //        transactionUtil = BeanFactory.getTransactionUtil();
 //    }
-//
-//    @Test
-//    public void testFileLineCounter() throws IOException {
-//        long counter = tradeService.fileLineCounter(applicationPropertiesUtils.getFilePath());
-//        Assert.assertEquals(9999, counter);
-//    }
-//
-//    @Test
-//    public void testBuildFilePath() {
-//        String filePath = tradeService.buildFilePath(5, applicationPropertiesUtils.getChunkFilePathWithName());
-//        Assert.assertEquals(applicationPropertiesUtils.getChunkFilePathWithName() + 5 + ".csv", filePath);
-//    }
-//
-//
-//
-//
-//    @Test
-//    public void testChunkFileGeneratorRun() throws IOException {
-//        applicationPropertiesUtils.setTotalNoOfLines(tradeService.fileLineCounter(applicationPropertiesUtils.getFilePath()));
-//        ChunkFileGenerator chunkFileGenerator = new ChunkFileGenerator();
-//        chunkFileGenerator.run();
-//        long fileCount = 0;
-//        File directory = new File(applicationPropertiesUtils.getChunkDirectoryPath());
-//        File[] files = directory.listFiles();
-//        if (files != null) {
-//            for (File file : files) {
-//                if (file.isFile()) {
-//                    fileCount++;
-//                }
-//            }
-//        }
-//        assertEquals(applicationPropertiesUtils.getNumberOfChunks(), fileCount);
-//    }
 //}

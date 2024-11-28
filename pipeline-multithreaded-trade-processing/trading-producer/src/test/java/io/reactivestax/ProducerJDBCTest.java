@@ -89,62 +89,6 @@
 //    }
 //
 //    @Test
-//    public void testInsertRawPayloadWithTwoDifferentRecords() throws SQLException {
-//        int count = 0;
-//        transactionUtil.startTransaction();
-//        TradePayload tradePayload1 = new TradePayload();
-//        tradePayload1.setPayload("TDB_00000001,2024-09-25 06:58:37,TDB_CUST_2517563,TSLA,SELL,45,1480.82");
-//        tradePayload1.setTradeNumber("TDB_00000001");
-//        tradePayload1.setValidityStatus("VALID");
-//        transactionUtil.commitTransaction();
-//        tradePayloadRepository.insertTradeRawPayload(tradePayload1);
-//        TradePayload tradePayload2 = new TradePayload();
-//        tradePayload2.setPayload("TDB_00000002,2024-09-25 06:58:37,TDB_CUST_2517563,V,SELL,45,1480.82");
-//        tradePayload2.setTradeNumber("TDB_00000002");
-//        tradePayload2.setValidityStatus("INVALID");
-//        tradePayloadRepository.insertTradeRawPayload(tradePayload2);
-//        Connection connection = connectionUtil.getConnection();
-//        try (PreparedStatement preparedStatement = connection.prepareStatement(" Select count(*) as count from trade_payloads")) {
-//            ResultSet resultSet = preparedStatement.executeQuery();
-//            if (resultSet.next()) {
-//                count = resultSet.getInt("count");
-//                System.out.println(count);
-//            }
-//        }
-//        assertEquals(2, count);
-//    }
-//
-//    @Test
-//    public void testInsertRawPayloadWithTwoSameRecords() throws SQLException {
-//        int count = 0;
-//        TradePayload tradePayload1 = new TradePayload();
-//        tradePayload1.setPayload("TDB_00000001,2024-09-25 06:58:37,TDB_CUST_2517563,TSLA,SELL,45,1480.82");
-//        tradePayload1.setTradeNumber("TDB_00000001");
-//        tradePayload1.setValidityStatus("VALID");
-//        transactionUtil.startTransaction();
-//        tradePayloadRepository.insertTradeRawPayload(tradePayload1);
-//        transactionUtil.commitTransaction();
-//        TradePayload tradePayload2 = new TradePayload();
-//        tradePayload2.setPayload("TDB_00000001,2024-09-25 06:58:37,TDB_CUST_2517563,TSLA,SELL,45,1480.82");
-//        tradePayload2.setTradeNumber("TDB_00000001");
-//        tradePayload2.setValidityStatus("VALID");
-//        transactionUtil.startTransaction();
-//        tradePayloadRepository.insertTradeRawPayload(tradePayload2);
-//        transactionUtil.commitTransaction();
-//        transactionUtil.startTransaction();
-//        Connection connection = connectionUtil.getConnection();
-//        try (PreparedStatement preparedStatement = connection.prepareStatement("Select count(*) as count from " + "trade_payloads")) {
-//            ResultSet resultSet = preparedStatement.executeQuery();
-//            if (resultSet.next()) {
-//                count = resultSet.getInt("count");
-//                System.out.println(count);
-//            }
-//            transactionUtil.commitTransaction();
-//        }
-//        assertEquals(1, count);
-//    }
-//
-//    @Test
 //    public void testProcessChunk() throws IOException, InterruptedException, SQLException {
 //        applicationPropertiesUtils.setTotalNoOfLines(tradeService.fileLineCounter(applicationPropertiesUtils.getFilePath()));
 //        QueueProvider.getInstance().setChunkQueue(new LinkedBlockingQueue<>(applicationPropertiesUtils.getNumberOfChunks()));

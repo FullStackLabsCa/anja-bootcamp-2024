@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 public class ChunkFileGenerator implements Runnable {
+
     Logger logger = Logger.getLogger(ChunkFileGenerator.class.getName());
 
     @Override
