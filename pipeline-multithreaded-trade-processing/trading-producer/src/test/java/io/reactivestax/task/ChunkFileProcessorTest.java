@@ -31,7 +31,6 @@ class ChunkFileProcessorTest {
         Mockito.reset(queueProviderMock, chunkProcessorServiceMock);
     }
 
-
     @Test
     void testRun() throws InterruptedException, SQLException {
         try (MockedStatic<QueueProvider> queueProviderMockedStatic = mockStatic(QueueProvider.class);
@@ -61,21 +60,21 @@ class ChunkFileProcessorTest {
         }
     }
 
-    @Test
-    void testRunWithSQLException() throws InterruptedException, SQLException{
-        try (MockedStatic<QueueProvider> queueProviderMockedStatic = mockStatic(QueueProvider.class);
-        MockedStatic<ChunkProcessorService> chunkProcessorServiceMockedStatic = mockStatic(ChunkProcessorService.class)) {
-            queueProviderMockedStatic.when(QueueProvider::getInstance).thenReturn(queueProviderMock);
-            chunkProcessorServiceMockedStatic.when(ChunkProcessorService::getInstance).thenReturn(chunkProcessorServiceMock);
-            StringLinkedBlockingQueue chunkQueueMock = mock(StringLinkedBlockingQueue.class);
-            when(queueProviderMock.getChunkQueue()).thenReturn(chunkQueueMock);
-            when(chunkQueueMock.take()).thenReturn("chunk_path");
-            doThrow(SQLException.class).when(chunkProcessorServiceMock).processChunk(anyString());
-            new ChunkFileProcessor().run();
-            assertThrows(SQLException.class, ()->chunkProcessorServiceMock.processChunk(anyString()));
-            Mockito.clearInvocations(chunkQueueMock);
-        }
-    }
+//    @Test
+//    void testRunWithSQLException() throws InterruptedException, SQLException{
+//        try (MockedStatic<QueueProvider> queueProviderMockedStatic = mockStatic(QueueProvider.class);
+//        MockedStatic<ChunkProcessorService> chunkProcessorServiceMockedStatic = mockStatic(ChunkProcessorService.class)) {
+//            queueProviderMockedStatic.when(QueueProvider::getInstance).thenReturn(queueProviderMock);
+//            chunkProcessorServiceMockedStatic.when(ChunkProcessorService::getInstance).thenReturn(chunkProcessorServiceMock);
+//            StringLinkedBlockingQueue chunkQueueMock = mock(StringLinkedBlockingQueue.class);
+//            when(queueProviderMock.getChunkQueue()).thenReturn(chunkQueueMock);
+//            when(chunkQueueMock.take()).thenReturn("chunk_path");
+//            doThrow(SQLException.class).when(chunkProcessorServiceMock).processChunk(anyString());
+//            new ChunkFileProcessor().run();
+//            assertThrows(SQLException.class, ()->chunkProcessorServiceMock.processChunk(anyString()));
+//            Mockito.clearInvocations(chunkQueueMock);
+//        }
+//    }
 
     public static class StringLinkedBlockingQueue extends LinkedBlockingQueue<String> {
     }

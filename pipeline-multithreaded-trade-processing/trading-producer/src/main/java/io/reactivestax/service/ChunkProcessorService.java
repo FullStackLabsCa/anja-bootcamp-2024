@@ -35,7 +35,7 @@ public class ChunkProcessorService implements ChunkProcessor {
     }
 
     @Override
-    public void processChunk(String filePath) throws SQLException {
+    public void processChunk(String filePath) {
         TransactionUtil transactionUtil = BeanFactory.getTransactionUtil();
         MessageSender messageSender = BeanFactory.getMessageSender();
         TradePayloadRepository tradePayloadRepository = BeanFactory.getTradePayloadRepository();
