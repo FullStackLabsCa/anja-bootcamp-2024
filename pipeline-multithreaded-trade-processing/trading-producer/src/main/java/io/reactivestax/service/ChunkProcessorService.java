@@ -9,13 +9,11 @@ import io.reactivestax.util.database.TransactionUtil;
 import io.reactivestax.util.factory.BeanFactory;
 import io.reactivestax.util.messaging.MessageSender;
 import io.reactivestax.util.messaging.QueueDistributor;
-import org.hibernate.HibernateException;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.SQLException;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -50,9 +48,7 @@ public class ChunkProcessorService implements ChunkProcessor {
                 transactionUtil.commitTransaction();
                 submitValidTradePayloadsToQueue(tradePayload, transaction, messageSender);
             });
-
-        } catch (IOException | HibernateException e) {
-            transactionUtil.rollbackTransaction();
+        } catch (IOException e) {
             logger.warning("Exception detected in Chunk Processor.");
         }
     }

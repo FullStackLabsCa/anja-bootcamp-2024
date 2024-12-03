@@ -38,35 +38,16 @@ public class RabbitMQChannelProvider {
         return connection;
     }
 
-    private Channel getRabbitMQChannel() {
-        Channel localChannel = null;
-        try {
-            localChannel = getRabbitMQConnection().createChannel();
-            localChannel.exchangeDeclare(applicationPropertiesUtils.getQueueExchangeName(),
-                    applicationPropertiesUtils.getQueueExchangeType());
-            channelThreadLocal.set(localChannel);
-        } catch (TimeoutException | IOException e) {
-            logger.warning("Exception detected while creating channel.");
-        }
-
-        return localChannel;
-    }
-
-    public void closeChannel() {
-        Channel localChannel = channelThreadLocal.get();
-        if (localChannel != null) {
-            channelThreadLocal.remove();
-            try {
-                localChannel.close();
-            } catch (TimeoutException | IOException e) {
-                logger.warning("Exception detected while closing channel.");
-            }
-        }
-    }
-
     public Channel getSenderChannel() {
         if (channelThreadLocal.get() == null) {
-            channelThreadLocal.set(getRabbitMQChannel());
+            try {
+                Channel localChannel = getRabbitMQConnection().createChannel();
+                localChannel.exchangeDeclare(applicationPropertiesUtils.getQueueExchangeName(),
+                        applicationPropertiesUtils.getQueueExchangeType());
+                channelThreadLocal.set(localChannel);
+            } catch (TimeoutException | IOException e) {
+                logger.warning("Exception detected while creating channel.");
+            }
         }
 
         return channelThreadLocal.get();
