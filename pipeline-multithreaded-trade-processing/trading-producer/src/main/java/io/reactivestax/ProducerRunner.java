@@ -13,7 +13,7 @@ public class ProducerRunner {
         String rabbitmq = "rabbitmq";
         if (ApplicationPropertiesUtils.getInstance().getMessagingTechnology().equals(rabbitmq)) {
             TradeService.getInstance().startTradeProducer();
-        } else{
+        } else {
             logger.warning("Invalid messaging technology");
         }
     }

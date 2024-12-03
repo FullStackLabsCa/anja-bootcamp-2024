@@ -2,7 +2,7 @@ package io.reactivestax.util.database.jdbc;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import io.reactivestax.type.exception.HikariCPConnectionException;
+import io.reactivestax.type.exception.SystemInitializationException;
 import io.reactivestax.type.exception.TransactionHandlingException;
 import io.reactivestax.util.ApplicationPropertiesUtils;
 import io.reactivestax.util.database.ConnectionUtil;
@@ -40,8 +40,9 @@ public class JDBCTransactionUtil implements TransactionUtil, ConnectionUtil<Conn
             try {
                 connection = dataSource.getConnection();
                 connectionHolder.set(connection);
-            } catch (Exception e) {
-                throw new HikariCPConnectionException("Error getting connection from HikariCP", e);
+            } catch (SQLException e) {
+                logger.warning("Error while getting connection.");
+                throw new SystemInitializationException("Error getting connection from HikariCP");
             }
         }
         return connection;
@@ -72,32 +73,31 @@ public class JDBCTransactionUtil implements TransactionUtil, ConnectionUtil<Conn
     @Override
     public void startTransaction() {
         try {
-            getConnection().setAutoCommit(false);
+            Connection connection = getConnection();
+            connection.setAutoCommit(false);
         } catch (SQLException e) {
             logger.warning("Error while starting transaction.");
+            throw new TransactionHandlingException("error committing transaction", e);
         }
     }
 
-    private void closeConnection() {
+    private void closeConnection() throws SQLException {
         Connection connection = connectionHolder.get();
         if (connection != null) {
-            try {
-                connection.close();
-            } catch (Exception e) {
-                logger.warning("Error while closing the connection.");
-            } finally {
-                connectionHolder.remove();
-            }
+            connection.close();
+            connectionHolder.remove();
         }
     }
 
     @Override
     public void commitTransaction() {
         try {
-            connectionHolder.get().commit();
-            connectionHolder.get().setAutoCommit(false);
+            Connection connection = getConnection();
+            connection.commit();
+            connection.setAutoCommit(true);
             closeConnection();
         } catch (SQLException e) {
+            connectionHolder.remove();
             throw new TransactionHandlingException("error committing transaction", e);
         }
     }
@@ -105,10 +105,12 @@ public class JDBCTransactionUtil implements TransactionUtil, ConnectionUtil<Conn
     @Override
     public void rollbackTransaction() {
         try {
-            connectionHolder.get().rollback();
-            connectionHolder.get().setAutoCommit(false);
+            Connection connection = getConnection();
+            connection.rollback();
+            connection.setAutoCommit(true);
             closeConnection();
         } catch (SQLException e) {
+            connectionHolder.remove();
             throw new TransactionHandlingException("error rolling back transaction", e);
         }
     }

@@ -28,7 +28,6 @@ public class ChunkProcessorService implements ChunkProcessor {
         if (instance == null) {
             instance = new ChunkProcessorService();
         }
-
         return instance;
     }
 

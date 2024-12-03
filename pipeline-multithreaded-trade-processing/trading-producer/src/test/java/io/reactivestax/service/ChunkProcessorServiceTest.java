@@ -40,7 +40,7 @@ class ChunkProcessorServiceTest {
     private TradePayloadRepository tradePayloadRepositoryMock;
 
     @InjectMocks
-    private ChunkProcessorService chunkProcessorService;
+    private ChunkProcessorService chunkProcessorService = ChunkProcessorService.getInstance();
 
     @AfterEach
     void tearDown() {
