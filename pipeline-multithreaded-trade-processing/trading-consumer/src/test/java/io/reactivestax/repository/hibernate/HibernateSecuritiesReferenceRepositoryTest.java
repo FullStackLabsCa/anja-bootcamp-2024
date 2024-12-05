@@ -3,10 +3,7 @@ package io.reactivestax.repository.hibernate;
 import io.reactivestax.repository.hibernate.entity.SecuritiesReference;
 import io.reactivestax.util.ApplicationPropertiesUtils;
 import io.reactivestax.util.database.hibernate.HibernateTransactionUtil;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaDelete;
 import org.hibernate.Session;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +22,7 @@ class HibernateSecuritiesReferenceRepositoryTest {
     }
 
     @Test
-    void testLookupSecurities(){
+    void testLookupSecurities() {
         hibernateTransactionUtil.startTransaction();
         SecuritiesReference securitiesReference1 = new SecuritiesReference();
         securitiesReference1.setCusip("TSLA");

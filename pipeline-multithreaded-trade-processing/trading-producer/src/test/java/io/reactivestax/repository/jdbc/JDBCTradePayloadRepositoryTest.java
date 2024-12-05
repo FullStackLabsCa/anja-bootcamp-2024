@@ -6,7 +6,6 @@ import io.reactivestax.util.ApplicationPropertiesUtils;
 import io.reactivestax.util.database.ConnectionUtil;
 import io.reactivestax.util.database.TransactionUtil;
 import io.reactivestax.util.database.jdbc.JDBCTransactionUtil;
-import io.reactivestax.util.factory.BeanFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
