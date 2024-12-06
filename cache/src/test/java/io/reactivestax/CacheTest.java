@@ -2,6 +2,7 @@ package io.reactivestax;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -74,7 +75,7 @@ class CacheTest {
         Cache<String, Value> cache = new Cache<>();
         cache.put("UniqueKey1", valueSupplier);
         cache.put("UniqueKey2", valueSupplier);
-        Set<String> keys = cache.keys();
+        List<String> keys = cache.keys();
         assertEquals(2, keys.size());
         String key = keys.stream().findAny().orElse(null);
         assertNotNull(key);
