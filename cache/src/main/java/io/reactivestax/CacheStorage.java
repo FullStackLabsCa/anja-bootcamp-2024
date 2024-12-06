@@ -1,6 +1,6 @@
 package io.reactivestax;
 
-import java.util.List;
+import java.util.Set;
 
 public interface CacheStorage<K, V> {
     void put(K key, V value);
@@ -15,5 +15,5 @@ public interface CacheStorage<K, V> {
 
     void clear();
 
-   String keys();
+    Set<K> keys();
 }

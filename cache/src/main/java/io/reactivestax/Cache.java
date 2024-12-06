@@ -83,8 +83,7 @@ public class Cache<K, V> implements CacheStorage<K, V> {
     }
 
     @Override
-    public String keys() {
-        Set<K> ks = cacheMap.keySet();
-        return ks.toString();
+    public Set<K> keys() {
+        return cacheMap.keySet();
     }
 }
