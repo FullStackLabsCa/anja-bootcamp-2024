@@ -1,4 +1,4 @@
-package io.reactivestax;
+package io.reactivestax.model;
 
 import lombok.AllArgsConstructor;
 

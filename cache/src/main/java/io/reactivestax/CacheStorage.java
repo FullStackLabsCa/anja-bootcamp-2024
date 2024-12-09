@@ -1,5 +1,7 @@
 package io.reactivestax;
 
+import io.reactivestax.model.ValueParameters;
+
 import java.util.List;
 
 public interface CacheStorage<K, V> {
@@ -17,5 +19,5 @@ public interface CacheStorage<K, V> {
 
     List<K> keys();
 
-    List<ValueTtl<K, V>> values();
+    List<ValueParameters<K, V>> values();
 }

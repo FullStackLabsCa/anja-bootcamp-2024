@@ -1,12 +1,12 @@
 package io.reactivestax.factory;
 
 import io.reactivestax.Cache;
-import io.reactivestax.EvictionPolicy;
+import io.reactivestax.enums.EvictionPolicy;
 
 import java.util.*;
 
 public class CacheFactory<K, V> {
-    private final Map<EvictionPolicy, List<Cache<K, V>>> map = new HashMap<>();
+    private final Map<EvictionPolicy, List<Cache<K, V>>> map = new EnumMap<>(EvictionPolicy.class);
 
     public Cache<K, V> createCacheStorage(EvictionPolicy policy) {
         Cache<K, V> cache = new Cache<>();
