@@ -5,6 +5,7 @@ import io.reactivestax.type.enums.LookupStatus;
 import io.reactivestax.type.enums.PostedStatus;
 import io.reactivestax.type.enums.ValidityStatus;
 import io.reactivestax.util.ApplicationPropertiesUtils;
+import io.reactivestax.util.EntitySupplier;
 import io.reactivestax.util.database.hibernate.HibernateTransactionUtil;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaDelete;
@@ -23,6 +24,7 @@ class HibernateTradePayloadRepositoryTest {
     private final HibernateTradePayloadRepository hibernateTradePayloadRepository =
             HibernateTradePayloadRepository.getInstance();
     private final HibernateTransactionUtil hibernateTransactionUtil = HibernateTransactionUtil.getInstance();
+    private final Supplier<TradePayload> buyTradePayloadEntity = EntitySupplier.buyTradePayloadEntity;
 
     @BeforeEach
     void setUp() {
@@ -40,14 +42,6 @@ class HibernateTradePayloadRepositoryTest {
         session.createMutationQuery(criteriaDeleteTradePayload).executeUpdate();
         hibernateTransactionUtil.commitTransaction();
     }
-
-    private final Supplier<TradePayload> buyTradePayloadEntity = () -> TradePayload.builder()
-            .tradeNumber("TDB_000001")
-            .payload("TDB_000001,2024-09-19 22:16:18,TDB_CUST_5214938,TSLA,BUY,1,638.02")
-            .validityStatus(ValidityStatus.VALID)
-            .lookupStatus(LookupStatus.NOT_CHECKED)
-            .journalEntryStatus(PostedStatus.NOT_POSTED)
-            .build();
 
     @Test
     void testReadRawPayload() {

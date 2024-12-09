@@ -13,9 +13,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @Data
 @Entity
 @Table(name = "trade_payloads")
