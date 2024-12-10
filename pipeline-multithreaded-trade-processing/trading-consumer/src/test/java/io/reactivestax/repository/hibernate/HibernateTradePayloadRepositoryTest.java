@@ -3,17 +3,15 @@ package io.reactivestax.repository.hibernate;
 import io.reactivestax.repository.hibernate.entity.TradePayload;
 import io.reactivestax.type.enums.LookupStatus;
 import io.reactivestax.type.enums.PostedStatus;
-import io.reactivestax.type.enums.ValidityStatus;
 import io.reactivestax.util.ApplicationPropertiesUtils;
+import io.reactivestax.util.DbSetUpUtil;
 import io.reactivestax.util.EntitySupplier;
 import io.reactivestax.util.database.hibernate.HibernateTransactionUtil;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaDelete;
 import org.hibernate.Session;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.sql.SQLException;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,22 +23,14 @@ class HibernateTradePayloadRepositoryTest {
             HibernateTradePayloadRepository.getInstance();
     private final HibernateTransactionUtil hibernateTransactionUtil = HibernateTransactionUtil.getInstance();
     private final Supplier<TradePayload> buyTradePayloadEntity = EntitySupplier.buyTradePayloadEntity;
+    private final DbSetUpUtil dbSetUpUtil = new DbSetUpUtil();
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws SQLException {
         ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance(
                 "applicationHibernateTest.properties");
         applicationPropertiesUtils.loadApplicationProperties("applicationHibernateTest.properties");
-    }
-
-    @AfterEach
-    void tearDown() {
-        hibernateTransactionUtil.startTransaction();
-        Session session = hibernateTransactionUtil.getConnection();
-        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
-        CriteriaDelete<TradePayload> criteriaDeleteTradePayload = criteriaBuilder.createCriteriaDelete(io.reactivestax.repository.hibernate.entity.TradePayload.class);
-        session.createMutationQuery(criteriaDeleteTradePayload).executeUpdate();
-        hibernateTransactionUtil.commitTransaction();
+        dbSetUpUtil.createTradePayloadsTable();
     }
 
     @Test
@@ -63,7 +53,7 @@ class HibernateTradePayloadRepositoryTest {
     void testUpdateTradePayloadLookupStatus() {
         hibernateTransactionUtil.startTransaction();
         Long id = insertTradePayload();
-        hibernateTradePayloadRepository.updateTradePayloadLookupStatus(true, 1L);
+        hibernateTradePayloadRepository.updateTradePayloadLookupStatus(true, id);
         io.reactivestax.type.dto.TradePayload tradePayloadDto = hibernateTradePayloadRepository.readRawPayload("TDB_000001");
         assertNotNull(tradePayloadDto);
         assertEquals(LookupStatus.PASS.name(), tradePayloadDto.getLookupStatus());
@@ -71,7 +61,7 @@ class HibernateTradePayloadRepositoryTest {
     }
 
     @Test
-    void testUpdateTradePayloadPostedStatus(){
+    void testUpdateTradePayloadPostedStatus() {
         hibernateTransactionUtil.startTransaction();
         Long id = insertTradePayload();
         hibernateTradePayloadRepository.updateTradePayloadPostedStatus(id);
@@ -81,7 +71,7 @@ class HibernateTradePayloadRepositoryTest {
         hibernateTransactionUtil.rollbackTransaction();
     }
 
-    Long insertTradePayload() {
+    private Long insertTradePayload() {
         TradePayload tradePayload = buyTradePayloadEntity.get();
         Session session = hibernateTransactionUtil.getConnection();
         session.persist(tradePayload);

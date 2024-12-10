@@ -29,7 +29,7 @@ public class JDBCJournalEntryRepository implements JournalEntryRepository {
     public Optional<Long> insertIntoJournalEntry(JournalEntry journalEntry) {
         Optional<Long> id;
         Connection connection = JDBCTransactionUtil.getInstance().getConnection();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_INTO_JOURNAL_ENTRY_QUERY, PreparedStatement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_INTO_JOURNAL_ENTRY_QUERY, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, journalEntry.getTradeId());
             preparedStatement.setString(2, journalEntry.getAccountNumber());
             preparedStatement.setString(3, journalEntry.getSecurityCusip());

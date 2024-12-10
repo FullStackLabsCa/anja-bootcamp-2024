@@ -3,14 +3,14 @@ package io.reactivestax.repository.hibernate;
 import io.reactivestax.repository.hibernate.entity.JournalEntry;
 import io.reactivestax.type.enums.PostedStatus;
 import io.reactivestax.util.ApplicationPropertiesUtils;
+import io.reactivestax.util.DbSetUpUtil;
+import io.reactivestax.util.EntitySupplier;
 import io.reactivestax.util.database.hibernate.HibernateTransactionUtil;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaDelete;
 import org.hibernate.Session;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.sql.SQLException;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -21,33 +21,16 @@ class HibernateJournalEntryRepositoryTest {
     private final HibernateJournalEntryRepository hibernateJournalEntryRepository =
             HibernateJournalEntryRepository.getInstance();
     private final HibernateTransactionUtil hibernateTransactionUtil = HibernateTransactionUtil.getInstance();
+    private final Supplier<io.reactivestax.type.dto.JournalEntry> journalEntrySupplier = EntitySupplier.journalEntrySupplier;
+    private final DbSetUpUtil dbSetUpUtil = new DbSetUpUtil();
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws SQLException {
         ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance(
                 "applicationHibernateTest.properties");
         applicationPropertiesUtils.loadApplicationProperties("applicationHibernateTest.properties");
+        dbSetUpUtil.createJournalEntryTable();
     }
-
-    @AfterEach
-    void tearDown() {
-        hibernateTransactionUtil.startTransaction();
-        Session session = hibernateTransactionUtil.getConnection();
-        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
-        CriteriaDelete<JournalEntry> journalEntryCriteriaDelete = criteriaBuilder.createCriteriaDelete(io.reactivestax.repository.hibernate.entity.JournalEntry.class);
-        session.createMutationQuery(journalEntryCriteriaDelete).executeUpdate();
-        hibernateTransactionUtil.commitTransaction();
-    }
-
-    private final Supplier<io.reactivestax.type.dto.JournalEntry> journalEntrySupplier =
-            () -> io.reactivestax.type.dto.JournalEntry.builder()
-            .accountNumber("TDB_CUST_5214938")
-            .securityCusip("TSLA")
-            .direction("BUY")
-            .tradeId("TDB_000001")
-            .quantity(10)
-            .transactionTimestamp("2024-09-19 22:16:18")
-            .build();
 
     @Test
     void testInsertIntoJournalEntry() {

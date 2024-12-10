@@ -2,10 +2,13 @@ package io.reactivestax.repository.hibernate;
 
 import io.reactivestax.repository.hibernate.entity.SecuritiesReference;
 import io.reactivestax.util.ApplicationPropertiesUtils;
+import io.reactivestax.util.DbSetUpUtil;
 import io.reactivestax.util.database.hibernate.HibernateTransactionUtil;
 import org.hibernate.Session;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -15,10 +18,12 @@ class HibernateSecuritiesReferenceRepositoryTest {
     private final HibernateTransactionUtil hibernateTransactionUtil = HibernateTransactionUtil.getInstance();
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws SQLException {
         ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance(
                 "applicationHibernateTest.properties");
         applicationPropertiesUtils.loadApplicationProperties("applicationHibernateTest.properties");
+        DbSetUpUtil dbSetUpUtil = new DbSetUpUtil();
+        dbSetUpUtil.createSecuritiesReferenceTable();
     }
 
     @Test

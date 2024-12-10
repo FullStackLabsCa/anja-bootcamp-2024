@@ -9,19 +9,19 @@ import io.reactivestax.util.database.ConnectionUtil;
 import io.reactivestax.util.database.TransactionUtil;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.boot.registry.StandardServiceRegistry;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.stream.Stream;
 
 public class HibernateTransactionUtil implements TransactionUtil, ConnectionUtil<Session> {
     private static final String DEFAULT_RESOURCE = "hibernate.cfg.xml";
     private static final Logger LOGGER = LoggerFactory.getLogger(HibernateTransactionUtil.class);
     private final ThreadLocal<Session> threadLocalSession = new ThreadLocal<>();
-
     private static HibernateTransactionUtil instance;
     private static SessionFactory sessionFactory;
+    private static final ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
 
     private HibernateTransactionUtil() {
     }
@@ -35,35 +35,24 @@ public class HibernateTransactionUtil implements TransactionUtil, ConnectionUtil
 
     private static synchronized SessionFactory buildSessionFactory() {
         if (sessionFactory == null) {
-            // Create the SessionFactory from hibernate-annotation.cfg.xml
             Configuration configuration = getConfiguration();
-            configuration.configure(HibernateTransactionUtil.DEFAULT_RESOURCE);
             LOGGER.debug("Hibernate Annotation Configuration loaded");
-
-            StandardServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
-                    .applySettings(configuration.getProperties())
-                    .build();
-            LOGGER.debug("Hibernate Annotation serviceRegistry created");
-
-            sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+            sessionFactory = configuration.configure(HibernateTransactionUtil.DEFAULT_RESOURCE).buildSessionFactory();
         }
         return sessionFactory;
     }
 
     private static Configuration getConfiguration() {
-        ApplicationPropertiesUtils applicationPropertiesUtils = ApplicationPropertiesUtils.getInstance();
-        Configuration configuration = new Configuration();
-        configuration.setProperty("hibernate.connection.driver_class", applicationPropertiesUtils.getDbDriverClass());
-        configuration.setProperty("hibernate.connection.url", applicationPropertiesUtils.getDbUrl());
-        configuration.setProperty("hibernate.connection.username", applicationPropertiesUtils.getDbUsername());
-        configuration.setProperty("hibernate.connection.password", applicationPropertiesUtils.getDbPassword());
-        configuration.setProperty("hibernate.dialect", applicationPropertiesUtils.getHibernateDialect());
-        configuration.setProperty("hibernate.hbm2ddl.auto", applicationPropertiesUtils.getHibernateDBCreationMode());
-        configuration.addAnnotatedClass(TradePayload.class);
-        configuration.addAnnotatedClass(JournalEntry.class);
-        configuration.addAnnotatedClass(Position.class);
-        configuration.addAnnotatedClass(SecuritiesReference.class);
-        return configuration;
+        return new Configuration().setProperty("hibernate.connection.driver_class",
+                        applicationPropertiesUtils.getDbDriverClass())
+                .setProperty("hibernate.connection.url", applicationPropertiesUtils.getDbUrl())
+                .setProperty("hibernate.connection.username", applicationPropertiesUtils.getDbUsername())
+                .setProperty("hibernate.connection.password", applicationPropertiesUtils.getDbPassword())
+                .setProperty("hibernate.hbm2ddl.auto", applicationPropertiesUtils.getHibernateDBCreationMode())
+                .addAnnotatedClass(TradePayload.class)
+                .addAnnotatedClass(JournalEntry.class)
+                .addAnnotatedClass(Position.class)
+                .addAnnotatedClass(SecuritiesReference.class);
     }
 
     public static SessionFactory getSessionFactory() {
@@ -104,5 +93,4 @@ public class HibernateTransactionUtil implements TransactionUtil, ConnectionUtil
         getConnection().getTransaction().rollback();
         closeConnection();
     }
-
 }
