@@ -1,7 +1,11 @@
 package io.reactivestax.type.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 public class TradePayload {
     private Long id;
