@@ -1,6 +1,6 @@
 package io.reactivestax.util;
 
-import io.reactivestax.entity.RuleSet;
+import io.reactivestax.repository.entity.RuleSet;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;

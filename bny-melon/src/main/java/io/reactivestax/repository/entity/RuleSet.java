@@ -1,8 +1,10 @@
-package io.reactivestax.entity;
+package io.reactivestax.repository.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 
+@Builder
 @Data
 @Entity
 @Table(name = "rule_set")
