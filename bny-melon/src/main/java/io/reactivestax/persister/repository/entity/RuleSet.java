@@ -1,4 +1,4 @@
-package io.reactivestax.repository.entity;
+package io.reactivestax.persister.repository.entity;
 
 import jakarta.persistence.*;
 import lombok.Builder;

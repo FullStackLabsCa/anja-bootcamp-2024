@@ -1,4 +1,4 @@
-package io.reactivestax.service;
+package io.reactivestax.persister.service;
 
 public interface RuleSetFileProcessor {
     void readAndProcessRuleSetFile();

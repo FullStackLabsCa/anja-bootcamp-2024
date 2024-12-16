@@ -1,6 +1,6 @@
-package io.reactivestax.util;
+package io.reactivestax.persister.util;
 
-import io.reactivestax.repository.entity.RuleSet;
+import io.reactivestax.persister.repository.entity.RuleSet;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -8,6 +8,9 @@ import org.hibernate.cfg.Configuration;
 public class DbUtil {
     private static SessionFactory sessionFactory;
     private static Session session;
+
+    private DbUtil() {
+    }
 
     private static synchronized SessionFactory getSessionFactory() {
         if (sessionFactory == null) {

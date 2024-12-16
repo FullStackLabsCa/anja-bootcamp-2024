@@ -1,6 +1,6 @@
-package io.reactivestax;
+package io.reactivestax.persister;
 
-import io.reactivestax.service.RuleSetFileProcessorService;
+import io.reactivestax.persister.service.RuleSetFileProcessorService;
 
 public class Main {
     public static void main(String[] args) {

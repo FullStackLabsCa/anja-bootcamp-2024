@@ -1,8 +1,8 @@
-package io.reactivestax.service;
+package io.reactivestax.persister.service;
 
-import io.reactivestax.model.RuleSet;
-import io.reactivestax.repository.RuleSetRepository;
-import io.reactivestax.util.DbUtil;
+import io.reactivestax.persister.model.RuleSet;
+import io.reactivestax.persister.repository.RuleSetRepository;
+import io.reactivestax.persister.util.DbUtil;
 
 import java.io.IOException;
 import java.nio.file.Files;
