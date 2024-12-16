@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-public class RuleSetFileProcessorService {
+public class RuleSetFileProcessorService implements RuleSetFileProcessor {
     private long id = 0;
     private final Deque<RuleSet> ruleSetStack = new ArrayDeque<>();
     private List<RuleSet> ruleSetList = new ArrayList<>();
@@ -19,7 +19,8 @@ public class RuleSetFileProcessorService {
     private String root = "";
     private final Logger logger = Logger.getLogger(RuleSetFileProcessorService.class.getName());
 
-    public void readRuleSetFile() {
+    @Override
+    public void readAndProcessRuleSetFile() {
         try (Stream<String> stream = Files.lines(Path.of("src/main/resources/rulesetfiles/bony_smb_ruleset_d100914" +
                 ".data"))) {
             stream.forEach(rule -> {
