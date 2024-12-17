@@ -6,13 +6,11 @@ import io.reactivestax.util.messaging.MessageReceiver;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
 
 public class FileTradeProcessor implements Callable<Void> {
     Logger logger = Logger.getLogger(FileTradeProcessor.class.getName());
     String queueName;
-    private final CountDownLatch latch = new CountDownLatch(1);
 
     int count = 0;
 
@@ -21,7 +19,7 @@ public class FileTradeProcessor implements Callable<Void> {
     }
 
     @Override
-    public Void call() throws InterruptedException {
+    public Void call() {
         try {
             MessageReceiver messageReceiver = BeanFactory.getMessageReceiver();
             while (count == 0) {
@@ -36,7 +34,6 @@ public class FileTradeProcessor implements Callable<Void> {
             logger.warning("Exception detected in Trade Processor.");
             Thread.currentThread().interrupt();
         }
-        latch.await();
         return null;
     }
 }
