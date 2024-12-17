@@ -10,16 +10,21 @@ import io.reactivestax.type.dto.Position;
 import io.reactivestax.util.EntitySupplier;
 import io.reactivestax.util.database.TransactionUtil;
 import io.reactivestax.util.factory.BeanFactory;
+import io.reactivestax.util.messaging.TransactionRetryer;
+import org.hibernate.HibernateException;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,20 +39,16 @@ class TradeProcessorServiceTest {
     private JournalEntryRepository journalEntryRepositoryMock;
     @Mock
     private PositionsRepository positionsRepositoryMock;
+    @Mock
+    private TransactionRetryer transactionRetryerMock;
 
     @InjectMocks
     private TradeProcessorService tradeProcessorService;
 
-
-    @BeforeEach
-    void setUp(){
-        MockitoAnnotations.openMocks(this);
-    }
-
     @AfterEach
     void tearDown() {
         Mockito.reset(transactionUtilMock, tradePayloadRepositoryMock, lookupSecuritiesRepositoryMock,
-                journalEntryRepositoryMock, positionsRepositoryMock);
+                journalEntryRepositoryMock, positionsRepositoryMock, transactionRetryerMock);
     }
 
     @Test
@@ -87,6 +88,11 @@ class TradeProcessorServiceTest {
             verify(positionsRepositoryMock, atMostOnce()).upsertPosition(any(Position.class));
             verify(journalEntryRepositoryMock, atMostOnce()).updateJournalEntryStatus(anyLong());
             verify(transactionUtilMock, atMostOnce()).commitTransaction();
+            beanFactoryMockedStatic.when(BeanFactory::getTransactionRetryer).thenReturn(transactionRetryerMock);
+            doThrow(HibernateException.class).when(transactionUtilMock).commitTransaction();
+            doNothing().when(transactionRetryerMock).retryTransaction(anyString(), anyString());
+            tradeProcessorService.processTrade("TDB_000001", "queue");
+            assertThrows(HibernateException.class, transactionUtilMock::commitTransaction);
         }
     }
 
