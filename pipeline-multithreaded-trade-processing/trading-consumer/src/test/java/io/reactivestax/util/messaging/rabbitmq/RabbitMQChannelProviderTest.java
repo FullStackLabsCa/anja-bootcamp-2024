@@ -13,7 +13,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
-import java.util.concurrent.TimeoutException;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -41,7 +40,7 @@ class RabbitMQChannelProviderTest {
     }
 
     @AfterEach
-    void tearDown(){
+    void tearDown() {
         Mockito.reset(connection, channel);
     }
 
@@ -62,8 +61,8 @@ class RabbitMQChannelProviderTest {
     @Test
     void testGetReceiverChannelWithTimeoutException() throws IOException {
         doReturn(channel).when(connection).createChannel();
-        doThrow(TimeoutException.class).when(channel).exchangeDeclare(anyString(), anyString());
+        doThrow(IOException.class).when(channel).exchangeDeclare(anyString(), anyString());
         rabbitMQChannelProviderWithMocks.getReceiverChannel("queue_name");
-        assertThrows(TimeoutException.class, () -> channel.exchangeDeclare(anyString(), anyString()));
+        assertThrows(IOException.class, () -> channel.exchangeDeclare(anyString(), anyString()));
     }
 }
