@@ -53,19 +53,6 @@ public class RabbitMQChannelProvider {
         return localChannel;
     }
 
-    public void closeChannel() {
-        Channel localChannel = channelThreadLocal.get();
-        if (localChannel != null) {
-            channelThreadLocal.remove();
-            try {
-                localChannel.close();
-            } catch (TimeoutException | IOException e) {
-                logger.warning("Exception detected while closing channel.");
-            }
-        }
-    }
-
-
     public Channel getReceiverChannel(String queueName) {
         if (channelThreadLocal.get() == null) {
             try {
