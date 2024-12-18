@@ -2,8 +2,6 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-src/main/resources/rulesetfiles
-src/main/resources/parsed
 .idea
 
 ### IntelliJ IDEA ###

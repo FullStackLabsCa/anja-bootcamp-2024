@@ -1,5 +1,6 @@
 package io.reactivestax.persister.service;
 
+import io.reactivestax.persister.enums.RuleNo;
 import io.reactivestax.persister.model.RuleSet;
 import io.reactivestax.persister.repository.RuleSetRepository;
 import io.reactivestax.persister.util.DbUtil;
@@ -11,6 +12,9 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
+import static io.reactivestax.persister.enums.RuleNo.ONE;
+import static io.reactivestax.persister.enums.RuleNo.THREE;
+
 public class RuleSetFileProcessorService implements RuleSetFileProcessor {
     private long id = 0;
     private final Deque<RuleSet> ruleSetStack = new ArrayDeque<>();
@@ -21,8 +25,7 @@ public class RuleSetFileProcessorService implements RuleSetFileProcessor {
 
     @Override
     public void readAndProcessRuleSetFile() {
-        try (Stream<String> stream = Files.lines(Path.of("src/main/resources/rulesetfiles/bony_smb_ruleset_d100914" +
-                ".data"))) {
+        try (Stream<String> stream = Files.lines(Path.of("src/main/resources/rulesetfiles/bony_smb_ruleset_d100914.data"))) {
             stream.forEach(rule -> {
                 String ruleNo = rule.substring(0, 2);
                 String ruleValue = rule.substring(2);
@@ -44,38 +47,40 @@ public class RuleSetFileProcessorService implements RuleSetFileProcessor {
     }
 
     private void prepareRuleSetList(RuleSet ruleSet) {
-        switch (ruleSet.getRuleNo()) {
-            case "01": {
-                if (!ruleSetList.isEmpty()) {
-                    processRuleSet();
-                    ruleSetList = new ArrayList<>();
+        RuleNo.getEnumValue(ruleSet.getRuleNo()).ifPresent(ruleNo -> {
+            switch (ruleNo) {
+                case ONE: {
+                    if (!ruleSetList.isEmpty()) {
+                        processRuleSet();
+                        ruleSetList = new ArrayList<>();
+                    }
+                    setLeftIdAndPushToStack(ruleSet);
+                    break;
                 }
-                setLeftIdAndPushToStack(ruleSet);
-                break;
+                case TWO, FIVE, SIX: {
+                    ruleSet.setLeftId(++id);
+                    ruleSet.setRightId(++id);
+                    break;
+                }
+                case THREE: {
+                    popAndSetRightId(ONE.getValue());
+                    setLeftIdAndPushToStack(ruleSet);
+                    break;
+                }
+                case FOUR: {
+                    popAndSetRightId(THREE.getValue());
+                    setLeftIdAndPushToStack(ruleSet);
+                    break;
+                }
+                case SEVEN: {
+                    popAndSetRightId(THREE.getValue());
+                    ruleSet.setLeftId(++id);
+                    ruleSet.setRightId(++id);
+                    break;
+                }
+                default:
             }
-            case "02", "05", "06": {
-                ruleSet.setLeftId(++id);
-                ruleSet.setRightId(++id);
-                break;
-            }
-            case "03": {
-                popAndSetRightId("01");
-                setLeftIdAndPushToStack(ruleSet);
-                break;
-            }
-            case "04": {
-                popAndSetRightId("03");
-                setLeftIdAndPushToStack(ruleSet);
-                break;
-            }
-            case "07": {
-                popAndSetRightId("03");
-                ruleSet.setLeftId(++id);
-                ruleSet.setRightId(++id);
-                break;
-            }
-            default:
-        }
+        });
     }
 
     private void popAndSetRightId(String ruleNo) {
