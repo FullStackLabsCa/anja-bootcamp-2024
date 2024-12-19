@@ -1,10 +1,7 @@
 package io.reactivestax.domainmodel.repository.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Builder
 @NoArgsConstructor
@@ -14,7 +11,6 @@ import lombok.NoArgsConstructor;
 @Table(name = "rule_set")
 public class Rule {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "rule_set_id")
     private Long ruleSetId;
 

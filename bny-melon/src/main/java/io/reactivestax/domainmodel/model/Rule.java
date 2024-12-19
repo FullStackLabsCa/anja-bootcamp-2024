@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class Rule {
+    private long ruleSetId;
     private String ruleNo;
     private String ruleValue;
     private long leftId;

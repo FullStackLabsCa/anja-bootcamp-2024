@@ -6,13 +6,22 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
 public class DbUtil {
-    private static SessionFactory sessionFactory;
-    private static Session session;
+    private static DbUtil instance;
+    private SessionFactory sessionFactory;
+    private final ThreadLocal<Session> sessionThreadLocal = new ThreadLocal<>();
 
     private DbUtil() {
     }
 
-    private static synchronized SessionFactory getSessionFactory() {
+    public static synchronized DbUtil getInstance() {
+        if (instance == null) {
+            instance = new DbUtil();
+        }
+
+        return instance;
+    }
+
+    private synchronized SessionFactory getSessionFactory() {
         if (sessionFactory == null) {
             Configuration configuration = new Configuration()
                     .addAnnotatedClass(Rule.class)
@@ -22,34 +31,38 @@ public class DbUtil {
         return sessionFactory;
     }
 
-    public static Session getConnection() {
+    public Session getConnection() {
+        Session session = sessionThreadLocal.get();
         if (session == null) {
-            session = getSessionFactory().openSession();
+            sessionThreadLocal.set(getSessionFactory().openSession());
         }
 
-        return session;
+        return sessionThreadLocal.get();
     }
 
-    public static void startTransaction() {
+    public void startTransaction() {
+        Session session = sessionThreadLocal.get();
         if (session == null) {
-            session = getSessionFactory().openSession();
+            sessionThreadLocal.set(getSessionFactory().openSession());
         }
-        session.beginTransaction();
+        sessionThreadLocal.get().beginTransaction();
     }
 
-    public static void commitTransaction() {
+    public void commitTransaction() {
+        Session session = sessionThreadLocal.get();
         if (session != null) {
             session.getTransaction().commit();
             session.close();
-            session = null;
+            sessionThreadLocal.remove();
         }
     }
 
-    public static void rollbackTransaction() {
+    public void rollbackTransaction() {
+        Session session = sessionThreadLocal.get();
         if (session != null) {
             session.getTransaction().rollback();
             session.close();
-            session = null;
+            sessionThreadLocal.remove();
         }
     }
 }

@@ -16,25 +16,27 @@ import static io.reactivestax.withoutdomainmodel.persister.enums.RuleNo.ONE;
 import static io.reactivestax.withoutdomainmodel.persister.enums.RuleNo.THREE;
 
 public class RuleSetFileProcessorService implements RuleSetFileProcessor {
+    private long primaryKey = 0;
     private long id = 0;
     private final Deque<Rule> ruleStack = new ArrayDeque<>();
     private List<Rule> ruleList = new ArrayList<>();
-    private final RuleSetRepository ruleSetRepository = new RuleSetRepository();
     private final Logger logger = Logger.getLogger(RuleSetFileProcessorService.class.getName());
 
     @Override
     public void readAndProcessRuleSetFile() {
-        try (Stream<String> stream = Files.lines(Path.of("src/main/resources/rulesetfiles/bony_smb_ruleset_d100914.data"))) {
+        try (Stream<String> stream = Files.lines(Path.of("src/main/resources/rulesetfiles/bony_sal_ruleset_d050914.data"))) {
             stream.forEach(line -> {
                 String ruleNo = line.substring(0, 2);
                 String ruleValue = line.substring(2);
                 Rule rule = Rule.builder()
+                        .ruleSetId(++primaryKey)
                         .ruleNo(ruleNo)
                         .ruleValue(ruleValue)
                         .build();
                 prepareRuleSetList(rule);
                 ruleList.add(rule);
             });
+            emptyStack();
             processRuleSet();
         } catch (IOException e) {
             logger.info(e.getMessage());
@@ -46,6 +48,7 @@ public class RuleSetFileProcessorService implements RuleSetFileProcessor {
             switch (ruleType) {
                 case ONE: {
                     if (!ruleList.isEmpty()) {
+                        emptyStack();
                         processRuleSet();
                         ruleList = new ArrayList<>();
                     }
@@ -91,12 +94,13 @@ public class RuleSetFileProcessorService implements RuleSetFileProcessor {
         ruleStack.push(rule);
     }
 
-    private void processRuleSet() {
+    private void emptyStack() {
         while (!ruleStack.isEmpty()) {
             ruleStack.pop().setRightId(++id);
         }
-        DbUtil.startTransaction();
-        ruleList.forEach(ruleSetRepository::insertRule);
-        DbUtil.commitTransaction();
+    }
+
+    private void processRuleSet() {
+        RuleSetRepository.getInstance().insertRule(ruleList);
     }
 }

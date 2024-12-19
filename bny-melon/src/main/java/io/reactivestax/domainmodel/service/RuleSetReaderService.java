@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 public class RuleSetReaderService {
-    private final RuleSetRepository ruleSetRepository = new RuleSetRepository();
     private final List<RuleSet> ruleSetList = new ArrayList<>();
     private final Map<RuleNo, Object> ruleSetMap = new EnumMap<>(RuleNo.class);
 
@@ -95,6 +94,6 @@ public class RuleSetReaderService {
     }
 
     private List<Rule> readRules() {
-        return ruleSetRepository.readRules();
+        return RuleSetRepository.getInstance().readRules();
     }
 }
