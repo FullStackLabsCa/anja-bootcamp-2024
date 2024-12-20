@@ -3,7 +3,6 @@ package io.reactivestax.domainmodel.service;
 import io.reactivestax.domainmodel.enums.RuleType;
 import io.reactivestax.domainmodel.model.Rule;
 import io.reactivestax.domainmodel.repository.RuleSetRepository;
-import io.reactivestax.domainmodel.util.DbUtil;
 
 import java.io.IOException;
 import java.nio.file.Files;

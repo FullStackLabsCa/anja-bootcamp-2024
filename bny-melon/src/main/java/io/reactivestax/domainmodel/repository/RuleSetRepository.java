@@ -10,7 +10,7 @@ import java.util.concurrent.Executors;
 
 public class RuleSetRepository {
     private static RuleSetRepository instance;
-    private final ExecutorService executorService = Executors.newFixedThreadPool(10);
+    private final ExecutorService executorService = Executors.newFixedThreadPool(20);
 
     private RuleSetRepository() {
     }
