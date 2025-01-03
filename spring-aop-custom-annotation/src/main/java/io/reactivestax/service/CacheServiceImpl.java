@@ -1,9 +1,7 @@
 package io.reactivestax.service;
 
-import io.reactivestax.customannotation.Cache;
-import io.reactivestax.customannotation.CacheEvict;
-import io.reactivestax.customannotation.Synchronized;
-import io.reactivestax.customannotation.Timer;
+import io.reactivestax.customannotation.*;
+import io.reactivestax.enums.RateLimitAlgorithm;
 import io.reactivestax.model.Trade;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -11,9 +9,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CacheServiceImpl {
-
     private final Log log = LogFactory.getLog(CacheServiceImpl.class);
 
+    @RateLimit(algorithm = RateLimitAlgorithm.FIXED_WINDOW, limit = 6, timeFrame = 1000)
     @Timer
     @Synchronized
     @Cache

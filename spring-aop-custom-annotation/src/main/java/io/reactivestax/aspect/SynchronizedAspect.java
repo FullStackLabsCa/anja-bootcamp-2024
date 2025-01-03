@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Aspect
-@Order(2)
+@Order(1)
 public class SynchronizedAspect {
     private final Log log = LogFactory.getLog(SynchronizedAspect.class);
 

@@ -37,6 +37,10 @@ public class Main {
         if (terminated) {
             log.debug(cacheService.getObject("TN1", "AAPL"));
             cacheService.processTrade("TN1", "AAPL");
+            cacheService.processTrade("TN1", "AAPL");
+            cacheService.processTrade("TN1", "AAPL");
+//            Thread.sleep(60000);
+            cacheService.processTrade("TN1", "AAPL");
         }
     }
 }

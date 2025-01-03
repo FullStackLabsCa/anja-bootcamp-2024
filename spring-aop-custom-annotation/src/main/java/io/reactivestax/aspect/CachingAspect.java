@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Aspect
 @Component
-@Order(3)
+@Order(4)
 public class CachingAspect {
     private final Log log = LogFactory.getLog(CachingAspect.class);
     private final Map<String, Trade> cache = new ConcurrentHashMap<>();

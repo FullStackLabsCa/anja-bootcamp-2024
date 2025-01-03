@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Aspect
-@Order(1)
+@Order(2)
 public class TimerAspect {
     private final Log log = LogFactory.getLog(TimerAspect.class);
 
