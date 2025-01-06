@@ -28,6 +28,7 @@ public class FixedWindowService implements RateLimitAlgorithm  {
         window.setRemainingRequests(remainingRequests - 1);
         limitMap.put(methodSignature, window);
         if (remainingRequests != 0) {
+            log.debug("Served the request using fixed window algorithm.");
             log.debug("Remaining requests count: " + (remainingRequests - 1));
         } else throw new NoAvailableRequestsException();
     }

@@ -3,6 +3,7 @@ package io.reactivestax.aspect;
 import io.reactivestax.customannotation.RateLimit;
 import io.reactivestax.enums.RateLimitAlgorithm;
 import io.reactivestax.service.FixedWindowService;
+import io.reactivestax.service.SlidingWindowService;
 import io.reactivestax.service.TokenBucketService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,15 +23,16 @@ public class RateLimitAspect {
 
     private io.reactivestax.service.RateLimitAlgorithm rateLimitAlgorithm;
     private final FixedWindowService fixedWindowService;
+    private final SlidingWindowService slidingWindowService;
     private final TokenBucketService tokenBucketService;
 
     @Autowired
     public RateLimitAspect(FixedWindowService fixedWindowService,
-//                           SlidingWindowService slidingWindowService,
-            TokenBucketService tokenBucketService
+                           SlidingWindowService slidingWindowService,
+                           TokenBucketService tokenBucketService
     ) {
         this.fixedWindowService = fixedWindowService;
-//        this.slidingWindowService = slidingWindowService;
+        this.slidingWindowService = slidingWindowService;
         this.tokenBucketService = tokenBucketService;
     }
 
@@ -45,16 +47,16 @@ public class RateLimitAspect {
         log.debug("TimeFrame: " + timeFrame);
         switch (algorithm) {
             case FIXED_WINDOW:
-                fixedWindowService.imposeAlgorithm(joinPoint, limit, timeFrame);
+                rateLimitAlgorithm = fixedWindowService;
                 break;
             case TOKEN_BUCKET:
                 rateLimitAlgorithm = tokenBucketService;
                 break;
             case SLIDING_WINDOW:
-//                rateLimitAlgorithm = slidingWindowService;
+                rateLimitAlgorithm = slidingWindowService;
                 break;
         }
-//        rateLimitAlgorithm.imposeAlgorithm(joinPoint, limit, timeFrame);
+        rateLimitAlgorithm.imposeAlgorithm(joinPoint, limit, timeFrame);
         joinPoint.proceed();
     }
 }

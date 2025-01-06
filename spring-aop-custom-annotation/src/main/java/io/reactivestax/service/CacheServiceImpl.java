@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 public class CacheServiceImpl {
     private final Log log = LogFactory.getLog(CacheServiceImpl.class);
 
-    @RateLimit(algorithm = RateLimitAlgorithm.FIXED_WINDOW, limit = 6, timeFrame = 1000)
+    @RateLimit(algorithm = RateLimitAlgorithm.TOKEN_BUCKET, limit = 4, timeFrame = 500)
     @Timer
     @Synchronized
     @Cache
