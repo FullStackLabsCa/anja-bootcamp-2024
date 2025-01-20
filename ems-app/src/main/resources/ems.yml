@@ -1,0 +1,596 @@
+openapi: 3.0.3
+info:
+  title: Enterprise Messaging Service
+  description: |-
+    
+    Enterprise Messaging Service (EMS) is a robust middleware solution that facilitates communication between distributed systems in an enterprise environment. It ensures reliable, secure, and asynchronous message delivery across applications, enabling seamless integration and coordination. EMS supports various messaging patterns like publish/subscribe and point-to-point, providing scalability and flexibility for enterprise workflows. It's commonly used for decoupling services, enhancing fault tolerance, and ensuring message persistence and integrity in complex business processes.
+    
+    Below is the api contract for the ems service.
+
+  contact:
+    email: apiteam@ems.ca
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api/v1
+tags:
+  - name: ens
+    description: Send message via sms, call and email
+  - name: otp
+    description: Send otp via sms, call and email, verify and check the status of it
+paths:
+  /ems/sms:
+    post:
+      tags:
+        - ens
+      summary: Send a message as sms
+      description: Send a message as sms
+      operationId: sendSms
+      requestBody:
+        description: Send a message as sms
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SmsMessage'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/SmsMessage'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SmsMessage'
+        required: true
+      responses:
+        '200':
+          description: Message sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessfulMessage'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/SuccessfulMessage'
+        '400':
+          description: Invalid phoneNumber supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /ems/call:
+    post:
+      tags:
+        - ens
+      summary: Deliver the message on call
+      description: Deliver a message via call
+      operationId: call
+      requestBody:
+        description: Deliver a message via call
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CallMessage'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/CallMessage'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CallMessage'
+        required: true
+      responses:
+        '200':
+          description: Message sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessfulMessage'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/SuccessfulMessage'
+        '400':
+          description: Invalid phone number supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /ems/email:
+    post:
+      tags:
+        - ens
+      summary: Send a message as email
+      description: Send a message as email
+      operationId: sendEmail
+      requestBody:
+        description: Send a message as email
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailMessage'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/EmailMessage'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EmailMessage'
+        required: true
+      responses:
+        '200':
+          description: Email sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessfulMessage'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/SuccessfulMessage'
+        '400':
+          description: Invalid email supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /otp/sms:
+    post:
+      tags:
+        - otp
+      summary: Send otp as sms
+      description: Send otp as sms
+      operationId: sendOtpSms
+      requestBody:
+        description: Send otp as sms
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SmsOtp'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/SmsOtp'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SmsOtp'
+        required: true
+      responses:
+        '200':
+          description: Otp sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessfulOtp'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/SuccessfulOtp'
+        '400':
+          description: Invalid phoneNumber supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /otp/call:
+    post:
+      tags:
+        - otp
+      summary: Deliver otp via call
+      description: Deliver otp via call
+      operationId: sendOtpCall
+      requestBody:
+        description: Deliver otp via call
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CallOtp'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/CallOtp'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CallOtp'
+        required: true
+      responses:
+        '200':
+          description: Otp delivered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessfulOtp'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/SuccessfulOtp'
+        '400':
+          description: Invalid phoneNumber supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /otp/email:
+    post:
+      tags:
+        - otp
+      summary: Send otp as email
+      description: Send otp as email
+      operationId: sendOtpEmail
+      requestBody:
+        description: Send otp as email
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailOtp'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/EmailOtp'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EmailOtp'
+        required: true
+      responses:
+        '200':
+          description: Otp delivered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessfulOtp'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/SuccessfulOtp'
+        '400':
+          description: Invalid email supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /otp/verify:
+    put:
+      tags:
+        - otp
+      summary: Verify otp
+      description: Verify otp
+      operationId: verifyOtp
+      requestBody:
+        description: Verify otp
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyOtp'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/VerifyOtp'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VerifyOtp'
+        required: true
+      responses:
+        '200':
+          description: Otp verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifiedOtp'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VerifiedOtp'
+        '400':
+          description: Invalid otp supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '410':
+          description: Otp expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /otp/status/{customerId}:
+    get:
+      tags:
+        - otp
+      summary: Check otp validation status
+      description: Check otp validation status
+      operationId: statusOtp
+      parameters:
+        - name: customerId
+          in: path
+          description: ID of customer to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Otp status validation successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidatedOtp'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ValidatedOtp'
+        '400':
+          description: Invalid customer id supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '422':
+          description: Otp not validated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+components:
+  schemas:
+    SmsMessage:
+      required:
+        - customerId
+        - phoneNumber
+        - message
+      type: object
+      properties:
+        customerId:
+          type: string
+          description: unique customer id
+          example: jfgkjgjdsnjknsndkjngfkjns990rnjkanbfgkj
+        phoneNumber:
+          type: string
+          description: Message will be sent on this number
+          example: 666-666-6666
+        message:
+          type: string
+          description: Message to be sent
+          example: your message here
+      xml:
+        name: smsMessage
+    EmailMessage:
+      required:
+        - customerId
+        - emailId
+        - message
+      type: object
+      properties:
+        customerId:
+          type: string
+          description: unique customer id
+          example: jfgkjgjdsnjknsndkjngfkjns990rnjkanbfgkj
+        emailId:
+          type: string
+          description: Message will be sent on this email
+          example: example@email.com
+        message:
+          type: string
+          description: Message to be sent
+          example: your message here
+      xml:
+        name: emailMessage
+    CallMessage:
+      required:
+        - customerId
+        - phoneNumber
+        - message
+      type: object
+      properties:
+        customerId:
+          type: string
+          description: unique customer id
+          example: jfgkjgjdsnjknsndkjngfkjns990rnjkanbfgkj
+        phoneNumber:
+          type: string
+          description: Message will be delivered on this number via call
+          example: 666-666-6666
+        message:
+          type: string
+          description: Message to be given on call
+          example: your message here
+      xml:
+        name: callMessage
+    SuccessfulMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Success Message
+          example: Success - Message delivered successfully
+      xml:
+        name: successMessage
+    SuccessfulOtp:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Success Message
+          example: Success - Otp delivered successfully
+      xml:
+        name: successMessage
+    SmsOtp:
+      required:
+        - customerId
+        - phoneNumber
+      type: object
+      properties:
+        customerId:
+          type: string
+          description: unique customer id
+          example: jfgkjgjdsnjknsndkjngfkjns990rnjkanbfgkj
+        phoneNumber:
+          type: string
+          description: Otp will be sent on this number
+          example: 666-666-6666
+      xml:
+        name: smsOtp
+    CallOtp:
+      required:
+        - customerId
+        - phoneNumber
+      type: object
+      properties:
+        customerId:
+          type: string
+          description: unique customer id
+          example: jfgkjgjdsnjknsndkjngfkjns990rnjkanbfgkj
+        phoneNumber:
+          type: string
+          description: Otp will be delivered by call on this number
+          example: 666-666-6666
+      xml:
+        name: callOtp
+    EmailOtp:
+      required:
+        - customerId
+        - emailId
+      type: object
+      properties:
+        customerId:
+          type: string
+          description: unique customer id
+          example: jfgkjgjdsnjknsndkjngfkjns990rnjkanbfgkj
+        emailId:
+          type: string
+          description: Otp will be sent on this emailId
+          example: example@email.com
+      xml:
+        name: emailOtp
+    VerifyOtp:
+      required:
+        - customerId
+        - otp
+      type: object
+      properties:
+        customerId:
+          type: string
+          description: unique customer id
+          example: jfgkjgjdsnjknsndkjngfkjns990rnjkanbfgkj
+        emailId:
+          type: string
+          description: Otp to be verified
+          example: 12345
+      xml:
+        name: verifyOtp
+    ValidatedOtp:
+      type: object
+      properties:
+        message:
+          type: string
+          description: otp validation message
+          example: Success - Otp validation successful
+      xml:
+        name: validatedOtp
+    VerifiedOtp:
+      type: object
+      properties:
+        message:
+          type: string
+          description: otp verification message
+          example: Success - Otp verified successfully
+      xml:
+        name: verifiedOtp
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        timestamp:
+          type: string
+        message:
+          type: string
+      xml:
+        name: '##default'
