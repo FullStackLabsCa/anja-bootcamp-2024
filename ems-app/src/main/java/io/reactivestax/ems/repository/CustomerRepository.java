@@ -1,9 +1,9 @@
 package io.reactivestax.ems.repository;
 
-import io.reactivestax.ems.domain.EnsMessage;
+import io.reactivestax.ems.domain.Customer;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
 
-public interface EnsRepository extends JpaRepository<EnsMessage, UUID> {
+public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 }

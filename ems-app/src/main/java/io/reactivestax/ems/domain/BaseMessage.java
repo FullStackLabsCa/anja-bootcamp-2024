@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -19,4 +20,18 @@ public class BaseMessage {
     private String customerId;
     @Enumerated(EnumType.STRING)
     private NotificationMethod notificationMethod;
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+    @Column(updatable = true)
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }

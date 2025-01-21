@@ -7,6 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,6 +17,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationException(MethodArgumentNotValidException exception) {
         Map<String, String> errors = new HashMap<>();
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+
+        errors.put("code", String.valueOf(httpStatus.value()));
+        errors.put("type", httpStatus.getReasonPhrase());
+        errors.put("timestamp", String.valueOf(LocalDateTime.now()));
 
         for (FieldError error : exception.getBindingResult().getFieldErrors()) {
             errors.put(error.getField(), error.getDefaultMessage());
@@ -24,6 +30,32 @@ public class GlobalExceptionHandler {
         exception.getBindingResult().getGlobalErrors().forEach(
                 error -> errors.put(error.getObjectName(), error.getDefaultMessage()));
 
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errors, httpStatus);
+    }
+
+    @ExceptionHandler(InvalidRequestException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidRequestException(InvalidRequestException exception) {
+        Map<String, String> errors = new HashMap<>();
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+
+        errors.put("code", String.valueOf(httpStatus.value()));
+        errors.put("type", httpStatus.getReasonPhrase());
+        errors.put("timestamp", String.valueOf(LocalDateTime.now()));
+        errors.put("message", exception.getMessage());
+
+        return new ResponseEntity<>(errors, httpStatus);
+    }
+
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<Map<String, String>> handleTooManyRequestsException(TooManyRequestsException exception) {
+        Map<String, String> errors = new HashMap<>();
+        HttpStatus httpStatus = HttpStatus.TOO_MANY_REQUESTS;
+
+        errors.put("code", String.valueOf(httpStatus.value()));
+        errors.put("type", httpStatus.getReasonPhrase());
+        errors.put("timestamp", String.valueOf(LocalDateTime.now()));
+        errors.put("message", exception.getMessage());
+
+        return new ResponseEntity<>(errors, httpStatus);
     }
 }

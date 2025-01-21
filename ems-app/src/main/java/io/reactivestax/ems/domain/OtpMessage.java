@@ -15,7 +15,5 @@ import lombok.experimental.SuperBuilder;
 public class OtpMessage extends BaseMessage {
     private String otp;
     @Enumerated(value = EnumType.STRING)
-    private OtpStatus otpStatus = OtpStatus.NOT_GENERATED;
-    private int attempt;
-    private long generatedDateTime;
+    private OtpStatus otpStatus;
 }

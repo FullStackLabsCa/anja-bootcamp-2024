@@ -5,4 +5,5 @@ public class SuccessMessage {
     }
 
     public static final String SUCCESS_MESSAGE = "Success - Message delivered successfully.";
+    public static final String SUCCESS_OTP = "Success - Otp delivered successfully.";
 }

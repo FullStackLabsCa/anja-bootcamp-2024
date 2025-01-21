@@ -21,3 +21,10 @@ spring:
     password: artemis
     ens-queue: ens_queue
     otp-queue: otp_queue
+application:
+  properties:
+    otp:
+      verification-attempt: 3
+      otp-attempt: 5
+      validation-lock-period-hour: 2
+      attempt-lock-period-hour: 8

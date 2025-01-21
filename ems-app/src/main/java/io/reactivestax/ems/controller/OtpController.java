@@ -33,20 +33,20 @@ public class OtpController {
     public ResponseEntity<SuccessfulResponse> smsOtp(@Validated({SmsGroup.class, Default.class}) @RequestBody BaseDTO otpDTO) {
         this.otpService.save(otpDTO, NotificationMethod.SMS);
 
-        return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_MESSAGE).build());
+        return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_OTP).build());
     }
 
     @PostMapping(value = "/call", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SuccessfulResponse> callOtp(@Validated({CallGroup.class, Default.class}) @RequestBody BaseDTO otpDTO) {
         this.otpService.save(otpDTO, NotificationMethod.CALL);
 
-        return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_MESSAGE).build());
+        return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_OTP).build());
     }
 
     @PostMapping(value = "/email", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SuccessfulResponse> emailOtp(@Validated({EmailGroup.class, Default.class}) @RequestBody BaseDTO otpDTO) {
         this.otpService.save(otpDTO, NotificationMethod.EMAIL);
 
-        return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_MESSAGE).build());
+        return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_OTP).build());
     }
 }

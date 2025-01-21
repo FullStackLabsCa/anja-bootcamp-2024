@@ -15,7 +15,7 @@ public class EnsMessage extends BaseMessage {
     private String message;
 
     @Enumerated(value = EnumType.STRING)
-    private MessageStatus messageStatus = MessageStatus.NOT_SENT;
+    private MessageStatus messageStatus;
 }
 
 
