@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-public class EnsService {
+public class EnsService  implements MessagingService{
 
     private final EnsRepository ensRepository;
     private final MessageProducer messageProducer;
@@ -26,6 +26,7 @@ public class EnsService {
     }
 
     @Transactional
+    @Override
     public void save(BaseDTO messageDTO, NotificationMethod notificationMethod) {
         EnsMessage ensMessage = convertToEntity(messageDTO, notificationMethod);
         EnsMessage savedMessage = ensRepository.save(ensMessage);

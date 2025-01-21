@@ -6,12 +6,13 @@ import io.reactivestax.ems.enums.NotificationMethod;
 import io.reactivestax.ems.enums.OtpStatus;
 import io.reactivestax.ems.messaging.MessageProducer;
 import io.reactivestax.ems.repository.OtpRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-public class OtpService {
+public class OtpService implements MessagingService {
 
     private final OtpRepository otpRepository;
     private final MessageProducer messageProducer;
@@ -24,6 +25,8 @@ public class OtpService {
         this.messageProducer = messageProducer;
     }
 
+    @Transactional
+    @Override
     public void save(BaseDTO baseDTO, NotificationMethod notificationMethod) {
         OtpMessage otpMessage = convertToEntity(baseDTO, notificationMethod);
         OtpMessage savedOtpMessage = this.otpRepository.save(otpMessage);
