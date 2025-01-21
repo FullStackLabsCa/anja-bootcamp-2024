@@ -1,13 +1,17 @@
 package io.reactivestax.ems.controller;
 
 import io.reactivestax.ems.constant.SuccessMessage;
-import io.reactivestax.ems.dto.MessageDTO;
+import io.reactivestax.ems.dto.BaseDTO;
 import io.reactivestax.ems.dto.SuccessfulResponse;
 import io.reactivestax.ems.enums.NotificationMethod;
 import io.reactivestax.ems.service.EnsService;
+import io.reactivestax.ems.validation.CallGroup;
+import io.reactivestax.ems.validation.EmailGroup;
+import io.reactivestax.ems.validation.MessageGroup;
 import io.reactivestax.ems.validation.SmsGroup;
 import jakarta.validation.groups.Default;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,9 +31,23 @@ public class EnsController {
         this.ensService = ensService;
     }
 
-    @PostMapping(value = "/sms", produces = "application/json", consumes = "application/json")
-    public ResponseEntity<SuccessfulResponse> sendSms(@Validated({SmsGroup.class, Default.class}) @RequestBody MessageDTO messageDTO) {
+    @PostMapping(value = "/sms", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<SuccessfulResponse> sendSms(@Validated({SmsGroup.class, MessageGroup.class, Default.class}) @RequestBody BaseDTO messageDTO) {
         this.ensService.save(messageDTO, NotificationMethod.SMS);
+
+        return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_MESSAGE).build());
+    }
+
+    @PostMapping(value = "/call", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<SuccessfulResponse> call(@Validated({CallGroup.class, MessageGroup.class, Default.class}) @RequestBody BaseDTO messageDTO) {
+        this.ensService.save(messageDTO, NotificationMethod.CALL);
+
+        return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_MESSAGE).build());
+    }
+
+    @PostMapping(value = "/email", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<SuccessfulResponse> email(@Validated({EmailGroup.class, MessageGroup.class, Default.class}) @RequestBody BaseDTO messageDTO) {
+        this.ensService.save(messageDTO, NotificationMethod.EMAIL);
 
         return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_MESSAGE).build());
     }
