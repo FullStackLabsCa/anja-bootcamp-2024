@@ -1,4 +1,4 @@
-package io.reactivestax.ems_message_processor_app;
+package io.reactivestax.message.processor;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
