@@ -556,7 +556,7 @@ components:
           type: string
           description: unique customer id
           example: jfgkjgjdsnjknsndkjngfkjns990rnjkanbfgkj
-        emailId:
+        otp:
           type: string
           description: Otp to be verified
           example: 12345
@@ -569,6 +569,10 @@ components:
           type: string
           description: otp validation message
           example: Success - Otp validation successful
+        lastValidatedTime:
+          type: string
+          description: validation timestamp
+          example: string
       xml:
         name: validatedOtp
     VerifiedOtp:
