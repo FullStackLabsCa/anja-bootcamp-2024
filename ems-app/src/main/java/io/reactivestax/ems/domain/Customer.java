@@ -1,9 +1,13 @@
 package io.reactivestax.ems.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import io.reactivestax.ems.enums.OtpLock;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,17 +21,17 @@ public class Customer {
     private String firstName;
     private String lastName;
 
+    @JsonBackReference
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Contact> contacts;
 
     @Enumerated(value = EnumType.STRING)
     private OtpLock otpLock = OtpLock.NOT_LOCKED;
 
+    @CreationTimestamp
     @Column(updatable = false)
-    private java.time.LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = java.time.LocalDateTime.now();
-    }
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }

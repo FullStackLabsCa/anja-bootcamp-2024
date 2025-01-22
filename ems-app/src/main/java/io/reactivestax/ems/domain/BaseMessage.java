@@ -2,8 +2,12 @@ package io.reactivestax.ems.domain;
 
 import io.reactivestax.ems.enums.NotificationMethod;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -11,6 +15,8 @@ import java.util.UUID;
 @Data
 @SuperBuilder
 @MappedSuperclass
+@NoArgsConstructor
+@AllArgsConstructor
 public class BaseMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -20,18 +26,9 @@ public class BaseMessage {
     private String customerId;
     @Enumerated(EnumType.STRING)
     private NotificationMethod notificationMethod;
+    @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
-    @Column(updatable = true)
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
 }

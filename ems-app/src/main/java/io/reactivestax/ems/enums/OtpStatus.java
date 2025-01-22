@@ -1,5 +1,5 @@
 package io.reactivestax.ems.enums;
 
 public enum OtpStatus {
-    GENERATED, VERIFIED, DISCARDED
+    GENERATED, VALIDATION_FAILED, VERIFIED, DISCARDED
 }

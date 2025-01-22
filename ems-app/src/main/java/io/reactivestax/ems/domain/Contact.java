@@ -1,9 +1,13 @@
 package io.reactivestax.ems.domain;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.reactivestax.ems.enums.ContactType;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -13,6 +17,7 @@ public class Contact {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID contactId;
 
+    @JsonManagedReference
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
@@ -22,11 +27,10 @@ public class Contact {
 
     private String contactValue;
 
+    @CreationTimestamp
     @Column(updatable = false)
-    private java.time.LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = java.time.LocalDateTime.now();
-    }
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }

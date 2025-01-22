@@ -11,6 +11,8 @@ import lombok.experimental.SuperBuilder;
 @Data
 @SuperBuilder
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 public class EnsMessage extends BaseMessage {
     private String message;
 

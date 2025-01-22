@@ -3,6 +3,8 @@ package io.reactivestax.ems.controller;
 import io.reactivestax.ems.constant.SuccessMessage;
 import io.reactivestax.ems.dto.BaseDTO;
 import io.reactivestax.ems.dto.SuccessfulResponse;
+import io.reactivestax.ems.dto.ValidatedOtpDTO;
+import io.reactivestax.ems.dto.VerifyOtpDTO;
 import io.reactivestax.ems.enums.NotificationMethod;
 import io.reactivestax.ems.service.OtpService;
 import io.reactivestax.ems.validation.CallGroup;
@@ -13,10 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/otp")
@@ -48,5 +47,19 @@ public class OtpController {
         this.otpService.save(otpDTO, NotificationMethod.EMAIL);
 
         return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_OTP).build());
+    }
+
+    @PutMapping(value = "/verify", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<SuccessfulResponse> verifyOtp(@RequestBody VerifyOtpDTO verifyOtpDTO) {
+        this.otpService.verify(verifyOtpDTO);
+
+        return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_OTP_VERIFICATION).build());
+    }
+
+    @GetMapping(value = "/status/{customerId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ValidatedOtpDTO> verifyOtp(@PathVariable String customerId) {
+        ValidatedOtpDTO validatedOtpDTO = this.otpService.status(customerId);
+
+        return ResponseEntity.ok(validatedOtpDTO);
     }
 }
