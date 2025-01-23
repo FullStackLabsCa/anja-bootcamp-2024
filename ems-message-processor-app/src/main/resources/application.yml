@@ -21,3 +21,8 @@ spring:
     password: artemis
     ens-queue: ens_queue
     otp-queue: otp_queue
+twilio:
+  account:
+    sid: AC816d4ea8d463a8f24a9c692190f10cf0
+    auth-token: aa98b7719e2cf54e88cc82b2ca8e00f7
+    messaging-service: MGc1f0835654f5333758b07938935e8f80
