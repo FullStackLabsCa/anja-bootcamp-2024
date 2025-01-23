@@ -27,7 +27,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
-import java.util.stream.Stream;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class OtpService implements MessagingService {
@@ -36,29 +38,40 @@ public class OtpService implements MessagingService {
     private final CustomerRepository customerRepository;
     private final MessageProducer messageProducer;
     private final EmsUtil emsUtil;
+
     @Value("${spring.artemis.otp-queue}")
     private String queueName;
 
     @Value("${application.properties.otp.verification-attempt}")
     private int verificationAttempt;
 
-    @Value("${application.properties.otp.otp-attempt}")
-    private int otpAttempt;
+    @Value("${application.properties.otp.validation-lock-period-minutes}")
+    private int validationLockPeriodMin;
 
-    @Value("${application.properties.otp.validation-lock-period-hour}")
-    private int validationLockPeriodHr;
+    @Value("${application.properties.otp.attempt-lock-period-minutes}")
+    private int attemptLockPeriodMin;
 
-    @Value("${application.properties.otp.attempt-lock-period-hour}")
-    private int attemptLockPeriodHr;
+    @Value("${application.properties.otp.expire-minutes}")
+    private int expireMinutes;
 
-    private final Random random = new Random();
+    @Value("${application.properties.otp.try-unlock-seconds}")
+    private int tryUnlockSeconds;
+
+    ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
 
     @Autowired
-    public OtpService(OtpRepository otpRepository, CustomerRepository customerRepository, MessageProducer messageProducer, EmsUtil emsUtil) {
+    public OtpService(OtpRepository otpRepository,
+                      CustomerRepository customerRepository,
+                      MessageProducer messageProducer,
+                      EmsUtil emsUtil,
+                      @Value("${application.properties.otp.try-unlock-seconds}")
+                      int tryUnlockSeconds) {
         this.otpRepository = otpRepository;
         this.customerRepository = customerRepository;
         this.messageProducer = messageProducer;
         this.emsUtil = emsUtil;
+        scheduledExecutorService.scheduleAtFixedRate(this::removeAttemptLock, 0, tryUnlockSeconds, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(this::removeValidationLock, 0, tryUnlockSeconds, TimeUnit.SECONDS);
     }
 
     @Transactional
@@ -68,94 +81,108 @@ public class OtpService implements MessagingService {
         if (customer.getOtpLock().equals(OtpLock.NOT_LOCKED)) {
             String contact = emsUtil.getContact(otpDTO.getPhoneNumber(), otpDTO.getEmail(), notificationMethod);
             if (emsUtil.checkIfProvidedContactExistInContacts(contact, customer.getContacts())) {
-                checkIfAttemptLockNeeded(customer, otpDTO.getCustomerId());
-                otpRepository.updateOtpStatusByCustomerIdAndOtpStatus(OtpStatus.DISCARDED, otpDTO.getCustomerId());
+                changeStatusOfAllExistingOtp(otpDTO.getCustomerId(), OtpStatus.EXPIRED);
+                if (emsUtil.checkIfAttemptLockNeeded(customer, otpDTO.getCustomerId())) {
+                    throw new TooManyRequestsException(ValidationMessage.OTP_ATTEMPTS_EXCEEDED);
+                }
                 OtpMessage otpMessage = convertToEntity(otpDTO, notificationMethod);
                 OtpMessage savedOtpMessage = otpRepository.save(otpMessage);
                 messageProducer.sendMessageToQueue(queueName, savedOtpMessage.getId());
             } else throw new InvalidRequestException(emsUtil.getValidationMessageForInvalidContact(notificationMethod));
-        } else tryToRemoveOtpLock(otpDTO, customer, notificationMethod);
+        } else throw new TooManyRequestsException(ValidationMessage.OTP_ATTEMPTS_EXCEEDED);
     }
 
-    public void verify(VerifyOtpDTO verifyOtpDTO) {
+    public void verifyOtp(VerifyOtpDTO verifyOtpDTO) {
         Customer customer = emsUtil.checkIfCustomerExists(verifyOtpDTO.getCustomerId());
         if (customer.getOtpLock() == OtpLock.VALIDATION_LOCK) {
             throw new InvalidRequestException(ValidationMessage.OTP_VERIFICATION_ATTEMPTS_EXCEEDED);
         }
-        Optional<OtpMessage> otpMessageOptional = otpRepository.findByCustomerIdAndOtpStatus(verifyOtpDTO.getCustomerId(), OtpStatus.GENERATED);
+        Optional<OtpMessage> otpMessageOptional = otpRepository.findAllByCustomerIdAndOtpStatus(verifyOtpDTO.getCustomerId(),
+                OtpStatus.GENERATED).stream().findFirst();
         otpMessageOptional.ifPresentOrElse(otpMessage -> {
             otpMessage.setVerificationAttempt(otpMessage.getVerificationAttempt() + 1);
             if (Objects.equals(otpMessage.getOtp(), verifyOtpDTO.getOtp())) {
-                customer.setOtpLock(OtpLock.NOT_LOCKED);
-                customerRepository.save(customer);
+                if (emsUtil.findHourDifferenceGreaterThanOrEqualToProvidedPeriod(otpMessage.getCreatedAt(),
+                        expireMinutes)) {
+                    otpMessage.setOtpStatus(OtpStatus.EXPIRED);
+                    otpRepository.save(otpMessage);
+                    throw new InvalidRequestException(ValidationMessage.OTP_EXPIRED);
+                }
+                changeStatusOfAllExistingOtp(customer.getCustomerId().toString(), OtpStatus.DISCARDED);
                 otpMessage.setOtpStatus(OtpStatus.VERIFIED);
                 otpRepository.save(otpMessage);
+            } else if (otpMessage.getVerificationAttempt() == verificationAttempt) {
+                customer.setOtpLock(OtpLock.VALIDATION_LOCK);
+                customerRepository.save(customer);
+                otpRepository.save(otpMessage);
+                throw new InvalidRequestException(ValidationMessage.OTP_VERIFICATION_FAILED_WITH_ATTEMPTS_EXCEEDED);
             } else {
-                if (otpMessage.getVerificationAttempt() == verificationAttempt) {
-                    otpMessage.setOtpStatus(OtpStatus.VALIDATION_FAILED);
-                    customer.setOtpLock(OtpLock.VALIDATION_LOCK);
-                    customerRepository.save(customer);
-                    otpRepository.save(otpMessage);
-                    throw new InvalidRequestException(ValidationMessage.OTP_VERIFICATION_FAILED_WITH_ATTEMPTS_EXCEEDED);
-                } else {
-                    otpRepository.save(otpMessage);
-                    throw new InvalidRequestException(ValidationMessage.INVALID_OTP);
-                }
+                otpRepository.save(otpMessage);
+                throw new InvalidRequestException(ValidationMessage.INVALID_OTP);
             }
         }, () -> {
             throw new InvalidRequestException(ValidationMessage.OTP_EXPIRED_NOT_GENERATED);
         });
     }
 
+    private void changeStatusOfAllExistingOtp(String customerId, OtpStatus otpStatus) {
+        List<OtpMessage> otpMessages = otpRepository.findNotDiscardedOtpMessageByCustomerId(customerId)
+                .stream().peek(otpMessage1 -> otpMessage1.setOtpStatus(otpStatus)).toList();
+        otpRepository.saveAll(otpMessages);
+    }
+
     public ValidatedOtpDTO status(String customerId) {
         emsUtil.checkIfCustomerExists(customerId);
-        Optional<OtpMessage> optionalOtpMessage = otpRepository.findByCustomerIdAndOtpStatus(customerId, OtpStatus.VERIFIED);
-        return optionalOtpMessage.map(otpMessage -> new ValidatedOtpDTO(SuccessMessage.SUCCESS_OTP_VALIDATION, otpMessage.getUpdatedAt().toString())).orElseThrow(() -> new InvalidRequestException(ValidationMessage.NOT_A_VALIDATED_USER));
+        Optional<OtpMessage> optionalOtpMessage = otpRepository.findAllByCustomerIdAndOtpStatus(customerId,
+                OtpStatus.VERIFIED).stream().findFirst();
+        return optionalOtpMessage
+                .map(otpMessage ->
+                        new ValidatedOtpDTO(SuccessMessage.SUCCESS_OTP_VALIDATION,
+                                otpMessage.getUpdatedAt().toString()))
+                .orElseThrow(() -> new InvalidRequestException(ValidationMessage.NOT_A_VALIDATED_USER));
     }
 
-    private void checkIfAttemptLockNeeded(Customer customer, String customerId) {
-        List<OtpMessage> allOtpMessageByCustomerId = otpRepository.findAllByCustomerId(customerId);
-        if (allOtpMessageByCustomerId.size() == otpAttempt - 1) {
-            customer.setOtpLock(OtpLock.ATTEMPT_LOCK);
-            customerRepository.save(customer);
-        }
-    }
-
-    private void tryToRemoveOtpLock(BaseDTO otpDTO, Customer customer, NotificationMethod notificationMethod) {
-        List<OtpMessage> allOtpMessageByCustomerId = otpRepository.findAllByCustomerId(otpDTO.getCustomerId());
-        if (customer.getOtpLock().equals(OtpLock.VALIDATION_LOCK)) {
-            Stream<OtpMessage> otpMessageStream = allOtpMessageByCustomerId.stream().filter(otpMessage -> otpMessage.getOtpStatus().equals(OtpStatus.VALIDATION_FAILED));
-            otpMessageStream.findFirst().ifPresent(otpMessage -> {
-                if (findHourDifference(otpMessage.getUpdatedAt(), validationLockPeriodHr)) {
-                    otpMessage.setOtpStatus(OtpStatus.DISCARDED);
+    private void removeValidationLock() {
+        customerRepository.findAllWithOtpLock(OtpLock.VALIDATION_LOCK).forEach(customer -> {
+            Optional<OtpMessage> otpMessageOptional = otpRepository.findAllByCustomerIdAndOtpStatus(customer.getCustomerId().toString(), OtpStatus.GENERATED).stream().findFirst();
+            otpMessageOptional.ifPresent(otpMessage -> {
+                if (emsUtil.findHourDifferenceGreaterThanOrEqualToProvidedPeriod(otpMessage.getUpdatedAt(),
+                        validationLockPeriodMin)) {
+                    otpMessage.setOtpStatus(OtpStatus.EXPIRED);
                     otpRepository.save(otpMessage);
                     customer.setOtpLock(OtpLock.NOT_LOCKED);
                     customerRepository.save(customer);
-                    save(otpDTO, notificationMethod);
-                } else throw new TooManyRequestsException(ValidationMessage.OTP_ATTEMPTS_EXCEEDED);
+                }
             });
-        } else {
-            List<OtpMessage> otpMessagesToBeRemoved = allOtpMessageByCustomerId.stream().filter(otpMessage -> findHourDifference(otpMessage.getCreatedAt(), attemptLockPeriodHr)).toList();
-            if (!otpMessagesToBeRemoved.isEmpty()) {
-                customer.setOtpLock(OtpLock.NOT_LOCKED);
-                customerRepository.save(customer);
-                otpRepository.deleteAll(otpMessagesToBeRemoved);
-                save(otpDTO, notificationMethod);
-            } else throw new TooManyRequestsException(ValidationMessage.OTP_ATTEMPTS_EXCEEDED);
-        }
+        });
     }
 
-    private boolean findHourDifference(LocalDateTime createdDateTime, int period) {
-        LocalDateTime currentDateTime = LocalDateTime.now();
-        Duration duration = Duration.between(createdDateTime, currentDateTime);
-        return (Math.abs(duration.toMinutes()) >= 2);
-    }
-
-    private int generateOtp() {
-        return 100000 + random.nextInt(900000);
+    private void removeAttemptLock() {
+        customerRepository.findAll().forEach(customer -> {
+            List<OtpMessage> list = otpRepository.findNotDiscardedOtpMessageByCustomerId(customer.getCustomerId().toString())
+                    .stream().filter(otpMessage ->
+                            emsUtil.findHourDifferenceGreaterThanOrEqualToProvidedPeriod(otpMessage.getUpdatedAt(),
+                                    attemptLockPeriodMin))
+                    .toList();
+            list.forEach(otpMessage -> otpMessage.setOtpStatus(OtpStatus.DISCARDED));
+            if (list.size() > 1) {
+                otpRepository.saveAll(list);
+                if (customer.getOtpLock().equals(OtpLock.ATTEMPT_LOCK)) {
+                    customer.setOtpLock(OtpLock.NOT_LOCKED);
+                    customerRepository.save(customer);
+                }
+            }
+        });
     }
 
     private OtpMessage convertToEntity(BaseDTO otpDTO, NotificationMethod notificationMethod) {
-        return OtpMessage.builder().customerId(otpDTO.getCustomerId()).phone(otpDTO.getPhoneNumber()).email(otpDTO.getEmail()).otpStatus(OtpStatus.GENERATED).notificationMethod(notificationMethod).otp(String.valueOf(generateOtp())).verificationAttempt(0).build();
+        return OtpMessage.builder()
+                .customerId(otpDTO.getCustomerId())
+                .phone(otpDTO.getPhoneNumber())
+                .email(otpDTO.getEmail())
+                .otpStatus(OtpStatus.GENERATED)
+                .notificationMethod(notificationMethod)
+                .otp(String.valueOf(emsUtil.generateOtp()))
+                .verificationAttempt(0).build();
     }
 }

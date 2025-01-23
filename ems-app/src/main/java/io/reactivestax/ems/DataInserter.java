@@ -47,8 +47,8 @@ public class DataInserter {
 
     // Method to insert contacts for a customer
     private static void insertContacts(Connection connection, UUID customerId, String firstName) throws SQLException {
-        String[] phones = { "123-456-789" + firstName.charAt(firstName.length() - 1), "987-654-321" + firstName.charAt(firstName.length() - 1) };
-        String[] emails = { firstName.toLowerCase() + "1@example.com", "alt" + firstName.toLowerCase() + "@example.com" };
+        String[] phones = { "+12266985174", "+12266985174" };
+        String[] emails = { "jainanant36@gmail.com", "jainanant36@gmail.com" };
 
         for (String phone : phones) {
             insertContact(connection, customerId, "PHONE", phone);

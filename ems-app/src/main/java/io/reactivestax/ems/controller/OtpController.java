@@ -51,7 +51,7 @@ public class OtpController {
 
     @PutMapping(value = "/verify", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SuccessfulResponse> verifyOtp(@RequestBody VerifyOtpDTO verifyOtpDTO) {
-        this.otpService.verify(verifyOtpDTO);
+        this.otpService.verifyOtp(verifyOtpDTO);
 
         return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_OTP_VERIFICATION).build());
     }

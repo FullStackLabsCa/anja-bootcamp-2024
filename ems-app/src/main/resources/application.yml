@@ -26,5 +26,7 @@ application:
     otp:
       verification-attempt: 3
       otp-attempt: 5
-      validation-lock-period-hour: 2
-      attempt-lock-period-hour: 8
+      validation-lock-period-minutes: 120
+      attempt-lock-period-minutes: 480
+      expire-minutes: 10
+      try-unlock-seconds: 10
