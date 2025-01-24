@@ -1,7 +1,9 @@
 package io.reactivestax.ems.service;
 
 import io.reactivestax.ems.constant.ValidationMessage;
+import io.reactivestax.ems.domain.Contact;
 import io.reactivestax.ems.domain.Customer;
+import io.reactivestax.ems.enums.ContactType;
 import io.reactivestax.ems.enums.NotificationMethod;
 import io.reactivestax.ems.enums.OtpLock;
 import io.reactivestax.ems.exception.InvalidRequestException;
@@ -12,6 +14,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -43,6 +47,25 @@ class EmsCommonServiceTest {
 
         Customer customer1 = emsCommonService.checkIfCustomerExists(uuid);
         assertThat(customer1).isSameAs(customer);
+    }
+
+    @Test
+    void testCheckIfProvidedContactExistInContacts() {
+        List<Contact> contacts = new ArrayList<>();
+        contacts.add(Contact.builder()
+                .contactType(ContactType.PHONE)
+                .contactValue("+12223334444")
+                .build());
+
+        contacts.add(Contact.builder()
+                .contactType(ContactType.EMAIL)
+                .contactValue("example@email.com")
+                .build());
+
+        assertThat(emsCommonService.checkIfProvidedContactExistInContacts("+12223334444", contacts)).isTrue();
+        assertThat(emsCommonService.checkIfProvidedContactExistInContacts("+13434333234", contacts)).isFalse();
+        assertThat(emsCommonService.checkIfProvidedContactExistInContacts("example@email.com", contacts)).isTrue();
+        assertThat(emsCommonService.checkIfProvidedContactExistInContacts("non_existing@email.com", contacts)).isFalse();
     }
 
     @Test
