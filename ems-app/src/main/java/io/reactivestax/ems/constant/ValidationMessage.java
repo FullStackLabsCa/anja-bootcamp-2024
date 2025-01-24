@@ -7,6 +7,7 @@ public class ValidationMessage {
 
     public static final String EMPTY_CUSTOMER_ID = "Customer id is required.";
     public static final String EMPTY_PHONE_NUMBER = "Phone number is required.";
+    public static final String EMPTY_OTP = "Otp is required.";
     public static final String INVALID_PHONE_NUMBER = "Invalid phone number.";
     public static final String INVALID_PHONE_NUMBER_REGEX = "Invalid phone number, it should be in the format +19999999999.";
     public static final String EMPTY_EMAIL = "Email is required.";

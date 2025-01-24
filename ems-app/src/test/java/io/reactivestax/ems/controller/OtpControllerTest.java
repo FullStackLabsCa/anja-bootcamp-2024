@@ -1,5 +1,6 @@
 package io.reactivestax.ems.controller;
 
+import io.reactivestax.ems.constant.Endpoints;
 import io.reactivestax.ems.constant.SuccessMessage;
 import io.reactivestax.ems.dto.BaseDTO;
 import io.reactivestax.ems.dto.ValidatedOtpDTO;
@@ -39,7 +40,7 @@ class OtpControllerTest {
     void testSendSmsOtpWithValidValues() throws Exception {
         doNothing().when(otpService).save(any(BaseDTO.class), any(NotificationMethod.class));
 
-        mockMvc.perform(post("/api/v1/otp/sms")
+        mockMvc.perform(post(Endpoints.OTP_BASE + Endpoints.SMS)
                         .content(getPhoneRequestJson())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -51,7 +52,7 @@ class OtpControllerTest {
     void testSendCallOtpWithValidValues() throws Exception {
         doNothing().when(otpService).save(any(BaseDTO.class), any(NotificationMethod.class));
 
-        mockMvc.perform(post("/api/v1/otp/call")
+        mockMvc.perform(post(Endpoints.OTP_BASE + Endpoints.CALL)
                         .content(getPhoneRequestJson())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -63,7 +64,7 @@ class OtpControllerTest {
     void testSendEmailOtpWithValidValues() throws Exception {
         doNothing().when(otpService).save(any(BaseDTO.class), any(NotificationMethod.class));
 
-        mockMvc.perform(post("/api/v1/otp/email")
+        mockMvc.perform(post(Endpoints.OTP_BASE + Endpoints.EMAIL)
                         .content(getEmailRequestJson())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -75,7 +76,7 @@ class OtpControllerTest {
     void testSendVerifyOtpWithValidValues() throws Exception {
         doNothing().when(otpService).verifyOtp(any(VerifyOtpDTO.class));
 
-        mockMvc.perform(put("/api/v1/otp/verify")
+        mockMvc.perform(put(Endpoints.OTP_BASE + Endpoints.VERIFY)
                         .content(getVerifyOtpRequestJson())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -87,7 +88,7 @@ class OtpControllerTest {
     void testStatusOtpWithValidValues() throws Exception {
         doReturn(getValidatedOtpDTO()).when(otpService).status(anyString());
 
-        mockMvc.perform(get("/api/v1/otp/status/b87ce6bd-ec3c-4d51-9c48-b68ef99301ee"))
+        mockMvc.perform(get(Endpoints.OTP_BASE + "/status/b87ce6bd-ec3c-4d51-9c48-b68ef99301ee"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(getValidatedResponseJson()));

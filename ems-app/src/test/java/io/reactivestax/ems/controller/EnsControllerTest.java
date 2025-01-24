@@ -1,5 +1,6 @@
 package io.reactivestax.ems.controller;
 
+import io.reactivestax.ems.constant.Endpoints;
 import io.reactivestax.ems.constant.SuccessMessage;
 import io.reactivestax.ems.dto.BaseDTO;
 import io.reactivestax.ems.enums.NotificationMethod;
@@ -32,7 +33,7 @@ class EnsControllerTest {
     void testSendSmsWithValidValues() throws Exception {
         doNothing().when(ensService).save(any(BaseDTO.class), any(NotificationMethod.class));
 
-        mockMvc.perform(post("/api/v1/ems/sms")
+        mockMvc.perform(post(Endpoints.ENS_BASE + Endpoints.SMS)
                         .content(getPhoneRequestJson())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -44,7 +45,7 @@ class EnsControllerTest {
     void testSendCallWithValidValues() throws Exception {
         doNothing().when(ensService).save(any(BaseDTO.class), any(NotificationMethod.class));
 
-        mockMvc.perform(post("/api/v1/ems/call")
+        mockMvc.perform(post(Endpoints.ENS_BASE + Endpoints.CALL)
                         .content(getPhoneRequestJson())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -56,7 +57,7 @@ class EnsControllerTest {
     void testSendEmailWithValidValues() throws Exception {
         doNothing().when(ensService).save(any(BaseDTO.class), any(NotificationMethod.class));
 
-        mockMvc.perform(post("/api/v1/ems/email")
+        mockMvc.perform(post(Endpoints.ENS_BASE + Endpoints.EMAIL)
                         .content(getEmailRequestJson())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())

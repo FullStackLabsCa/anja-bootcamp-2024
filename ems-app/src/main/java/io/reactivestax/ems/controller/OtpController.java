@@ -1,5 +1,6 @@
 package io.reactivestax.ems.controller;
 
+import io.reactivestax.ems.constant.Endpoints;
 import io.reactivestax.ems.constant.SuccessMessage;
 import io.reactivestax.ems.dto.BaseDTO;
 import io.reactivestax.ems.dto.SuccessfulResponse;
@@ -18,7 +19,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/otp")
+@RequestMapping(Endpoints.OTP_BASE)
 public class OtpController {
 
     private final OtpService otpService;
@@ -28,35 +29,39 @@ public class OtpController {
         this.otpService = otpService;
     }
 
-    @PostMapping(value = "/sms", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = Endpoints.SMS, produces = MediaType.APPLICATION_JSON_VALUE, consumes =
+            MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SuccessfulResponse> smsOtp(@Validated({SmsGroup.class, Default.class}) @RequestBody BaseDTO otpDTO) {
         this.otpService.save(otpDTO, NotificationMethod.SMS);
 
         return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_OTP_MESSAGE).build());
     }
 
-    @PostMapping(value = "/call", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = Endpoints.CALL, produces = MediaType.APPLICATION_JSON_VALUE, consumes =
+            MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SuccessfulResponse> callOtp(@Validated({CallGroup.class, Default.class}) @RequestBody BaseDTO otpDTO) {
         this.otpService.save(otpDTO, NotificationMethod.CALL);
 
         return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_OTP_MESSAGE).build());
     }
 
-    @PostMapping(value = "/email", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = Endpoints.EMAIL, produces = MediaType.APPLICATION_JSON_VALUE, consumes =
+            MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SuccessfulResponse> emailOtp(@Validated({EmailGroup.class, Default.class}) @RequestBody BaseDTO otpDTO) {
         this.otpService.save(otpDTO, NotificationMethod.EMAIL);
 
         return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_OTP_MESSAGE).build());
     }
 
-    @PutMapping(value = "/verify", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = Endpoints.VERIFY, produces = MediaType.APPLICATION_JSON_VALUE, consumes =
+            MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SuccessfulResponse> verifyOtp(@RequestBody VerifyOtpDTO verifyOtpDTO) {
         this.otpService.verifyOtp(verifyOtpDTO);
 
         return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_OTP_VERIFICATION).build());
     }
 
-    @GetMapping(value = "/status/{customerId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = Endpoints.STATUS_BY_CUSTOMER_ID, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ValidatedOtpDTO> statusOtp(@PathVariable String customerId) {
         ValidatedOtpDTO validatedOtpDTO = this.otpService.status(customerId);
 

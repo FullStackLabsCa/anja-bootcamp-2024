@@ -19,14 +19,12 @@ import io.reactivestax.ems.util.EmsUtil;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -38,6 +36,7 @@ public class OtpService implements MessagingService {
     private final CustomerRepository customerRepository;
     private final MessageProducer messageProducer;
     private final EmsUtil emsUtil;
+    private final ApplicationContext applicationContext;
 
     @Value("${spring.artemis.otp-queue}")
     private String queueName;
@@ -57,6 +56,9 @@ public class OtpService implements MessagingService {
     @Value("${application.properties.otp.try-unlock-seconds}")
     private int tryUnlockSeconds;
 
+    @Value("${application.properties.otp.otp-attempt}")
+    private int otpAttempt;
+
     ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
 
     @Autowired
@@ -65,11 +67,13 @@ public class OtpService implements MessagingService {
                       MessageProducer messageProducer,
                       EmsUtil emsUtil,
                       @Value("${application.properties.otp.try-unlock-seconds}")
-                      int tryUnlockSeconds) {
+                      int tryUnlockSeconds,
+                      ApplicationContext applicationContext) {
         this.otpRepository = otpRepository;
         this.customerRepository = customerRepository;
         this.messageProducer = messageProducer;
         this.emsUtil = emsUtil;
+        this.applicationContext = applicationContext;
         scheduledExecutorService.scheduleAtFixedRate(this::removeAttemptLock, 0, tryUnlockSeconds, TimeUnit.SECONDS);
         scheduledExecutorService.scheduleAtFixedRate(this::removeValidationLock, 0, tryUnlockSeconds, TimeUnit.SECONDS);
     }
@@ -82,7 +86,8 @@ public class OtpService implements MessagingService {
             String contact = emsUtil.getContact(otpDTO.getPhoneNumber(), otpDTO.getEmail(), notificationMethod);
             if (emsUtil.checkIfProvidedContactExistInContacts(contact, customer.getContacts())) {
                 changeStatusOfAllExistingOtp(otpDTO.getCustomerId(), OtpStatus.EXPIRED);
-                if (emsUtil.checkIfAttemptLockNeeded(customer, otpDTO.getCustomerId())) {
+                OtpService otpServiceBean = applicationContext.getBean(OtpService.class);
+                if (otpServiceBean.checkIfAttemptLockNeeded(customer, otpDTO.getCustomerId())) {
                     throw new TooManyRequestsException(ValidationMessage.OTP_ATTEMPTS_EXCEEDED);
                 }
                 OtpMessage otpMessage = convertToEntity(otpDTO, notificationMethod);
@@ -90,6 +95,17 @@ public class OtpService implements MessagingService {
                 messageProducer.sendMessageToQueue(queueName, savedOtpMessage.getId());
             } else throw new InvalidRequestException(emsUtil.getValidationMessageForInvalidContact(notificationMethod));
         } else throw new TooManyRequestsException(ValidationMessage.OTP_ATTEMPTS_EXCEEDED);
+    }
+
+    @Transactional(value = Transactional.TxType.REQUIRES_NEW)
+    private boolean checkIfAttemptLockNeeded(Customer customer, String customerId) {
+        List<OtpMessage> allByCustomerIdAndOtpStatus = otpRepository.findNotDiscardedOtpMessageByCustomerId(customerId);
+        if (allByCustomerIdAndOtpStatus.size() == otpAttempt) {
+            customer.setOtpLock(OtpLock.ATTEMPT_LOCK);
+            customerRepository.save(customer);
+            return true;
+        }
+        return false;
     }
 
     public void verifyOtp(VerifyOtpDTO verifyOtpDTO) {

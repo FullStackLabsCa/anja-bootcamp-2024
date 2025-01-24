@@ -14,7 +14,7 @@ public class VerifyOtpDTO {
     @NotBlank(message = ValidationMessage.EMPTY_CUSTOMER_ID)
     private String customerId;
 
-    @NotBlank(message = ValidationMessage.INVALID_OTP)
+    @NotBlank(message = ValidationMessage.EMPTY_OTP)
     @Size(min = 6, max = 6, message = ValidationMessage.INVALID_OTP)
     private String otp;
 }

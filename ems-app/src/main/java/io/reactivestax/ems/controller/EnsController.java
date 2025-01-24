@@ -1,5 +1,6 @@
 package io.reactivestax.ems.controller;
 
+import io.reactivestax.ems.constant.Endpoints;
 import io.reactivestax.ems.constant.SuccessMessage;
 import io.reactivestax.ems.dto.BaseDTO;
 import io.reactivestax.ems.dto.SuccessfulResponse;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/ems")
+@RequestMapping(Endpoints.ENS_BASE)
 @Validated
 public class EnsController {
 
@@ -31,21 +32,24 @@ public class EnsController {
         this.ensService = ensService;
     }
 
-    @PostMapping(value = "/sms", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = Endpoints.SMS, produces = MediaType.APPLICATION_JSON_VALUE, consumes =
+            MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SuccessfulResponse> sendSms(@Validated({SmsGroup.class, MessageGroup.class, Default.class}) @RequestBody BaseDTO messageDTO) {
         this.ensService.save(messageDTO, NotificationMethod.SMS);
 
         return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_ENS_MESSAGE).build());
     }
 
-    @PostMapping(value = "/call", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = Endpoints.CALL, produces = MediaType.APPLICATION_JSON_VALUE, consumes =
+            MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SuccessfulResponse> call(@Validated({CallGroup.class, MessageGroup.class, Default.class}) @RequestBody BaseDTO messageDTO) {
         this.ensService.save(messageDTO, NotificationMethod.CALL);
 
         return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_ENS_MESSAGE).build());
     }
 
-    @PostMapping(value = "/email", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = Endpoints.EMAIL, produces = MediaType.APPLICATION_JSON_VALUE, consumes =
+            MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SuccessfulResponse> email(@Validated({EmailGroup.class, MessageGroup.class, Default.class}) @RequestBody BaseDTO messageDTO) {
         this.ensService.save(messageDTO, NotificationMethod.EMAIL);
 
