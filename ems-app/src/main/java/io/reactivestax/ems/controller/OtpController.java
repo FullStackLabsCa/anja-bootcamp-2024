@@ -32,21 +32,21 @@ public class OtpController {
     public ResponseEntity<SuccessfulResponse> smsOtp(@Validated({SmsGroup.class, Default.class}) @RequestBody BaseDTO otpDTO) {
         this.otpService.save(otpDTO, NotificationMethod.SMS);
 
-        return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_OTP).build());
+        return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_OTP_MESSAGE).build());
     }
 
     @PostMapping(value = "/call", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SuccessfulResponse> callOtp(@Validated({CallGroup.class, Default.class}) @RequestBody BaseDTO otpDTO) {
         this.otpService.save(otpDTO, NotificationMethod.CALL);
 
-        return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_OTP).build());
+        return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_OTP_MESSAGE).build());
     }
 
     @PostMapping(value = "/email", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SuccessfulResponse> emailOtp(@Validated({EmailGroup.class, Default.class}) @RequestBody BaseDTO otpDTO) {
         this.otpService.save(otpDTO, NotificationMethod.EMAIL);
 
-        return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_OTP).build());
+        return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_OTP_MESSAGE).build());
     }
 
     @PutMapping(value = "/verify", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -57,7 +57,7 @@ public class OtpController {
     }
 
     @GetMapping(value = "/status/{customerId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ValidatedOtpDTO> verifyOtp(@PathVariable String customerId) {
+    public ResponseEntity<ValidatedOtpDTO> statusOtp(@PathVariable String customerId) {
         ValidatedOtpDTO validatedOtpDTO = this.otpService.status(customerId);
 
         return ResponseEntity.ok(validatedOtpDTO);

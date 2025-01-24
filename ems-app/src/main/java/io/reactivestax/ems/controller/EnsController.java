@@ -35,20 +35,20 @@ public class EnsController {
     public ResponseEntity<SuccessfulResponse> sendSms(@Validated({SmsGroup.class, MessageGroup.class, Default.class}) @RequestBody BaseDTO messageDTO) {
         this.ensService.save(messageDTO, NotificationMethod.SMS);
 
-        return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_MESSAGE).build());
+        return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_ENS_MESSAGE).build());
     }
 
     @PostMapping(value = "/call", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SuccessfulResponse> call(@Validated({CallGroup.class, MessageGroup.class, Default.class}) @RequestBody BaseDTO messageDTO) {
         this.ensService.save(messageDTO, NotificationMethod.CALL);
 
-        return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_MESSAGE).build());
+        return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_ENS_MESSAGE).build());
     }
 
     @PostMapping(value = "/email", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SuccessfulResponse> email(@Validated({EmailGroup.class, MessageGroup.class, Default.class}) @RequestBody BaseDTO messageDTO) {
         this.ensService.save(messageDTO, NotificationMethod.EMAIL);
 
-        return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_MESSAGE).build());
+        return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_ENS_MESSAGE).build());
     }
 }
