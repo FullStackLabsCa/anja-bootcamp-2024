@@ -33,7 +33,7 @@ public class EnsService implements MessagingService {
     @Override
     public void save(BaseDTO messageDTO, NotificationMethod notificationMethod) {
         Customer customer = emsCommonService.checkIfCustomerExists(messageDTO.getCustomerId());
-        String contact = emsCommonService.getContact(messageDTO.getPhoneNumber(), messageDTO.getEmail(), notificationMethod);
+        String contact = emsCommonService.getContactValue(messageDTO.getPhoneNumber(), messageDTO.getEmail(), notificationMethod);
         if (emsCommonService.checkIfProvidedContactExistInContacts(contact, customer.getContacts())) {
             EnsMessage ensMessage = convertToEntity(messageDTO, notificationMethod);
             EnsMessage savedMessage = ensRepository.save(ensMessage);

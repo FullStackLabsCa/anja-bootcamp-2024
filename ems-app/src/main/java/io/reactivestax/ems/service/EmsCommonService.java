@@ -46,7 +46,7 @@ public class EmsCommonService {
         return contactOptional.isPresent();
     }
 
-    public String getContact(String phone, String email, NotificationMethod notificationMethod) {
+    public String getContactValue(String phone, String email, NotificationMethod notificationMethod) {
         return notificationMethod == NotificationMethod.EMAIL ? email : phone;
     }
 

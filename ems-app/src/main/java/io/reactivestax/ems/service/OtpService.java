@@ -83,7 +83,7 @@ public class OtpService implements MessagingService {
     public void save(BaseDTO otpDTO, NotificationMethod notificationMethod) {
         Customer customer = emsCommonService.checkIfCustomerExists(otpDTO.getCustomerId());
         if (customer.getOtpLock().equals(OtpLock.NOT_LOCKED)) {
-            String contact = emsCommonService.getContact(otpDTO.getPhoneNumber(), otpDTO.getEmail(), notificationMethod);
+            String contact = emsCommonService.getContactValue(otpDTO.getPhoneNumber(), otpDTO.getEmail(), notificationMethod);
             if (emsCommonService.checkIfProvidedContactExistInContacts(contact, customer.getContacts())) {
                 changeStatusOfAllExistingOtp(otpDTO.getCustomerId(), OtpStatus.EXPIRED);
                 OtpService otpServiceBean = applicationContext.getBean(OtpService.class);

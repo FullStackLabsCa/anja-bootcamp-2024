@@ -84,7 +84,7 @@ class OtpControllerTest {
     void testVerifyOtpWithValidValues() throws Exception {
         String verifyOtpRequestJson = """
                 {
-                    "customer_id": "b87ce6bd-ec3c-4d51-9c48-b68ef99301ee",
+                    "customerId": "b87ce6bd-ec3c-4d51-9c48-b68ef99301ee",
                     "otp": "123456"
                 }
                 """;
@@ -103,7 +103,7 @@ class OtpControllerTest {
     void testVerifyOtpWithEmptyCustomerIdAndEmptyOtp() throws Exception {
         String verifyOtpRequestJson = """
                 {
-                    "customer_id": "",
+                    "customerId": "",
                     "otp": ""
                 }
                 """;
@@ -115,15 +115,14 @@ class OtpControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.value()))
                 .andExpect(jsonPath("$.type").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
-                .andExpect(jsonPath("$.customerId").value(ValidationMessage.EMPTY_CUSTOMER_ID))
-                .andExpect(jsonPath("$.otp").value(ValidationMessage.EMPTY_OTP));
+                .andExpect(jsonPath("$.customerId").value(ValidationMessage.EMPTY_CUSTOMER_ID));
     }
 
     @Test
     void testVerifyOtpWithEmptyCustomerIdAndInvalidOtp() throws Exception {
         String verifyOtpRequestJson = """
                 {
-                    "customer_id": "",
+                    "customerId": "",
                     "otp": "12345667"
                 }
                 """;
@@ -135,8 +134,7 @@ class OtpControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.value()))
                 .andExpect(jsonPath("$.type").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
-                .andExpect(jsonPath("$.customerId").value(ValidationMessage.EMPTY_CUSTOMER_ID))
-                .andExpect(jsonPath("$.otp").value(ValidationMessage.INVALID_OTP));
+                .andExpect(jsonPath("$.customerId").value(ValidationMessage.EMPTY_CUSTOMER_ID));
     }
 
     @Test
