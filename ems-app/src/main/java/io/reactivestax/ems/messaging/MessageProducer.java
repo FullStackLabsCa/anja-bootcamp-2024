@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.UUID;
 
 @Component
-public class MessageProducer {
+public class MessageProducer implements MessageProcessor {
 
     private final JmsTemplate jmsTemplate;
 
@@ -20,6 +20,7 @@ public class MessageProducer {
         this.jmsTemplate = jmsTemplate;
     }
 
+    @Override
     public void sendMessageToQueue(String queueName, UUID message) {
         jmsTemplate.send(queueName, new MessageCreator() {
             @Override

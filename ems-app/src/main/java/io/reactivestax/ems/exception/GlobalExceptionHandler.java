@@ -1,5 +1,6 @@
 package io.reactivestax.ems.exception;
 
+import io.reactivestax.ems.constant.ExceptionHandlerConstant;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -19,9 +20,9 @@ public class GlobalExceptionHandler {
         Map<String, String> errors = new HashMap<>();
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
 
-        errors.put("code", String.valueOf(httpStatus.value()));
-        errors.put("type", httpStatus.getReasonPhrase());
-        errors.put("timestamp", String.valueOf(LocalDateTime.now()));
+        errors.put(ExceptionHandlerConstant.CODE, String.valueOf(httpStatus.value()));
+        errors.put(ExceptionHandlerConstant.TYPE, httpStatus.getReasonPhrase());
+        errors.put(ExceptionHandlerConstant.TIMESTAMP, String.valueOf(LocalDateTime.now()));
 
         for (FieldError error : exception.getBindingResult().getFieldErrors()) {
             errors.put(error.getField(), error.getDefaultMessage());
@@ -38,10 +39,10 @@ public class GlobalExceptionHandler {
         Map<String, String> errors = new HashMap<>();
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
 
-        errors.put("code", String.valueOf(httpStatus.value()));
-        errors.put("type", httpStatus.getReasonPhrase());
-        errors.put("timestamp", String.valueOf(LocalDateTime.now()));
-        errors.put("message", exception.getMessage());
+        errors.put(ExceptionHandlerConstant.CODE, String.valueOf(httpStatus.value()));
+        errors.put(ExceptionHandlerConstant.TYPE, httpStatus.getReasonPhrase());
+        errors.put(ExceptionHandlerConstant.TIMESTAMP, String.valueOf(LocalDateTime.now()));
+        errors.put(ExceptionHandlerConstant.MESSAGE, exception.getMessage());
 
         return new ResponseEntity<>(errors, httpStatus);
     }
@@ -51,10 +52,10 @@ public class GlobalExceptionHandler {
         Map<String, String> errors = new HashMap<>();
         HttpStatus httpStatus = HttpStatus.TOO_MANY_REQUESTS;
 
-        errors.put("code", String.valueOf(httpStatus.value()));
-        errors.put("type", httpStatus.getReasonPhrase());
-        errors.put("timestamp", String.valueOf(LocalDateTime.now()));
-        errors.put("message", exception.getMessage());
+        errors.put(ExceptionHandlerConstant.CODE, String.valueOf(httpStatus.value()));
+        errors.put(ExceptionHandlerConstant.TYPE, httpStatus.getReasonPhrase());
+        errors.put(ExceptionHandlerConstant.TIMESTAMP, String.valueOf(LocalDateTime.now()));
+        errors.put(ExceptionHandlerConstant.MESSAGE, exception.getMessage());
 
         return new ResponseEntity<>(errors, httpStatus);
     }

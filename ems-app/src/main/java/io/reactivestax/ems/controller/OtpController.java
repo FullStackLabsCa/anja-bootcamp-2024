@@ -11,6 +11,7 @@ import io.reactivestax.ems.service.OtpService;
 import io.reactivestax.ems.validation.CallGroup;
 import io.reactivestax.ems.validation.EmailGroup;
 import io.reactivestax.ems.validation.SmsGroup;
+import jakarta.validation.Valid;
 import jakarta.validation.groups.Default;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -55,7 +56,7 @@ public class OtpController {
 
     @PutMapping(value = Endpoints.VERIFY, produces = MediaType.APPLICATION_JSON_VALUE, consumes =
             MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<SuccessfulResponse> verifyOtp(@RequestBody VerifyOtpDTO verifyOtpDTO) {
+    public ResponseEntity<SuccessfulResponse> verifyOtp(@Valid @RequestBody VerifyOtpDTO verifyOtpDTO) {
         this.otpService.verifyOtp(verifyOtpDTO);
 
         return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_OTP_VERIFICATION).build());

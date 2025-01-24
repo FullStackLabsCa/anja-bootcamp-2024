@@ -1,4 +1,4 @@
-package io.reactivestax.ems.util;
+package io.reactivestax.ems.service;
 
 import io.reactivestax.ems.constant.ValidationMessage;
 import io.reactivestax.ems.domain.Contact;
@@ -7,21 +7,21 @@ import io.reactivestax.ems.enums.NotificationMethod;
 import io.reactivestax.ems.exception.InvalidRequestException;
 import io.reactivestax.ems.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
-@Component
-public class EmsUtil {
+@Service
+public class EmsCommonService {
 
     private final CustomerRepository customerRepository;
 
     private final Random random = new Random();
 
     @Autowired
-    public EmsUtil(CustomerRepository customerRepository) {
+    public EmsCommonService(CustomerRepository customerRepository) {
         this.customerRepository = customerRepository;
     }
 
