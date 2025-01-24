@@ -9,7 +9,6 @@ import io.reactivestax.ems.validation.SmsGroup;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,8 +22,6 @@ public class BaseDTO {
     @NotBlank(message = ValidationMessage.EMPTY_CUSTOMER_ID)
     private String customerId;
 
-    @NotBlank(groups = {CallGroup.class, SmsGroup.class}, message = ValidationMessage.EMPTY_PHONE_NUMBER)
-    @Size(groups = {CallGroup.class, SmsGroup.class}, min = 12, max = 12, message = ValidationMessage.INVALID_PHONE_NUMBER)
     @Pattern(groups = {CallGroup.class, SmsGroup.class}, regexp = ValidationRegexPattern.PHONE_REGEX, message =
             ValidationMessage.INVALID_PHONE_NUMBER_REGEX)
     private String phoneNumber;
