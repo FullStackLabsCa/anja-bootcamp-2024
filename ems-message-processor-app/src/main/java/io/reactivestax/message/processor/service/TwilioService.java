@@ -5,19 +5,30 @@ import com.twilio.rest.api.v2010.account.Call;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
 import com.twilio.type.Twiml;
+import io.reactivestax.message.processor.domain.TwilioCredentials;
 import io.reactivestax.message.processor.enums.NotificationMethod;
-import org.springframework.beans.factory.annotation.Value;
+import io.reactivestax.message.processor.respository.TwilioRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class TwilioService {
 
-    @Value("${twilio.account.messaging-service}")
-    private String messagingService;
+    private String messagingServiceId;
+    private String sid;
+    private String authToken;
 
-    public TwilioService(@Value("${twilio.account.sid}") String sid,
-                         @Value("${twilio.account.auth-token}") String authToken) {
-        Twilio.init(sid, authToken);
+    @Autowired
+    public TwilioService(TwilioRepository twilioRepository) {
+        Optional<TwilioCredentials> twilioCredentialOptional = twilioRepository.findAll().stream().findFirst();
+        twilioCredentialOptional.ifPresent(twilioCredentials -> {
+            messagingServiceId = twilioCredentials.getMessagingServiceId();
+            sid = twilioCredentials.getSid();
+            authToken = twilioCredentials.getAuthToken();
+            Twilio.init(sid, authToken);
+        });
     }
 
     public void sendToTwilio(NotificationMethod notificationMethod, String message, String contact) {
@@ -31,7 +42,7 @@ public class TwilioService {
     public void deliverMessageViaSms(String messageToBeSent, String contact) {
         Message.creator(
                 new PhoneNumber(contact),
-                messagingService,
+                messagingServiceId,
                 messageToBeSent
         ).create();
     }
