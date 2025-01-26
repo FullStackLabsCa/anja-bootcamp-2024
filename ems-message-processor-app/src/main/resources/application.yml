@@ -21,3 +21,8 @@ spring:
     password: artemis
     ens-queue: ens_queue
     otp-queue: otp_queue
+twilio:
+  credentials:
+    auth-token: ${AUTH_TOKEN}
+    messaging-service-id: ${MESSAGING_SERVICE_ID}
+    sid: ${SID}
