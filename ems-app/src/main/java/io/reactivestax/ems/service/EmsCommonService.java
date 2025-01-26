@@ -3,10 +3,15 @@ package io.reactivestax.ems.service;
 import io.reactivestax.ems.constant.ValidationMessage;
 import io.reactivestax.ems.domain.Contact;
 import io.reactivestax.ems.domain.Customer;
+import io.reactivestax.ems.domain.OtpMessage;
 import io.reactivestax.ems.enums.NotificationMethod;
+import io.reactivestax.ems.enums.OtpLock;
 import io.reactivestax.ems.exception.InvalidRequestException;
 import io.reactivestax.ems.repository.CustomerRepository;
+import io.reactivestax.ems.repository.OtpRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -17,12 +22,17 @@ import java.util.*;
 public class EmsCommonService {
 
     private final CustomerRepository customerRepository;
+    private final OtpRepository otpRepository;
+
+    @Value("${application.properties.otp.otp-attempt}")
+    private int otpAttempt;
 
     private final Random random = new Random();
 
     @Autowired
-    public EmsCommonService(CustomerRepository customerRepository) {
+    public EmsCommonService(CustomerRepository customerRepository, OtpRepository otpRepository) {
         this.customerRepository = customerRepository;
+        this.otpRepository = otpRepository;
     }
 
     public Customer checkIfCustomerExists(String customerId) {
@@ -59,6 +69,17 @@ public class EmsCommonService {
         LocalDateTime currentDateTime = LocalDateTime.now();
         Duration duration = Duration.between(createdDateTime, currentDateTime);
         return (Math.abs(duration.toMinutes()) >= period);
+    }
+
+    @Transactional(value = Transactional.TxType.REQUIRES_NEW)
+    public boolean checkIfAttemptLockNeeded(Customer customer, String customerId) {
+        List<OtpMessage> allByCustomerIdAndOtpStatus = otpRepository.findNotDiscardedAndNotVerifiedOtpMessageByCustomerId(customerId);
+        if (allByCustomerIdAndOtpStatus.size() == otpAttempt) {
+            customer.setOtpLock(OtpLock.ATTEMPT_LOCK);
+            customerRepository.save(customer);
+            return true;
+        }
+        return false;
     }
 
     public int generateOtp() {
