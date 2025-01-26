@@ -48,8 +48,11 @@ public class TwilioService {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setBasicAuth(sid, authToken);
         httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        String body = "To=" + contact + "&From=" + TWILIO_CONTACT + "&Body=" + messageToBeSent;
-        HttpEntity<String> httpEntity = new HttpEntity<>(body, httpHeaders);
+        MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+        requestBody.add("From", TWILIO_CONTACT);
+        requestBody.add("To", contact);
+        requestBody.add("Body", messageToBeSent);
+        HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity<>(requestBody, httpHeaders);
         String url = TWILIO_BASE_URL + sid + "/Messages.json";
         restTemplate.postForEntity(url, httpEntity, String.class);
     }
