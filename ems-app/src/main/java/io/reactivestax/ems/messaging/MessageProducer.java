@@ -22,11 +22,10 @@ public class MessageProducer implements MessageProcessor {
 
     @Override
     public void sendMessageToQueue(String queueName, UUID message) {
-        jmsTemplate.send(queueName, new MessageCreator() {
-            @Override
-            public Message createMessage(Session session) throws JMSException {
-                return session.createTextMessage(message.toString());
-            }
-        });
+        jmsTemplate.send(queueName, getMessageCreator(message));
+    }
+
+    public MessageCreator getMessageCreator(UUID message){
+        return session -> session.createTextMessage(message.toString());
     }
 }

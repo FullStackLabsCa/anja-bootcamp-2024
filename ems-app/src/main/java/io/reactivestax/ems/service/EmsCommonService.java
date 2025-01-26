@@ -41,7 +41,7 @@ public class EmsCommonService {
         else return optionalCustomer.get();
     }
 
-    private UUID getUUIDFromString(String id) {
+    public UUID getUUIDFromString(String id) {
         try {
             return UUID.fromString(id);
         } catch (IllegalArgumentException exception) {

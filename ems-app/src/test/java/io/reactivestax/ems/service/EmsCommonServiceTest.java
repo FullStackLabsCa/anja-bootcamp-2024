@@ -10,6 +10,7 @@ import io.reactivestax.ems.enums.OtpLock;
 import io.reactivestax.ems.exception.InvalidRequestException;
 import io.reactivestax.ems.repository.CustomerRepository;
 import io.reactivestax.ems.repository.OtpRepository;
+import io.reactivestax.ems.util.DataProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +28,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class EmsCommonServiceTest {
@@ -46,7 +48,7 @@ class EmsCommonServiceTest {
 
     @Test
     void testCheckIfCustomerExists() {
-        String uuid = "b87ce6bd-ec3c-4d51-9c48-b68ef99301ee";
+        String uuid = DataProvider.ID_STRING;
         Customer customer = Customer.builder()
                 .customerId(UUID.fromString(uuid))
                 .firstName("FirstName")
@@ -58,6 +60,18 @@ class EmsCommonServiceTest {
 
         Customer customer1 = emsCommonService.checkIfCustomerExists(uuid);
         assertThat(customer1).isSameAs(customer);
+    }
+
+    @Test
+    void testGetUUIDFromStringWithValidId() {
+        UUID uuidFromString = emsCommonService.getUUIDFromString(DataProvider.ID_STRING);
+        assertThat(uuidFromString).isEqualTo(DataProvider.ID_UUID);
+    }
+
+    @Test
+    void testGetUUIDFromStringWithInvalidId() {
+        assertThatThrownBy(() -> emsCommonService.getUUIDFromString("13434535"),
+                ValidationMessage.INVALID_CUSTOMER_ID, InvalidRequestException.class);
     }
 
     @Test

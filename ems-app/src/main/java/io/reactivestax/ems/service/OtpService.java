@@ -11,6 +11,7 @@ import io.reactivestax.ems.enums.NotificationMethod;
 import io.reactivestax.ems.enums.OtpLock;
 import io.reactivestax.ems.enums.OtpStatus;
 import io.reactivestax.ems.exception.InvalidRequestException;
+import io.reactivestax.ems.exception.ResourceNotFoundException;
 import io.reactivestax.ems.exception.TooManyRequestsException;
 import io.reactivestax.ems.messaging.MessageProcessor;
 import io.reactivestax.ems.messaging.MessageProducer;
@@ -51,10 +52,7 @@ public class OtpService implements MessagingService {
     @Value("${application.properties.otp.expire-minutes}")
     private int expireMinutes;
 
-    @Value("${application.properties.otp.try-unlock-seconds}")
-    private int tryUnlockSeconds;
-
-    ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
+    private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
 
     @Autowired
     public OtpService(OtpRepository otpRepository,
@@ -67,8 +65,13 @@ public class OtpService implements MessagingService {
         this.customerRepository = customerRepository;
         this.messageProducer = messageProducer;
         this.emsCommonService = emsCommonService;
+        scheduleLockRemoval(tryUnlockSeconds);
+    }
+
+    private void scheduleLockRemoval(int tryUnlockSeconds) {
         scheduledExecutorService.scheduleAtFixedRate(this::removeAttemptLock, 0, tryUnlockSeconds, TimeUnit.SECONDS);
-        scheduledExecutorService.scheduleAtFixedRate(this::removeValidationLock, 0, tryUnlockSeconds, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(this::removeValidationLock, 0, tryUnlockSeconds,
+                TimeUnit.SECONDS);
     }
 
     @Transactional
@@ -133,8 +136,10 @@ public class OtpService implements MessagingService {
     }
 
     public ValidatedOtpDTO status(String customerId) {
-        emsCommonService.checkIfCustomerExists(customerId);
-        Optional<OtpMessage> optionalOtpMessage = otpRepository.findAllByCustomerIdAndOtpStatus(customerId,
+        Optional<Customer> optionalCustomer = customerRepository.findById(emsCommonService.getUUIDFromString(customerId));
+        Customer customer = optionalCustomer.orElseThrow(() -> new ResourceNotFoundException(ValidationMessage.CUSTOMER_NOT_FOUND));
+        Optional<OtpMessage> optionalOtpMessage =
+                otpRepository.findAllByCustomerIdAndOtpStatus(customer.getCustomerId().toString(),
                 OtpStatus.VERIFIED).stream().findFirst();
         return optionalOtpMessage
                 .map(otpMessage ->
@@ -143,7 +148,7 @@ public class OtpService implements MessagingService {
                 .orElseThrow(() -> new InvalidRequestException(ValidationMessage.NOT_A_VALIDATED_USER));
     }
 
-    private void removeValidationLock() {
+    public void removeValidationLock() {
         customerRepository.findAllWithOtpLock(OtpLock.VALIDATION_LOCK).forEach(customer -> {
             Optional<OtpMessage> otpMessageOptional = otpRepository.findAllByCustomerIdAndOtpStatus(customer.getCustomerId().toString(), OtpStatus.GENERATED).stream().findFirst();
             otpMessageOptional.ifPresent(otpMessage -> {
@@ -158,20 +163,18 @@ public class OtpService implements MessagingService {
         });
     }
 
-    private void removeAttemptLock() {
-        customerRepository.findAll().forEach(customer -> {
+    public void removeAttemptLock() {
+        customerRepository.findAllWithOtpLock(OtpLock.ATTEMPT_LOCK).forEach(customer -> {
             List<OtpMessage> list = otpRepository.findNotDiscardedAndNotVerifiedOtpMessageByCustomerId(customer.getCustomerId().toString())
                     .stream().filter(otpMessage ->
                             emsCommonService.findHourDifferenceGreaterThanOrEqualToProvidedPeriod(otpMessage.getUpdatedAt(),
                                     attemptLockPeriodMin))
                     .toList();
             list.forEach(otpMessage -> otpMessage.setOtpStatus(OtpStatus.DISCARDED));
-            if (list.size() > 1) {
+            if (!list.isEmpty()) {
                 otpRepository.saveAll(list);
-                if (customer.getOtpLock().equals(OtpLock.ATTEMPT_LOCK)) {
-                    customer.setOtpLock(OtpLock.NOT_LOCKED);
-                    customerRepository.save(customer);
-                }
+                customer.setOtpLock(OtpLock.NOT_LOCKED);
+                customerRepository.save(customer);
             }
         });
     }

@@ -24,4 +24,5 @@ public class ValidationMessage {
     public static final String OTP_VERIFICATION_ATTEMPTS_EXCEEDED = "You have exceeded the number of allowed OTP " +
             " verification attempts. Please try again later.";
     public static final String NOT_A_VALIDATED_USER = "User not validated. Please generate a new otp and verify.";
+    public static final String CUSTOMER_NOT_FOUND = "Customer not found.";
 }

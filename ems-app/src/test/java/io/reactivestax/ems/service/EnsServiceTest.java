@@ -8,6 +8,7 @@ import io.reactivestax.ems.enums.NotificationMethod;
 import io.reactivestax.ems.exception.InvalidRequestException;
 import io.reactivestax.ems.messaging.MessageProducer;
 import io.reactivestax.ems.repository.EnsRepository;
+import io.reactivestax.ems.util.DataProvider;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,9 +40,9 @@ class EnsServiceTest {
     @Test
     void testSaveForPositiveCase() {
         Customer customer = new Customer();
-        String uuid = "b87ce6bd-ec3c-4d51-9c48-b68ef99301ee";
-        String contact = "+12223334444";
-        BaseDTO baseDTO = new BaseDTO(uuid, contact, "", "message");
+        String uuid = DataProvider.ID_STRING;
+        String contact = DataProvider.CONTACT;
+        BaseDTO baseDTO = new BaseDTO(uuid, contact, "", DataProvider.MESSAGE);
         when(emsCommonService.checkIfCustomerExists(anyString())).thenReturn(customer);
         when(emsCommonService.getContactValue(anyString(), anyString(), any(NotificationMethod.class))).thenReturn(contact);
         when(emsCommonService.checkIfProvidedContactExistInContacts(anyString(), any())).thenReturn(true);
@@ -57,9 +58,9 @@ class EnsServiceTest {
     @Test
     void testSaveForException() {
         Customer customer = new Customer();
-        String uuid = "b87ce6bd-ec3c-4d51-9c48-b68ef99301ee";
-        String contact = "+12223334444";
-        BaseDTO baseDTO = new BaseDTO(uuid, contact, "", "message");
+        String uuid = DataProvider.ID_STRING;
+        String contact = DataProvider.CONTACT;
+        BaseDTO baseDTO = new BaseDTO(uuid, contact, "", DataProvider.MESSAGE);
         when(emsCommonService.checkIfCustomerExists(anyString())).thenReturn(customer);
         when(emsCommonService.getContactValue(anyString(), anyString(), any(NotificationMethod.class))).thenReturn(contact);
         when(emsCommonService.checkIfProvidedContactExistInContacts(anyString(), any())).thenReturn(false);
