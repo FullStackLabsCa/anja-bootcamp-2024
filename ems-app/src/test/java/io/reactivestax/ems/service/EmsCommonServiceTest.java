@@ -3,13 +3,16 @@ package io.reactivestax.ems.service;
 import io.reactivestax.ems.constant.ValidationMessage;
 import io.reactivestax.ems.domain.Contact;
 import io.reactivestax.ems.domain.Customer;
+import io.reactivestax.ems.domain.OtpMessage;
 import io.reactivestax.ems.enums.ContactType;
 import io.reactivestax.ems.enums.NotificationMethod;
 import io.reactivestax.ems.enums.OtpLock;
 import io.reactivestax.ems.exception.InvalidRequestException;
 import io.reactivestax.ems.repository.CustomerRepository;
+import io.reactivestax.ems.repository.OtpRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -18,11 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class EmsCommonServiceTest {
@@ -32,6 +37,12 @@ class EmsCommonServiceTest {
 
     @MockitoBean
     private CustomerRepository customerRepository;
+
+    @MockitoBean
+    private OtpRepository otpRepository;
+
+    @Value("${application.properties.otp.otp-attempt}")
+    private int otpAttempt;
 
     @Test
     void testCheckIfCustomerExists() {
@@ -117,6 +128,28 @@ class EmsCommonServiceTest {
         boolean hourDifferenceGreaterThanOrEqualToProvidedPeriod2 =
                 emsCommonService.findHourDifferenceGreaterThanOrEqualToProvidedPeriod(dateTime.minusMinutes(10), 50);
         assertThat(hourDifferenceGreaterThanOrEqualToProvidedPeriod2).isFalse();
+    }
+
+    @Test
+    void testCheckIfAttemptLockNeededTrueCase() {
+        String customerId = "3d3d3d3d-ec3c-4d51-9c48-b68ef99301ee";
+        Customer customer = new Customer();
+        List<OtpMessage> otpMessageList = IntStream.range(0, otpAttempt)
+                .mapToObj(i -> new OtpMessage()).toList();
+        doReturn(otpMessageList).when(otpRepository).findNotDiscardedAndNotVerifiedOtpMessageByCustomerId(anyString());
+        boolean ifAttemptLockNeeded = emsCommonService.checkIfAttemptLockNeeded(customer, customerId);
+        assertThat(ifAttemptLockNeeded).isTrue();
+    }
+
+    @Test
+    void testCheckIfAttemptLockNeededFalseCase() {
+        String customerId = "3d3d3d3d-ec3c-4d51-9c48-b68ef99301ee";
+        Customer customer = new Customer();
+        List<OtpMessage> otpMessageList = IntStream.range(1, otpAttempt)
+                .mapToObj(i -> new OtpMessage()).toList();
+        doReturn(otpMessageList).when(otpRepository).findNotDiscardedAndNotVerifiedOtpMessageByCustomerId(anyString());
+        boolean ifAttemptLockNeeded = emsCommonService.checkIfAttemptLockNeeded(customer, customerId);
+        assertThat(ifAttemptLockNeeded).isFalse();
     }
 
     @Test
