@@ -1,0 +1,24 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: ems-message-processor-app
+  artemis:
+    mode: embedded
+    host: 127.0.0.1
+    port: 61616
+    embeddable:
+      server:
+        persistent: false
+        queues: ens_queue, otp_queue
+    ens-queue: ens_queue
+    otp-queue: otp_queue
+application:
+  properties:
+    otp:
+      verification-attempt: 3
+      otp-attempt: 5
+      validation-lock-period-minutes: 120
+      attempt-lock-period-minutes: 480
+      expire-minutes: 10
+      try-unlock-seconds: 10

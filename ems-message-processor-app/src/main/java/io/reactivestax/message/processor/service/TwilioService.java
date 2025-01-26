@@ -1,28 +1,38 @@
 package io.reactivestax.message.processor.service;
 
 import com.twilio.Twilio;
-import com.twilio.rest.api.v2010.account.Call;
-import com.twilio.rest.api.v2010.account.Message;
-import com.twilio.type.PhoneNumber;
-import com.twilio.type.Twiml;
+import com.twilio.twiml.VoiceResponse;
+import com.twilio.twiml.voice.Say;
 import io.reactivestax.message.processor.enums.NotificationMethod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 public class TwilioService {
 
-    private final String messagingServiceId;
+    private final RestTemplate restTemplate;
+    private final String sid;
+    private final String authToken;
+
+    private static final String TWILIO_BASE_URL = "https://api.twilio.com/2010-04-01/Accounts/";
+    private static final String TWILIO_CONTACT = "+16473725174";
 
     @Autowired
     public TwilioService(@Value("${twilio.credentials.auth-token}")
                          String authToken,
-                         @Value("${twilio.credentials.messaging-service-id}")
-                         String messagingServiceId,
                          @Value("${twilio.credentials.sid}")
-                         String sid) {
-        this.messagingServiceId = messagingServiceId;
+                         String sid,
+                         RestTemplate restTemplate) {
+        this.authToken = authToken;
+        this.sid = sid;
+        this.restTemplate = restTemplate;
         Twilio.init(sid, authToken);
     }
 
@@ -35,22 +45,32 @@ public class TwilioService {
     }
 
     public void deliverMessageViaSms(String messageToBeSent, String contact) {
-        Message.creator(
-                new PhoneNumber(contact),
-                messagingServiceId,
-                messageToBeSent
-        ).create();
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setBasicAuth(sid, authToken);
+        httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        String body = "To=" + contact + "&From=" + TWILIO_CONTACT + "&Body=" + messageToBeSent;
+        HttpEntity<String> httpEntity = new HttpEntity<>(body, httpHeaders);
+        String url = TWILIO_BASE_URL + sid + "/Messages.json";
+        restTemplate.postForEntity(url, httpEntity, String.class);
     }
 
     public void deliverMessageViaCall(String message, String contact) {
-        String response = "<Response><Say>" + message + "</Say></Response>";
+        String url = TWILIO_BASE_URL + sid + "/Calls.json";
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setBasicAuth(sid, authToken);
+        httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        Twiml twiml = new Twiml(response);
-        Call.creator(
-                new PhoneNumber(contact),
-                new PhoneNumber("+16473725174"),
-                twiml
-        ).create();
+        String twiml = new VoiceResponse.Builder().say(new Say.Builder(message)
+                        .voice(Say.Voice.POLLY_MATTHEW).build())
+                .build().toXml();
+
+        MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+        requestBody.add("From", TWILIO_CONTACT);
+        requestBody.add("To", contact);
+        requestBody.add("Twiml", twiml);
+
+        HttpEntity<MultiValueMap<String, String>> callEntity = new HttpEntity<>(requestBody, httpHeaders);
+        restTemplate.postForEntity(url, callEntity, String.class);
     }
 
     public void deliverMessageViaEmail(String message, String contact) {
