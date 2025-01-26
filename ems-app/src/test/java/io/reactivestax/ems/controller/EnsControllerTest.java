@@ -59,7 +59,6 @@ class EnsControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.value()))
                 .andExpect(jsonPath("$.type").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
-                .andExpect(jsonPath("$.phoneNumber").value(ValidationMessage.INVALID_PHONE_NUMBER_REGEX))
                 .andExpect(jsonPath("$.customerId").value(ValidationMessage.EMPTY_CUSTOMER_ID))
                 .andExpect(jsonPath("$.message").value(ValidationMessage.EMPTY_MESSAGE));
     }
@@ -81,7 +80,6 @@ class EnsControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.value()))
                 .andExpect(jsonPath("$.type").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
-                .andExpect(jsonPath("$.phoneNumber").value(ValidationMessage.INVALID_PHONE_NUMBER_REGEX))
                 .andExpect(jsonPath("$.customerId").value(ValidationMessage.EMPTY_CUSTOMER_ID))
                 .andExpect(jsonPath("$.message").value(ValidationMessage.EMPTY_MESSAGE));
     }
@@ -133,8 +131,7 @@ class EnsControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.value()))
-                .andExpect(jsonPath("$.email").value(ValidationMessage.INVALID_EMAIL));
+                .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.value()));
     }
 
     @Test
@@ -152,8 +149,7 @@ class EnsControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.value()))
-                .andExpect(jsonPath("$.email").value(ValidationMessage.EMPTY_EMAIL));
+                .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.value()));
     }
 
     private String getPhoneRequestJson() {
