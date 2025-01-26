@@ -19,7 +19,7 @@ class CustomerRepositoryTest {
     private CustomerRepository customerRepository;
 
     @Test
-    void testSave(){
+    void testSave() {
         Customer customerEntity = getCustomerEntity();
         Customer customer = customerRepository.save(customerEntity);
         assertThat(customer).isNotNull();
@@ -49,14 +49,11 @@ class CustomerRepositoryTest {
     }
 
     @Test
-    void testFindAllWithOtpLock(){
-        Customer customerEntity = getCustomerEntity();
-        Customer customerEntity2 = getCustomerEntity();
-        Customer customerEntity3 = getCustomerEntity();
+    void testFindAllWithOtpLock() {
         List<Customer> customerList = new ArrayList<>();
-        customerList.add(customerEntity);
-        customerList.add(customerEntity2);
-        customerList.add(customerEntity3);
+        customerList.add(getCustomerEntity());
+        customerList.add(getCustomerEntity());
+        customerList.add(getCustomerEntity());
         List<Customer> customers = customerRepository.saveAll(customerList);
         List<Customer> allWithOtpLock = customerRepository.findAllWithOtpLock(OtpLock.NOT_LOCKED);
         assertThat(customers).isEqualTo(allWithOtpLock);
