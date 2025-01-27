@@ -8,9 +8,9 @@ spring:
     embeddable:
       server:
         persistent: false
-        queues: ens_queue, otp_queue
-    ens-queue: ens_queue
-    otp-queue: otp_queue
+        queues: ens_test_queue, otp_test_queue
+    ens-queue: ens_test_queue
+    otp-queue: otp_test_queue
 application:
   properties:
     otp:
