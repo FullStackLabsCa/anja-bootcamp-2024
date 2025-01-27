@@ -1,16 +1,5 @@
-server:
-  port: 8080
 spring:
-  application:
-    name: ems-message-processor-app
   artemis:
-    mode: embedded
-    host: 127.0.0.1
-    port: 61616
-    embeddable:
-      server:
-        persistent: false
-        queues: ens_queue, otp_queue
     ens-queue: ens_queue
     otp-queue: otp_queue
 application:

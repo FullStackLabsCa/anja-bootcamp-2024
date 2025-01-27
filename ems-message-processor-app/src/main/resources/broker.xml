@@ -1,0 +1,6 @@
+<address-setting match="#">
+    <dead-letter-address>DLQ</dead-letter-address>
+    <expiry-address>ExpiryQueue</expiry-address>
+    <max-delivery-attempts>3</max-delivery-attempts>
+    <redelivery-delay>1000</redelivery-delay>
+</address-setting>
