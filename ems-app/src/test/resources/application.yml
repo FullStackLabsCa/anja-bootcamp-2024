@@ -1,14 +1,8 @@
-server:
-  port: 8080
 spring:
-  application:
-    name: ems-app
+  jpa:
+    show-sql: true
+    defer-datasource-initialization: true
   artemis:
-    mode: embedded
-    embeddable:
-      server:
-        persistent: false
-        queues: ens_test_queue, otp_test_queue
     ens-queue: ens_test_queue
     otp-queue: otp_test_queue
 application:

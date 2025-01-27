@@ -4,19 +4,36 @@ import io.reactivestax.ems.constant.Endpoints;
 import io.reactivestax.ems.constant.SuccessMessage;
 import io.reactivestax.ems.dto.BaseDTO;
 import io.reactivestax.ems.dto.SuccessfulResponse;
+import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EnsIntegrationTest {
 
-    private static final String BASE_URL = "http://localhost:8080" + Endpoints.ENS_BASE;
+    @LocalServerPort
+    private int port;
+
+    private String baseUrl;
+
+    private static final String CUSTOMER_ID = "6e6a7d4b-1eaa-4e23-9fd3-8b5d0840d3f1";
+
+    @BeforeAll
+    void setup() {
+        RestAssured.baseURI = "http://localhost";
+        RestAssured.port = port;
+        baseUrl = "http://localhost:" + port + Endpoints.ENS_BASE;
+    }
 
     @Test
     void testSendEnsMessageViaSms() {
@@ -25,7 +42,7 @@ class EnsIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(getEnsPhoneDTO())
                 .when()
-                .post(BASE_URL + Endpoints.SMS)
+                .post(baseUrl + Endpoints.SMS)
                 .then()
                 .log().all()
                 .statusCode(HttpStatus.OK.value())
@@ -44,7 +61,7 @@ class EnsIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(getEnsPhoneDTO())
                 .when()
-                .post(BASE_URL + Endpoints.CALL)
+                .post(baseUrl + Endpoints.CALL)
                 .then()
                 .log().all()
                 .statusCode(HttpStatus.OK.value())
@@ -63,7 +80,7 @@ class EnsIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(getEnsEmailDTO())
                 .when()
-                .post(BASE_URL + Endpoints.EMAIL)
+                .post(baseUrl + Endpoints.EMAIL)
                 .then()
                 .log().all()
                 .statusCode(HttpStatus.OK.value())
@@ -77,16 +94,16 @@ class EnsIntegrationTest {
 
     private BaseDTO getEnsPhoneDTO() {
         return BaseDTO.builder()
-                .customerId("f39b73ca-d6d9-4ee7-b6ff-7fd3c20fae85")
-                .phoneNumber("+12266985174")
+                .customerId(CUSTOMER_ID)
+                .phoneNumber("+12345678901")
                 .message("message")
                 .build();
     }
 
     private BaseDTO getEnsEmailDTO() {
         return BaseDTO.builder()
-                .customerId("f39b73ca-d6d9-4ee7-b6ff-7fd3c20fae85")
-                .email("jainanant36@gmail.com")
+                .customerId(CUSTOMER_ID)
+                .email("john.doe@example.com")
                 .message("message")
                 .build();
     }

@@ -9,10 +9,14 @@ import io.reactivestax.ems.dto.ValidatedOtpDTO;
 import io.reactivestax.ems.dto.VerifyOtpDTO;
 import io.reactivestax.ems.enums.OtpStatus;
 import io.reactivestax.ems.repository.OtpRepository;
+import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
@@ -22,14 +26,25 @@ import java.util.Optional;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OtpIntegrationTest {
 
-    private static final String BASE_URL = "http://localhost:8080" + Endpoints.OTP_BASE;
-    private static final String CUSTOMER_ID = "02e81b1a-f9ea-4da9-87ee-f6def2e15589";
+    @LocalServerPort
+    private int port;
+
+    private String baseUrl;
+    private static final String CUSTOMER_ID = "6e6a7d4b-1eaa-4e23-9fd3-8b5d0840d3f1";
 
     @Autowired
     private OtpRepository otpRepository;
+
+    @BeforeAll
+    void setup() {
+        RestAssured.baseURI = "http://localhost";
+        RestAssured.port = port;
+        baseUrl = "http://localhost:" + port + Endpoints.OTP_BASE;
+    }
 
     @Test
     void testSendOtpViaSms() {
@@ -38,7 +53,7 @@ class OtpIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(getPhoneOtpDTO())
                 .when()
-                .post(BASE_URL + Endpoints.SMS)
+                .post(baseUrl + Endpoints.SMS)
                 .then()
                 .log().all()
                 .statusCode(HttpStatus.OK.value())
@@ -57,7 +72,7 @@ class OtpIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(getPhoneOtpDTO())
                 .when()
-                .post(BASE_URL + Endpoints.CALL)
+                .post(baseUrl + Endpoints.CALL)
                 .then()
                 .log().all()
                 .statusCode(HttpStatus.OK.value())
@@ -76,7 +91,7 @@ class OtpIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(getEmailOtpDTO())
                 .when()
-                .post(BASE_URL + Endpoints.EMAIL)
+                .post(baseUrl + Endpoints.EMAIL)
                 .then()
                 .log().all()
                 .statusCode(HttpStatus.OK.value())
@@ -100,7 +115,7 @@ class OtpIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(verifyOtpDTO)
                 .when()
-                .put(BASE_URL + Endpoints.VERIFY)
+                .put(baseUrl + Endpoints.VERIFY)
                 .then()
                 .log().all()
                 .statusCode(HttpStatus.OK.value())
@@ -116,7 +131,7 @@ class OtpIntegrationTest {
         Response response = given()
                 .log().all()
                 .when()
-                .get(BASE_URL + "/status/" + CUSTOMER_ID)
+                .get(baseUrl + "/status/" + CUSTOMER_ID)
                 .then()
                 .log().all()
                 .statusCode(HttpStatus.OK.value())
@@ -131,14 +146,14 @@ class OtpIntegrationTest {
 
     private BaseDTO getPhoneOtpDTO() {
         return BaseDTO.builder()
-                .phoneNumber("+12266985174")
+                .phoneNumber("+12345678901")
                 .customerId(CUSTOMER_ID)
                 .build();
     }
 
     private BaseDTO getEmailOtpDTO() {
         return BaseDTO.builder()
-                .email("jainanant36@gmail.com")
+                .email("john.doe@example.com")
                 .customerId(CUSTOMER_ID)
                 .build();
     }
