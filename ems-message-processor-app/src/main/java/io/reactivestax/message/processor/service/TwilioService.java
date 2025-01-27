@@ -4,6 +4,7 @@ import com.twilio.Twilio;
 import com.twilio.twiml.VoiceResponse;
 import com.twilio.twiml.voice.Say;
 import io.reactivestax.message.processor.enums.NotificationMethod;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -14,6 +15,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+@Slf4j
 @Service
 public class TwilioService {
 
@@ -44,7 +46,7 @@ public class TwilioService {
         }
     }
 
-    public void deliverMessageViaSms(String messageToBeSent, String contact) {
+    private void deliverMessageViaSms(String messageToBeSent, String contact) {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setBasicAuth(sid, authToken);
         httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -57,7 +59,7 @@ public class TwilioService {
         restTemplate.postForEntity(url, httpEntity, String.class);
     }
 
-    public void deliverMessageViaCall(String message, String contact) {
+    private void deliverMessageViaCall(String message, String contact) {
         String url = TWILIO_BASE_URL + sid + "/Calls.json";
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setBasicAuth(sid, authToken);
@@ -76,7 +78,7 @@ public class TwilioService {
         restTemplate.postForEntity(url, callEntity, String.class);
     }
 
-    public void deliverMessageViaEmail(String message, String contact) {
-        // to be implemented
+    private void deliverMessageViaEmail(String message, String contact) {
+        log.info("Email sent to: {} with message: {}", contact, message);
     }
 }

@@ -22,3 +22,11 @@ application:
       attempt-lock-period-minutes: 480
       expire-minutes: 10
       try-unlock-seconds: 10
+twilio:
+  credentials:
+    auth-token: ${AUTH_TOKEN}
+    messaging-service-id: ${MESSAGING_SERVICE_ID}
+    sid: ${SID}
+logging:
+  level:
+    root: INFO

@@ -26,3 +26,6 @@ twilio:
     auth-token: ${AUTH_TOKEN}
     messaging-service-id: ${MESSAGING_SERVICE_ID}
     sid: ${SID}
+logging:
+  level:
+    root: INFO
