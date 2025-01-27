@@ -2,6 +2,7 @@ spring:
   artemis:
     ens-queue: ens_queue
     otp-queue: otp_queue
+    dlq: ems-dlq
 application:
   properties:
     otp:
