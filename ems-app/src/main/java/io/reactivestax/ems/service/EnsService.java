@@ -45,6 +45,7 @@ public class EnsService implements MessagingService {
         return EnsMessage.builder()
                 .customerId(messageDTO.getCustomerId())
                 .phone(messageDTO.getPhoneNumber())
+                .email(messageDTO.getEmail())
                 .message(messageDTO.getMessage())
                 .messageStatus(MessageStatus.NOT_SENT)
                 .notificationMethod(notificationMethod)
