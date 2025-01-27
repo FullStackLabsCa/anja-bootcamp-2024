@@ -1,8 +1,5 @@
 package io.reactivestax.ems.messaging;
 
-import jakarta.jms.JMSException;
-import jakarta.jms.Message;
-import jakarta.jms.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
@@ -25,7 +22,7 @@ public class MessageProducer implements MessageProcessor {
         jmsTemplate.send(queueName, getMessageCreator(message));
     }
 
-    public MessageCreator getMessageCreator(UUID message){
+    public MessageCreator getMessageCreator(UUID message) {
         return session -> session.createTextMessage(message.toString());
     }
 }
