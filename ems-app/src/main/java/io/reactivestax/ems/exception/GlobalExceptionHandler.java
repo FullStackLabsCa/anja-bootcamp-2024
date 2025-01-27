@@ -28,8 +28,8 @@ public class GlobalExceptionHandler {
             errors.put(error.getField(), error.getDefaultMessage());
         }
 
-        exception.getBindingResult().getGlobalErrors().forEach(
-                error -> errors.put(error.getObjectName(), error.getDefaultMessage()));
+        exception.getBindingResult()
+                .getGlobalErrors().forEach(error -> errors.put(error.getObjectName(), error.getDefaultMessage()));
 
         return new ResponseEntity<>(errors, httpStatus);
     }
