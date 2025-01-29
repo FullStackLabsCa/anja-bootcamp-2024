@@ -2,17 +2,24 @@ package io.reactivestax.active.life.canada.controller;
 
 import io.reactivestax.active.life.canada.constant.Endpoints;
 import io.reactivestax.active.life.canada.dto.RegisterMemberRequest;
-import org.springframework.http.ResponseEntity;
+import io.reactivestax.active.life.canada.service.FamilyManagementService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController(Endpoints.BASE)
+@RestController
+@RequestMapping(Endpoints.BASE_URL)
 public class AuthenticationController {
 
+    private final FamilyManagementService familyManagementService;
+
+    public AuthenticationController(FamilyManagementService familyManagementService) {
+        this.familyManagementService = familyManagementService;
+    }
+
     @PostMapping(Endpoints.SIGNUP)
-    private void signUp(@RequestBody RegisterMemberRequest registerMemberRequest){
-
-
+    public void signUp(@RequestBody RegisterMemberRequest registerMemberRequest) {
+        this.familyManagementService.createFamilyMember(registerMemberRequest, true);
     }
 }

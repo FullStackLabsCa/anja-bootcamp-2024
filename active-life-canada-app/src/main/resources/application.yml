@@ -1,0 +1,16 @@
+server.port: 8082
+spring:
+  application:
+    name: active-life-canada-app
+  datasource:
+    url: jdbc:postgresql://localhost:5432/active_life_canada
+    username: postgres
+    password: postgres
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 30000
+      connection-timeout: 20000
+  jpa:
+    hibernate.ddl-auto: create-drop
+    show-sql: true

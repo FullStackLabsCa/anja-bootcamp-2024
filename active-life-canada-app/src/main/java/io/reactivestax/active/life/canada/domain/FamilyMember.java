@@ -1,25 +1,29 @@
 package io.reactivestax.active.life.canada.domain;
 
 import io.reactivestax.active.life.canada.enums.Gender;
+import io.reactivestax.active.life.canada.enums.PreferredModeOfCommunication;
 import jakarta.persistence.*;
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.UUID;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
-@Builder
+@SuperBuilder
 @Data
-public class FamilyMember {
+@AllArgsConstructor
+@NoArgsConstructor
+public class FamilyMember extends AuditTrail {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID memberId;
+    private UUID familyMemberId;
     private String name;
-    private Date dob;
+    private LocalDate dob;
     @Enumerated(value = EnumType.STRING)
     private Gender gender;
     private String emailId;
@@ -33,12 +37,10 @@ public class FamilyMember {
     private String language;
     private String memberLoginId;
     private String groupId;
-    private Long credits = 0L;
-    private Long failedLoginAttempts = 0L;
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-    private LocalDateTime createdBy;
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
-    private LocalDateTime updatedBy;
+    private PreferredModeOfCommunication preferredModeOfCommunication;
+    private boolean isActive;
+    private boolean isGroupAdmin;
+    @ManyToOne
+    @JoinColumn(name = "family_group_id", nullable = false)
+    private FamilyGroup familyGroup;
 }
