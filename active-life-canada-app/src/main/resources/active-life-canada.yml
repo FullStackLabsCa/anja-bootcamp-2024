@@ -1,0 +1,1011 @@
+openapi: 3.0.3
+info:
+  title: Enterprise Messaging Service
+  description: |-
+    
+    Cities across Canada manage a variety of recreational facilities, such as community centers, sports complexes, and swimming pools, each offering programs tailored to their unique capabilities and resources. These programs, ranging from swimming and skating to fitness, dance, and cooking & nutrition, are designed to serve diverse age groups, from children and youth to seniors.
+    
+    Below are the endpoints provided for the Active Life Canada application which allows you to register as a member, add a family member to your family group, offer a course, define fee for the course, members can register for a course and managers can update the details of a offered course.
+
+  contact:
+    email: apiteam@activelifecanada.ca
+  version: 1.0.0
+servers:
+  - url: http://localhost:8082/api/v1
+tags:
+  - name: authentication management
+    description: SignIn and signUp
+  - name: family management
+    description: Register member, login member, add member to family group
+  - name: program management
+    description: Offer a course, edit a offered course, create fee for offered course
+paths:
+  /signUp:
+    post:
+      tags:
+        - authentication management
+      summary: Register a member
+      description: Register a member
+      operationId: regsiterMember
+      requestBody:
+        description: Register a member
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterMemberRequest'
+        required: true
+      responses:
+        '200':
+          description: Member registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessfulRegistration'
+        '400':
+          description: Invalid fields validation response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /login:
+    post:
+      tags:
+        - authentication management
+      summary: Login member
+      description: Login member
+      operationId: loginMember
+      requestBody:
+        description: Login member
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginMemberRequest'
+        required: true
+      responses:
+        '200':
+          description: Credentials verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessfulResponse'
+        '400':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /members:
+    post:
+      tags:
+        - family management
+      summary: Add a member to a family group
+      description: Add a member to a family group
+      operationId: addToFamilyGroup
+      requestBody:
+        description: Add a member to a family group
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterMemberRequest'
+        required: true
+      responses:
+        '200':
+          description: Member registered successfully
+          headers:
+            X-security-header:
+              description: family group id
+              schema:
+                type: object
+                properties:
+                  familyGroupId:
+                    type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessfulRegistration'
+        '400':
+          description: Invalid fields validation response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /members/{memberId}:
+    get:
+      tags:
+        - family management
+      summary: Get member details
+      description: Get member details
+      operationId: memberDetails
+      parameters:
+        - name: memberId
+          in: path
+          description: member Id to fetch the member details
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Member details
+          headers:
+            X-security-header:
+              description: family group id
+              schema:
+                type: object
+                properties:
+                  familyGroupId:
+                    type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberDetails'
+        '400':
+          description: Invalid email supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /registeredCourses/{memberId}:
+    get:
+      tags:
+        - program management
+      summary: Find registered courses by member id
+      description: Find registered courses by member id
+      operationId: registeredCourseByMemberId
+      parameters:
+        - name: memberId
+          in: path
+          description: Member Id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Registered courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseDetailsResponse'
+        '404':
+          description: Member not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /registeredCourses/{enrollmentActorId}:
+    get:
+      tags:
+        - program management
+      summary: Find registered courses by Enrollment actor id
+      description: Find registered courses by Enrollment actor id
+      operationId: registeredCourseByEnrollmentActorId
+      parameters:
+        - name: enrollmentActorId
+          in: path
+          description: Enrollment actor Id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Registered courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseDetailsResponse'
+        '404':
+          description: Member not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /waitlistedCourses/{memberId}:
+    get:
+      tags:
+        - program management
+      summary: Find waitlistedCourses courses by member id
+      description: Find waitlistedCourses courses by member id
+      operationId: waitlistedCoursesByMemberId
+      parameters:
+        - name: memberId
+          in: path
+          description: Member Id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Waitlisted courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseDetailsResponse'
+        '404':
+          description: Member not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /waitlistedCourses/{enrollmentActorId}:
+    get:
+      tags:
+        - program management
+      summary: Find waitlisted courses by Enrollment actor id
+      description: Find waitlisted courses by Enrollment actor id
+      operationId: waitlistedCoursesByEnrollmentActorId
+      parameters:
+        - name: enrollmentActorId
+          in: path
+          description: Enrollment actor Id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Waitlisted courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseDetailsResponse'
+        '404':
+          description: Member not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /offeredCourses:
+    post:
+      tags:
+        - program management
+      summary: Offer a course
+      description: Offer a course
+      operationId: offerCourse
+      requestBody:
+        description: Offer a course
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseRequest1'
+        required: true
+      responses:
+        '200':
+          description: Course offered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessfulResponse'
+        '400':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+    put:
+      tags:
+        - program management
+      summary: Update a offered course
+      description: Update a offered course
+      operationId: updateCourse
+      requestBody:
+        description: Update a offered course
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseUpdateRequest'
+        required: true
+      responses:
+        '200':
+          description: Course offered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessfulResponse'
+        '400':
+          description: Invalid phoneNumber supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+    get:
+      tags:
+        - program management
+      summary: Get all offered courses
+      description: Get all offered courses
+      operationId: allCourses
+      responses:
+        '200':
+          description: Course details
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseDetailsResponse'
+        '404':
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /offeredCourses/{offeredCourseId}/enrollments/{familyMemberId}:
+    post:
+      tags:
+        - program management
+      summary: Enroll into a course
+      description: Enroll into a course
+      operationId: registerForCourse
+      parameters:
+        - name: offeredCourseId
+          in: path
+          description: Course Id of the offered course to enroll into
+          required: true
+          schema:
+            type: string
+        - name: familyMemberId
+          in: path
+          description: Family member Id to enroll into the course
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Enrollment successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessfulResponse'
+        '404':
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /offeredCourses/{offeredCourseId}/enrollments/{registrationId}:
+    delete:
+      tags:
+        - program management
+      summary: Withdraw from a course
+      description: Withdraw from a course
+      operationId: withdrawFromCourse
+      parameters:
+        - name: offeredCourseId
+          in: path
+          description: Course Id of the offered course to withdraw from
+          required: true
+          schema:
+            type: string
+        - name: registrationId
+          in: path
+          description: Member's course registration Id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully withdrawn from the course
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessfulResponse'
+        '404':
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /offeredCourses/{offeredCourseId}/waitlist/{familyMemberId}:
+    post:
+      tags:
+        - program management
+      summary: Add to course waitlist
+      description: Add to course waitlist
+      operationId: addToWaitlist
+      parameters:
+        - name: offeredCourseId
+          in: path
+          description: Course Id to add to waitlist
+          required: true
+          schema:
+            type: string
+        - name: familyMemberId
+          in: path
+          description: Family member Id to add to waitlist
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully added to waitlist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessfulResponse'
+        '404':
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /offeredCourses/search:
+    post:
+      tags:
+        - program management
+      summary: Search courses
+      description: Search courses
+      operationId: searchCourse
+      requestBody:
+        description: Search courses
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+        required: true
+      responses:
+        '200':
+          description: All course details
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseDetailsResponse'
+        '404':
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /facilities/{facilityId}/courses/{courseId}/offeredCourses:
+    post:
+      tags:
+        - program management
+      summary: Offer a course
+      description: Offer a course
+      operationId: offeredCourse
+      parameters:
+        - name: facilityId
+          in: path
+          description: Facility Id of the facility where the course is being offered
+          required: true
+          schema:
+            type: string
+        - name: courseId
+          in: path
+          description: Course Id of the course to be offered
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Update a offered course
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseRequest2'
+        required: true
+      responses:
+        '200':
+          description: Course offered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessfulResponse'
+        '404':
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+components:
+  schemas:
+    RegisterMemberRequest:
+      required:
+        - name
+        - dob
+        - gender
+        - emailId
+        - streetNo
+        - streetName
+        - city
+        - province
+        - country
+        - homePhone
+        - username
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the member
+          example: Firstname Lastname
+        dob:
+          type: string
+          description: Date of birth of the member
+          example: 10/05/1999
+        gender:
+          type: string
+          description: Gender of the member
+          example: Male
+        emailId:
+          type: string
+          description: Email Id of the member
+          example: example@email.com
+        streetNo:
+          type: string
+          description: House number of the member
+          example: 273
+        streetName:
+          type: string
+          description: Street address of the member
+          example: SanteeGate
+        city:
+          type: string
+          description: City of the member
+          example: Mississauga
+        province:
+          type: string
+          description: Province to which the member belongs
+          example: Ontario
+        country:
+          type: string
+          description: Country to which the member belongs
+          example: Canada
+        homePhone:
+          type: string
+          description: Home phone number
+          example: 222-555-5555
+        businessPhone:
+          type: string
+          description: Business phone number
+          example: 226-444-3434
+        language:
+          type: string
+          description: Language spoken by the customer
+          example: English
+        username:
+          type: string
+          description: Username to be used by the member to login
+          example: example36
+      xml:
+        name: '##default'
+    MemberDetails:
+      type: object
+      properties:
+        memberId:
+          type: string
+        name:
+          type: string
+          description: Name of the member
+          example: Firstname Lastname
+        dob:
+          type: string
+          description: Date of birth of the member
+          example: 10/05/1999
+        gender:
+          type: string
+          description: Gender of the member
+          example: Male
+        emailId:
+          type: string
+          description: Email Id of the member
+          example: example@email.com
+        streetNo:
+          type: string
+          description: House number of the member
+          example: 273
+        streetName:
+          type: string
+          description: Street address of the member
+          example: SanteeGate
+        city:
+          type: string
+          description: City of the member
+          example: Mississauga
+        province:
+          type: string
+          description: Province to which the member belongs
+          example: Ontario
+        country:
+          type: string
+          description: Country to which the member belongs
+          example: Canada
+        homePhone:
+          type: string
+          description: Home phone number
+          example: 222-555-5555
+        businessPhone:
+          type: string
+          description: Business phone number
+          example: 226-444-3434
+        language:
+          type: string
+          description: Language spoken by the customer
+          example: English
+        memberLoginId:
+          type: string
+          description: Username to be used by the member to login
+          example: example36
+        groupId:
+          type: string
+        credits:
+          type: integer
+          format: int64
+          example: 300
+        failedLoginAttempts:
+          type: integer
+          format: int64
+          example: 10
+      xml:
+        name: '##default'
+    LoginMemberRequest:
+      required:
+        - memberLoginId
+        - groupPin
+      type: object
+      properties:
+        memberLoginId:
+          type: string
+          description: Username to be used by the member to login
+          example: example36
+        groupPin:
+          type: string
+          description: Group pin to login
+          example: 1234556
+      xml:
+        name: '##default'
+    SuccessfulRegistration:
+      type: object
+      properties:
+        memberId:
+          type: string
+          description: Member id of the member just created
+          example: 6e6a7d4b-1eaa-4e23-9fd3-8b5d0840d3f1
+        createdAt:
+          type: string
+          description: string
+          example: 2011-10-31T01:01:01
+      xml:
+        name: '##default'
+    SearchRequest:
+      type: object
+      properties:
+        city:
+          type: string
+          example: mississauga
+        province:
+          type: string
+          example: ontario
+        category:
+          type: string
+        subCategory:
+          type: string
+        ageGroup:
+          type: string
+        skillLevel:
+          type: string
+        programType:
+          type: string
+        schedulePreferences:
+          type: array
+          xml:
+            name: schedulePreferences
+            wrapped: true
+          items:
+            type: string
+      xml:
+        name: '##default'
+    CourseRequest1:
+      required:
+        - courseId
+        - facilityId
+        - startDate
+        - endDate
+        - noOfClassesOffered
+        - startTime
+        - endTime
+        - isAllDayCourse
+        - registrationStartDate
+        - feeType
+        - courseFee
+      type: object
+      properties:
+        courseId:
+          type: string
+          description: Course Id
+        facilityId:
+          type: string
+          description: Course Id
+        startDate:
+          type: string
+          description: Course start date
+          example: 2010-09-12
+        endDate:
+          type: string
+          description: Course end date
+          example: 2010-09-12
+        noOfClassesOffered:
+          type: integer
+          format: int32
+          description: Number of classes offered
+          example: 10
+        startTime:
+          type: string
+          description: Class start time
+        endTime:
+          type: string
+          description: Class end time
+        isAllDayCourse:
+          type: boolean
+          example: true
+        registrationStartDate:
+          type: string
+          description: Registration start date
+          example: 2010-09-12
+        feeType:
+          type: string
+          description: Fees type
+          example: resident
+        courseFee:
+          type: integer
+          format: int32
+          example: 180
+      xml:
+        name: '##default'
+    CourseRequest2:
+      required:
+        - startDate
+        - endDate
+        - noOfClassesOffered
+        - startTime
+        - endTime
+        - isAllDayCourse
+        - registrationStartDate
+        - feeType
+        - courseFee
+      type: object
+      properties:
+        startDate:
+          type: string
+          description: Course start date
+          example: 2010-09-12
+        endDate:
+          type: string
+          description: Course end date
+          example: 2010-09-12
+        noOfClassesOffered:
+          type: integer
+          format: int32
+          description: Number of classes offered
+          example: 10
+        startTime:
+          type: string
+          description: Class start time
+        endTime:
+          type: string
+          description: Class end time
+        isAllDayCourse:
+          type: boolean
+          example: true
+        registrationStartDate:
+          type: string
+          description: Registration start date
+          example: 2010-09-12
+        feeType:
+          type: string
+          description: Fees type
+          example: resident
+        courseFee:
+          type: integer
+          format: int32
+          example: 180
+      xml:
+        name: '##default'
+    CourseUpdateRequest:
+      required:
+        - offerdCourseId
+      type: object
+      properties:
+        offerdCourseId:
+          type: string
+          description: Course Id of the course to update
+        startDate:
+          type: string
+          description: Course start date
+          example: 2010-09-12
+        endDate:
+          type: string
+          description: Course end date
+          example: 2010-09-12
+        noOfClassesOffered:
+          type: integer
+          format: int32
+          description: Number of classes offered
+          example: 10
+        startTime:
+          type: string
+          description: Class start time
+        endTime:
+          type: string
+          description: Class end time
+        isAllDayCourse:
+          type: boolean
+          example: true
+        registrationStartDate:
+          type: string
+          description: Registration start date
+          example: 2010-09-12
+        feeType:
+          type: string
+          description: Fees type
+          example: resident
+        courseFee:
+          type: integer
+          format: int32
+          example: 180
+      xml:
+        name: '##default'
+    CourseDetailsResponse:
+      type: object
+      properties:
+        offerdCourseId:
+          type: string
+        startDate:
+          type: string
+          description: Course start date
+          example: 2010-09-12
+        endDate:
+          type: string
+          description: Course end date
+          example: 2010-09-12
+        noOfClassesOffered:
+          type: integer
+          format: int32
+          description: Number of classes offered
+          example: 10
+        startTime:
+          type: string
+          description: Class start time
+        endTime:
+          type: string
+          description: Class end time
+        isAllDayCourse:
+          type: boolean
+          example: true
+        registrationStartDate:
+          type: string
+          description: Registration start date
+          example: 2010-09-12
+        availableForEnrollment:
+          type: string
+      xml:
+        name: '##default'
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        timestamp:
+          type: string
+          example: 2011-10-31T01:01:01
+        message:
+          type: string
+      xml:
+        name: '##default'
+    SuccessfulResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Success Message
+      xml:
+        name: '##default'

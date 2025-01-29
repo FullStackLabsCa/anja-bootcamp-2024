@@ -1,4 +1,4 @@
-package io.reactivestax.active_life_canada_app;
+package io.reactivestax.active.life.canada;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

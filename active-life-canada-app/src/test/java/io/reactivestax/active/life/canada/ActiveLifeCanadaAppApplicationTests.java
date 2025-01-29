@@ -1,4 +1,4 @@
-package io.reactivestax.active_life_canada_app;
+package io.reactivestax.active.life.canada;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
