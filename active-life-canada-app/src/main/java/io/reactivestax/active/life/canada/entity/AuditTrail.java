@@ -1,4 +1,4 @@
-package io.reactivestax.active.life.canada.domain;
+package io.reactivestax.active.life.canada.entity;
 
 import jakarta.persistence.MappedSuperclass;
 import lombok.AllArgsConstructor;

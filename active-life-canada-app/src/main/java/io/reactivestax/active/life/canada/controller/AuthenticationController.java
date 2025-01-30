@@ -1,12 +1,14 @@
 package io.reactivestax.active.life.canada.controller;
 
 import io.reactivestax.active.life.canada.constant.Endpoints;
-import io.reactivestax.active.life.canada.dto.RegisterMemberRequest;
+import io.reactivestax.active.life.canada.constant.Message;
+import io.reactivestax.active.life.canada.dto.CreateMemberRequest;
+import io.reactivestax.active.life.canada.dto.LoginMemberRequest;
+import io.reactivestax.active.life.canada.dto.SuccessfulResponse;
 import io.reactivestax.active.life.canada.service.FamilyManagementService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(Endpoints.BASE_URL)
@@ -18,8 +20,23 @@ public class AuthenticationController {
         this.familyManagementService = familyManagementService;
     }
 
-    @PostMapping(Endpoints.SIGNUP)
-    public void signUp(@RequestBody RegisterMemberRequest registerMemberRequest) {
-        this.familyManagementService.createFamilyMember(registerMemberRequest, true);
+    @PostMapping(value = Endpoints.SIGNUP, produces = MediaType.APPLICATION_JSON_VALUE, consumes =
+            MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<SuccessfulResponse> signUp(@RequestBody CreateMemberRequest createMemberRequest) {
+        this.familyManagementService.createFamilyMember(createMemberRequest, null, true);
+
+        return ResponseEntity.ok(SuccessfulResponse.builder().message(Message.SIGNUP_SUCCESSFUL).build());
+    }
+
+    @PostMapping(value = Endpoints.LOGIN)
+    public void login(@RequestBody LoginMemberRequest loginMemberRequest) {
+        this.familyManagementService.loginMember(loginMemberRequest);
+    }
+
+    @GetMapping(value = Endpoints.ACTIVATION, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<SuccessfulResponse> activateAccount(@PathVariable String activationId) {
+        this.familyManagementService.activateMemberAccount(activationId);
+
+        return ResponseEntity.ok(SuccessfulResponse.builder().message(Message.ACTIVATED_SUCCESSFULLY).build());
     }
 }

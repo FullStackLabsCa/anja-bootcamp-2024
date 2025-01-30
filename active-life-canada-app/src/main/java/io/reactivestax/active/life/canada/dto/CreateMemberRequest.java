@@ -11,7 +11,7 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Data
-public class RegisterMemberRequest {
+public class CreateMemberRequest {
     private String name;
     @JsonFormat(pattern = "MM/dd/yyyy")
     private LocalDate dob;
@@ -27,7 +27,7 @@ public class RegisterMemberRequest {
     private String businessPhone;
     private String language;
     private String username;
-    private String pin;
+    private String password;
     @JsonDeserialize(using = PreferredModeOfCommunicationDeserializer.class)
     private PreferredModeOfCommunication preferredModeOfCommunication;
 }

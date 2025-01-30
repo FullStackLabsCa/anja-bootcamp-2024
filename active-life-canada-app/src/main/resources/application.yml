@@ -12,5 +12,5 @@ spring:
       idle-timeout: 30000
       connection-timeout: 20000
   jpa:
-    hibernate.ddl-auto: create-drop
+    hibernate.ddl-auto: create
     show-sql: true

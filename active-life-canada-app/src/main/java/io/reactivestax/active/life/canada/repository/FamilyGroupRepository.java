@@ -1,6 +1,6 @@
-package io.reactivestax.active.life.canada.service;
+package io.reactivestax.active.life.canada.repository;
 
-import io.reactivestax.active.life.canada.domain.FamilyGroup;
+import io.reactivestax.active.life.canada.entity.FamilyGroup;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
