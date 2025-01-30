@@ -5,6 +5,8 @@ public class Message {
     }
 
     public static final String SIGNUP_SUCCESSFUL = "Member registered successfully and an activation link is sent to you.";
+    public static final String LOGIN_INACTIVE_MEMBER = "You are not an active member. An account activation link is " +
+            "sent to you.";
     public static final String MEMBER_ADD_SUCCESSFUL = "Member registered successfully and an activation link is sent" +
             " to the member's preferred mode of communication.";
     public static final String ACTIVATION_LINK_MESSAGE = "Hello {0}, Your account activation link is: {1}.";

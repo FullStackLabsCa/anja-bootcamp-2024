@@ -1,10 +1,12 @@
 package io.reactivestax.active.life.canada.service;
 
 import io.reactivestax.active.life.canada.constant.ExceptionMessage;
+import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.dto.CreateMemberRequest;
 import io.reactivestax.active.life.canada.dto.LoginMemberRequest;
 import io.reactivestax.active.life.canada.entity.FamilyGroup;
 import io.reactivestax.active.life.canada.entity.FamilyMember;
+import io.reactivestax.active.life.canada.entity.LoginRequest;
 import io.reactivestax.active.life.canada.enums.Status;
 import io.reactivestax.active.life.canada.exception.InvalidRequestException;
 import io.reactivestax.active.life.canada.exception.UnauthorizedException;
@@ -12,6 +14,7 @@ import io.reactivestax.active.life.canada.mapper.FamilyMemberMapper;
 import io.reactivestax.active.life.canada.model.SecurityHeader;
 import io.reactivestax.active.life.canada.repository.FamilyGroupRepository;
 import io.reactivestax.active.life.canada.repository.FamilyMemberRepository;
+import io.reactivestax.active.life.canada.repository.LoginRequestRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,41 +27,44 @@ public class FamilyManagementService {
     private final FamilyMemberRepository familyMemberRepository;
     private final FamilyGroupRepository familyGroupRepository;
     private final FamilyMemberMapper familyMemberMapper;
+    private final LoginRequestRepository loginRequestRepository;
     private final EmsService emsService;
 
     public FamilyManagementService(FamilyMemberRepository familyMemberRepository,
                                    FamilyGroupRepository familyGroupRepository,
                                    FamilyMemberMapper familyMemberMapper,
+                                   LoginRequestRepository loginRequestRepository,
                                    EmsService emsService) {
         this.familyMemberRepository = familyMemberRepository;
         this.familyGroupRepository = familyGroupRepository;
         this.familyMemberMapper = familyMemberMapper;
+        this.loginRequestRepository = loginRequestRepository;
         this.emsService = emsService;
     }
 
     public void createFamilyMember(CreateMemberRequest createMemberRequest, SecurityHeader securityHeader,
                                    boolean isGroupAdmin) {
         FamilyMember familyMember = familyMemberMapper.registerMemberRequestToFamilyMember(createMemberRequest);
-        Optional<FamilyMember> familyMemberOptional = familyMemberRepository.findByMemberLoginId(familyMember.getMemberLoginId());
-        familyMemberOptional.ifPresentOrElse(member -> {
+        familyMemberRepository.findByMemberLoginId(familyMember.getMemberLoginId())
+                .ifPresent(member -> {
                     throw new InvalidRequestException(ExceptionMessage.MEMBER_ALREADY_EXISTS);
-                }, () -> {
-                    familyMember.setGroupAdmin(isGroupAdmin);
-                    if (isGroupAdmin) {
-                        FamilyGroup familyGroup = new FamilyGroup();
-                        familyGroup.setFamilyPin(createMemberRequest.getPassword());
-                        saveFamilyMemberAndSendToEms(familyMember, familyGroup);
-                    } else {
-                        Optional<FamilyMember> adminMember = familyMemberRepository.findById(UUID.fromString(securityHeader.getFamilyMemberId()));
-                        adminMember.ifPresentOrElse(admin -> {
-                            FamilyGroup familyGroup = admin.getFamilyGroup();
-                            saveFamilyMemberAndSendToEms(familyMember, familyGroup);
-                        }, () -> {
-                            throw new UnauthorizedException(ExceptionMessage.UNAUTHORIZED_ACCESS);
-                        });
-                    }
-                }
-        );
+                });
+        familyMember.setGroupAdmin(isGroupAdmin);
+        if (isGroupAdmin) {
+            FamilyGroup familyGroup = new FamilyGroup();
+            familyGroup.setFamilyPin(createMemberRequest.getPassword());
+            saveFamilyMemberAndSendToEms(familyMember, familyGroup);
+        } else {
+            Optional<FamilyMember> adminMember = familyMemberRepository.findById(UUID.fromString(securityHeader.getFamilyMemberId()));
+            adminMember.ifPresentOrElse(admin -> {
+                if (admin.isGroupAdmin()) {
+                    FamilyGroup familyGroup = admin.getFamilyGroup();
+                    saveFamilyMemberAndSendToEms(familyMember, familyGroup);
+                } else throw new UnauthorizedException(ExceptionMessage.UNAUTHORIZED_ACCESS);
+            }, () -> {
+                throw new UnauthorizedException(ExceptionMessage.UNAUTHORIZED_ACCESS);
+            });
+        }
     }
 
     private void saveFamilyMemberAndSendToEms(FamilyMember familyMember, FamilyGroup familyGroup) {
@@ -72,15 +78,29 @@ public class FamilyManagementService {
         emsService.sendToEms(savedFamilyMember);
     }
 
-    public void loginMember(LoginMemberRequest loginMemberRequest) {
-        Optional<FamilyMember> familyMember = familyMemberRepository.findByMemberLoginId(loginMemberRequest.getMemberLoginId());
-        familyMember.ifPresent(member -> {
-            if (member.isActive()) {
-//                emsService.sendToEms(member.getFamilyMemberId());
+    public String loginMember(LoginMemberRequest loginMemberRequest) {
+        String token = "";
+        FamilyMember familyMember =
+                familyMemberRepository.findByMemberLoginId(loginMemberRequest.getUsername())
+                        .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INCORRECT_USERNAME_PASSWORD));
+        String familyPin = familyMember.getFamilyGroup().getFamilyPin();
+        if (loginMemberRequest.getPassword().equals(familyPin)) {
+            token = UUID.randomUUID().toString();
+            if (familyMember.isActive()) {
+                LoginRequest loginRequest = LoginRequest.builder()
+                        .familyMemberId(familyMember.getFamilyMemberId())
+                        .loginToken(token)
+                        .build();
+                loginRequestRepository.save(loginRequest);
+                emsService.sendToEmsOtp(familyMember);
+                System.out.println(familyMember);
             } else {
-//                emsService.sendToEms(member.getFamilyMemberId());
+                familyMember.setActivationToken(token);
+                FamilyMember savedMember = familyMemberRepository.save(familyMember);
+                emsService.sendToEms(savedMember);
             }
-        });
+        } else throw new InvalidRequestException(ExceptionMessage.INCORRECT_USERNAME_PASSWORD);
+        return token;
     }
 
     public void activateMemberAccount(String activationToken) {

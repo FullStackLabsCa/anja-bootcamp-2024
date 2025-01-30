@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class LoginMemberRequest {
-    private String memberLoginId;
-    private String groupPin;
+    private String username;
+    private String password;
 }

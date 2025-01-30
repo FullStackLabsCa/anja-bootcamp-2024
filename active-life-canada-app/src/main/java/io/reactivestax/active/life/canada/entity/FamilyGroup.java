@@ -26,7 +26,7 @@ public class FamilyGroup extends AuditTrail {
     private Status status = Status.INACTIVE;
     private Integer failedLoginAttempts = 0;
     @JsonManagedReference
-    @OneToMany(mappedBy = "familyMemberId", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "familyGroup", cascade = CascadeType.ALL)
     private List<FamilyMember> familyMembers = new ArrayList<>();
 
     @Override
