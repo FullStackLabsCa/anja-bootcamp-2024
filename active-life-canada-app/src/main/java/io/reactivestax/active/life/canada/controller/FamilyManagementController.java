@@ -8,6 +8,7 @@ import io.reactivestax.active.life.canada.dto.CreateMemberRequest;
 import io.reactivestax.active.life.canada.dto.SuccessfulResponse;
 import io.reactivestax.active.life.canada.model.SecurityHeader;
 import io.reactivestax.active.life.canada.service.FamilyManagementService;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +22,7 @@ public class FamilyManagementController {
         this.familyManagementService = familyManagementService;
     }
 
-    @PostMapping()
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SuccessfulResponse> addMember(@RequestHeader(name = "X-security-header") String securityHeaderJson,
                                                         @RequestBody CreateMemberRequest createMemberRequest) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -29,5 +30,12 @@ public class FamilyManagementController {
         this.familyManagementService.createFamilyMember(createMemberRequest, securityHeader, false);
 
         return ResponseEntity.ok(SuccessfulResponse.builder().message(Message.MEMBER_ADD_SUCCESSFUL).build());
+    }
+
+    @DeleteMapping(value = Endpoints.MEMBER_ID, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<SuccessfulResponse> deactivateMember(@PathVariable String memberId){
+        this.familyManagementService.deactivateFamilyMember(memberId);
+
+        return ResponseEntity.ok(SuccessfulResponse.builder().message(Message.MEMBER_DEACTIVATED).build());
     }
 }

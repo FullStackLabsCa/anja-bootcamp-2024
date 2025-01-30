@@ -129,4 +129,18 @@ public class FamilyManagementService {
             throw new InvalidRequestException(ExceptionMessage.INVALID_ACTIVATION_LINK);
         });
     }
+
+    public void deactivateFamilyMember(String memberId) {
+        Optional<FamilyMember> familyMemberOptional = familyMemberRepository.findByMemberLoginId(memberId);
+        FamilyMember familyMember = familyMemberOptional
+                .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INVALID_MEMBER_ID));
+        familyMember.setActive(false);
+        FamilyGroup familyGroup = familyMember.getFamilyGroup();
+        if (familyMember.getFamilyGroup().getFamilyMembers().size() == 1) {
+            familyGroup.setStatus(Status.INACTIVE);
+            familyGroupRepository.save(familyGroup);
+        } else {
+            familyMemberRepository.save(familyMember);
+        }
+    }
 }

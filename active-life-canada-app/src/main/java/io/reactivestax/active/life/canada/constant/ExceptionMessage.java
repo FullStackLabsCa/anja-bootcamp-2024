@@ -11,4 +11,5 @@ public class ExceptionMessage {
     public static final String INCORRECT_TOKEN_OTP = "Incorrect token/otp.";
     public static final String INTERNAL_ERROR = "Internal Server Error.";
     public static final String BAD_REQUEST = "Bad request.";
+    public static final String INVALID_MEMBER_ID = "Invalid username.";
 }

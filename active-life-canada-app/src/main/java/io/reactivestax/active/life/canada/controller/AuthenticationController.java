@@ -26,14 +26,16 @@ public class AuthenticationController {
         return ResponseEntity.ok(SuccessfulResponse.builder().message(Message.SIGNUP_SUCCESSFUL).build());
     }
 
-    @PostMapping(value = Endpoints.LOGIN)
+    @PostMapping(value = Endpoints.LOGIN, produces = MediaType.APPLICATION_JSON_VALUE, consumes =
+            MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<LoginResponse> login(@RequestBody LoginMemberRequest loginMemberRequest) {
         LoginResponse loginResponse = this.familyManagementService.loginMember(loginMemberRequest);
 
         return ResponseEntity.ok(loginResponse);
     }
 
-    @PostMapping(value = Endpoints.LOGIN_2FA)
+    @PostMapping(value = Endpoints.LOGIN_2FA, produces = MediaType.APPLICATION_JSON_VALUE, consumes =
+            MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<LoginResponse> twoFactorLogin(@RequestBody TwoFactorLoginRequest twoFactorLoginRequest) {
         LoginResponse loginResponse = this.familyManagementService.twoFactorLogin(twoFactorLoginRequest);
 
