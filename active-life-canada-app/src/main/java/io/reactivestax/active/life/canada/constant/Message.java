@@ -11,4 +11,7 @@ public class Message {
             " to the member's preferred mode of communication.";
     public static final String ACTIVATION_LINK_MESSAGE = "Hello {0}, Your account activation link is: {1}.";
     public static final String ACTIVATED_SUCCESSFULLY = "Your account activated successfully.";
+
+    public static final String SUCCESSFUL_LOGIN = "Credentials verified successfully, an otp is sent to your preferred mode of communication for verification.";
+    public static final String SUCCESSFUL_LOGIN_VERIFICATION = "Login verification successful.";
 }

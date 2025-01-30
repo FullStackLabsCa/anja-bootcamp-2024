@@ -2,9 +2,7 @@ package io.reactivestax.active.life.canada.controller;
 
 import io.reactivestax.active.life.canada.constant.Endpoints;
 import io.reactivestax.active.life.canada.constant.Message;
-import io.reactivestax.active.life.canada.dto.CreateMemberRequest;
-import io.reactivestax.active.life.canada.dto.LoginMemberRequest;
-import io.reactivestax.active.life.canada.dto.SuccessfulResponse;
+import io.reactivestax.active.life.canada.dto.*;
 import io.reactivestax.active.life.canada.service.FamilyManagementService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,8 +27,17 @@ public class AuthenticationController {
     }
 
     @PostMapping(value = Endpoints.LOGIN)
-    public void login(@RequestBody LoginMemberRequest loginMemberRequest) {
-        this.familyManagementService.loginMember(loginMemberRequest);
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginMemberRequest loginMemberRequest) {
+        LoginResponse loginResponse = this.familyManagementService.loginMember(loginMemberRequest);
+
+        return ResponseEntity.ok(loginResponse);
+    }
+
+    @PostMapping(value = Endpoints.LOGIN_2FA)
+    public ResponseEntity<LoginResponse> twoFactorLogin(@RequestBody TwoFactorLoginRequest twoFactorLoginRequest) {
+        LoginResponse loginResponse = this.familyManagementService.twoFactorLogin(twoFactorLoginRequest);
+
+        return ResponseEntity.ok(loginResponse);
     }
 
     @GetMapping(value = Endpoints.ACTIVATION, produces = MediaType.APPLICATION_JSON_VALUE)

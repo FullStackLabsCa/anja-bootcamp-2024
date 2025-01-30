@@ -4,6 +4,8 @@ import io.reactivestax.active.life.canada.constant.ExceptionMessage;
 import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.dto.CreateMemberRequest;
 import io.reactivestax.active.life.canada.dto.LoginMemberRequest;
+import io.reactivestax.active.life.canada.dto.LoginResponse;
+import io.reactivestax.active.life.canada.dto.TwoFactorLoginRequest;
 import io.reactivestax.active.life.canada.entity.FamilyGroup;
 import io.reactivestax.active.life.canada.entity.FamilyMember;
 import io.reactivestax.active.life.canada.entity.LoginRequest;
@@ -78,8 +80,9 @@ public class FamilyManagementService {
         emsService.sendToEms(savedFamilyMember);
     }
 
-    public String loginMember(LoginMemberRequest loginMemberRequest) {
+    public LoginResponse loginMember(LoginMemberRequest loginMemberRequest) {
         String token = "";
+        String message = "";
         FamilyMember familyMember =
                 familyMemberRepository.findByMemberLoginId(loginMemberRequest.getUsername())
                         .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INCORRECT_USERNAME_PASSWORD));
@@ -93,14 +96,24 @@ public class FamilyManagementService {
                         .build();
                 loginRequestRepository.save(loginRequest);
                 emsService.sendToEmsOtp(familyMember);
-                System.out.println(familyMember);
+                message = Message.SUCCESSFUL_LOGIN;
             } else {
                 familyMember.setActivationToken(token);
                 FamilyMember savedMember = familyMemberRepository.save(familyMember);
                 emsService.sendToEms(savedMember);
+                message = Message.LOGIN_INACTIVE_MEMBER;
             }
         } else throw new InvalidRequestException(ExceptionMessage.INCORRECT_USERNAME_PASSWORD);
-        return token;
+        return LoginResponse.builder().token(token).message(message).build();
+    }
+
+    public LoginResponse twoFactorLogin(TwoFactorLoginRequest twoFactorLoginRequest) {
+        LoginRequest loginRequest = loginRequestRepository.findByLoginToken(twoFactorLoginRequest.getToken())
+                .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INCORRECT_TOKEN_OTP));
+        emsService.sendToEmsForVerification(loginRequest.getFamilyMemberId().toString(),
+                twoFactorLoginRequest.getOtp());
+
+        return LoginResponse.builder().message(Message.SUCCESSFUL_LOGIN_VERIFICATION).build();
     }
 
     public void activateMemberAccount(String activationToken) {
