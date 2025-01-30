@@ -2,10 +2,7 @@ package io.reactivestax.active.life.canada.service;
 
 import io.reactivestax.active.life.canada.constant.ExceptionMessage;
 import io.reactivestax.active.life.canada.constant.Message;
-import io.reactivestax.active.life.canada.dto.CreateMemberRequest;
-import io.reactivestax.active.life.canada.dto.LoginMemberRequest;
-import io.reactivestax.active.life.canada.dto.LoginResponse;
-import io.reactivestax.active.life.canada.dto.TwoFactorLoginRequest;
+import io.reactivestax.active.life.canada.dto.*;
 import io.reactivestax.active.life.canada.entity.FamilyGroup;
 import io.reactivestax.active.life.canada.entity.FamilyMember;
 import io.reactivestax.active.life.canada.entity.LoginRequest;
@@ -142,5 +139,22 @@ public class FamilyManagementService {
         } else {
             familyMemberRepository.save(familyMember);
         }
+    }
+
+    public void updateFamilyMember(String memberId, UpdateMemberRequest updateMemberRequest) {
+        Optional<FamilyMember> familyMemberOptional = familyMemberRepository.findByMemberLoginId(memberId);
+        FamilyMember familyMember = familyMemberOptional
+                .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INVALID_MEMBER_ID));
+    }
+
+    public MemberDetails getFamilyMember(String memberId) {
+        Optional<FamilyMember> familyMemberOptional = familyMemberRepository.findByMemberLoginId(memberId);
+        FamilyMember familyMember = familyMemberOptional
+                .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INVALID_MEMBER_ID));
+        Double credits = familyMember.getFamilyGroup().getCredits();
+        MemberDetails memberDetails = familyMemberMapper.familyMemberToMemberDetails(familyMember);
+        memberDetails.setCredits(credits);
+
+        return memberDetails;
     }
 }
