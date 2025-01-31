@@ -15,4 +15,5 @@ public class Message {
     public static final String SUCCESSFUL_LOGIN = "Credentials verified successfully, an otp is sent to your preferred mode of communication for verification.";
     public static final String SUCCESSFUL_LOGIN_VERIFICATION = "Login verification successful.";
     public static final String MEMBER_DEACTIVATED = "Member deactivated successfully.";
+    public static final String MEMBER_UPDATED = "Member updated successfully.";
 }

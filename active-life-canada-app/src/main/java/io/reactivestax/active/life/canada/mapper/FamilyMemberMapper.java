@@ -2,9 +2,9 @@ package io.reactivestax.active.life.canada.mapper;
 
 import io.reactivestax.active.life.canada.dto.CreateMemberRequest;
 import io.reactivestax.active.life.canada.dto.MemberDetails;
+import io.reactivestax.active.life.canada.dto.UpdateMemberRequest;
 import io.reactivestax.active.life.canada.entity.FamilyMember;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")
@@ -18,4 +18,9 @@ public interface FamilyMemberMapper {
 
     @Mapping(source = "memberLoginId", target = "username")
     MemberDetails familyMemberToMemberDetails(FamilyMember familyMember);
+
+    @Mapping(source = "username", target = "memberLoginId")
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateMemberRequestToFamilyMember(UpdateMemberRequest updateMemberRequest,
+                                           @MappingTarget FamilyMember familyMember);
 }

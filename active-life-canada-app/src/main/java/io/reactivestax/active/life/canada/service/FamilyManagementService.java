@@ -10,7 +10,6 @@ import io.reactivestax.active.life.canada.enums.Status;
 import io.reactivestax.active.life.canada.exception.InvalidRequestException;
 import io.reactivestax.active.life.canada.exception.UnauthorizedException;
 import io.reactivestax.active.life.canada.mapper.FamilyMemberMapper;
-import io.reactivestax.active.life.canada.model.SecurityHeader;
 import io.reactivestax.active.life.canada.repository.FamilyGroupRepository;
 import io.reactivestax.active.life.canada.repository.FamilyMemberRepository;
 import io.reactivestax.active.life.canada.repository.LoginRequestRepository;
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class FamilyManagementService {
@@ -41,7 +41,7 @@ public class FamilyManagementService {
         this.emsService = emsService;
     }
 
-    public void createFamilyMember(CreateMemberRequest createMemberRequest, SecurityHeader securityHeader,
+    public void createFamilyMember(CreateMemberRequest createMemberRequest, String loggedInMemberId,
                                    boolean isGroupAdmin) {
         FamilyMember familyMember = familyMemberMapper.registerMemberRequestToFamilyMember(createMemberRequest);
         familyMemberRepository.findByMemberLoginId(familyMember.getMemberLoginId())
@@ -54,8 +54,8 @@ public class FamilyManagementService {
             familyGroup.setFamilyPin(createMemberRequest.getPassword());
             saveFamilyMemberAndSendToEms(familyMember, familyGroup);
         } else {
-            Optional<FamilyMember> adminMember = familyMemberRepository.findById(UUID.fromString(securityHeader.getFamilyMemberId()));
-            adminMember.ifPresentOrElse(admin -> {
+            Optional<FamilyMember> loggedInMember = familyMemberRepository.findById(UUID.fromString(loggedInMemberId));
+            loggedInMember.ifPresentOrElse(admin -> {
                 if (admin.isGroupAdmin()) {
                     FamilyGroup familyGroup = admin.getFamilyGroup();
                     saveFamilyMemberAndSendToEms(familyMember, familyGroup);
@@ -78,8 +78,8 @@ public class FamilyManagementService {
     }
 
     public LoginResponse loginMember(LoginMemberRequest loginMemberRequest) {
-        String token = "";
-        String message = "";
+        String token;
+        String message;
         FamilyMember familyMember =
                 familyMemberRepository.findByMemberLoginId(loginMemberRequest.getUsername())
                         .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INCORRECT_USERNAME_PASSWORD));
@@ -127,34 +127,55 @@ public class FamilyManagementService {
         });
     }
 
-    public void deactivateFamilyMember(String memberId) {
-        Optional<FamilyMember> familyMemberOptional = familyMemberRepository.findByMemberLoginId(memberId);
-        FamilyMember familyMember = familyMemberOptional
-                .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INVALID_MEMBER_ID));
-        familyMember.setActive(false);
-        FamilyGroup familyGroup = familyMember.getFamilyGroup();
-        if (familyMember.getFamilyGroup().getFamilyMembers().size() == 1) {
-            familyGroup.setStatus(Status.INACTIVE);
-            familyGroupRepository.save(familyGroup);
-        } else {
-            familyMemberRepository.save(familyMember);
-        }
+    public void updateFamilyMember(String memberId, UpdateMemberRequest updateMemberRequest, String loggedInMemberId) {
+        familyMemberRepository.findById(UUID.fromString(loggedInMemberId)).ifPresentOrElse(member -> {
+            if (memberId.equals(loggedInMemberId)) {
+                Optional<FamilyMember> familyMemberOptional = familyMemberRepository.findByMemberLoginId(memberId);
+                FamilyMember familyMember = familyMemberOptional
+                        .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INVALID_MEMBER_ID));
+                familyMemberMapper.updateMemberRequestToFamilyMember(updateMemberRequest, familyMember);
+                familyMemberRepository.save(familyMember);
+            } else throw new UnauthorizedException(ExceptionMessage.UNAUTHORIZED_ACCESS);
+        }, () -> {
+            throw new UnauthorizedException(ExceptionMessage.UNAUTHORIZED_ACCESS);
+        });
     }
 
-    public void updateFamilyMember(String memberId, UpdateMemberRequest updateMemberRequest) {
-        Optional<FamilyMember> familyMemberOptional = familyMemberRepository.findByMemberLoginId(memberId);
-        FamilyMember familyMember = familyMemberOptional
-                .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INVALID_MEMBER_ID));
+    public MemberDetails getFamilyMember(String memberId, String loggedInMemberId) {
+        AtomicReference<MemberDetails> memberDetails = new AtomicReference<>(new MemberDetails());
+        familyMemberRepository.findById(UUID.fromString(loggedInMemberId)).ifPresentOrElse(member -> {
+            if (memberId.equals(loggedInMemberId)) {
+                Optional<FamilyMember> familyMemberOptional = familyMemberRepository.findByMemberLoginId(memberId);
+                FamilyMember familyMember = familyMemberOptional
+                        .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INVALID_MEMBER_ID));
+                Double credits = familyMember.getFamilyGroup().getCredits();
+                memberDetails.set(familyMemberMapper.familyMemberToMemberDetails(familyMember));
+                memberDetails.get().setCredits(credits);
+            } else throw new UnauthorizedException(ExceptionMessage.UNAUTHORIZED_ACCESS);
+        }, () -> {
+            throw new UnauthorizedException(ExceptionMessage.UNAUTHORIZED_ACCESS);
+        });
+
+        return memberDetails.get();
     }
 
-    public MemberDetails getFamilyMember(String memberId) {
-        Optional<FamilyMember> familyMemberOptional = familyMemberRepository.findByMemberLoginId(memberId);
-        FamilyMember familyMember = familyMemberOptional
-                .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INVALID_MEMBER_ID));
-        Double credits = familyMember.getFamilyGroup().getCredits();
-        MemberDetails memberDetails = familyMemberMapper.familyMemberToMemberDetails(familyMember);
-        memberDetails.setCredits(credits);
-
-        return memberDetails;
+    public void deactivateFamilyMember(String memberId, String loggedInMemberId) {
+        familyMemberRepository.findById(UUID.fromString(loggedInMemberId)).ifPresentOrElse(member -> {
+            if (memberId.equals(loggedInMemberId)) {
+                Optional<FamilyMember> familyMemberOptional = familyMemberRepository.findByMemberLoginId(memberId);
+                FamilyMember familyMember = familyMemberOptional
+                        .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INVALID_MEMBER_ID));
+                familyMember.setActive(false);
+                FamilyGroup familyGroup = familyMember.getFamilyGroup();
+                if (familyMember.getFamilyGroup().getFamilyMembers().size() == 1) {
+                    familyGroup.setStatus(Status.INACTIVE);
+                    familyGroupRepository.save(familyGroup);
+                } else {
+                    familyMemberRepository.save(familyMember);
+                }
+            } else throw new UnauthorizedException(ExceptionMessage.UNAUTHORIZED_ACCESS);
+        }, () -> {
+            throw new UnauthorizedException(ExceptionMessage.UNAUTHORIZED_ACCESS);
+        });
     }
 }
