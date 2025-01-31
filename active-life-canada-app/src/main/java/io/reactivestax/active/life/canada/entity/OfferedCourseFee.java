@@ -1,13 +1,11 @@
 package io.reactivestax.active.life.canada.entity;
 
+import io.reactivestax.active.life.canada.enums.FeeType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.math.BigDecimal;
+import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -18,13 +16,15 @@ import java.math.BigDecimal;
 public class OfferedCourseFee extends AuditTrail {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long feeId;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID feeId;
 
-    private String feeType;
-    private BigDecimal courseFee;
+    @Enumerated(value = EnumType.STRING)
+    private FeeType feeType;
+    private Integer courseFee;
 
-    @ManyToOne
+    @ToString.Exclude
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "offered_course_id", nullable = false)
     private OfferedCourse offeredCourse;
 }

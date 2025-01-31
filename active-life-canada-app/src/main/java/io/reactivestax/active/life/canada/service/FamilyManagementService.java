@@ -14,6 +14,7 @@ import io.reactivestax.active.life.canada.repository.FamilyGroupRepository;
 import io.reactivestax.active.life.canada.repository.FamilyMemberRepository;
 import io.reactivestax.active.life.canada.repository.LoginRequestRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -41,6 +42,7 @@ public class FamilyManagementService {
         this.emsService = emsService;
     }
 
+    @Transactional
     public void createFamilyMember(CreateMemberRequest createMemberRequest, String loggedInMemberId,
                                    boolean isGroupAdmin) {
         FamilyMember familyMember = familyMemberMapper.registerMemberRequestToFamilyMember(createMemberRequest);
@@ -77,6 +79,7 @@ public class FamilyManagementService {
         emsService.sendToEms(savedFamilyMember);
     }
 
+    @Transactional
     public LoginResponse loginMember(LoginMemberRequest loginMemberRequest) {
         String token;
         String message;
@@ -113,6 +116,7 @@ public class FamilyManagementService {
         return LoginResponse.builder().message(Message.SUCCESSFUL_LOGIN_VERIFICATION).build();
     }
 
+    @Transactional
     public void activateMemberAccount(String activationToken) {
         Optional<FamilyMember> familyMember = familyMemberRepository.findByActivationToken(activationToken);
         familyMember.ifPresentOrElse(member -> {
@@ -127,6 +131,7 @@ public class FamilyManagementService {
         });
     }
 
+    @Transactional
     public void updateFamilyMember(String memberId, UpdateMemberRequest updateMemberRequest, String loggedInMemberId) {
         familyMemberRepository.findById(UUID.fromString(loggedInMemberId)).ifPresentOrElse(member -> {
             if (memberId.equals(loggedInMemberId)) {
@@ -159,6 +164,7 @@ public class FamilyManagementService {
         return memberDetails.get();
     }
 
+    @Transactional
     public void deactivateFamilyMember(String memberId, String loggedInMemberId) {
         familyMemberRepository.findById(UUID.fromString(loggedInMemberId)).ifPresentOrElse(member -> {
             if (memberId.equals(loggedInMemberId)) {

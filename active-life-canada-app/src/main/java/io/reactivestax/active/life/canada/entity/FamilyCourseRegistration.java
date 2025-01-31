@@ -1,10 +1,7 @@
 package io.reactivestax.active.life.canada.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
@@ -29,10 +26,12 @@ public class FamilyCourseRegistration extends AuditTrail {
     private String withdrawActor;
     private UUID enrollmentActorId;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "offered_course_id", nullable = false)
     private OfferedCourse offeredCourse;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "family_member_id", nullable = false)
     private FamilyMember familyMember;

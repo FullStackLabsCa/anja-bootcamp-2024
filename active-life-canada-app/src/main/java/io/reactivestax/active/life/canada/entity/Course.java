@@ -1,10 +1,7 @@
 package io.reactivestax.active.life.canada.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
@@ -24,14 +21,17 @@ public class Course extends AuditTrail {
     private String name;
     private String description;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "sub_category_id", nullable = false)
     private SubCategory subCategory;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "age_group_id", nullable = false)
     private AgeGroup ageGroup;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
     private List<OfferedCourse> offeredCourses;
 }

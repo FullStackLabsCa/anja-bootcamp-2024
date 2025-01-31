@@ -1,10 +1,7 @@
 package io.reactivestax.active.life.canada.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
@@ -24,6 +21,7 @@ public class Function extends AuditTrail {
 
     private String description;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "function", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FacilityFunction> facilityFunctions = new ArrayList<>();
 }

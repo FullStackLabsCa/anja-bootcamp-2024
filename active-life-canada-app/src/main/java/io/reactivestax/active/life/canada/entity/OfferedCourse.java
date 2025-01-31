@@ -1,15 +1,14 @@
 package io.reactivestax.active.life.canada.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -20,27 +19,31 @@ import java.util.List;
 public class OfferedCourse extends AuditTrail {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long offeredCourseId;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID offeredCourseId;
 
-    private String barCode;
+    @Column(unique = true, nullable = false)
+    private UUID barCode;
     private LocalDate startDate;
     private LocalDate endDate;
-    private Short noOfClassesOffered;
+    private Integer noOfClassesOffered;
     private LocalTime startTime;
     private LocalTime endTime;
     private Boolean isAllDayCourse;
     private LocalDate registrationStartDate;
     private String availableForEnrollment;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "facility_id", nullable = false)
     private Facility facility;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "offeredCourse", cascade = CascadeType.ALL)
-    private List<OfferedCourseFee> offeredCourseFees;
+    private List<OfferedCourseFee> offeredCourseFees = new ArrayList<>();
 }

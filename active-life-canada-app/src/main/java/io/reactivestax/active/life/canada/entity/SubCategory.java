@@ -1,10 +1,7 @@
 package io.reactivestax.active.life.canada.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 @EqualsAndHashCode(callSuper = true)
@@ -22,6 +19,7 @@ public class SubCategory extends AuditTrail {
     private String name;
     private String description;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;

@@ -1,6 +1,5 @@
 package io.reactivestax.active.life.canada.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.reactivestax.active.life.canada.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,18 +24,7 @@ public class FamilyGroup extends AuditTrail {
     @Enumerated(value = EnumType.STRING)
     private Status status = Status.INACTIVE;
     private Integer failedLoginAttempts = 0;
-    @JsonManagedReference
+    @ToString.Exclude
     @OneToMany(mappedBy = "familyGroup", cascade = CascadeType.ALL)
     private List<FamilyMember> familyMembers = new ArrayList<>();
-
-    @Override
-    public String toString() {
-        return "FamilyGroup{" +
-                "failedLoginAttempts=" + failedLoginAttempts +
-                ", status=" + status +
-                ", credits=" + credits +
-                ", familyPin='" + familyPin + '\'' +
-                ", familyGroupId=" + familyGroupId +
-                '}';
-    }
 }

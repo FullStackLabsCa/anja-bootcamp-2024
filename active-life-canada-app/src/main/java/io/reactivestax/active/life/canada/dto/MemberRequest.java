@@ -2,6 +2,7 @@ package io.reactivestax.active.life.canada.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.reactivestax.active.life.canada.constant.ShortConstant;
 import io.reactivestax.active.life.canada.dto.deserializer.GenderDeserializer;
 import io.reactivestax.active.life.canada.dto.deserializer.PreferredModeOfCommunicationDeserializer;
 import io.reactivestax.active.life.canada.enums.Gender;
@@ -19,7 +20,7 @@ import java.time.LocalDate;
 @SuperBuilder
 public class MemberRequest {
     private String name;
-    @JsonFormat(pattern = "MM/dd/yyyy")
+    @JsonFormat(pattern = ShortConstant.DATE_PATTERN)
     private LocalDate dob;
     @JsonDeserialize(using = GenderDeserializer.class)
     private Gender gender;

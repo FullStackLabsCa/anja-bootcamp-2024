@@ -12,4 +12,6 @@ public class ExceptionMessage {
     public static final String INTERNAL_ERROR = "Internal Server Error.";
     public static final String BAD_REQUEST = "Bad request.";
     public static final String INVALID_MEMBER_ID = "Invalid username.";
+    public static final String INVALID_COURSE_ID = "Invalid course Id.";
+    public static final String INVALID_FACILITY_ID = "Invalid facility Id.";
 }

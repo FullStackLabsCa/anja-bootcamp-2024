@@ -13,4 +13,6 @@ public class ShortConstant {
 
     public static final String ENUM_DESERIALIZER_REGEX = "[\\s-]";
     public static final String ENUM_DESERIALIZER_REPLACE = "_";
+    public static final String DATE_PATTERN = "MM/dd/yyyy";
+    public static final String TIME_PATTERN = "HH:mm";
 }
