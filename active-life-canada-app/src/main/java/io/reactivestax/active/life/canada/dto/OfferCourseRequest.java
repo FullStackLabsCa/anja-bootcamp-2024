@@ -1,6 +1,15 @@
 package io.reactivestax.active.life.canada.dto;
 
-public class CourseRequest {
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class OfferCourseRequest {
     private String courseId;
     private String facilityId;
     private String startDate;

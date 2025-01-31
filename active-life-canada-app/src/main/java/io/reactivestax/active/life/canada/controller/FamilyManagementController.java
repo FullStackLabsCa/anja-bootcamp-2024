@@ -1,8 +1,8 @@
 package io.reactivestax.active.life.canada.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.reactivestax.active.life.canada.constant.Endpoints;
 import io.reactivestax.active.life.canada.constant.Message;
+import io.reactivestax.active.life.canada.constant.ShortConstant;
 import io.reactivestax.active.life.canada.dto.CreateMemberRequest;
 import io.reactivestax.active.life.canada.dto.MemberDetails;
 import io.reactivestax.active.life.canada.dto.SuccessfulResponse;
@@ -28,8 +28,8 @@ public class FamilyManagementController {
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<SuccessfulResponse> addMember(@RequestHeader(name = "X-security-header") String securityHeaderJson,
-                                                        @RequestBody CreateMemberRequest createMemberRequest) throws JsonProcessingException {
+    public ResponseEntity<SuccessfulResponse> addMember(@RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson,
+                                                        @RequestBody CreateMemberRequest createMemberRequest) {
         SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
         this.familyManagementService.createFamilyMember(createMemberRequest, securityHeader.getFamilyMemberId(), false);
 
@@ -38,7 +38,7 @@ public class FamilyManagementController {
 
     @PatchMapping(value = Endpoints.MEMBER_ID, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SuccessfulResponse> updateMember(@PathVariable String memberId,
-                                                           @RequestHeader(name = "X-security-header") String securityHeaderJson,
+                                                           @RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson,
                                                            @RequestBody UpdateMemberRequest updateMemberRequest) {
         SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
         this.familyManagementService.updateFamilyMember(memberId, updateMemberRequest, securityHeader.getFamilyMemberId());
@@ -48,7 +48,7 @@ public class FamilyManagementController {
 
     @GetMapping(value = Endpoints.MEMBER_ID, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MemberDetails> getMember(@PathVariable String memberId,
-                                                   @RequestHeader(name = "X-security-header") String securityHeaderJson) {
+                                                   @RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson) {
         SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
         MemberDetails memberDetails = this.familyManagementService.getFamilyMember(memberId, securityHeader.getFamilyMemberId());
 
@@ -57,7 +57,7 @@ public class FamilyManagementController {
 
     @DeleteMapping(value = Endpoints.MEMBER_ID, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SuccessfulResponse> deactivateMember(@PathVariable String memberId,
-                                                               @RequestHeader(name = "X-security-header") String securityHeaderJson) {
+                                                               @RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson) {
         SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
         this.familyManagementService.deactivateFamilyMember(memberId, securityHeader.getFamilyMemberId());
 
