@@ -45,8 +45,11 @@ public class CourseRegistrationManagementController {
     }
 
     @DeleteMapping(Endpoints.WITHDRAW_FROM_COURSE)
-    public void withdrawFromCourse(@PathVariable String enrollmentId,
-                                   @RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson) {
+    public ResponseEntity<SuccessfulResponse> withdrawFromCourse(@PathVariable String enrollmentId,
+                                                                 @RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson) {
         SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
+        this.courseRegistrationManagementService.withdrawFromCourse(enrollmentId, securityHeader.getFamilyMemberId());
+
+        return ResponseEntity.ok(SuccessfulResponse.builder().message(Message.WITHDRAWN_SUCCESSFUL).build());
     }
 }

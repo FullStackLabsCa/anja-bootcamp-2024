@@ -37,8 +37,9 @@ public class ProgramManagementController {
     }
 
     @GetMapping(Endpoints.OFFERED_COURSES)
-    public List<CourseDetailsResponse> offeredCourses() {
-        return this.programManagementService.offeredCourses();
+    public ResponseEntity<List<CourseDetailsResponse>> offeredCourses() {
+
+        return ResponseEntity.ok(this.programManagementService.offeredCourses());
     }
 
     @PostMapping(Endpoints.SEARCH_OFFERED_COURSES)

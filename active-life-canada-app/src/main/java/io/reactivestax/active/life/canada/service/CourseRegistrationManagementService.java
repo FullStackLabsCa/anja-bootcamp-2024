@@ -14,6 +14,9 @@ import io.reactivestax.active.life.canada.repository.OfferedCourseRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -46,6 +49,7 @@ public class CourseRegistrationManagementService {
                     .cost(getFees(offeredCourse, familyMember).getCourseFee())
                     .isWithdrawn(false)
                     .withdrawnCredits(0)
+                    .enrollmentActorId(loggedInMember.getFamilyMemberId())
                     .build();
             familyCourseRegistrationRepository.save(familyCourseRegistration);
         } else throw new InvalidRequestException(ExceptionMessage.INVALID_MEMBER_ID);
@@ -62,9 +66,26 @@ public class CourseRegistrationManagementService {
                 .findFirst().orElseThrow(() -> new InvalidRequestException(ExceptionMessage.NON_RESIDENT_COURSE_FEE_NOT_FOUND));
     }
 
+    public List<FamilyCourseRegistration> getWaitlistedCourses(String loggedInMemberId){
+        FamilyMember familyMember = familyMemberRepository.findById(UUID.fromString(loggedInMemberId))
+                .orElseThrow(() -> new UnauthorizedException(ExceptionMessage.UNAUTHORIZED_ACCESS));
+        return familyCourseRegistrationRepository.findAllByFamilyMemberIdOrEnrollmentActorId(familyMember.getFamilyMemberId(), loggedInMemberId);
+    }
+
     @Transactional
     public void withdrawFromCourse(String familyCourseRegistrationId, String loggedInMemberId) {
         FamilyMember familyMember = familyMemberRepository.findById(UUID.fromString(loggedInMemberId))
-                .orElseThrow(()-> new UnauthorizedException(ExceptionMessage.UNAUTHORIZED_ACCESS));
+                .orElseThrow(() -> new UnauthorizedException(ExceptionMessage.UNAUTHORIZED_ACCESS));
+        FamilyCourseRegistration familyCourseRegistration = familyCourseRegistrationRepository
+                .findByFamilyCourseRegistrationIdAndEnrollmentActorIdOrFamilyMemberIdForNonWithdrawnCourse(
+                        UUID.fromString(familyCourseRegistrationId), familyMember.getFamilyMemberId())
+                .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INVALID_FAMILY_COURSE_REGISTRATION_ID));
+        LocalDate startDate = familyCourseRegistration.getOfferedCourse().getStartDate();
+        long between = ChronoUnit.DAYS.between(startDate, LocalDate.now());
+        if (between > 2) {
+            throw new InvalidRequestException(ExceptionMessage.WITHDRAW_NOT_ALLOWED);
+        }
+        familyCourseRegistration.setIsWithdrawn(true);
+        familyCourseRegistrationRepository.save(familyCourseRegistration);
     }
 }
