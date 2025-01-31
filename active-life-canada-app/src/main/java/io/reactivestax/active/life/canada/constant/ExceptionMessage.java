@@ -2,7 +2,8 @@ package io.reactivestax.active.life.canada.constant;
 
 public class ExceptionMessage {
 
-    private ExceptionMessage(){}
+    private ExceptionMessage() {
+    }
 
     public static final String MEMBER_ALREADY_EXISTS = "Username already exists, please try with a different username.";
     public static final String INVALID_ACTIVATION_LINK = "Invalid account activation link.";
@@ -15,4 +16,6 @@ public class ExceptionMessage {
     public static final String INVALID_COURSE_ID = "Invalid course Id.";
     public static final String INVALID_OFFERED_COURSE_ID = "Invalid offered course Id.";
     public static final String INVALID_FACILITY_ID = "Invalid facility Id.";
+    public static final String RESIDENT_COURSE_FEE_NOT_FOUND = "Course not available for residents.";
+    public static final String NON_RESIDENT_COURSE_FEE_NOT_FOUND = "Course not available for non-residents.";
 }

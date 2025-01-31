@@ -10,7 +10,6 @@ import io.reactivestax.active.life.canada.service.ProgramManagementService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -44,11 +43,6 @@ public class ProgramManagementController {
 
     @PostMapping(Endpoints.SEARCH_OFFERED_COURSES)
     public void searchOfferedCourses() {
-
-    }
-
-    @PostMapping(Endpoints.OFFER_COURSES_BY_FACILITY)
-    public void offerCourseByFacility() {
 
     }
 }

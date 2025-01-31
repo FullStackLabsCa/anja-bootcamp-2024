@@ -3,6 +3,8 @@ package io.reactivestax.active.life.canada.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -13,17 +15,19 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
+@EntityListeners(AuditingEntityListener.class)
 public class FamilyCourseRegistration extends AuditTrail {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID familyCourseRegistrationId;
 
-    private String cost;
+    private Integer cost;
+    @CreatedDate
+    @Column(updatable = false, nullable = false)
     private LocalDate enrollmentDate;
     private Boolean isWithdrawn;
-    private Short withdrawnCredits;
-    private String withdrawActor;
+    private Integer withdrawnCredits;
     private UUID enrollmentActorId;
 
     @ToString.Exclude
