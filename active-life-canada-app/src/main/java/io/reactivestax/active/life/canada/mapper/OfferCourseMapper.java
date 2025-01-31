@@ -27,8 +27,6 @@ public interface OfferCourseMapper {
 
     List<CourseDetailsResponse> offeredCoursesToListOfCourseDetails(List<OfferedCourse> offeredCourses);
 
-    OfferedCourseFee offerCourseRequestToOfferedCourseFee(OfferCourseRequest offerCourseRequest);
-
     @Mapping(target = ShortConstant.BAR_CODE, ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateOfferedCourseRequestToOfferedCourse(CourseUpdateRequest courseUpdateRequest,

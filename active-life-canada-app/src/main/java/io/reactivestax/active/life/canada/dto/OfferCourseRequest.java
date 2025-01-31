@@ -1,10 +1,7 @@
 package io.reactivestax.active.life.canada.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.reactivestax.active.life.canada.constant.ShortConstant;
-import io.reactivestax.active.life.canada.dto.deserializer.FeeTypeDeserializer;
-import io.reactivestax.active.life.canada.enums.FeeType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -33,7 +30,6 @@ public class OfferCourseRequest {
     @JsonFormat(pattern = ShortConstant.DATE_PATTERN)
     private LocalDate registrationStartDate;
     private Integer noOfSpots;
-    @JsonDeserialize(using = FeeTypeDeserializer.class)
-    private FeeType feeType;
-    private Integer courseFee;
+    private Integer residentCourseFee;
+    private Integer nonResidentCourseFee;
 }

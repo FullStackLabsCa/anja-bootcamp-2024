@@ -8,6 +8,7 @@ import io.reactivestax.active.life.canada.entity.Course;
 import io.reactivestax.active.life.canada.entity.Facility;
 import io.reactivestax.active.life.canada.entity.OfferedCourse;
 import io.reactivestax.active.life.canada.entity.OfferedCourseFee;
+import io.reactivestax.active.life.canada.enums.FeeType;
 import io.reactivestax.active.life.canada.exception.InvalidRequestException;
 import io.reactivestax.active.life.canada.mapper.OfferCourseMapper;
 import io.reactivestax.active.life.canada.repository.CourseRepository;
@@ -17,6 +18,7 @@ import io.reactivestax.active.life.canada.repository.OfferedCourseRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -51,21 +53,28 @@ public class ProgramManagementService {
         offeredCourse.setBarCode(UUID.randomUUID());
         offeredCourse.setCourse(course);
         offeredCourse.setFacility(facility);
-        OfferedCourseFee offeredCourseFee = offerCourseMapper.offerCourseRequestToOfferedCourseFee(offerCourseRequest);
-        offeredCourseFee.setOfferedCourse(offeredCourse);
-        offeredCourseFeeRepository.save(offeredCourseFee);
+        List<OfferedCourseFee> offeredCourseFeeList = new ArrayList<>();
+        offeredCourseFeeList.add(OfferedCourseFee.builder()
+                .feeType(FeeType.RESIDENT)
+                .offeredCourse(offeredCourse)
+                .courseFee(offerCourseRequest.getResidentCourseFee()).build());
+        offeredCourseFeeList.add(OfferedCourseFee.builder()
+                .feeType(FeeType.NON_RESIDENT)
+                .offeredCourse(offeredCourse)
+                .courseFee(offerCourseRequest.getNonResidentCourseFee()).build());
+        offeredCourseFeeRepository.saveAll(offeredCourseFeeList);
     }
 
     @Transactional
-    public void updateOfferedCourse(CourseUpdateRequest courseUpdateRequest){
+    public void updateOfferedCourse(CourseUpdateRequest courseUpdateRequest) {
         String barCode = courseUpdateRequest.getBarCode();
         OfferedCourse offeredCourse = offeredCourseRepository.findByBarCode(UUID.fromString(barCode))
-                .orElseThrow(()-> new InvalidRequestException(ExceptionMessage.INVALID_OFFERED_COURSE_ID));
+                .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INVALID_OFFERED_COURSE_ID));
         offerCourseMapper.updateOfferedCourseRequestToOfferedCourse(courseUpdateRequest, offeredCourse);
         offeredCourseRepository.save(offeredCourse);
     }
 
-    public List<CourseDetailsResponse> offeredCourses(){
+    public List<CourseDetailsResponse> offeredCourses() {
         List<OfferedCourse> offeredCourses = offeredCourseRepository.findAll();
         return offerCourseMapper.offeredCoursesToListOfCourseDetails(offeredCourses);
     }
