@@ -9,12 +9,14 @@ import io.reactivestax.active.life.canada.enums.PreferredModeOfCommunication;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@SuperBuilder
 public class MemberRequest {
     private String name;
     @JsonFormat(pattern = "MM/dd/yyyy")

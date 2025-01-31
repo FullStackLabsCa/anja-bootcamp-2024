@@ -17,9 +17,9 @@ import java.time.LocalDateTime;
 @MappedSuperclass
 public class AuditTrail {
     @CreationTimestamp
-    private LocalDateTime createdAt;
-    private LocalDateTime createdBy;
+    private LocalDateTime createdTs;
+    private String createdBy;
     @UpdateTimestamp
-    private LocalDateTime updatedAt;
-    private LocalDateTime updatedBy;
+    private LocalDateTime lastUpdatedTs;
+    private String lastUpdatedBy;
 }
