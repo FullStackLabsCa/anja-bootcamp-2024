@@ -1,6 +1,8 @@
 package io.reactivestax.active.life.canada.service;
 
 import io.reactivestax.active.life.canada.constant.ExceptionMessage;
+import io.reactivestax.active.life.canada.dto.CourseDetailsResponse;
+import io.reactivestax.active.life.canada.dto.CourseUpdateRequest;
 import io.reactivestax.active.life.canada.dto.OfferCourseRequest;
 import io.reactivestax.active.life.canada.entity.Course;
 import io.reactivestax.active.life.canada.entity.Facility;
@@ -15,6 +17,7 @@ import io.reactivestax.active.life.canada.repository.OfferedCourseRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -43,7 +46,7 @@ public class ProgramManagementService {
         Course course = courseRepository.findById(offerCourseRequest.getCourseId())
                 .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INVALID_COURSE_ID));
         Facility facility = facilityRepository.findById(offerCourseRequest.getFacilityId())
-                .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INVALID_COURSE_ID));
+                .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INVALID_FACILITY_ID));
         OfferedCourse offeredCourse = offerCourseMapper.offerCourseRequestToOfferedCourse(offerCourseRequest);
         offeredCourse.setBarCode(UUID.randomUUID());
         offeredCourse.setCourse(course);
@@ -51,5 +54,19 @@ public class ProgramManagementService {
         OfferedCourseFee offeredCourseFee = offerCourseMapper.offerCourseRequestToOfferedCourseFee(offerCourseRequest);
         offeredCourseFee.setOfferedCourse(offeredCourse);
         offeredCourseFeeRepository.save(offeredCourseFee);
+    }
+
+    @Transactional
+    public void updateOfferedCourse(CourseUpdateRequest courseUpdateRequest){
+        String barCode = courseUpdateRequest.getBarCode();
+        OfferedCourse offeredCourse = offeredCourseRepository.findByBarCode(UUID.fromString(barCode))
+                .orElseThrow(()-> new InvalidRequestException(ExceptionMessage.INVALID_OFFERED_COURSE_ID));
+        offerCourseMapper.updateOfferedCourseRequestToOfferedCourse(courseUpdateRequest, offeredCourse);
+        offeredCourseRepository.save(offeredCourse);
+    }
+
+    public List<CourseDetailsResponse> offeredCourses(){
+        List<OfferedCourse> offeredCourses = offeredCourseRepository.findAll();
+        return offerCourseMapper.offeredCoursesToListOfCourseDetails(offeredCourses);
     }
 }

@@ -32,6 +32,7 @@ public class OfferCourseRequest {
     private Boolean isAllDayCourse;
     @JsonFormat(pattern = ShortConstant.DATE_PATTERN)
     private LocalDate registrationStartDate;
+    private Integer noOfSpots;
     @JsonDeserialize(using = FeeTypeDeserializer.class)
     private FeeType feeType;
     private Integer courseFee;

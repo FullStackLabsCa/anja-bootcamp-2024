@@ -19,13 +19,17 @@ tags:
     description: Register member, login member, add member to family group
   - name: program management
     description: Offer a course, edit a offered course, create fee for offered course
+  - name: dashboard
+    description: Display data on dashboard
+  - name: course registration management
+    description: Enroll into a course, withdraw from course, get all registered courses and waitlisted courses
 paths:
   /signUp:
     post:
       tags:
         - authentication management
       summary: Register a member
-      description: Register a member
+      description: This will register a member and send an activation link to the member using ems service
       operationId: regsiterMember
       requestBody:
         description: Register a member
@@ -36,11 +40,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Member registered successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessfulRegistration'
+          description: Member registered successfully and an activation link is sent to you
         '400':
           description: Invalid fields validation response
           content:
@@ -61,7 +61,40 @@ paths:
       description: Login member
       operationId: loginMember
       requestBody:
-        description: Login member
+        description: Authentication successfull, you'll receive an otp to verify
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginMemberRequest'
+        required: true
+      responses:
+        '200':
+          description: Credentials verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /login/2fa:
+    post:
+      tags:
+        - authentication management
+      summary: 2 factor authentication
+      description: Login member
+      operationId: multiFactorAuthLogin
+      requestBody:
+        description: Authenticate login
         content:
           application/json:
             schema:
@@ -86,6 +119,84 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponse'
+  /activate/{activationId}:
+    get:
+      tags:
+        - authentication management
+      summary: 2 factor authentication
+      description: Login member
+      operationId: activateAccount
+      parameters:
+        - name: activationId
+          in: path
+          description: member Id to fetch the member details
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Credentials verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessfulResponse'
+        '400':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /dashboard:
+    get:
+      tags:
+        - dashboard
+      summary: Get the data to display on dashboard
+      description: Get the data to display on dashboard such as waitlisted courses and registered courses
+      operationId: dashboard
+      parameters:
+        - name: X-security-header
+          in: header
+          description: Group Id for authentication
+          required: true
+          schema:
+            type: object
+            properties:
+              familyMemberId:
+                type: string
+      responses:
+        '200':
+          description: Dashboard details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  waitlistedCourses:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CourseDetailsResponse'
+                  enrolledCourses:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CourseDetailsResponse'
+        '400':
+          description: Invalid fields validation response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
   /members:
     post:
       tags:
@@ -93,28 +204,26 @@ paths:
       summary: Add a member to a family group
       description: Add a member to a family group
       operationId: addToFamilyGroup
+      parameters:
+        - name: X-security-header
+          in: header
+          description: Group Id for authentication
+          required: true
+          schema:
+            type: object
+            properties:
+              familyMemberId:
+                type: string
       requestBody:
         description: Add a member to a family group
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RegisterMemberRequest'
+              $ref: '#/components/schemas/AddMemberRequest'
         required: true
       responses:
         '200':
-          description: Member registered successfully
-          headers:
-            X-security-header:
-              description: family group id
-              schema:
-                type: object
-                properties:
-                  familyGroupId:
-                    type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessfulRegistration'
+          description: Member registered successfully, you'll receive a activation link
         '400':
           description: Invalid fields validation response
           content:
@@ -128,6 +237,50 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiResponse'
   /members/{memberId}:
+    patch:
+      tags:
+        - family management
+      summary: Update a family member
+      description: Update a family member
+      operationId: updateMember
+      parameters:
+        - name: X-security-header
+          in: header
+          description: Group Id for authentication
+          required: true
+          schema:
+            type: object
+            properties:
+              familyMemberId:
+                type: string
+        - name: memberId
+          in: path
+          description: member Id to fetch the member details
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Add a member to a family group
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddMemberRequest'
+        required: true
+      responses:
+        '200':
+          description: Member registered successfully, you'll receive a activation link
+        '400':
+          description: Invalid fields validation response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
     get:
       tags:
         - family management
@@ -135,6 +288,15 @@ paths:
       description: Get member details
       operationId: memberDetails
       parameters:
+        - name: X-security-header
+          in: header
+          description: Group Id for authentication
+          required: true
+          schema:
+            type: object
+            properties:
+              familyMemberId:
+                type: string
         - name: memberId
           in: path
           description: member Id to fetch the member details
@@ -144,20 +306,49 @@ paths:
       responses:
         '200':
           description: Member details
-          headers:
-            X-security-header:
-              description: family group id
-              schema:
-                type: object
-                properties:
-                  familyGroupId:
-                    type: string
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/MemberDetails'
         '400':
-          description: Invalid email supplied
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+    delete:
+      tags:
+        - family management
+      summary: Delete a member
+      description: Delete a member will mark the member as Inactive
+      operationId: deleteMember
+      parameters:
+        - name: X-security-header
+          in: header
+          description: Group Id for authentication
+          required: true
+          schema:
+            type: object
+            properties:
+              familyMemberId:
+                type: string
+        - name: memberId
+          in: path
+          description: member Id to delete a member
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Member deleted successfully
+        '400':
+          description: Invalid credentials
           content:
             application/json:
               schema:
@@ -171,7 +362,7 @@ paths:
   /registeredCourses/{memberId}:
     get:
       tags:
-        - program management
+        - course registration management
       summary: Find registered courses by member id
       description: Find registered courses by member id
       operationId: registeredCourseByMemberId
@@ -203,45 +394,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponse'
-  /registeredCourses/{enrollmentActorId}:
-    get:
-      tags:
-        - program management
-      summary: Find registered courses by Enrollment actor id
-      description: Find registered courses by Enrollment actor id
-      operationId: registeredCourseByEnrollmentActorId
-      parameters:
-        - name: enrollmentActorId
-          in: path
-          description: Enrollment actor Id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Registered courses
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CourseDetailsResponse'
-        '404':
-          description: Member not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
   /waitlistedCourses/{memberId}:
     get:
       tags:
-        - program management
+        - course registration management
       summary: Find waitlistedCourses courses by member id
       description: Find waitlistedCourses courses by member id
       operationId: waitlistedCoursesByMemberId
@@ -252,41 +408,15 @@ paths:
           required: true
           schema:
             type: string
-      responses:
-        '200':
-          description: Waitlisted courses
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CourseDetailsResponse'
-        '404':
-          description: Member not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-  /waitlistedCourses/{enrollmentActorId}:
-    get:
-      tags:
-        - program management
-      summary: Find waitlisted courses by Enrollment actor id
-      description: Find waitlisted courses by Enrollment actor id
-      operationId: waitlistedCoursesByEnrollmentActorId
-      parameters:
-        - name: enrollmentActorId
-          in: path
-          description: Enrollment actor Id
+        - name: X-security-header
+          in: header
+          description: Group Id for authentication
           required: true
           schema:
-            type: string
+            type: object
+            properties:
+              familyMemberId:
+                type: string
       responses:
         '200':
           description: Waitlisted courses
@@ -400,26 +530,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponse'
-  /offeredCourses/{offeredCourseId}/enrollments/{familyMemberId}:
+  /offeredCourses/{barCode}/enrollments/{memberLoginId}:
     post:
       tags:
-        - program management
+        - course registration management
       summary: Enroll into a course
       description: Enroll into a course
       operationId: registerForCourse
       parameters:
-        - name: offeredCourseId
+        - name: barCode
           in: path
-          description: Course Id of the offered course to enroll into
+          description: Bar code of the offered course to enroll into
           required: true
           schema:
             type: string
-        - name: familyMemberId
+        - name: memberLoginId
           in: path
-          description: Family member Id to enroll into the course
+          description:  member login Id to enroll into the course
           required: true
           schema:
             type: string
+        - name: X-security-header
+          in: header
+          description: Group Id for authentication
+          required: true
+          schema:
+            type: object
+            properties:
+              familyMemberId:
+                type: string
       responses:
         '200':
           description: Enrollment successful
@@ -439,68 +578,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponse'
-  /offeredCourses/{offeredCourseId}/enrollments/{registrationId}:
+  /enrollments/{enrollmentId}:
     delete:
       tags:
-        - program management
+        - course registration management
       summary: Withdraw from a course
       description: Withdraw from a course
       operationId: withdrawFromCourse
       parameters:
-        - name: offeredCourseId
+        - name: enrollmentId
           in: path
-          description: Course Id of the offered course to withdraw from
+          description: Member's course enrollment Id
           required: true
           schema:
             type: string
-        - name: registrationId
-          in: path
-          description: Member's course registration Id
+        - name: X-security-header
+          in: header
+          description: Group Id for authentication
           required: true
           schema:
-            type: string
+            type: object
+            properties:
+              familyMemberId:
+                type: string
       responses:
         '200':
           description: Successfully withdrawn from the course
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessfulResponse'
-        '404':
-          description: Course not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-  /offeredCourses/{offeredCourseId}/waitlist/{familyMemberId}:
-    post:
-      tags:
-        - program management
-      summary: Add to course waitlist
-      description: Add to course waitlist
-      operationId: addToWaitlist
-      parameters:
-        - name: offeredCourseId
-          in: path
-          description: Course Id to add to waitlist
-          required: true
-          schema:
-            type: string
-        - name: familyMemberId
-          in: path
-          description: Family member Id to add to waitlist
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Successfully added to waitlist
           content:
             application/json:
               schema:
@@ -611,7 +714,6 @@ components:
         - name
         - dob
         - gender
-        - emailId
         - streetNo
         - streetName
         - city
@@ -619,6 +721,8 @@ components:
         - country
         - homePhone
         - username
+        - password
+        - preferredModeOfCommunication
       type: object
       properties:
         name:
@@ -673,6 +777,85 @@ components:
           type: string
           description: Username to be used by the member to login
           example: example36
+        password:
+          type: string
+          description: password to login
+          example: 234344
+        preferredModeOfCommunication:
+          type: string
+          example: HOME_PHONE
+      xml:
+        name: '##default'
+    AddMemberRequest:
+      required:
+        - name
+        - dob
+        - gender
+        - streetNo
+        - streetName
+        - city
+        - province
+        - country
+        - homePhone
+        - username
+        - preferredModeOfCommunication
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the member
+          example: Firstname Lastname
+        dob:
+          type: string
+          description: Date of birth of the member
+          example: 10/05/1999
+        gender:
+          type: string
+          description: Gender of the member
+          example: Male
+        emailId:
+          type: string
+          description: Email Id of the member
+          example: example@email.com
+        streetNo:
+          type: string
+          description: House number of the member
+          example: 273
+        streetName:
+          type: string
+          description: Street address of the member
+          example: SanteeGate
+        city:
+          type: string
+          description: City of the member
+          example: Mississauga
+        province:
+          type: string
+          description: Province to which the member belongs
+          example: Ontario
+        country:
+          type: string
+          description: Country to which the member belongs
+          example: Canada
+        homePhone:
+          type: string
+          description: Home phone number
+          example: 222-555-5555
+        businessPhone:
+          type: string
+          description: Business phone number
+          example: 226-444-3434
+        language:
+          type: string
+          description: Language spoken by the customer
+          example: English
+        username:
+          type: string
+          description: Username to be used by the member to login
+          example: example36
+        preferredModeOfCommunication:
+          type: string
+          description: Home phone/Business phone/email
       xml:
         name: '##default'
     MemberDetails:
@@ -728,7 +911,7 @@ components:
           type: string
           description: Language spoken by the customer
           example: English
-        memberLoginId:
+        username:
           type: string
           description: Username to be used by the member to login
           example: example36
@@ -758,19 +941,6 @@ components:
           type: string
           description: Group pin to login
           example: 1234556
-      xml:
-        name: '##default'
-    SuccessfulRegistration:
-      type: object
-      properties:
-        memberId:
-          type: string
-          description: Member id of the member just created
-          example: 6e6a7d4b-1eaa-4e23-9fd3-8b5d0840d3f1
-        createdAt:
-          type: string
-          description: string
-          example: 2011-10-31T01:01:01
       xml:
         name: '##default'
     SearchRequest:
@@ -848,6 +1018,10 @@ components:
           type: string
           description: Registration start date
           example: 2010-09-12
+        noOfSpots:
+          type: integer
+          format: int32
+          example: 10
         feeType:
           type: string
           description: Fees type
@@ -897,6 +1071,10 @@ components:
           type: string
           description: Registration start date
           example: 2010-09-12
+        noOfSpots:
+          type: integer
+          format: int32
+          example: 10
         feeType:
           type: string
           description: Fees type
@@ -941,14 +1119,13 @@ components:
           type: string
           description: Registration start date
           example: 2010-09-12
-        feeType:
+        availableForEnrollment:
           type: string
-          description: Fees type
-          example: resident
-        courseFee:
+          example: AVAILABLE
+        noOfSpots:
           type: integer
           format: int32
-          example: 180
+          example: 10
       xml:
         name: '##default'
     CourseDetailsResponse:
@@ -999,6 +1176,18 @@ components:
           example: 2011-10-31T01:01:01
         message:
           type: string
+      xml:
+        name: '##default'
+    LoginResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Success Message
+          example: Credentials verified succesfully, you'll receive an otp to verify shortly
+        token:
+          type: string
+          description: token to be sent with otp
       xml:
         name: '##default'
     SuccessfulResponse:

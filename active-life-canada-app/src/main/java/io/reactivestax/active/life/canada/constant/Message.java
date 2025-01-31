@@ -12,6 +12,8 @@ public class Message {
     public static final String SUCCESSFUL_LOGIN_VERIFICATION = "Login verification successful.";
     public static final String MEMBER_DEACTIVATED = "Member deactivated successfully.";
     public static final String MEMBER_UPDATED = "Member updated successfully.";
+    public static final String OFFERED_COURSE_ADDED = "Offered course added successfully";
+    public static final String OFFERED_COURSE_UPDATED = "Offered course updated successfully";
 
     public static final String LOGIN_INACTIVE_MEMBER = "You are not an active member. An account activation link is " +
             "sent to you.";

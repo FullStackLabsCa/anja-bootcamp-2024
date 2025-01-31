@@ -1,5 +1,6 @@
 package io.reactivestax.active.life.canada.entity;
 
+import io.reactivestax.active.life.canada.enums.AvailableForEnrollment;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -31,7 +32,9 @@ public class OfferedCourse extends AuditTrail {
     private LocalTime endTime;
     private Boolean isAllDayCourse;
     private LocalDate registrationStartDate;
-    private String availableForEnrollment;
+    private Integer noOfSpots;
+    @Enumerated(EnumType.STRING)
+    private AvailableForEnrollment availableForEnrollment = AvailableForEnrollment.AVAILABLE;
 
     @ToString.Exclude
     @ManyToOne
