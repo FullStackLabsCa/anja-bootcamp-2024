@@ -1,10 +1,12 @@
 package io.reactivestax.active.life.canada.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -14,7 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class FamilyCourseRegistration extends AuditTrail{
+public class FamilyCourseRegistration extends AuditTrail {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
