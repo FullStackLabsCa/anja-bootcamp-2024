@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(Endpoints.BASE_URL)
+@RequestMapping(Endpoints.BASE_ENDPOINT)
 public class AuthenticationController {
 
     private final FamilyManagementService familyManagementService;

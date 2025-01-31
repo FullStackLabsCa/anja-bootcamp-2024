@@ -15,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(Endpoints.BASE_URL + Endpoints.MEMBERS_BASE)
+@RequestMapping(Endpoints.BASE_ENDPOINT + Endpoints.MEMBERS_BASE)
 public class FamilyManagementController {
 
     private final FamilyManagementService familyManagementService;
