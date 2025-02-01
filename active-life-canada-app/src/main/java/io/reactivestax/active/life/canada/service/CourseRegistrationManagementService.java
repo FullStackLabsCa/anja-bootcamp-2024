@@ -1,6 +1,7 @@
 package io.reactivestax.active.life.canada.service;
 
 import io.reactivestax.active.life.canada.constant.ExceptionMessage;
+import io.reactivestax.active.life.canada.dto.FamilyCourseRegistrationDetails;
 import io.reactivestax.active.life.canada.entity.FamilyCourseRegistration;
 import io.reactivestax.active.life.canada.entity.FamilyMember;
 import io.reactivestax.active.life.canada.entity.OfferedCourse;
@@ -8,6 +9,7 @@ import io.reactivestax.active.life.canada.entity.OfferedCourseFee;
 import io.reactivestax.active.life.canada.enums.FeeType;
 import io.reactivestax.active.life.canada.exception.InvalidRequestException;
 import io.reactivestax.active.life.canada.exception.UnauthorizedException;
+import io.reactivestax.active.life.canada.mapper.FamilyCourseRegistrationMapper;
 import io.reactivestax.active.life.canada.repository.FamilyCourseRegistrationRepository;
 import io.reactivestax.active.life.canada.repository.FamilyMemberRepository;
 import io.reactivestax.active.life.canada.repository.OfferedCourseRepository;
@@ -25,13 +27,16 @@ public class CourseRegistrationManagementService {
     private final FamilyCourseRegistrationRepository familyCourseRegistrationRepository;
     private final OfferedCourseRepository offeredCourseRepository;
     private final FamilyMemberRepository familyMemberRepository;
+    private final FamilyCourseRegistrationMapper familyCourseRegistrationMapper;
 
     public CourseRegistrationManagementService(FamilyCourseRegistrationRepository familyCourseRegistrationRepository,
                                                OfferedCourseRepository offeredCourseRepository,
-                                               FamilyMemberRepository familyMemberRepository) {
+                                               FamilyMemberRepository familyMemberRepository,
+                                               FamilyCourseRegistrationMapper familyCourseRegistrationMapper) {
         this.familyCourseRegistrationRepository = familyCourseRegistrationRepository;
         this.offeredCourseRepository = offeredCourseRepository;
         this.familyMemberRepository = familyMemberRepository;
+        this.familyCourseRegistrationMapper = familyCourseRegistrationMapper;
     }
 
     @Transactional
@@ -66,10 +71,12 @@ public class CourseRegistrationManagementService {
                 .findFirst().orElseThrow(() -> new InvalidRequestException(ExceptionMessage.NON_RESIDENT_COURSE_FEE_NOT_FOUND));
     }
 
-    public List<FamilyCourseRegistration> getWaitlistedCourses(String loggedInMemberId){
+    public List<FamilyCourseRegistrationDetails> getRegisteredCourses(String loggedInMemberId){
         FamilyMember familyMember = familyMemberRepository.findById(UUID.fromString(loggedInMemberId))
                 .orElseThrow(() -> new UnauthorizedException(ExceptionMessage.UNAUTHORIZED_ACCESS));
-        return familyCourseRegistrationRepository.findAllByFamilyMemberIdOrEnrollmentActorId(familyMember.getFamilyMemberId(), loggedInMemberId);
+        List<FamilyCourseRegistration> familyCourseRegistrationList =
+                familyCourseRegistrationRepository.findByEnrollmentActorIdOrFamilyMemberId(familyMember.getFamilyMemberId());
+        return familyCourseRegistrationMapper.toDtoList(familyCourseRegistrationList);
     }
 
     @Transactional

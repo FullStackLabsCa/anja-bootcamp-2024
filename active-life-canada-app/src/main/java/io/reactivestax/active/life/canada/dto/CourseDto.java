@@ -1,6 +1,5 @@
 package io.reactivestax.active.life.canada.dto;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -9,12 +8,11 @@ import lombok.experimental.SuperBuilder;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@SuperBuilder
-public class OfferCourseRequest extends BaseCourseDto {
+public class CourseDto extends NameDescription {
     private Long courseId;
-    private Long facilityId;
-    private Integer residentCourseFee;
-    private Integer nonResidentCourseFee;
+    private SubCategoryDto subCategory;
+    private AgeGroupDto ageGroup;
 }

@@ -2,23 +2,22 @@ package io.reactivestax.active.life.canada.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CourseDetailsResponse {
+@SuperBuilder
+public class OfferedCourseDetailsResponse extends BaseCourseDto {
     private String barCode;
-    private String startDate;
-    private String endDate;
-    private Integer noOfClassesOffered;
-    private String startTime;
-    private String endTime;
-    private Boolean isAllDayCourse;
-    private String registrationStartDate;
     private String availableForEnrollment;
     private List<CourseFeeDto> courseFee = new ArrayList<>();
+    private CourseDto course;
+    private FacilityDto facility;
 }

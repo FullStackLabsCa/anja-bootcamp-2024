@@ -2,7 +2,7 @@ package io.reactivestax.active.life.canada.controller;
 
 import io.reactivestax.active.life.canada.constant.Endpoints;
 import io.reactivestax.active.life.canada.constant.Message;
-import io.reactivestax.active.life.canada.dto.CourseDetailsResponse;
+import io.reactivestax.active.life.canada.dto.OfferedCourseDetailsResponse;
 import io.reactivestax.active.life.canada.dto.CourseUpdateRequest;
 import io.reactivestax.active.life.canada.dto.OfferCourseRequest;
 import io.reactivestax.active.life.canada.dto.SuccessfulResponse;
@@ -37,7 +37,7 @@ public class ProgramManagementController {
     }
 
     @GetMapping(Endpoints.OFFERED_COURSES)
-    public ResponseEntity<List<CourseDetailsResponse>> offeredCourses() {
+    public ResponseEntity<List<OfferedCourseDetailsResponse>> offeredCourses() {
 
         return ResponseEntity.ok(this.programManagementService.offeredCourses());
     }

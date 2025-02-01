@@ -15,5 +15,6 @@ public interface FamilyCourseRegistrationRepository extends JpaRepository<Family
     Optional<FamilyCourseRegistration> findByFamilyCourseRegistrationIdAndEnrollmentActorIdOrFamilyMemberIdForNonWithdrawnCourse
             (UUID familyCourseRegistrationId, UUID memberId);
 
-    List<FamilyCourseRegistration> findAllByFamilyMemberIdOrEnrollmentActorId(UUID familyMemberId, String enrollmentActorId);
+    @Query("SELECT fcr from FamilyCourseRegistration fcr where fcr.enrollmentActorId = ?1 OR fcr.familyMember.familyMemberId = ?1")
+    List<FamilyCourseRegistration> findByEnrollmentActorIdOrFamilyMemberId(UUID familyMemberId);
 }

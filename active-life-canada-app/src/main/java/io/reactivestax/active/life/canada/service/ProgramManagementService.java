@@ -1,7 +1,7 @@
 package io.reactivestax.active.life.canada.service;
 
 import io.reactivestax.active.life.canada.constant.ExceptionMessage;
-import io.reactivestax.active.life.canada.dto.CourseDetailsResponse;
+import io.reactivestax.active.life.canada.dto.OfferedCourseDetailsResponse;
 import io.reactivestax.active.life.canada.dto.CourseUpdateRequest;
 import io.reactivestax.active.life.canada.dto.OfferCourseRequest;
 import io.reactivestax.active.life.canada.entity.Course;
@@ -74,7 +74,7 @@ public class ProgramManagementService {
         offeredCourseRepository.save(offeredCourse);
     }
 
-    public List<CourseDetailsResponse> offeredCourses() {
+    public List<OfferedCourseDetailsResponse> offeredCourses() {
         List<OfferedCourse> offeredCourses = offeredCourseRepository.findAll();
         return offerCourseMapper.offeredCoursesToListOfCourseDetails(offeredCourses);
     }

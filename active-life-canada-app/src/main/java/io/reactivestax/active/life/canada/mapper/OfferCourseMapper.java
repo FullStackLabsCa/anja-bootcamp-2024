@@ -1,7 +1,7 @@
 package io.reactivestax.active.life.canada.mapper;
 
 import io.reactivestax.active.life.canada.constant.ShortConstant;
-import io.reactivestax.active.life.canada.dto.CourseDetailsResponse;
+import io.reactivestax.active.life.canada.dto.OfferedCourseDetailsResponse;
 import io.reactivestax.active.life.canada.dto.CourseFeeDto;
 import io.reactivestax.active.life.canada.dto.CourseUpdateRequest;
 import io.reactivestax.active.life.canada.dto.OfferCourseRequest;
@@ -11,21 +11,21 @@ import org.mapstruct.*;
 
 import java.util.List;
 
-@Mapper(componentModel = ShortConstant.SPRING)
+@Mapper(componentModel = ShortConstant.SPRING, uses = {CourseMapper.class, FacilityMapper.class})
 public interface OfferCourseMapper {
     @Mapping(target = ShortConstant.AVAILABLE_FOR_ENROLLMENT, constant = "AVAILABLE")
     OfferedCourse offerCourseRequestToOfferedCourse(OfferCourseRequest offerCourseRequest);
 
     @Mapping(source = "offeredCourseFees", target = "courseFee")
     @Mapping(target = "barCode", expression = "java(offeredCourse.getBarCode().toString())")
-    CourseDetailsResponse toCourseDetailsResponse(OfferedCourse offeredCourse);
+    OfferedCourseDetailsResponse toCourseDetailsResponse(OfferedCourse offeredCourse);
 
     @Mapping(target = "feeId", expression = "java(offeredCourseFee.getFeeId().toString())")
     CourseFeeDto toCourseFeeDto(OfferedCourseFee offeredCourseFee);
 
     List<CourseFeeDto> toCourseFeeDtoList(List<OfferedCourseFee> offeredCourseFees);
 
-    List<CourseDetailsResponse> offeredCoursesToListOfCourseDetails(List<OfferedCourse> offeredCourses);
+    List<OfferedCourseDetailsResponse> offeredCoursesToListOfCourseDetails(List<OfferedCourse> offeredCourses);
 
     @Mapping(target = ShortConstant.BAR_CODE, ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

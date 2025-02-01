@@ -4,12 +4,15 @@ package io.reactivestax.active.life.canada.controller;
 import io.reactivestax.active.life.canada.constant.Endpoints;
 import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.constant.ShortConstant;
+import io.reactivestax.active.life.canada.dto.FamilyCourseRegistrationDetails;
 import io.reactivestax.active.life.canada.dto.SuccessfulResponse;
 import io.reactivestax.active.life.canada.model.SecurityHeader;
 import io.reactivestax.active.life.canada.service.CourseRegistrationManagementService;
 import io.reactivestax.active.life.canada.util.ActiveLifeUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(Endpoints.BASE_ENDPOINT)
@@ -35,8 +38,11 @@ public class CourseRegistrationManagementController {
     }
 
     @GetMapping(Endpoints.REGISTERED_COURSES)
-    public void registeredCourses(@RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson) {
+    public ResponseEntity<List<FamilyCourseRegistrationDetails>> registeredCourses(@RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson) {
         SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
+        List<FamilyCourseRegistrationDetails> familyCourseRegistrationDetailsList = this.courseRegistrationManagementService.getRegisteredCourses(securityHeader.getFamilyMemberId());
+
+        return ResponseEntity.ok(familyCourseRegistrationDetailsList);
     }
 
     @GetMapping(Endpoints.WAITLISTED_COURSES)
