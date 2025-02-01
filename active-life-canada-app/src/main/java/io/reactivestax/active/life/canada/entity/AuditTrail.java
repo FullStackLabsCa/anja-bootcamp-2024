@@ -11,10 +11,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Data
-@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 @MappedSuperclass
+@SuperBuilder
 public class AuditTrail {
     @CreationTimestamp
     private LocalDateTime createdTs;

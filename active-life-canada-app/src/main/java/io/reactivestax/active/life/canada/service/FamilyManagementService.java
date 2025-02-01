@@ -12,7 +12,6 @@ import io.reactivestax.active.life.canada.exception.UnauthorizedException;
 import io.reactivestax.active.life.canada.mapper.FamilyMemberMapper;
 import io.reactivestax.active.life.canada.repository.FamilyGroupRepository;
 import io.reactivestax.active.life.canada.repository.FamilyMemberRepository;
-import io.reactivestax.active.life.canada.repository.LoginRequestRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,18 +26,15 @@ public class FamilyManagementService {
     private final FamilyMemberRepository familyMemberRepository;
     private final FamilyGroupRepository familyGroupRepository;
     private final FamilyMemberMapper familyMemberMapper;
-    private final LoginRequestRepository loginRequestRepository;
     private final EmsService emsService;
 
     public FamilyManagementService(FamilyMemberRepository familyMemberRepository,
                                    FamilyGroupRepository familyGroupRepository,
                                    FamilyMemberMapper familyMemberMapper,
-                                   LoginRequestRepository loginRequestRepository,
                                    EmsService emsService) {
         this.familyMemberRepository = familyMemberRepository;
         this.familyGroupRepository = familyGroupRepository;
         this.familyMemberMapper = familyMemberMapper;
-        this.loginRequestRepository = loginRequestRepository;
         this.emsService = emsService;
     }
 

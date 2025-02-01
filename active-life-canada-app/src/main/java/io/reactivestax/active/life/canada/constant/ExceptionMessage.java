@@ -20,4 +20,5 @@ public class ExceptionMessage {
     public static final String RESIDENT_COURSE_FEE_NOT_FOUND = "Course not available for residents.";
     public static final String NON_RESIDENT_COURSE_FEE_NOT_FOUND = "Course not available for non-residents.";
     public static final String WITHDRAW_NOT_ALLOWED = "Withdraw from the course is not allowed.";
+    public static final String COURSE_FULL = "Course spots and waitlist full.";
 }

@@ -48,5 +48,13 @@ public class OfferedCourse extends AuditTrail {
 
     @ToString.Exclude
     @OneToMany(mappedBy = "offeredCourse", cascade = CascadeType.ALL)
+    private List<FamilyCourseRegistration> familyCourseRegistrations = new ArrayList<>();
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "offeredCourse", cascade = CascadeType.ALL)
     private List<OfferedCourseFee> offeredCourseFees = new ArrayList<>();
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "offeredCourse", cascade = CascadeType.ALL)
+    private List<OfferedCourseWaitlist> offeredCourseWaitlist = new ArrayList<>();
 }

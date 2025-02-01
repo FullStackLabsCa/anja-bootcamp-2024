@@ -5,6 +5,7 @@ import io.reactivestax.active.life.canada.constant.Endpoints;
 import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.constant.ShortConstant;
 import io.reactivestax.active.life.canada.dto.FamilyCourseRegistrationDetails;
+import io.reactivestax.active.life.canada.dto.OfferedCourseWaitlistDto;
 import io.reactivestax.active.life.canada.dto.SuccessfulResponse;
 import io.reactivestax.active.life.canada.model.SecurityHeader;
 import io.reactivestax.active.life.canada.service.CourseRegistrationManagementService;
@@ -32,9 +33,10 @@ public class CourseRegistrationManagementController {
                                                                @PathVariable String memberLoginId,
                                                                @RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson) {
         SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
-        courseRegistrationManagementService.enrollIntoOfferedCourse(barCode, memberLoginId, securityHeader.getFamilyMemberId());
+        String message = courseRegistrationManagementService.enrollIntoOfferedCourse(barCode, memberLoginId,
+                securityHeader.getFamilyMemberId());
 
-        return ResponseEntity.ok(SuccessfulResponse.builder().message(Message.ENROLLED_SUCCESSFUL).build());
+        return ResponseEntity.ok(SuccessfulResponse.builder().message(message).build());
     }
 
     @GetMapping(Endpoints.REGISTERED_COURSES)
@@ -46,8 +48,11 @@ public class CourseRegistrationManagementController {
     }
 
     @GetMapping(Endpoints.WAITLISTED_COURSES)
-    public void waitlistedCourses(@RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson) {
+    public ResponseEntity<List<OfferedCourseWaitlistDto>> waitlistedCourses(@RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson) {
         SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
+        List<OfferedCourseWaitlistDto> waitlistedCourses = this.courseRegistrationManagementService.getWaitlistedCourses(securityHeader.getFamilyMemberId());
+
+        return ResponseEntity.ok(waitlistedCourses);
     }
 
     @DeleteMapping(Endpoints.WITHDRAW_FROM_COURSE)

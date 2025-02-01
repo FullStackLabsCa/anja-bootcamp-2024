@@ -1,18 +1,20 @@
 package io.reactivestax.active.life.canada.service;
 
 import io.reactivestax.active.life.canada.constant.ExceptionMessage;
+import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.dto.FamilyCourseRegistrationDetails;
-import io.reactivestax.active.life.canada.entity.FamilyCourseRegistration;
-import io.reactivestax.active.life.canada.entity.FamilyMember;
-import io.reactivestax.active.life.canada.entity.OfferedCourse;
-import io.reactivestax.active.life.canada.entity.OfferedCourseFee;
+import io.reactivestax.active.life.canada.dto.OfferedCourseWaitlistDto;
+import io.reactivestax.active.life.canada.entity.*;
+import io.reactivestax.active.life.canada.enums.AvailableForEnrollment;
 import io.reactivestax.active.life.canada.enums.FeeType;
 import io.reactivestax.active.life.canada.exception.InvalidRequestException;
 import io.reactivestax.active.life.canada.exception.UnauthorizedException;
 import io.reactivestax.active.life.canada.mapper.FamilyCourseRegistrationMapper;
+import io.reactivestax.active.life.canada.mapper.OfferedCourseWaitlistMapper;
 import io.reactivestax.active.life.canada.repository.FamilyCourseRegistrationRepository;
 import io.reactivestax.active.life.canada.repository.FamilyMemberRepository;
 import io.reactivestax.active.life.canada.repository.OfferedCourseRepository;
+import io.reactivestax.active.life.canada.repository.OfferedCourseWaitlistRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,27 +29,35 @@ public class CourseRegistrationManagementService {
     private final FamilyCourseRegistrationRepository familyCourseRegistrationRepository;
     private final OfferedCourseRepository offeredCourseRepository;
     private final FamilyMemberRepository familyMemberRepository;
+    private final OfferedCourseWaitlistRepository offeredCourseWaitlistRepository;
     private final FamilyCourseRegistrationMapper familyCourseRegistrationMapper;
+    private final OfferedCourseWaitlistMapper offeredCourseWaitlistMapper;
 
     public CourseRegistrationManagementService(FamilyCourseRegistrationRepository familyCourseRegistrationRepository,
                                                OfferedCourseRepository offeredCourseRepository,
                                                FamilyMemberRepository familyMemberRepository,
-                                               FamilyCourseRegistrationMapper familyCourseRegistrationMapper) {
+                                               OfferedCourseWaitlistRepository offeredCourseWaitlistRepository,
+                                               FamilyCourseRegistrationMapper familyCourseRegistrationMapper,
+                                               OfferedCourseWaitlistMapper offeredCourseWaitlistMapper) {
         this.familyCourseRegistrationRepository = familyCourseRegistrationRepository;
         this.offeredCourseRepository = offeredCourseRepository;
         this.familyMemberRepository = familyMemberRepository;
+        this.offeredCourseWaitlistRepository = offeredCourseWaitlistRepository;
         this.familyCourseRegistrationMapper = familyCourseRegistrationMapper;
+        this.offeredCourseWaitlistMapper = offeredCourseWaitlistMapper;
     }
 
     @Transactional
-    public void enrollIntoOfferedCourse(String barCode, String memberLoginId, String loggedInMemberId) {
+    public String enrollIntoOfferedCourse(String barCode, String memberLoginId, String loggedInMemberId) {
+        String enrollmentMessage;
         FamilyMember loggedInMember = familyMemberRepository.findById(UUID.fromString(loggedInMemberId))
                 .orElseThrow(() -> new UnauthorizedException(ExceptionMessage.UNAUTHORIZED_ACCESS));
+        FamilyMember familyMember = familyMemberRepository.findByMemberLoginIdAndFamilyGroup_FamilyGroupId
+                        (memberLoginId, loggedInMember.getFamilyGroup().getFamilyGroupId())
+                .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INVALID_MEMBER_ID));
         OfferedCourse offeredCourse = offeredCourseRepository.findByBarCode(UUID.fromString(barCode))
                 .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INVALID_OFFERED_COURSE_ID));
-        FamilyMember familyMember = familyMemberRepository.findByMemberLoginId(memberLoginId)
-                .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INVALID_MEMBER_ID));
-        if (loggedInMember.getFamilyGroup().getFamilyGroupId().equals(familyMember.getFamilyGroup().getFamilyGroupId())) {
+        if (offeredCourse.getAvailableForEnrollment().equals(AvailableForEnrollment.AVAILABLE)) {
             FamilyCourseRegistration familyCourseRegistration = FamilyCourseRegistration.builder()
                     .offeredCourse(offeredCourse)
                     .familyMember(familyMember)
@@ -56,8 +66,29 @@ public class CourseRegistrationManagementService {
                     .withdrawnCredits(0)
                     .enrollmentActorId(loggedInMember.getFamilyMemberId())
                     .build();
-            familyCourseRegistrationRepository.save(familyCourseRegistration);
-        } else throw new InvalidRequestException(ExceptionMessage.INVALID_MEMBER_ID);
+            List<FamilyCourseRegistration> familyCourseRegistrations = offeredCourse.getFamilyCourseRegistrations();
+            familyCourseRegistrations.add(familyCourseRegistration);
+            if (familyCourseRegistrations.size() == offeredCourse.getNoOfSpots()) {
+                offeredCourse.setAvailableForEnrollment(AvailableForEnrollment.WAITLIST_OPEN);
+            }
+            offeredCourseRepository.save(offeredCourse);
+            enrollmentMessage = Message.ENROLLMENT_SUCCESSFUL;
+        } else if (offeredCourse.getAvailableForEnrollment().equals(AvailableForEnrollment.WAITLIST_OPEN)) {
+            List<OfferedCourseWaitlist> courseWaitlist = offeredCourse.getOfferedCourseWaitlist();
+            OfferedCourseWaitlist offeredCourseWaitlist = OfferedCourseWaitlist.builder()
+                    .enrollmentActorId(UUID.fromString(loggedInMemberId))
+                    .offeredCourse(offeredCourse)
+                    .familyMember(familyMember)
+                    .build();
+            courseWaitlist.add(offeredCourseWaitlist);
+            if (offeredCourse.getNoOfSpots() == courseWaitlist.size()) {
+                offeredCourse.setAvailableForEnrollment(AvailableForEnrollment.NOT_AVAILABLE);
+            }
+            offeredCourseRepository.save(offeredCourse);
+            enrollmentMessage = Message.ADDED_TO_WAITLIST;
+        } else throw new InvalidRequestException(ExceptionMessage.COURSE_FULL);
+
+        return enrollmentMessage;
     }
 
     private OfferedCourseFee getFees(OfferedCourse offeredCourse, FamilyMember familyMember) {
@@ -71,12 +102,22 @@ public class CourseRegistrationManagementService {
                 .findFirst().orElseThrow(() -> new InvalidRequestException(ExceptionMessage.NON_RESIDENT_COURSE_FEE_NOT_FOUND));
     }
 
-    public List<FamilyCourseRegistrationDetails> getRegisteredCourses(String loggedInMemberId){
+    public List<FamilyCourseRegistrationDetails> getRegisteredCourses(String loggedInMemberId) {
         FamilyMember familyMember = familyMemberRepository.findById(UUID.fromString(loggedInMemberId))
                 .orElseThrow(() -> new UnauthorizedException(ExceptionMessage.UNAUTHORIZED_ACCESS));
-        List<FamilyCourseRegistration> familyCourseRegistrationList =
-                familyCourseRegistrationRepository.findByEnrollmentActorIdOrFamilyMemberId(familyMember.getFamilyMemberId());
+        List<FamilyCourseRegistration> familyCourseRegistrationList = familyCourseRegistrationRepository
+                .findAllByEnrollmentActorIdOrFamilyMember_FamilyMemberId(UUID.fromString(loggedInMemberId),
+                        familyMember.getFamilyMemberId());
         return familyCourseRegistrationMapper.toDtoList(familyCourseRegistrationList);
+    }
+
+    public List<OfferedCourseWaitlistDto> getWaitlistedCourses(String loggedInMemberId) {
+        FamilyMember familyMember = familyMemberRepository.findById(UUID.fromString(loggedInMemberId))
+                .orElseThrow(() -> new UnauthorizedException(ExceptionMessage.UNAUTHORIZED_ACCESS));
+        List<OfferedCourseWaitlist> offeredCourseWaitlist = offeredCourseWaitlistRepository
+                .findAllByEnrollmentActorIdOrFamilyMember_FamilyMemberId(UUID.fromString(loggedInMemberId),
+                        familyMember.getFamilyMemberId());
+        return offeredCourseWaitlistMapper.toDtoList(offeredCourseWaitlist);
     }
 
     @Transactional

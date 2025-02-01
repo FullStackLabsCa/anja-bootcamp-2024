@@ -8,7 +8,8 @@ public class Message {
     public static final String MEMBER_ADD_SUCCESSFUL = "Member registered successfully and an activation link is sent" +
             " to the member's preferred mode of communication.";
     public static final String ACTIVATED_SUCCESSFULLY = "Your account activated successfully.";
-    public static final String ENROLLED_SUCCESSFUL = "Enrollment successful.";
+    public static final String ENROLLMENT_SUCCESSFUL = "Enrollment successful.";
+    public static final String ADDED_TO_WAITLIST = "Spots full, added to waitlist.";
     public static final String WITHDRAWN_SUCCESSFUL = "Withdrawn successful.";
     public static final String SUCCESSFUL_LOGIN = "Credentials verified successfully, an otp is sent to your preferred mode of communication for verification.";
     public static final String SUCCESSFUL_LOGIN_VERIFICATION = "Login verification successful.";

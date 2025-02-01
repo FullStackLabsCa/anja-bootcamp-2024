@@ -11,6 +11,8 @@ import java.util.UUID;
 public interface FamilyMemberRepository extends JpaRepository<FamilyMember, UUID> {
     Optional<FamilyMember> findByMemberLoginId(String memberLoginId);
 
+    Optional<FamilyMember> findByMemberLoginIdAndFamilyGroup_FamilyGroupId(String memberLoginId, UUID familyGroupId);
+
     @Modifying
     @Query("UPDATE FamilyMember SET isActive = true WHERE activationToken = ?1")
     int activateAccountByActivationToken(String activationToken);

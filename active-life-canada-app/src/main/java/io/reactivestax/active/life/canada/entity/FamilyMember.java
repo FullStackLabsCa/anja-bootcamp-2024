@@ -7,6 +7,8 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
@@ -34,14 +36,19 @@ public class FamilyMember extends AuditTrail {
     private String language;
     @Column(unique = true, nullable = false)
     private String memberLoginId;
-    private String groupId;
     @Enumerated(value = EnumType.STRING)
     private PreferredModeOfCommunication preferredModeOfCommunication;
     private boolean isActive;
     private boolean isGroupAdmin;
+
     @ManyToOne
     @JoinColumn(name = "family_group_id", nullable = false)
     @ToString.Exclude
     private FamilyGroup familyGroup;
+
     private String activationToken;
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "familyMember", cascade = CascadeType.ALL)
+    private List<OfferedCourseWaitlist> offeredCourseWaitlist = new ArrayList<>();
 }
