@@ -15,11 +15,10 @@ import io.reactivestax.active.life.canada.repository.FamilyCourseRegistrationRep
 import io.reactivestax.active.life.canada.repository.FamilyMemberRepository;
 import io.reactivestax.active.life.canada.repository.OfferedCourseRepository;
 import io.reactivestax.active.life.canada.repository.OfferedCourseWaitlistRepository;
+import io.reactivestax.active.life.canada.util.ActiveLifeUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,19 +31,22 @@ public class CourseRegistrationManagementService {
     private final OfferedCourseWaitlistRepository offeredCourseWaitlistRepository;
     private final FamilyCourseRegistrationMapper familyCourseRegistrationMapper;
     private final OfferedCourseWaitlistMapper offeredCourseWaitlistMapper;
+    private final ActiveLifeUtil activeLifeUtil;
 
     public CourseRegistrationManagementService(FamilyCourseRegistrationRepository familyCourseRegistrationRepository,
                                                OfferedCourseRepository offeredCourseRepository,
                                                FamilyMemberRepository familyMemberRepository,
                                                OfferedCourseWaitlistRepository offeredCourseWaitlistRepository,
                                                FamilyCourseRegistrationMapper familyCourseRegistrationMapper,
-                                               OfferedCourseWaitlistMapper offeredCourseWaitlistMapper) {
+                                               OfferedCourseWaitlistMapper offeredCourseWaitlistMapper,
+                                               ActiveLifeUtil activeLifeUtil) {
         this.familyCourseRegistrationRepository = familyCourseRegistrationRepository;
         this.offeredCourseRepository = offeredCourseRepository;
         this.familyMemberRepository = familyMemberRepository;
         this.offeredCourseWaitlistRepository = offeredCourseWaitlistRepository;
         this.familyCourseRegistrationMapper = familyCourseRegistrationMapper;
         this.offeredCourseWaitlistMapper = offeredCourseWaitlistMapper;
+        this.activeLifeUtil = activeLifeUtil;
     }
 
     @Transactional
@@ -128,11 +130,10 @@ public class CourseRegistrationManagementService {
                 .findByFamilyCourseRegistrationIdAndEnrollmentActorIdOrFamilyMemberIdForNonWithdrawnCourse(
                         UUID.fromString(familyCourseRegistrationId), familyMember.getFamilyMemberId())
                 .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INVALID_FAMILY_COURSE_REGISTRATION_ID));
-        LocalDate startDate = familyCourseRegistration.getOfferedCourse().getStartDate();
-        long between = ChronoUnit.DAYS.between(startDate, LocalDate.now());
-        if (between > 2) {
+        OfferedCourse offeredCourse = familyCourseRegistration.getOfferedCourse();
+        if (activeLifeUtil.compareDateAndTime(offeredCourse.getStartDate(), offeredCourse.getStartTime()))
             throw new InvalidRequestException(ExceptionMessage.WITHDRAW_NOT_ALLOWED);
-        }
+
         familyCourseRegistration.setIsWithdrawn(true);
         familyCourseRegistrationRepository.save(familyCourseRegistration);
     }
