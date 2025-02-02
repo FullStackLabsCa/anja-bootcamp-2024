@@ -12,7 +12,7 @@ import org.mapstruct.*;
 import java.util.List;
 
 @Mapper(componentModel = ShortConstant.SPRING, uses = {CourseMapper.class, FacilityMapper.class})
-public interface OfferCourseMapper {
+public interface OfferedCourseMapper {
     @Mapping(target = ShortConstant.AVAILABLE_FOR_ENROLLMENT, constant = "AVAILABLE")
     OfferedCourse offerCourseRequestToOfferedCourse(OfferCourseRequest offerCourseRequest);
 

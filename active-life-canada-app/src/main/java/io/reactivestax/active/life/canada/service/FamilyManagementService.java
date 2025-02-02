@@ -31,7 +31,7 @@ public class FamilyManagementService {
     @Transactional
     public void createFamilyMember(CreateMemberRequest createMemberRequest, String loggedInMemberId, boolean isGroupAdmin) {
         FamilyMember familyMember = familyMemberMapper.registerMemberRequestToFamilyMember(createMemberRequest);
-        if(familyMemberRepository.existsById(UUID.fromString(familyMember.getMemberLoginId())))
+        if (familyMemberRepository.existsByMemberLoginId(familyMember.getMemberLoginId()))
             throw new InvalidRequestException(ExceptionHandlerConst.MEMBER_ALREADY_EXISTS);
         familyMember.setGroupAdmin(isGroupAdmin);
         if (isGroupAdmin) {
@@ -57,7 +57,7 @@ public class FamilyManagementService {
         FamilyGroup familyGroupSaved = familyGroupRepository.save(familyGroup);
         List<FamilyMember> familyMembers = familyGroupSaved.getFamilyMembers();
         FamilyMember savedFamilyMember = familyMembers.get(familyMembers.size() - 1);
-        new Thread(() -> activeLifeCommonService.createAccountActivationRequestEntryAndSendToEms(savedFamilyMember));
+        activeLifeCommonService.createAccountActivationRequestEntryAndSendToEms(savedFamilyMember);
     }
 
     @Transactional

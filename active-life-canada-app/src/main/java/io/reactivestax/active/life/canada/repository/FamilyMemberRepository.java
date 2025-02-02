@@ -11,6 +11,8 @@ import java.util.UUID;
 public interface FamilyMemberRepository extends JpaRepository<FamilyMember, UUID> {
     Optional<FamilyMember> findByMemberLoginId(String memberLoginId);
 
+    boolean existsByMemberLoginId(String memberLoginId);
+
     Optional<FamilyMember> findByMemberLoginIdAndFamilyGroup_FamilyGroupId(String memberLoginId, UUID familyGroupId);
 
     boolean existsByMemberLoginIdAndFamilyGroup_FamilyGroupId(String memberLoginId, UUID familyGroupId);

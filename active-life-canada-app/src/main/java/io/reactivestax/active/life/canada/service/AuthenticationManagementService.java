@@ -44,11 +44,11 @@ public class AuthenticationManagementService {
                         .loginToken(token)
                         .build();
                 loginRequestRepository.save(loginRequest);
-                new Thread(() -> emsService.sendToEmsOtp(familyMember));
+                emsService.sendToEmsOtp(familyMember);
                 message = Message.SUCCESSFUL_LOGIN;
             } else {
                 message = Message.LOGIN_INACTIVE_MEMBER;
-                new Thread(() -> activeLifeCommonService.createAccountActivationRequestEntryAndSendToEms(familyMember));
+                activeLifeCommonService.createAccountActivationRequestEntryAndSendToEms(familyMember);
             }
         } else throw new InvalidRequestException(ExceptionHandlerConst.INCORRECT_USERNAME_PASSWORD);
         return LoginResponse.builder().token(token).message(message).build();

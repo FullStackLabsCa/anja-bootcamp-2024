@@ -38,6 +38,9 @@ public class ProgramManagementController {
     }
 
     @PostMapping(Endpoints.SEARCH_OFFERED_COURSES)
-    public void searchOfferedCourses(@RequestBody OfferedCourseSearchRequest offeredCourseSearchRequest) {
+    public ResponseEntity<List<OfferedCourseDetailsResponse>> searchOfferedCourses(@RequestBody OfferedCourseSearchRequest offeredCourseSearchRequest) {
+        List<OfferedCourseDetailsResponse> offeredCourseDetailsResponses = this.programManagementService.searchOfferedCourses(offeredCourseSearchRequest);
+
+        return ResponseEntity.ok(offeredCourseDetailsResponses);
     }
 }

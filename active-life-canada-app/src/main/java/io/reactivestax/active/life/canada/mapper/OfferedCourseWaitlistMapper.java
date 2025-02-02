@@ -7,7 +7,7 @@ import org.mapstruct.Mapper;
 
 import java.util.List;
 
-@Mapper(componentModel = ShortConstant.SPRING, uses = {OfferCourseMapper.class, FamilyMemberMapper.class})
+@Mapper(componentModel = ShortConstant.SPRING, uses = {OfferedCourseMapper.class, FamilyMemberMapper.class})
 public interface OfferedCourseWaitlistMapper {
 
     OfferedCourseWaitlistDto toDto(OfferedCourseWaitlist offeredCourseWaitlist);

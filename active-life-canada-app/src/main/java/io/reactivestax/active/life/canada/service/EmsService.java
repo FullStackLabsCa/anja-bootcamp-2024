@@ -14,6 +14,7 @@ import io.reactivestax.active.life.canada.repository.OfferedCourseWaitlistReposi
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -28,8 +29,11 @@ public class EmsService {
 
     private final RestTemplate restTemplate;
     private final OfferedCourseWaitlistRepository offeredCourseWaitlistRepository;
+    private final EmsService selfInjectedEmsService;
 
+    @Async
     public void sendToEms(FamilyMember familyMember, String message) {
+        log.info(">>>>>>>>>>>>>>>{}", message);
         EmsRequest emsRequest = prepareEmsRequest(familyMember, message);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -40,6 +44,7 @@ public class EmsService {
         validateResponseCode(response.getStatusCode(), ExceptionHandlerConst.EMS_SEND_REQUEST_FAILED);
     }
 
+    @Async
     public void sendToEmsOtp(FamilyMember familyMember) {
         EmsRequest emsOtpRequest = prepareEmsRequest(familyMember, "");
         HttpHeaders headers = new HttpHeaders();
@@ -96,11 +101,12 @@ public class EmsService {
         return Endpoints.ENS_SMS_OTP;
     }
 
+    @Async
     public void sendEmsNotificationToAllWaitlistedMembersByOfferedCourseId(UUID offeredCourseId, String courseName) {
         List<FamilyMember> allTheWaitlistedMembersByOfferedCourseId = offeredCourseWaitlistRepository
                 .findAllByOfferedCourse_OfferedCourseId(offeredCourseId).stream().map(OfferedCourseWaitlist::getFamilyMember)
                 .toList();
-        allTheWaitlistedMembersByOfferedCourseId.forEach(familyMember -> sendToEms(familyMember,
+        allTheWaitlistedMembersByOfferedCourseId.forEach(familyMember -> selfInjectedEmsService.sendToEms(familyMember,
                 MessageFormat.format(Message.SPOT_AVAILABLE_FOR_ENROLLMENT, familyMember.getName(), courseName)));
     }
 }

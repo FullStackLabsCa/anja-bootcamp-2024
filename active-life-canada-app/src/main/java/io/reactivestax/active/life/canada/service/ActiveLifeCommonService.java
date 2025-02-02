@@ -6,6 +6,7 @@ import io.reactivestax.active.life.canada.entity.AccountActivationRequest;
 import io.reactivestax.active.life.canada.entity.FamilyMember;
 import io.reactivestax.active.life.canada.repository.AccountActivationRequestRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ public class ActiveLifeCommonService {
     private final AccountActivationRequestRepository accountActivationRequestRepository;
     private final EmsService emsService;
 
+    @Async
     @Transactional
     public void createAccountActivationRequestEntryAndSendToEms(FamilyMember familyMember) {
         AccountActivationRequest accountActivationRequest = AccountActivationRequest.builder()
@@ -28,6 +30,6 @@ public class ActiveLifeCommonService {
         AccountActivationRequest savedAccountActivationRequest = accountActivationRequestRepository.save(accountActivationRequest);
         String activationLink = MessageFormat.format(Endpoints.ACTIVATION_LINK_URL, savedAccountActivationRequest.getToken());
         String message = MessageFormat.format(Message.ACTIVATION_LINK_MESSAGE, familyMember.getName(), activationLink);
-        new Thread(() -> emsService.sendToEms(familyMember, message));
+        emsService.sendToEms(familyMember, message);
     }
 }

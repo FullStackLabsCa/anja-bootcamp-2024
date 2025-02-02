@@ -7,6 +7,10 @@ import org.springframework.data.jpa.domain.Specification;
 import java.time.LocalDate;
 
 public class OfferedCourseSpecification {
+
+    private OfferedCourseSpecification() {
+    }
+
     public static Specification<OfferedCourse> hasCourseName(String courseName) {
         return ((root, query, criteriaBuilder) -> courseName == null || courseName.isEmpty()
                 ? criteriaBuilder.conjunction() : criteriaBuilder.like(

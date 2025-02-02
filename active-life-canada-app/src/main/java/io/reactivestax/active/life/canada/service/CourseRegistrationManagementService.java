@@ -17,6 +17,7 @@ import io.reactivestax.active.life.canada.repository.OfferedCourseRepository;
 import io.reactivestax.active.life.canada.repository.OfferedCourseWaitlistRepository;
 import io.reactivestax.active.life.canada.util.ActiveLifeUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +36,7 @@ public class CourseRegistrationManagementService {
     private final OfferedCourseWaitlistMapper offeredCourseWaitlistMapper;
     private final ActiveLifeUtil activeLifeUtil;
     private final EmsService emsService;
+    private final CourseRegistrationManagementService selfInjectedCourseRegistrationManagementService;
 
     @Transactional
     public String enrollIntoOfferedCourse(String barCode, String memberLoginId, String loggedInMemberId) {
@@ -70,11 +72,13 @@ public class CourseRegistrationManagementService {
         if (familyCourseRegistrations.size() == offeredCourse.getNoOfSpots())
             offeredCourse.setAvailableForEnrollment(AvailableForEnrollment.WAITLIST_OPEN);
         offeredCourseRepository.save(offeredCourse);
-        new Thread(() -> removeEntryFromWaitlistIfExists(offeredCourse.getOfferedCourseId(), familyMember.getFamilyMemberId()));
+        selfInjectedCourseRegistrationManagementService
+                .removeEntryFromWaitlistIfExists(offeredCourse.getOfferedCourseId(), familyMember.getFamilyMemberId());
         return Message.ENROLLMENT_SUCCESSFUL;
     }
 
-    private void removeEntryFromWaitlistIfExists(UUID offeredCourseId, UUID familyMemberId) {
+    @Async
+    public void removeEntryFromWaitlistIfExists(UUID offeredCourseId, UUID familyMemberId) {
         offeredCourseWaitlistRepository.deleteFromWaitlistByFamilyMemberIdAndOfferedCourseId(offeredCourseId, familyMemberId);
     }
 
@@ -139,7 +143,7 @@ public class CourseRegistrationManagementService {
 
         familyCourseRegistration.setIsWithdrawn(true);
         familyCourseRegistrationRepository.save(familyCourseRegistration);
-        new Thread(() -> emsService.sendEmsNotificationToAllWaitlistedMembersByOfferedCourseId(offeredCourse.getOfferedCourseId(),
-                offeredCourse.getCourse().getName()));
+        emsService.sendEmsNotificationToAllWaitlistedMembersByOfferedCourseId(offeredCourse.getOfferedCourseId(),
+                offeredCourse.getCourse().getName());
     }
 }
