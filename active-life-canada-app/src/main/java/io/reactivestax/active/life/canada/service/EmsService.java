@@ -2,8 +2,6 @@ package io.reactivestax.active.life.canada.service;
 
 import io.reactivestax.active.life.canada.constant.Endpoints;
 import io.reactivestax.active.life.canada.constant.ExceptionMessage;
-import io.reactivestax.active.life.canada.constant.Message;
-import io.reactivestax.active.life.canada.entity.AccountActivationRequest;
 import io.reactivestax.active.life.canada.entity.FamilyMember;
 import io.reactivestax.active.life.canada.enums.PreferredModeOfCommunication;
 import io.reactivestax.active.life.canada.exception.InvalidRequestException;
@@ -15,8 +13,6 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.text.MessageFormat;
-
 @Slf4j
 @Service
 public class EmsService {
@@ -27,9 +23,8 @@ public class EmsService {
         this.restTemplate = restTemplate;
     }
 
-    public void sendToEms(AccountActivationRequest accountActivationRequest, FamilyMember familyMember) {
-        String activationLink = MessageFormat.format(Endpoints.ACTIVATION_LINK_URL, accountActivationRequest.getToken());
-        EmsRequest emsRequest = EmsRequest.builder().customerId(familyMember.getFamilyMemberId().toString()).phoneNumber(familyMember.getHomePhone()).message(MessageFormat.format(Message.ACTIVATION_LINK_MESSAGE, familyMember.getName(), activationLink)).build();
+    public void sendToEms(FamilyMember familyMember, String message) {
+        EmsRequest emsRequest = prepareEmsRequest(familyMember, message);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<EmsRequest> request = new HttpEntity<>(emsRequest, headers);
@@ -40,7 +35,7 @@ public class EmsService {
     }
 
     public void sendToEmsOtp(FamilyMember familyMember) {
-        EmsRequest emsOtpRequest = EmsRequest.builder().customerId(familyMember.getFamilyMemberId().toString()).phoneNumber(familyMember.getHomePhone()).build();
+        EmsRequest emsOtpRequest = prepareEmsRequest(familyMember, "");
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<EmsRequest> request = new HttpEntity<>(emsOtpRequest, headers);
@@ -56,20 +51,33 @@ public class EmsService {
         HttpEntity<EmsVerify> request = new HttpEntity<>(emsVerify, headers);
         ResponseEntity<String> response = restTemplate.exchange(Endpoints.ENS_VERIFY_OTP, HttpMethod.PUT, request, String.class);
         logResponseFromEms(response.getStatusCode());
-        validateResponseCode(response.getStatusCode(), ExceptionMessage.VERIFICATION_FAILED);
-        return true;
+        return validateResponseCode(response.getStatusCode(), ExceptionMessage.VERIFICATION_FAILED);
     }
 
     private void logResponseFromEms(HttpStatusCode httpStatusCode) {
         log.info("Response from ems service:{}", httpStatusCode);
     }
 
-    private void validateResponseCode(HttpStatusCode statusCode, String message) {
+    private boolean validateResponseCode(HttpStatusCode statusCode, String message) {
         if (statusCode.is5xxServerError()) {
             throw new SomethingWentWrongException(message);
         } else if (statusCode.is4xxClientError()) {
             throw new InvalidRequestException(message);
+        } else return statusCode.is2xxSuccessful();
+    }
+
+    private EmsRequest prepareEmsRequest(FamilyMember familyMember, String message) {
+        EmsRequest emsRequest = EmsRequest.builder()
+                .customerId(familyMember.getFamilyMemberId().toString())
+                .message(message)
+                .build();
+        switch (familyMember.getPreferredModeOfCommunication()) {
+            case HOME_PHONE -> emsRequest.setPhoneNumber(familyMember.getHomePhone());
+            case BUSINESS_PHONE -> emsRequest.setPhoneNumber(familyMember.getBusinessPhone());
+            case EMAIL -> emsRequest.setEmail(familyMember.getEmailId());
         }
+
+        return emsRequest;
     }
 
     public String getEnsEndpoint(PreferredModeOfCommunication preferredModeOfCommunication) {
