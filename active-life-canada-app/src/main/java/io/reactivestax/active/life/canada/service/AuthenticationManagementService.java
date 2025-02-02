@@ -13,7 +13,6 @@ import io.reactivestax.active.life.canada.exception.SomethingWentWrongException;
 import io.reactivestax.active.life.canada.repository.AccountActivationRequestRepository;
 import io.reactivestax.active.life.canada.repository.FamilyMemberRepository;
 import io.reactivestax.active.life.canada.repository.LoginRequestRepository;
-import io.reactivestax.active.life.canada.util.ActiveLifeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +30,6 @@ public class AuthenticationManagementService {
     private final AccountActivationRequestRepository accountActivationRequestRepository;
     private final EmsService emsService;
     private final AsyncJobsService asyncJobsService;
-    private final ActiveLifeUtil activeLifeUtil;
 
     @Transactional
     public LoginResponse loginMember(LoginMemberRequest loginMemberRequest) {
