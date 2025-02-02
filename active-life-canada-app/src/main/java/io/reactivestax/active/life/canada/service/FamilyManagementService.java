@@ -1,13 +1,13 @@
 package io.reactivestax.active.life.canada.service;
 
-import io.reactivestax.active.life.canada.constant.ExceptionMessage;
+import io.reactivestax.active.life.canada.constant.ExceptionHandlerConst;
 import io.reactivestax.active.life.canada.dto.CreateMemberRequest;
 import io.reactivestax.active.life.canada.dto.MemberDetails;
 import io.reactivestax.active.life.canada.dto.UpdateMemberRequest;
 import io.reactivestax.active.life.canada.entity.FamilyGroup;
 import io.reactivestax.active.life.canada.entity.FamilyMember;
 import io.reactivestax.active.life.canada.exception.InvalidRequestException;
-import io.reactivestax.active.life.canada.exception.UnauthorizedException;
+import io.reactivestax.active.life.canada.exception.UnauthorizedAccessException;
 import io.reactivestax.active.life.canada.mapper.FamilyMemberMapper;
 import io.reactivestax.active.life.canada.repository.FamilyGroupRepository;
 import io.reactivestax.active.life.canada.repository.FamilyMemberRepository;
@@ -40,7 +40,7 @@ public class FamilyManagementService {
     public void createFamilyMember(CreateMemberRequest createMemberRequest, String loggedInMemberId, boolean isGroupAdmin) {
         FamilyMember familyMember = familyMemberMapper.registerMemberRequestToFamilyMember(createMemberRequest);
         if(familyMemberRepository.existsById(UUID.fromString(familyMember.getMemberLoginId())))
-            throw new InvalidRequestException(ExceptionMessage.MEMBER_ALREADY_EXISTS);
+            throw new InvalidRequestException(ExceptionHandlerConst.MEMBER_ALREADY_EXISTS);
         familyMember.setGroupAdmin(isGroupAdmin);
         if (isGroupAdmin) {
             FamilyGroup familyGroup = new FamilyGroup();
@@ -52,9 +52,9 @@ public class FamilyManagementService {
                 if (admin.isGroupAdmin()) {
                     FamilyGroup familyGroup = admin.getFamilyGroup();
                     saveFamilyMemberAndSendToEms(familyMember, familyGroup);
-                } else throw new UnauthorizedException(ExceptionMessage.UNAUTHORIZED_ACCESS);
+                } else throw new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS);
             }, () -> {
-                throw new UnauthorizedException(ExceptionMessage.UNAUTHORIZED_ACCESS);
+                throw new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS);
             });
         }
     }
@@ -65,39 +65,39 @@ public class FamilyManagementService {
         FamilyGroup familyGroupSaved = familyGroupRepository.save(familyGroup);
         List<FamilyMember> familyMembers = familyGroupSaved.getFamilyMembers();
         FamilyMember savedFamilyMember = familyMembers.get(familyMembers.size() - 1);
-        activeLifeCommonService.createAccountActivationRequestEntryAndSendToEms(savedFamilyMember);
+        new Thread(() -> activeLifeCommonService.createAccountActivationRequestEntryAndSendToEms(savedFamilyMember));
     }
 
     @Transactional
     public void updateFamilyMember(String memberLoginId, UpdateMemberRequest updateMemberRequest, String loggedInMemberId) {
         FamilyMember loggedInMember = familyMemberRepository.findById(UUID.fromString(loggedInMemberId))
-                .orElseThrow(() -> new UnauthorizedException(ExceptionMessage.UNAUTHORIZED_ACCESS));
+                .orElseThrow(() -> new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS));
         if (memberLoginId.equals(loggedInMemberId)) {
-            updateFamilyMember(loggedInMember, updateMemberRequest);
+            convertToEntityAndUpdateFamilyMember(loggedInMember, updateMemberRequest);
         } else if (loggedInMember.isGroupAdmin()) {
             FamilyMember familyMember = familyMemberRepository.findByMemberLoginIdAndFamilyGroup_FamilyGroupId(memberLoginId,
                             loggedInMember.getFamilyGroup().getFamilyGroupId())
-                    .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INVALID_MEMBER_ID));
-            updateFamilyMember(familyMember, updateMemberRequest);
-        } else throw new UnauthorizedException(ExceptionMessage.UNAUTHORIZED_ACCESS);
+                    .orElseThrow(() -> new InvalidRequestException(ExceptionHandlerConst.INVALID_MEMBER_ID));
+            convertToEntityAndUpdateFamilyMember(familyMember, updateMemberRequest);
+        } else throw new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS);
     }
 
-    private void updateFamilyMember(FamilyMember familyMember, UpdateMemberRequest updateMemberRequest) {
+    private void convertToEntityAndUpdateFamilyMember(FamilyMember familyMember, UpdateMemberRequest updateMemberRequest) {
         familyMemberMapper.updateMemberRequestToFamilyMember(updateMemberRequest, familyMember);
         familyMemberRepository.save(familyMember);
     }
 
     public MemberDetails getFamilyMember(String memberLoginId, String loggedInMemberId) {
         FamilyMember loggedInMember = familyMemberRepository.findById(UUID.fromString(loggedInMemberId))
-                .orElseThrow(() -> new UnauthorizedException(ExceptionMessage.UNAUTHORIZED_ACCESS));
+                .orElseThrow(() -> new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS));
         if (memberLoginId.equals(loggedInMemberId)) {
             return getMemberDetails(loggedInMember);
         } else if (loggedInMember.isGroupAdmin()) {
             FamilyMember familyMember = familyMemberRepository.findByMemberLoginIdAndFamilyGroup_FamilyGroupId(memberLoginId,
                             loggedInMember.getFamilyGroup().getFamilyGroupId())
-                    .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INVALID_MEMBER_ID));
+                    .orElseThrow(() -> new InvalidRequestException(ExceptionHandlerConst.INVALID_MEMBER_ID));
             return getMemberDetails(familyMember);
-        } else throw new UnauthorizedException(ExceptionMessage.UNAUTHORIZED_ACCESS);
+        } else throw new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS);
     }
 
     private MemberDetails getMemberDetails(FamilyMember familyMember) {
@@ -110,13 +110,13 @@ public class FamilyManagementService {
     @Transactional
     public void deactivateFamilyMember(String memberLoginId, String loggedInMemberId) {
         FamilyMember loggedInMember = familyMemberRepository.findById(UUID.fromString(loggedInMemberId))
-                .orElseThrow(() -> new UnauthorizedException(ExceptionMessage.UNAUTHORIZED_ACCESS));
+                .orElseThrow(() -> new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS));
         if (memberLoginId.equals(loggedInMemberId)) {
             familyMemberRepository.updateIsActiveByFamilyMemberId(loggedInMember.getFamilyMemberId(), false);
         } else if (loggedInMember.isGroupAdmin()) {
             if (familyMemberRepository.existsByMemberLoginIdAndFamilyGroup_FamilyGroupId(memberLoginId, loggedInMember.getFamilyGroup().getFamilyGroupId())) {
                 familyMemberRepository.updateIsActiveByMemberLoginId(memberLoginId, false);
-            } else throw new UnauthorizedException(ExceptionMessage.INVALID_MEMBER_ID);
-        } else throw new UnauthorizedException(ExceptionMessage.UNAUTHORIZED_ACCESS);
+            } else throw new UnauthorizedAccessException(ExceptionHandlerConst.INVALID_MEMBER_ID);
+        } else throw new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS);
     }
 }

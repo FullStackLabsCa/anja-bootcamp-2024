@@ -2,7 +2,7 @@ package io.reactivestax.active.life.canada.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.reactivestax.active.life.canada.constant.ExceptionMessage;
+import io.reactivestax.active.life.canada.constant.ExceptionHandlerConst;
 import io.reactivestax.active.life.canada.exception.SomethingWentWrongException;
 import io.reactivestax.active.life.canada.model.SecurityHeader;
 import org.springframework.stereotype.Component;
@@ -18,7 +18,7 @@ public class ActiveLifeUtil {
         try {
             return objectMapper.readValue(securityHeaderJson, SecurityHeader.class);
         } catch (JsonProcessingException e) {
-            throw new SomethingWentWrongException(ExceptionMessage.INTERNAL_ERROR);
+            throw new SomethingWentWrongException(ExceptionHandlerConst.INTERNAL_ERROR);
         }
     }
 

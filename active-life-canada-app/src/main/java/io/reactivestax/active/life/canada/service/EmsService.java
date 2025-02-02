@@ -1,7 +1,7 @@
 package io.reactivestax.active.life.canada.service;
 
 import io.reactivestax.active.life.canada.constant.Endpoints;
-import io.reactivestax.active.life.canada.constant.ExceptionMessage;
+import io.reactivestax.active.life.canada.constant.ExceptionHandlerConst;
 import io.reactivestax.active.life.canada.entity.FamilyMember;
 import io.reactivestax.active.life.canada.enums.PreferredModeOfCommunication;
 import io.reactivestax.active.life.canada.exception.InvalidRequestException;
@@ -31,7 +31,7 @@ public class EmsService {
         ResponseEntity<String> response = restTemplate.exchange(getEnsEndpoint(familyMember.getPreferredModeOfCommunication()), HttpMethod.POST, request,
                 String.class);
         logResponseFromEms(response.getStatusCode());
-        validateResponseCode(response.getStatusCode(), ExceptionMessage.EMS_SEND_REQUEST_FAILED);
+        validateResponseCode(response.getStatusCode(), ExceptionHandlerConst.EMS_SEND_REQUEST_FAILED);
     }
 
     public void sendToEmsOtp(FamilyMember familyMember) {
@@ -41,7 +41,7 @@ public class EmsService {
         HttpEntity<EmsRequest> request = new HttpEntity<>(emsOtpRequest, headers);
         ResponseEntity<String> response = restTemplate.exchange(getEnsOtpEndpoint(familyMember.getPreferredModeOfCommunication()), HttpMethod.POST, request, String.class);
         logResponseFromEms(response.getStatusCode());
-        validateResponseCode(response.getStatusCode(), ExceptionMessage.OTP_SEND_REQUEST_FAILED);
+        validateResponseCode(response.getStatusCode(), ExceptionHandlerConst.OTP_SEND_REQUEST_FAILED);
     }
 
     public boolean sendToEmsForVerification(String memberId, String otp) {
@@ -51,7 +51,7 @@ public class EmsService {
         HttpEntity<EmsVerify> request = new HttpEntity<>(emsVerify, headers);
         ResponseEntity<String> response = restTemplate.exchange(Endpoints.ENS_VERIFY_OTP, HttpMethod.PUT, request, String.class);
         logResponseFromEms(response.getStatusCode());
-        return validateResponseCode(response.getStatusCode(), ExceptionMessage.VERIFICATION_FAILED);
+        return validateResponseCode(response.getStatusCode(), ExceptionHandlerConst.VERIFICATION_FAILED);
     }
 
     private void logResponseFromEms(HttpStatusCode httpStatusCode) {

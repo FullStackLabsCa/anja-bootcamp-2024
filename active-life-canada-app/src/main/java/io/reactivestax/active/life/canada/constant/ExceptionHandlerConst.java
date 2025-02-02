@@ -1,9 +1,14 @@
 package io.reactivestax.active.life.canada.constant;
 
-public class ExceptionMessage {
+public class ExceptionHandlerConst {
 
-    private ExceptionMessage() {
+    private ExceptionHandlerConst() {
     }
+
+    public static final String CODE = "code";
+    public static final String TYPE = "type";
+    public static final String MESSAGE = "message";
+    public static final String TIMESTAMP = "timestamp";
 
     public static final String MEMBER_ALREADY_EXISTS = "Username already exists, please try with a different username.";
     public static final String INVALID_ACTIVATION_LINK = "Invalid account activation link.";
@@ -23,4 +28,6 @@ public class ExceptionMessage {
     public static final String NON_RESIDENT_COURSE_FEE_NOT_FOUND = "Course not available for non-residents.";
     public static final String WITHDRAW_NOT_ALLOWED = "Withdraw from the course is not allowed.";
     public static final String COURSE_FULL = "Course spots and waitlist full.";
+    public static final String ALREADY_ENROLLED = "Enrollment failed, already enrolled in this course.";
+    public static final String ALREADY_WAITLISTED = "Adding to waitlist failed, already part of the waitlist.";
 }
