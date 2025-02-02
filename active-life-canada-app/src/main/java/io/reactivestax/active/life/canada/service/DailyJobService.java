@@ -4,12 +4,14 @@ import io.reactivestax.active.life.canada.entity.OfferedCourse;
 import io.reactivestax.active.life.canada.enums.AvailableForEnrollment;
 import io.reactivestax.active.life.canada.repository.OfferedCourseRepository;
 import io.reactivestax.active.life.canada.util.ActiveLifeUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 public class DailyJobService {
 
@@ -22,8 +24,9 @@ public class DailyJobService {
         this.activeLifeUtil = activeLifeUtil;
     }
 
-    @Scheduled(cron = "0 1 0 * * *")  // Runs at 12:00 AM local time daily
+    @Scheduled(cron = "0 1 0 * * *")
     public void markOfferedCourseNotAvailable() {
+        log.info("Running daily job: markOfferedCourseNotAvailable");
         List<OfferedCourse> updatedOfferedCourses = new ArrayList<>();
         List<OfferedCourse> offeredCourseList = offeredCourseRepository.findAllByAvailableForEnrollmentNot(AvailableForEnrollment.NOT_AVAILABLE);
         offeredCourseList.forEach(offeredCourse -> {

@@ -13,9 +13,13 @@ public interface FamilyMemberRepository extends JpaRepository<FamilyMember, UUID
 
     Optional<FamilyMember> findByMemberLoginIdAndFamilyGroup_FamilyGroupId(String memberLoginId, UUID familyGroupId);
 
-    @Modifying
-    @Query("UPDATE FamilyMember SET isActive = true WHERE activationToken = ?1")
-    int activateAccountByActivationToken(String activationToken);
+    boolean existsByMemberLoginIdAndFamilyGroup_FamilyGroupId(String memberLoginId, UUID familyGroupId);
 
-    Optional<FamilyMember> findByActivationToken(String activationToken);
+    @Modifying
+    @Query("UPDATE FamilyMember fm SET fm.isActive = ?2 WHERE fm.familyMemberId = ?1")
+    void updateIsActiveByFamilyMemberId(UUID familyMemberId, boolean isActive);
+
+    @Modifying
+    @Query("UPDATE FamilyMember fm SET fm.isActive = ?2 WHERE fm.memberLoginId = ?1")
+    void updateIsActiveByMemberLoginId(String memberLoginId, boolean isActive);
 }

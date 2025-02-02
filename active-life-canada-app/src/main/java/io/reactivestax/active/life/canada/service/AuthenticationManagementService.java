@@ -5,18 +5,17 @@ import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.dto.LoginMemberRequest;
 import io.reactivestax.active.life.canada.dto.LoginResponse;
 import io.reactivestax.active.life.canada.dto.TwoFactorLoginRequest;
-import io.reactivestax.active.life.canada.entity.FamilyGroup;
+import io.reactivestax.active.life.canada.entity.AccountActivationRequest;
 import io.reactivestax.active.life.canada.entity.FamilyMember;
 import io.reactivestax.active.life.canada.entity.LoginRequest;
-import io.reactivestax.active.life.canada.enums.Status;
 import io.reactivestax.active.life.canada.exception.InvalidRequestException;
+import io.reactivestax.active.life.canada.repository.AccountActivationRequestRepository;
 import io.reactivestax.active.life.canada.repository.FamilyGroupRepository;
 import io.reactivestax.active.life.canada.repository.FamilyMemberRepository;
 import io.reactivestax.active.life.canada.repository.LoginRequestRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -25,16 +24,22 @@ public class AuthenticationManagementService {
     private final FamilyMemberRepository familyMemberRepository;
     private final LoginRequestRepository loginRequestRepository;
     private final FamilyGroupRepository familyGroupRepository;
+    private final AccountActivationRequestRepository accountActivationRequestRepository;
     private final EmsService emsService;
+    private final ActiveLifeCommonService activeLifeCommonService;
 
     public AuthenticationManagementService(FamilyMemberRepository familyMemberRepository,
                                            LoginRequestRepository loginRequestRepository,
                                            FamilyGroupRepository familyGroupRepository,
-                                           EmsService emsService) {
+                                           AccountActivationRequestRepository accountActivationRequestRepository,
+                                           EmsService emsService,
+                                           ActiveLifeCommonService activeLifeCommonService) {
         this.familyMemberRepository = familyMemberRepository;
         this.loginRequestRepository = loginRequestRepository;
         this.familyGroupRepository = familyGroupRepository;
+        this.accountActivationRequestRepository = accountActivationRequestRepository;
         this.emsService = emsService;
+        this.activeLifeCommonService = activeLifeCommonService;
     }
 
     @Transactional
@@ -56,9 +61,7 @@ public class AuthenticationManagementService {
                 emsService.sendToEmsOtp(familyMember);
                 message = Message.SUCCESSFUL_LOGIN;
             } else {
-                familyMember.setActivationToken(token);
-                FamilyMember savedMember = familyMemberRepository.save(familyMember);
-                emsService.sendToEms(savedMember);
+                activeLifeCommonService.createAccountActivationRequestEntryAndSendToEms(familyMember);
                 message = Message.LOGIN_INACTIVE_MEMBER;
             }
         } else throw new InvalidRequestException(ExceptionMessage.INCORRECT_USERNAME_PASSWORD);
@@ -76,16 +79,9 @@ public class AuthenticationManagementService {
 
     @Transactional
     public void activateMemberAccount(String activationToken) {
-        Optional<FamilyMember> familyMember = familyMemberRepository.findByActivationToken(activationToken);
-        familyMember.ifPresentOrElse(member -> {
-            member.setActive(true);
-            if (member.isGroupAdmin()) {
-                FamilyGroup familyGroup = member.getFamilyGroup();
-                familyGroup.setStatus(Status.ACTIVE);
-                familyGroupRepository.save(familyGroup);
-            } else familyMemberRepository.save(member);
-        }, () -> {
-            throw new InvalidRequestException(ExceptionMessage.INVALID_ACTIVATION_LINK);
-        });
+        AccountActivationRequest accountActivationRequest = accountActivationRequestRepository.
+                findByToken(UUID.fromString(activationToken))
+                .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INVALID_ACTIVATION_LINK));
+        familyMemberRepository.updateIsActiveByFamilyMemberId(accountActivationRequest.getFamilyMemberId(), true);
     }
 }

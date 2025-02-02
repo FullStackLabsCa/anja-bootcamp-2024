@@ -46,8 +46,6 @@ public class FamilyMember extends AuditTrail {
     @ToString.Exclude
     private FamilyGroup familyGroup;
 
-    private String activationToken;
-
     @ToString.Exclude
     @OneToMany(mappedBy = "familyMember", cascade = CascadeType.ALL)
     private List<OfferedCourseWaitlist> offeredCourseWaitlist = new ArrayList<>();

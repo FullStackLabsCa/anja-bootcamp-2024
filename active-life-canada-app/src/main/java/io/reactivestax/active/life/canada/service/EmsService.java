@@ -4,6 +4,7 @@ import io.reactivestax.active.life.canada.constant.Endpoints;
 import io.reactivestax.active.life.canada.constant.ExceptionMessage;
 import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.entity.FamilyMember;
+import io.reactivestax.active.life.canada.entity.AccountActivationRequest;
 import io.reactivestax.active.life.canada.enums.PreferredModeOfCommunication;
 import io.reactivestax.active.life.canada.exception.InvalidRequestException;
 import io.reactivestax.active.life.canada.exception.SomethingWentWrongException;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.MessageFormat;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -26,13 +28,13 @@ public class EmsService {
         this.restTemplate = restTemplate;
     }
 
-    public void sendToEms(FamilyMember familyMember) {
-        String activationLink = MessageFormat.format(Endpoints.ACTIVATION_LINK_URL, familyMember.getActivationToken());
+    public void sendToEms(AccountActivationRequest accountActivationRequest, FamilyMember familyMember) {
+        String activationLink = MessageFormat.format(Endpoints.ACTIVATION_LINK_URL, accountActivationRequest.getToken());
         EmsRequest emsRequest = EmsRequest.builder().customerId(familyMember.getFamilyMemberId().toString()).phoneNumber(familyMember.getHomePhone()).message(MessageFormat.format(Message.ACTIVATION_LINK_MESSAGE, familyMember.getName(), activationLink)).build();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<EmsRequest> request = new HttpEntity<>(emsRequest, headers);
-        log.info(request.getBody().toString());
+        log.info(Objects.requireNonNull(request.getBody()).toString());
         ResponseEntity<String> response = restTemplate.exchange(getEnsEndpoint(familyMember.getPreferredModeOfCommunication()), HttpMethod.POST, request,
                 String.class);
 
