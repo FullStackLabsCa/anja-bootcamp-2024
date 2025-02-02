@@ -38,10 +38,10 @@ public class CourseRegistrationManagementService {
 
     @Transactional
     public String enrollIntoOfferedCourse(String barCode, String memberLoginId, String loggedInMemberId) {
-        FamilyMember loggedInMember = familyMemberRepository.findById(UUID.fromString(loggedInMemberId))
+        FamilyMember loggedInMember = familyMemberRepository.findByFamilyMemberIdAndIsActive(UUID.fromString(loggedInMemberId), true)
                 .orElseThrow(() -> new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS));
-        FamilyMember familyMember = familyMemberRepository.findByMemberLoginIdAndFamilyGroup_FamilyGroupId
-                        (memberLoginId, loggedInMember.getFamilyGroup().getFamilyGroupId())
+        FamilyMember familyMember = familyMemberRepository.findByMemberLoginIdAndIsActiveAndFamilyGroup_FamilyGroupId
+                        (memberLoginId, true, loggedInMember.getFamilyGroup().getFamilyGroupId())
                 .orElseThrow(() -> new InvalidRequestException(ExceptionHandlerConst.INVALID_MEMBER_ID));
         OfferedCourse offeredCourse = offeredCourseRepository.findByBarCode(UUID.fromString(barCode))
                 .orElseThrow(() -> new InvalidRequestException(ExceptionHandlerConst.INVALID_OFFERED_COURSE_ID));
@@ -106,7 +106,7 @@ public class CourseRegistrationManagementService {
 
     public List<FamilyCourseRegistrationDetails> getRegisteredCourses(String loggedInMemberId) {
         UUID loggedInMemberIdUUID = UUID.fromString(loggedInMemberId);
-        if (!familyMemberRepository.existsById(loggedInMemberIdUUID))
+        if (!familyMemberRepository.existsByFamilyMemberIdAndIsActive(loggedInMemberIdUUID, true))
             throw new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS);
         List<FamilyCourseRegistration> familyCourseRegistrationList = familyCourseRegistrationRepository
                 .findAllByEnrollmentActorIdOrFamilyMember_FamilyMemberId(loggedInMemberIdUUID, loggedInMemberIdUUID);
@@ -115,7 +115,7 @@ public class CourseRegistrationManagementService {
 
     public List<OfferedCourseWaitlistDto> getWaitlistedCourses(String loggedInMemberId) {
         UUID loggedInMemberIdUUID = UUID.fromString(loggedInMemberId);
-        if (!familyMemberRepository.existsById(loggedInMemberIdUUID))
+        if (!familyMemberRepository.existsByFamilyMemberIdAndIsActive(loggedInMemberIdUUID, true))
             throw new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS);
         List<OfferedCourseWaitlist> offeredCourseWaitlist = offeredCourseWaitlistRepository
                 .findAllByEnrollmentActorIdOrFamilyMember_FamilyMemberId(loggedInMemberIdUUID, loggedInMemberIdUUID);
@@ -125,7 +125,7 @@ public class CourseRegistrationManagementService {
     @Transactional
     public void withdrawFromCourse(String familyCourseRegistrationId, String loggedInMemberId) {
         UUID loggedInMemberIdUUID = UUID.fromString(loggedInMemberId);
-        if (!familyMemberRepository.existsById(loggedInMemberIdUUID))
+        if (!familyMemberRepository.existsByFamilyMemberIdAndIsActive(loggedInMemberIdUUID, true))
             throw new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS);
         FamilyCourseRegistration familyCourseRegistration = familyCourseRegistrationRepository
                 .findByFamilyCourseRegistrationIdAndIsWithdrawnFalseAndEnrollmentActorIdOrFamilyMember_FamilyMemberId(

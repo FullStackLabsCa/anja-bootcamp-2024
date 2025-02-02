@@ -9,11 +9,16 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface FamilyMemberRepository extends JpaRepository<FamilyMember, UUID> {
+    Optional<FamilyMember> findByFamilyMemberIdAndIsActive(UUID familyMemberId, boolean isActive);
+
     Optional<FamilyMember> findByMemberLoginId(String memberLoginId);
+
+    boolean existsByFamilyMemberIdAndIsActive(UUID familyMemberId, boolean isActive);
 
     boolean existsByMemberLoginId(String memberLoginId);
 
-    Optional<FamilyMember> findByMemberLoginIdAndFamilyGroup_FamilyGroupId(String memberLoginId, UUID familyGroupId);
+    Optional<FamilyMember> findByMemberLoginIdAndIsActiveAndFamilyGroup_FamilyGroupId
+            (String memberLoginId, boolean isActive, UUID familyGroupId);
 
     boolean existsByMemberLoginIdAndFamilyGroup_FamilyGroupId(String memberLoginId, UUID familyGroupId);
 
