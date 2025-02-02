@@ -13,10 +13,13 @@ import io.reactivestax.active.life.canada.exception.SomethingWentWrongException;
 import io.reactivestax.active.life.canada.repository.AccountActivationRequestRepository;
 import io.reactivestax.active.life.canada.repository.FamilyMemberRepository;
 import io.reactivestax.active.life.canada.repository.LoginRequestRepository;
+import io.reactivestax.active.life.canada.util.ActiveLifeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @Service
@@ -28,6 +31,7 @@ public class AuthenticationManagementService {
     private final AccountActivationRequestRepository accountActivationRequestRepository;
     private final EmsService emsService;
     private final AsyncJobsService asyncJobsService;
+    private final ActiveLifeUtil activeLifeUtil;
 
     @Transactional
     public LoginResponse loginMember(LoginMemberRequest loginMemberRequest) {
@@ -57,6 +61,7 @@ public class AuthenticationManagementService {
     public LoginResponse twoFactorLogin(TwoFactorLoginRequest twoFactorLoginRequest) {
         LoginRequest loginRequest = loginRequestRepository.findByLoginToken(twoFactorLoginRequest.getToken())
                 .orElseThrow(() -> new InvalidRequestException(ExceptionHandlerConst.INCORRECT_TOKEN_OTP));
+        checkTokenForExpiry(loginRequest.getCreatedTs());
         if (emsService.sendToEmsForVerification(loginRequest.getFamilyMemberId().toString(), twoFactorLoginRequest.getOtp())) {
             return LoginResponse.builder().token(loginRequest.getFamilyMemberId().toString())
                     .message(Message.SUCCESSFUL_LOGIN_VERIFICATION).build();
@@ -69,6 +74,12 @@ public class AuthenticationManagementService {
         AccountActivationRequest accountActivationRequest = accountActivationRequestRepository.
                 findByToken(UUID.fromString(activationToken))
                 .orElseThrow(() -> new InvalidRequestException(ExceptionHandlerConst.INVALID_ACTIVATION_LINK));
+        checkTokenForExpiry(accountActivationRequest.getCreatedTs());
         familyMemberRepository.updateIsActiveByFamilyMemberId(accountActivationRequest.getFamilyMemberId(), true);
+    }
+
+    private void checkTokenForExpiry(LocalDateTime creationDateTime) {
+        if (ChronoUnit.MINUTES.between(creationDateTime, LocalDateTime.now()) > 2)
+            throw new InvalidRequestException(ExceptionHandlerConst.TOKEN_EXPIRED);
     }
 }

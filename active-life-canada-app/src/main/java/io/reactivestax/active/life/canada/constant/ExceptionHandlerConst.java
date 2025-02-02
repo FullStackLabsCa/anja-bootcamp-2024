@@ -30,4 +30,5 @@ public class ExceptionHandlerConst {
     public static final String COURSE_FULL = "Course spots and waitlist full.";
     public static final String ALREADY_ENROLLED = "Enrollment failed, already enrolled in this course.";
     public static final String ALREADY_WAITLISTED = "Adding to waitlist failed, already part of the waitlist.";
+    public static final String TOKEN_EXPIRED = "Verification failed, token expired, please generate a new one.";
 }
