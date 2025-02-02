@@ -34,7 +34,7 @@ public class CourseRegistrationManagementService {
     private final FamilyCourseRegistrationMapper familyCourseRegistrationMapper;
     private final OfferedCourseWaitlistMapper offeredCourseWaitlistMapper;
     private final ActiveLifeUtil activeLifeUtil;
-    private final ActiveLifeCommonService activeLifeCommonService;
+    private final AsyncJobsService asyncJobsService;
 
     @Transactional
     public String enrollIntoOfferedCourse(String barCode, String memberLoginId, String loggedInMemberId) {
@@ -70,7 +70,7 @@ public class CourseRegistrationManagementService {
         if (familyCourseRegistrations.size() == offeredCourse.getNoOfSpots())
             offeredCourse.setAvailableForEnrollment(AvailableForEnrollment.WAITLIST_OPEN);
         offeredCourseRepository.save(offeredCourse);
-        activeLifeCommonService
+        asyncJobsService
                 .removeEntryFromWaitlistIfExists(offeredCourse.getOfferedCourseId(), familyMember.getFamilyMemberId());
         return Message.ENROLLMENT_SUCCESSFUL;
     }
@@ -136,8 +136,9 @@ public class CourseRegistrationManagementService {
             throw new InvalidRequestException(ExceptionHandlerConst.WITHDRAW_NOT_ALLOWED);
 
         familyCourseRegistration.setIsWithdrawn(true);
-        familyCourseRegistrationRepository.save(familyCourseRegistration);
-        activeLifeCommonService.getAllWaitlistedMembersByOfferedCourseIdAndSendToEms(offeredCourse.getOfferedCourseId(),
+        FamilyCourseRegistration savedFamilyCourseRegistration = familyCourseRegistrationRepository.save(familyCourseRegistration);
+        asyncJobsService.updateWithDrawnCreditsInFamilyGroup(savedFamilyCourseRegistration);
+        asyncJobsService.getAllWaitlistedMembersByOfferedCourseIdAndSendToEms(offeredCourse.getOfferedCourseId(),
                 offeredCourse.getCourse().getName());
     }
 }

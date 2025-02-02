@@ -26,7 +26,7 @@ public class FamilyManagementService {
     private final FamilyMemberRepository familyMemberRepository;
     private final FamilyGroupRepository familyGroupRepository;
     private final FamilyMemberMapper familyMemberMapper;
-    private final ActiveLifeCommonService activeLifeCommonService;
+    private final AsyncJobsService asyncJobsService;
 
     @Transactional
     public void createFamilyMember(CreateMemberRequest createMemberRequest, String loggedInMemberId, boolean isGroupAdmin) {
@@ -57,7 +57,7 @@ public class FamilyManagementService {
         FamilyGroup familyGroupSaved = familyGroupRepository.save(familyGroup);
         List<FamilyMember> familyMembers = familyGroupSaved.getFamilyMembers();
         FamilyMember savedFamilyMember = familyMembers.get(familyMembers.size() - 1);
-        activeLifeCommonService.createAccountActivationRequestEntryAndSendToEms(savedFamilyMember);
+        asyncJobsService.createAccountActivationRequestEntryAndSendToEms(savedFamilyMember);
     }
 
     @Transactional

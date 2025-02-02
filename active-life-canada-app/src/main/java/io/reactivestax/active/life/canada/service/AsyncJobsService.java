@@ -2,10 +2,9 @@ package io.reactivestax.active.life.canada.service;
 
 import io.reactivestax.active.life.canada.constant.Endpoints;
 import io.reactivestax.active.life.canada.constant.Message;
-import io.reactivestax.active.life.canada.entity.AccountActivationRequest;
-import io.reactivestax.active.life.canada.entity.FamilyMember;
-import io.reactivestax.active.life.canada.entity.OfferedCourseWaitlist;
+import io.reactivestax.active.life.canada.entity.*;
 import io.reactivestax.active.life.canada.repository.AccountActivationRequestRepository;
+import io.reactivestax.active.life.canada.repository.FamilyGroupRepository;
 import io.reactivestax.active.life.canada.repository.OfferedCourseWaitlistRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
@@ -13,15 +12,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class ActiveLifeCommonService {
+public class AsyncJobsService {
 
     private final AccountActivationRequestRepository accountActivationRequestRepository;
     private final OfferedCourseWaitlistRepository offeredCourseWaitlistRepository;
+    private final FamilyGroupRepository familyGroupRepository;
     private final EmsService emsService;
 
     @Async
@@ -49,5 +51,16 @@ public class ActiveLifeCommonService {
     @Async
     public void removeEntryFromWaitlistIfExists(UUID offeredCourseId, UUID familyMemberId) {
         offeredCourseWaitlistRepository.deleteFromWaitlistByFamilyMemberIdAndOfferedCourseId(offeredCourseId, familyMemberId);
+    }
+
+    @Async
+    @Transactional
+    public void updateWithDrawnCreditsInFamilyGroup(FamilyCourseRegistration familyCourseRegistration) {
+        Integer cost = familyCourseRegistration.getCost();
+        long between = ChronoUnit.DAYS.between(familyCourseRegistration.getOfferedCourse().getStartDate(), LocalDate.now());
+        double withdrawnCredits = (double) cost / between;
+        FamilyGroup familyGroup = familyCourseRegistration.getFamilyMember().getFamilyGroup();
+        familyGroup.setCredits(familyGroup.getCredits() + withdrawnCredits);
+        familyGroupRepository.save(familyGroup);
     }
 }

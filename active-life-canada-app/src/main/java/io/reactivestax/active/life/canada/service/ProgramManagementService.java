@@ -35,7 +35,7 @@ public class ProgramManagementService {
     private final FacilityRepository facilityRepository;
     private final OfferedCourseRepository offeredCourseRepository;
     private final OfferedCourseFeeRepository offeredCourseFeeRepository;
-    private final ActiveLifeCommonService activeLifeCommonService;
+    private final AsyncJobsService asyncJobsService;
 
     @Transactional
     public void offerCourse(OfferCourseRequest offerCourseRequest) {
@@ -68,7 +68,7 @@ public class ProgramManagementService {
         offeredCourseMapper.updateOfferedCourseRequestToOfferedCourse(courseUpdateRequest, offeredCourse);
         offeredCourseRepository.save(offeredCourse);
         if (offeredCourse.getNoOfSpots() > noOfSpots)
-            activeLifeCommonService.getAllWaitlistedMembersByOfferedCourseIdAndSendToEms(offeredCourse.getOfferedCourseId(),
+            asyncJobsService.getAllWaitlistedMembersByOfferedCourseIdAndSendToEms(offeredCourse.getOfferedCourseId(),
                     offeredCourse.getCourse().getName());
     }
 

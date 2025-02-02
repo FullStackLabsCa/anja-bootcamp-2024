@@ -27,7 +27,7 @@ public class AuthenticationManagementService {
     private final LoginRequestRepository loginRequestRepository;
     private final AccountActivationRequestRepository accountActivationRequestRepository;
     private final EmsService emsService;
-    private final ActiveLifeCommonService activeLifeCommonService;
+    private final AsyncJobsService asyncJobsService;
 
     @Transactional
     public LoginResponse loginMember(LoginMemberRequest loginMemberRequest) {
@@ -48,7 +48,7 @@ public class AuthenticationManagementService {
                 message = Message.SUCCESSFUL_LOGIN;
             } else {
                 message = Message.LOGIN_INACTIVE_MEMBER;
-                activeLifeCommonService.createAccountActivationRequestEntryAndSendToEms(familyMember);
+                asyncJobsService.createAccountActivationRequestEntryAndSendToEms(familyMember);
             }
         } else throw new InvalidRequestException(ExceptionHandlerConst.INCORRECT_USERNAME_PASSWORD);
         return LoginResponse.builder().token(token).message(message).build();
