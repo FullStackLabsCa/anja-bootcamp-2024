@@ -36,7 +36,7 @@ public class EmsService {
         ResponseEntity<String> response = restTemplate.exchange(getEnsEndpoint(familyMember.getPreferredModeOfCommunication()), HttpMethod.POST, request,
                 String.class);
         logResponseFromEms(response.getStatusCode());
-        validateResponseCode(response.getStatusCode());
+        validateResponseCode(response.getStatusCode(), ExceptionMessage.EMS_SEND_REQUEST_FAILED);
     }
 
     public void sendToEmsOtp(FamilyMember familyMember) {
@@ -46,7 +46,7 @@ public class EmsService {
         HttpEntity<EmsRequest> request = new HttpEntity<>(emsOtpRequest, headers);
         ResponseEntity<String> response = restTemplate.exchange(getEnsOtpEndpoint(familyMember.getPreferredModeOfCommunication()), HttpMethod.POST, request, String.class);
         logResponseFromEms(response.getStatusCode());
-        validateResponseCode(response.getStatusCode());
+        validateResponseCode(response.getStatusCode(), ExceptionMessage.OTP_SEND_REQUEST_FAILED);
     }
 
     public boolean sendToEmsForVerification(String memberId, String otp) {
@@ -56,7 +56,7 @@ public class EmsService {
         HttpEntity<EmsVerify> request = new HttpEntity<>(emsVerify, headers);
         ResponseEntity<String> response = restTemplate.exchange(Endpoints.ENS_VERIFY_OTP, HttpMethod.PUT, request, String.class);
         logResponseFromEms(response.getStatusCode());
-        validateResponseCode(response.getStatusCode());
+        validateResponseCode(response.getStatusCode(), ExceptionMessage.VERIFICATION_FAILED);
         return true;
     }
 
@@ -64,11 +64,11 @@ public class EmsService {
         log.info("Response from ems service:{}", httpStatusCode);
     }
 
-    private void validateResponseCode(HttpStatusCode statusCode) {
+    private void validateResponseCode(HttpStatusCode statusCode, String message) {
         if (statusCode.is5xxServerError()) {
-            throw new SomethingWentWrongException(ExceptionMessage.INTERNAL_ERROR);
+            throw new SomethingWentWrongException(message);
         } else if (statusCode.is4xxClientError()) {
-            throw new InvalidRequestException(ExceptionMessage.BAD_REQUEST);
+            throw new InvalidRequestException(message);
         }
     }
 

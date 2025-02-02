@@ -9,6 +9,7 @@ import io.reactivestax.active.life.canada.entity.AccountActivationRequest;
 import io.reactivestax.active.life.canada.entity.FamilyMember;
 import io.reactivestax.active.life.canada.entity.LoginRequest;
 import io.reactivestax.active.life.canada.exception.InvalidRequestException;
+import io.reactivestax.active.life.canada.exception.SomethingWentWrongException;
 import io.reactivestax.active.life.canada.repository.AccountActivationRequestRepository;
 import io.reactivestax.active.life.canada.repository.FamilyMemberRepository;
 import io.reactivestax.active.life.canada.repository.LoginRequestRepository;
@@ -66,10 +67,11 @@ public class AuthenticationManagementService {
     public LoginResponse twoFactorLogin(TwoFactorLoginRequest twoFactorLoginRequest) {
         LoginRequest loginRequest = loginRequestRepository.findByLoginToken(twoFactorLoginRequest.getToken())
                 .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INCORRECT_TOKEN_OTP));
-        emsService.sendToEmsForVerification(loginRequest.getFamilyMemberId().toString(),
-                twoFactorLoginRequest.getOtp());
-
-        return LoginResponse.builder().message(Message.SUCCESSFUL_LOGIN_VERIFICATION).build();
+        if (emsService.sendToEmsForVerification(loginRequest.getFamilyMemberId().toString(), twoFactorLoginRequest.getOtp())) {
+            return LoginResponse.builder().token(loginRequest.getFamilyMemberId().toString())
+                    .message(Message.SUCCESSFUL_LOGIN_VERIFICATION).build();
+        }
+        throw new SomethingWentWrongException(ExceptionMessage.VERIFICATION_FAILED);
     }
 
     @Transactional
