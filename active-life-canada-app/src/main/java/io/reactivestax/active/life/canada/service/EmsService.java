@@ -3,8 +3,8 @@ package io.reactivestax.active.life.canada.service;
 import io.reactivestax.active.life.canada.constant.Endpoints;
 import io.reactivestax.active.life.canada.constant.ExceptionMessage;
 import io.reactivestax.active.life.canada.constant.Message;
-import io.reactivestax.active.life.canada.entity.FamilyMember;
 import io.reactivestax.active.life.canada.entity.AccountActivationRequest;
+import io.reactivestax.active.life.canada.entity.FamilyMember;
 import io.reactivestax.active.life.canada.enums.PreferredModeOfCommunication;
 import io.reactivestax.active.life.canada.exception.InvalidRequestException;
 import io.reactivestax.active.life.canada.exception.SomethingWentWrongException;
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.MessageFormat;
-import java.util.Objects;
 
 @Slf4j
 @Service
@@ -34,11 +33,9 @@ public class EmsService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<EmsRequest> request = new HttpEntity<>(emsRequest, headers);
-        log.info(Objects.requireNonNull(request.getBody()).toString());
         ResponseEntity<String> response = restTemplate.exchange(getEnsEndpoint(familyMember.getPreferredModeOfCommunication()), HttpMethod.POST, request,
                 String.class);
-
-        log.info("Response: " + response.getStatusCode());
+        logResponseFromEms(response.getStatusCode());
         validateResponseCode(response.getStatusCode());
     }
 
@@ -47,22 +44,24 @@ public class EmsService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<EmsRequest> request = new HttpEntity<>(emsOtpRequest, headers);
-        log.info(request.getBody().toString());
         ResponseEntity<String> response = restTemplate.exchange(getEnsOtpEndpoint(familyMember.getPreferredModeOfCommunication()), HttpMethod.POST, request, String.class);
-
-        log.info("Response: " + response.getStatusCode());
+        logResponseFromEms(response.getStatusCode());
         validateResponseCode(response.getStatusCode());
     }
 
-    public void sendToEmsForVerification(String memberId, String otp) {
+    public boolean sendToEmsForVerification(String memberId, String otp) {
         EmsVerify emsVerify = EmsVerify.builder().customerId(memberId).otp(otp).build();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<EmsVerify> request = new HttpEntity<>(emsVerify, headers);
-        log.info(request.getBody().toString());
         ResponseEntity<String> response = restTemplate.exchange(Endpoints.ENS_VERIFY_OTP, HttpMethod.PUT, request, String.class);
-        log.info("Response: " + response.getStatusCode());
+        logResponseFromEms(response.getStatusCode());
         validateResponseCode(response.getStatusCode());
+        return true;
+    }
+
+    private void logResponseFromEms(HttpStatusCode httpStatusCode) {
+        log.info("Response from ems service:{}", httpStatusCode);
     }
 
     private void validateResponseCode(HttpStatusCode statusCode) {

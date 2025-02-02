@@ -655,58 +655,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponse'
-  /facilities/{facilityId}/courses/{courseId}/offeredCourses:
-    post:
-      tags:
-        - program management
-      summary: Offer a course
-      description: Offer a course
-      operationId: offeredCourse
-      parameters:
-        - name: facilityId
-          in: path
-          description: Facility Id of the facility where the course is being offered
-          required: true
-          schema:
-            type: string
-        - name: courseId
-          in: path
-          description: Course Id of the course to be offered
-          required: true
-          schema:
-            type: string
-      requestBody:
-        description: Update a offered course
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CourseRequest2'
-        required: true
-      responses:
-        '200':
-          description: Course offered successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessfulResponse'
-        '404':
-          description: Course not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-        '400':
-          description: Validation failed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
 components:
   schemas:
     RegisterMemberRequest:
@@ -982,8 +930,9 @@ components:
         - endTime
         - isAllDayCourse
         - registrationStartDate
-        - feeType
-        - courseFee
+        - noOfSpots
+        - residentCourseFee
+        - nonResidentCourseFee
       type: object
       properties:
         courseId:
@@ -1022,11 +971,11 @@ components:
           type: integer
           format: int32
           example: 10
-        feeType:
-          type: string
-          description: Fees type
-          example: resident
-        courseFee:
+        residentCourseFee:
+          type: integer
+          format: int32
+          example: 180
+        nonResidentCourseFee:
           type: integer
           format: int32
           example: 180
@@ -1041,8 +990,9 @@ components:
         - endTime
         - isAllDayCourse
         - registrationStartDate
-        - feeType
-        - courseFee
+        - noOfSpots
+        - residentCourseFee
+        - nonResidentCourseFee
       type: object
       properties:
         startDate:
@@ -1075,11 +1025,11 @@ components:
           type: integer
           format: int32
           example: 10
-        feeType:
-          type: string
-          description: Fees type
-          example: resident
-        courseFee:
+        residentCourseFee:
+          type: integer
+          format: int32
+          example: 180
+        nonResidentCourseFee:
           type: integer
           format: int32
           example: 180

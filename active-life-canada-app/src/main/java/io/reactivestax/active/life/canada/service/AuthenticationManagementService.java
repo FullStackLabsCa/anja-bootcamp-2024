@@ -10,7 +10,6 @@ import io.reactivestax.active.life.canada.entity.FamilyMember;
 import io.reactivestax.active.life.canada.entity.LoginRequest;
 import io.reactivestax.active.life.canada.exception.InvalidRequestException;
 import io.reactivestax.active.life.canada.repository.AccountActivationRequestRepository;
-import io.reactivestax.active.life.canada.repository.FamilyGroupRepository;
 import io.reactivestax.active.life.canada.repository.FamilyMemberRepository;
 import io.reactivestax.active.life.canada.repository.LoginRequestRepository;
 import org.springframework.stereotype.Service;
@@ -23,20 +22,17 @@ public class AuthenticationManagementService {
 
     private final FamilyMemberRepository familyMemberRepository;
     private final LoginRequestRepository loginRequestRepository;
-    private final FamilyGroupRepository familyGroupRepository;
     private final AccountActivationRequestRepository accountActivationRequestRepository;
     private final EmsService emsService;
     private final ActiveLifeCommonService activeLifeCommonService;
 
     public AuthenticationManagementService(FamilyMemberRepository familyMemberRepository,
                                            LoginRequestRepository loginRequestRepository,
-                                           FamilyGroupRepository familyGroupRepository,
                                            AccountActivationRequestRepository accountActivationRequestRepository,
                                            EmsService emsService,
                                            ActiveLifeCommonService activeLifeCommonService) {
         this.familyMemberRepository = familyMemberRepository;
         this.loginRequestRepository = loginRequestRepository;
-        this.familyGroupRepository = familyGroupRepository;
         this.accountActivationRequestRepository = accountActivationRequestRepository;
         this.emsService = emsService;
         this.activeLifeCommonService = activeLifeCommonService;
@@ -46,9 +42,8 @@ public class AuthenticationManagementService {
     public LoginResponse loginMember(LoginMemberRequest loginMemberRequest) {
         String token;
         String message;
-        FamilyMember familyMember =
-                familyMemberRepository.findByMemberLoginId(loginMemberRequest.getUsername())
-                        .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INCORRECT_USERNAME_PASSWORD));
+        FamilyMember familyMember = familyMemberRepository.findByMemberLoginId(loginMemberRequest.getUsername())
+                .orElseThrow(() -> new InvalidRequestException(ExceptionMessage.INCORRECT_USERNAME_PASSWORD));
         String familyPin = familyMember.getFamilyGroup().getFamilyPin();
         if (loginMemberRequest.getPassword().equals(familyPin)) {
             token = UUID.randomUUID().toString();
@@ -58,11 +53,11 @@ public class AuthenticationManagementService {
                         .loginToken(token)
                         .build();
                 loginRequestRepository.save(loginRequest);
-                emsService.sendToEmsOtp(familyMember);
+                new Thread(() -> emsService.sendToEmsOtp(familyMember));
                 message = Message.SUCCESSFUL_LOGIN;
             } else {
-                activeLifeCommonService.createAccountActivationRequestEntryAndSendToEms(familyMember);
                 message = Message.LOGIN_INACTIVE_MEMBER;
+                new Thread(() -> activeLifeCommonService.createAccountActivationRequestEntryAndSendToEms(familyMember));
             }
         } else throw new InvalidRequestException(ExceptionMessage.INCORRECT_USERNAME_PASSWORD);
         return LoginResponse.builder().token(token).message(message).build();
