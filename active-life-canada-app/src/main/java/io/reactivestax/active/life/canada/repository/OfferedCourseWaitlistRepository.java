@@ -4,6 +4,7 @@ import io.reactivestax.active.life.canada.entity.OfferedCourseWaitlist;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -15,6 +16,7 @@ public interface OfferedCourseWaitlistRepository extends JpaRepository<OfferedCo
 
     List<OfferedCourseWaitlist> findAllByOfferedCourse_OfferedCourseId(UUID offeredCourseId);
 
+    @Transactional
     @Modifying
     @Query("DELETE FROM OfferedCourseWaitlist wl WHERE wl.offeredCourse.offeredCourseId = ?1 AND wl.familyMember.familyMemberId = ?2")
     void deleteFromWaitlistByFamilyMemberIdAndOfferedCourseId(UUID offeredCourseId, UUID familyMemberId);

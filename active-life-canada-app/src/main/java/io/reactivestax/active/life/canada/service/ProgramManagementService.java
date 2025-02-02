@@ -19,7 +19,6 @@ import io.reactivestax.active.life.canada.repository.OfferedCourseRepository;
 import io.reactivestax.active.life.canada.specification.OfferedCourseSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,8 +35,7 @@ public class ProgramManagementService {
     private final FacilityRepository facilityRepository;
     private final OfferedCourseRepository offeredCourseRepository;
     private final OfferedCourseFeeRepository offeredCourseFeeRepository;
-    private final EmsService emsService;
-    private final ProgramManagementService selfInjectedProgramManagementService;
+    private final ActiveLifeCommonService activeLifeCommonService;
 
     @Transactional
     public void offerCourse(OfferCourseRequest offerCourseRequest) {
@@ -69,15 +67,9 @@ public class ProgramManagementService {
         Integer noOfSpots = offeredCourse.getNoOfSpots();
         offeredCourseMapper.updateOfferedCourseRequestToOfferedCourse(courseUpdateRequest, offeredCourse);
         offeredCourseRepository.save(offeredCourse);
-        selfInjectedProgramManagementService.sendEmsNotificationIfNumOfSpotsIncreased(noOfSpots, offeredCourse);
-    }
-
-    @Async
-    public void sendEmsNotificationIfNumOfSpotsIncreased(Integer noOfSpots, OfferedCourse offeredCourse) {
-        if (offeredCourse.getNoOfSpots() > noOfSpots) {
-            emsService.sendEmsNotificationToAllWaitlistedMembersByOfferedCourseId(offeredCourse.getOfferedCourseId(),
+        if (offeredCourse.getNoOfSpots() > noOfSpots)
+            activeLifeCommonService.getAllWaitlistedMembersByOfferedCourseIdAndSendToEms(offeredCourse.getOfferedCourseId(),
                     offeredCourse.getCourse().getName());
-        }
     }
 
     public List<OfferedCourseDetailsResponse> offeredCourses() {

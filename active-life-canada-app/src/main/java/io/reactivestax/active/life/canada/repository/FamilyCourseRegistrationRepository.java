@@ -14,5 +14,5 @@ public interface FamilyCourseRegistrationRepository extends JpaRepository<Family
 
     List<FamilyCourseRegistration> findAllByEnrollmentActorIdOrFamilyMember_FamilyMemberId(UUID enrollmentActorId, UUID familyMemberId);
 
-    boolean existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseId(UUID offeredCourseId, UUID familyMemberId);
+    boolean existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseIdAndIsWithdrawn(UUID familyMemberId, UUID offeredCourseId, boolean isWithdrawn);
 }

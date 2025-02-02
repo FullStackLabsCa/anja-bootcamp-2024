@@ -17,7 +17,6 @@ import io.reactivestax.active.life.canada.repository.OfferedCourseRepository;
 import io.reactivestax.active.life.canada.repository.OfferedCourseWaitlistRepository;
 import io.reactivestax.active.life.canada.util.ActiveLifeUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,8 +34,7 @@ public class CourseRegistrationManagementService {
     private final FamilyCourseRegistrationMapper familyCourseRegistrationMapper;
     private final OfferedCourseWaitlistMapper offeredCourseWaitlistMapper;
     private final ActiveLifeUtil activeLifeUtil;
-    private final EmsService emsService;
-    private final CourseRegistrationManagementService selfInjectedCourseRegistrationManagementService;
+    private final ActiveLifeCommonService activeLifeCommonService;
 
     @Transactional
     public String enrollIntoOfferedCourse(String barCode, String memberLoginId, String loggedInMemberId) {
@@ -47,6 +45,9 @@ public class CourseRegistrationManagementService {
                 .orElseThrow(() -> new InvalidRequestException(ExceptionHandlerConst.INVALID_MEMBER_ID));
         OfferedCourse offeredCourse = offeredCourseRepository.findByBarCode(UUID.fromString(barCode))
                 .orElseThrow(() -> new InvalidRequestException(ExceptionHandlerConst.INVALID_OFFERED_COURSE_ID));
+        if (familyCourseRegistrationRepository.existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseIdAndIsWithdrawn
+                (familyMember.getFamilyMemberId(), offeredCourse.getOfferedCourseId(), false))
+            throw new InvalidRequestException(ExceptionHandlerConst.ALREADY_ENROLLED);
         return switch (offeredCourse.getAvailableForEnrollment()) {
             case AVAILABLE ->
                     enrollIntoAvailableCourse(offeredCourse, familyMember, loggedInMember.getFamilyMemberId());
@@ -56,9 +57,6 @@ public class CourseRegistrationManagementService {
     }
 
     private String enrollIntoAvailableCourse(OfferedCourse offeredCourse, FamilyMember familyMember, UUID enrollmentActorID) {
-        if (familyCourseRegistrationRepository.existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseId
-                (offeredCourse.getOfferedCourseId(), familyMember.getFamilyMemberId()))
-            throw new InvalidRequestException(ExceptionHandlerConst.ALREADY_ENROLLED);
         FamilyCourseRegistration familyCourseRegistration = FamilyCourseRegistration.builder()
                 .offeredCourse(offeredCourse)
                 .familyMember(familyMember)
@@ -72,19 +70,15 @@ public class CourseRegistrationManagementService {
         if (familyCourseRegistrations.size() == offeredCourse.getNoOfSpots())
             offeredCourse.setAvailableForEnrollment(AvailableForEnrollment.WAITLIST_OPEN);
         offeredCourseRepository.save(offeredCourse);
-        selfInjectedCourseRegistrationManagementService
+        activeLifeCommonService
                 .removeEntryFromWaitlistIfExists(offeredCourse.getOfferedCourseId(), familyMember.getFamilyMemberId());
         return Message.ENROLLMENT_SUCCESSFUL;
     }
 
-    @Async
-    public void removeEntryFromWaitlistIfExists(UUID offeredCourseId, UUID familyMemberId) {
-        offeredCourseWaitlistRepository.deleteFromWaitlistByFamilyMemberIdAndOfferedCourseId(offeredCourseId, familyMemberId);
-    }
 
     private String addToWaitlist(OfferedCourse offeredCourse, FamilyMember familyMember, UUID enrollmentActorID) {
         if (offeredCourseWaitlistRepository.existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseId
-                (offeredCourse.getOfferedCourseId(), familyMember.getFamilyMemberId()))
+                (familyMember.getFamilyMemberId(), offeredCourse.getOfferedCourseId()))
             throw new InvalidRequestException(ExceptionHandlerConst.ALREADY_WAITLISTED);
         List<OfferedCourseWaitlist> courseWaitlist = offeredCourse.getOfferedCourseWaitlist();
         OfferedCourseWaitlist offeredCourseWaitlist = OfferedCourseWaitlist.builder()
@@ -112,7 +106,7 @@ public class CourseRegistrationManagementService {
 
     public List<FamilyCourseRegistrationDetails> getRegisteredCourses(String loggedInMemberId) {
         UUID loggedInMemberIdUUID = UUID.fromString(loggedInMemberId);
-        if (familyMemberRepository.existsById(loggedInMemberIdUUID))
+        if (!familyMemberRepository.existsById(loggedInMemberIdUUID))
             throw new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS);
         List<FamilyCourseRegistration> familyCourseRegistrationList = familyCourseRegistrationRepository
                 .findAllByEnrollmentActorIdOrFamilyMember_FamilyMemberId(loggedInMemberIdUUID, loggedInMemberIdUUID);
@@ -121,7 +115,7 @@ public class CourseRegistrationManagementService {
 
     public List<OfferedCourseWaitlistDto> getWaitlistedCourses(String loggedInMemberId) {
         UUID loggedInMemberIdUUID = UUID.fromString(loggedInMemberId);
-        if (familyMemberRepository.existsById(loggedInMemberIdUUID))
+        if (!familyMemberRepository.existsById(loggedInMemberIdUUID))
             throw new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS);
         List<OfferedCourseWaitlist> offeredCourseWaitlist = offeredCourseWaitlistRepository
                 .findAllByEnrollmentActorIdOrFamilyMember_FamilyMemberId(loggedInMemberIdUUID, loggedInMemberIdUUID);
@@ -131,7 +125,7 @@ public class CourseRegistrationManagementService {
     @Transactional
     public void withdrawFromCourse(String familyCourseRegistrationId, String loggedInMemberId) {
         UUID loggedInMemberIdUUID = UUID.fromString(loggedInMemberId);
-        if (familyMemberRepository.existsById(loggedInMemberIdUUID))
+        if (!familyMemberRepository.existsById(loggedInMemberIdUUID))
             throw new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS);
         FamilyCourseRegistration familyCourseRegistration = familyCourseRegistrationRepository
                 .findByFamilyCourseRegistrationIdAndIsWithdrawnFalseAndEnrollmentActorIdOrFamilyMember_FamilyMemberId(
@@ -143,7 +137,7 @@ public class CourseRegistrationManagementService {
 
         familyCourseRegistration.setIsWithdrawn(true);
         familyCourseRegistrationRepository.save(familyCourseRegistration);
-        emsService.sendEmsNotificationToAllWaitlistedMembersByOfferedCourseId(offeredCourse.getOfferedCourseId(),
+        activeLifeCommonService.getAllWaitlistedMembersByOfferedCourseIdAndSendToEms(offeredCourse.getOfferedCourseId(),
                 offeredCourse.getCourse().getName());
     }
 }

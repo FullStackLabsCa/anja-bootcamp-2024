@@ -2,15 +2,12 @@ package io.reactivestax.active.life.canada.service;
 
 import io.reactivestax.active.life.canada.constant.Endpoints;
 import io.reactivestax.active.life.canada.constant.ExceptionHandlerConst;
-import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.entity.FamilyMember;
-import io.reactivestax.active.life.canada.entity.OfferedCourseWaitlist;
 import io.reactivestax.active.life.canada.enums.PreferredModeOfCommunication;
 import io.reactivestax.active.life.canada.exception.InvalidRequestException;
 import io.reactivestax.active.life.canada.exception.SomethingWentWrongException;
 import io.reactivestax.active.life.canada.model.EmsRequest;
 import io.reactivestax.active.life.canada.model.EmsVerify;
-import io.reactivestax.active.life.canada.repository.OfferedCourseWaitlistRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -18,18 +15,12 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.text.MessageFormat;
-import java.util.List;
-import java.util.UUID;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmsService {
 
     private final RestTemplate restTemplate;
-    private final OfferedCourseWaitlistRepository offeredCourseWaitlistRepository;
-    private final EmsService selfInjectedEmsService;
 
     @Async
     public void sendToEms(FamilyMember familyMember, String message) {
@@ -99,14 +90,5 @@ public class EmsService {
     private String getEnsOtpEndpoint(PreferredModeOfCommunication preferredModeOfCommunication) {
         if (preferredModeOfCommunication.equals(PreferredModeOfCommunication.EMAIL)) return Endpoints.ENS_EMAIL_OTP;
         return Endpoints.ENS_SMS_OTP;
-    }
-
-    @Async
-    public void sendEmsNotificationToAllWaitlistedMembersByOfferedCourseId(UUID offeredCourseId, String courseName) {
-        List<FamilyMember> allTheWaitlistedMembersByOfferedCourseId = offeredCourseWaitlistRepository
-                .findAllByOfferedCourse_OfferedCourseId(offeredCourseId).stream().map(OfferedCourseWaitlist::getFamilyMember)
-                .toList();
-        allTheWaitlistedMembersByOfferedCourseId.forEach(familyMember -> selfInjectedEmsService.sendToEms(familyMember,
-                MessageFormat.format(Message.SPOT_AVAILABLE_FOR_ENROLLMENT, familyMember.getName(), courseName)));
     }
 }
