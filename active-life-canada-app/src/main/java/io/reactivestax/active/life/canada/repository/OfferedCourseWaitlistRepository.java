@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.UUID;
 
 public interface OfferedCourseWaitlistRepository extends JpaRepository<OfferedCourseWaitlist, UUID> {
-    long countByOfferedCourse_OfferedCourseId(UUID offeredCourseId);
-
     List<OfferedCourseWaitlist> findAllByEnrollmentActorIdOrFamilyMember_FamilyMemberId(UUID enrollmentActorId, UUID familyMemberId);
 
     boolean existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseId(UUID offeredCourseId, UUID familyMemberId);
+
+    List<OfferedCourseWaitlist> findAllByOfferedCourseId(UUID offeredCourseId);
 
     @Modifying
     @Query("DELETE FROM OfferedCourseWaitlist wl WHERE wl.offeredCourse.offeredCourseId = ?1 AND wl.familyMember.familyMemberId = ?2")

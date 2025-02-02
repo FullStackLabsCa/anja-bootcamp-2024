@@ -32,6 +32,7 @@ public class CourseRegistrationManagementService {
     private final FamilyCourseRegistrationMapper familyCourseRegistrationMapper;
     private final OfferedCourseWaitlistMapper offeredCourseWaitlistMapper;
     private final ActiveLifeUtil activeLifeUtil;
+    private final EmsService emsService;
 
     public CourseRegistrationManagementService(FamilyCourseRegistrationRepository familyCourseRegistrationRepository,
                                                OfferedCourseRepository offeredCourseRepository,
@@ -39,7 +40,8 @@ public class CourseRegistrationManagementService {
                                                OfferedCourseWaitlistRepository offeredCourseWaitlistRepository,
                                                FamilyCourseRegistrationMapper familyCourseRegistrationMapper,
                                                OfferedCourseWaitlistMapper offeredCourseWaitlistMapper,
-                                               ActiveLifeUtil activeLifeUtil) {
+                                               ActiveLifeUtil activeLifeUtil,
+                                               EmsService emsService) {
         this.familyCourseRegistrationRepository = familyCourseRegistrationRepository;
         this.offeredCourseRepository = offeredCourseRepository;
         this.familyMemberRepository = familyMemberRepository;
@@ -47,6 +49,7 @@ public class CourseRegistrationManagementService {
         this.familyCourseRegistrationMapper = familyCourseRegistrationMapper;
         this.offeredCourseWaitlistMapper = offeredCourseWaitlistMapper;
         this.activeLifeUtil = activeLifeUtil;
+        this.emsService = emsService;
     }
 
     @Transactional
@@ -67,7 +70,7 @@ public class CourseRegistrationManagementService {
     }
 
     private String enrollIntoAvailableCourse(OfferedCourse offeredCourse, FamilyMember familyMember, UUID enrollmentActorID) {
-        if(familyCourseRegistrationRepository.existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseId
+        if (familyCourseRegistrationRepository.existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseId
                 (offeredCourse.getOfferedCourseId(), familyMember.getFamilyMemberId()))
             throw new InvalidRequestException(ExceptionHandlerConst.ALREADY_ENROLLED);
         FamilyCourseRegistration familyCourseRegistration = FamilyCourseRegistration.builder()
@@ -92,7 +95,7 @@ public class CourseRegistrationManagementService {
     }
 
     private String addToWaitlist(OfferedCourse offeredCourse, FamilyMember familyMember, UUID enrollmentActorID) {
-        if(offeredCourseWaitlistRepository.existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseId
+        if (offeredCourseWaitlistRepository.existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseId
                 (offeredCourse.getOfferedCourseId(), familyMember.getFamilyMemberId()))
             throw new InvalidRequestException(ExceptionHandlerConst.ALREADY_WAITLISTED);
         List<OfferedCourseWaitlist> courseWaitlist = offeredCourse.getOfferedCourseWaitlist();
@@ -152,5 +155,12 @@ public class CourseRegistrationManagementService {
 
         familyCourseRegistration.setIsWithdrawn(true);
         familyCourseRegistrationRepository.save(familyCourseRegistration);
+        new Thread(() -> emsService.sendEmsNotificationToAllWaitlistedMembersByOfferedCourseId(offeredCourse.getOfferedCourseId(),
+                offeredCourse.getCourse().getName()));
+    }
+
+    public List<FamilyMember> getAllTheWaitlistedMembersByOfferedCourseId(UUID offeredCourseId) {
+        return offeredCourseWaitlistRepository.findAllByOfferedCourseId(offeredCourseId)
+                .stream().map(OfferedCourseWaitlist::getFamilyMember).toList();
     }
 }

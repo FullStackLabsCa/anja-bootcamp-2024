@@ -2,6 +2,7 @@ package io.reactivestax.active.life.canada.service;
 
 import io.reactivestax.active.life.canada.constant.Endpoints;
 import io.reactivestax.active.life.canada.constant.ExceptionHandlerConst;
+import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.entity.FamilyMember;
 import io.reactivestax.active.life.canada.enums.PreferredModeOfCommunication;
 import io.reactivestax.active.life.canada.exception.InvalidRequestException;
@@ -13,14 +14,21 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.UUID;
+
 @Slf4j
 @Service
 public class EmsService {
 
     private final RestTemplate restTemplate;
+    private final CourseRegistrationManagementService courseRegistrationManagementService;
 
-    public EmsService(RestTemplate restTemplate) {
+    public EmsService(RestTemplate restTemplate,
+                      CourseRegistrationManagementService courseRegistrationManagementService) {
         this.restTemplate = restTemplate;
+        this.courseRegistrationManagementService = courseRegistrationManagementService;
     }
 
     public void sendToEms(FamilyMember familyMember, String message) {
@@ -80,13 +88,20 @@ public class EmsService {
         return emsRequest;
     }
 
-    public String getEnsEndpoint(PreferredModeOfCommunication preferredModeOfCommunication) {
+    private String getEnsEndpoint(PreferredModeOfCommunication preferredModeOfCommunication) {
         if (preferredModeOfCommunication.equals(PreferredModeOfCommunication.EMAIL)) return Endpoints.ENS_EMAIL;
         return Endpoints.ENS_SMS;
     }
 
-    public String getEnsOtpEndpoint(PreferredModeOfCommunication preferredModeOfCommunication) {
+    private String getEnsOtpEndpoint(PreferredModeOfCommunication preferredModeOfCommunication) {
         if (preferredModeOfCommunication.equals(PreferredModeOfCommunication.EMAIL)) return Endpoints.ENS_EMAIL_OTP;
         return Endpoints.ENS_SMS_OTP;
+    }
+
+    public void sendEmsNotificationToAllWaitlistedMembersByOfferedCourseId(UUID offeredCourseId, String courseName) {
+        List<FamilyMember> allTheWaitlistedMembersByOfferedCourseId = courseRegistrationManagementService
+                .getAllTheWaitlistedMembersByOfferedCourseId(offeredCourseId);
+        allTheWaitlistedMembersByOfferedCourseId.forEach(familyMember -> sendToEms(familyMember,
+                MessageFormat.format(Message.SPOT_AVAILABLE_FOR_ENROLLMENT, familyMember.getName(), courseName)));
     }
 }

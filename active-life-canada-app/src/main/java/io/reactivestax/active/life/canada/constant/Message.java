@@ -21,5 +21,6 @@ public class Message {
     public static final String LOGIN_INACTIVE_MEMBER = "You are not an active member. An account activation link is " +
             "sent to you.";
     public static final String ACTIVATION_LINK_MESSAGE = "Hello {0}, Your account activation link is: {1}.";
-
+    public static final String SPOT_AVAILABLE_FOR_ENROLLMENT = "Hello {0}, We have an open spot for the {1} course. " +
+            "Please enroll fast to avoid staying in waitlist.";
 }

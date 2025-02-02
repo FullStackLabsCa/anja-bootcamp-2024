@@ -15,6 +15,7 @@ import io.reactivestax.active.life.canada.repository.CourseRepository;
 import io.reactivestax.active.life.canada.repository.FacilityRepository;
 import io.reactivestax.active.life.canada.repository.OfferedCourseFeeRepository;
 import io.reactivestax.active.life.canada.repository.OfferedCourseRepository;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,17 +31,20 @@ public class ProgramManagementService {
     private final FacilityRepository facilityRepository;
     private final OfferedCourseRepository offeredCourseRepository;
     private final OfferedCourseFeeRepository offeredCourseFeeRepository;
+    private final EmsService emsService;
 
     public ProgramManagementService(OfferCourseMapper offerCourseMapper,
                                     CourseRepository courseRepository,
                                     FacilityRepository facilityRepository,
                                     OfferedCourseRepository offeredCourseRepository,
-                                    OfferedCourseFeeRepository offeredCourseFeeRepository) {
+                                    OfferedCourseFeeRepository offeredCourseFeeRepository,
+                                    EmsService emsService) {
         this.offerCourseMapper = offerCourseMapper;
         this.courseRepository = courseRepository;
         this.facilityRepository = facilityRepository;
         this.offeredCourseRepository = offeredCourseRepository;
         this.offeredCourseFeeRepository = offeredCourseFeeRepository;
+        this.emsService = emsService;
     }
 
     @Transactional
@@ -70,8 +74,17 @@ public class ProgramManagementService {
         String barCode = courseUpdateRequest.getBarCode();
         OfferedCourse offeredCourse = offeredCourseRepository.findByBarCode(UUID.fromString(barCode))
                 .orElseThrow(() -> new InvalidRequestException(ExceptionHandlerConst.INVALID_OFFERED_COURSE_ID));
+        Integer noOfSpots = offeredCourse.getNoOfSpots();
         offerCourseMapper.updateOfferedCourseRequestToOfferedCourse(courseUpdateRequest, offeredCourse);
         offeredCourseRepository.save(offeredCourse);
+        new Thread(() -> sendEmsNotificationIfNumOfSpotsIncreased(noOfSpots, offeredCourse));
+    }
+
+    private void sendEmsNotificationIfNumOfSpotsIncreased(Integer noOfSpots, OfferedCourse offeredCourse){
+        if(offeredCourse.getNoOfSpots() > noOfSpots) {
+            emsService.sendEmsNotificationToAllWaitlistedMembersByOfferedCourseId(offeredCourse.getOfferedCourseId(),
+                    offeredCourse.getCourse().getName());
+        }
     }
 
     public List<OfferedCourseDetailsResponse> offeredCourses() {
