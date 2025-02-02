@@ -13,7 +13,7 @@ public interface OfferedCourseWaitlistRepository extends JpaRepository<OfferedCo
 
     boolean existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseId(UUID offeredCourseId, UUID familyMemberId);
 
-    List<OfferedCourseWaitlist> findAllByOfferedCourseId(UUID offeredCourseId);
+    List<OfferedCourseWaitlist> findAllByOfferedCourse_OfferedCourseId(UUID offeredCourseId);
 
     @Modifying
     @Query("DELETE FROM OfferedCourseWaitlist wl WHERE wl.offeredCourse.offeredCourseId = ?1 AND wl.familyMember.familyMemberId = ?2")

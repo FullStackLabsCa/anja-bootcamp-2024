@@ -4,11 +4,13 @@ import io.reactivestax.active.life.canada.constant.Endpoints;
 import io.reactivestax.active.life.canada.constant.ExceptionHandlerConst;
 import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.entity.FamilyMember;
+import io.reactivestax.active.life.canada.entity.OfferedCourseWaitlist;
 import io.reactivestax.active.life.canada.enums.PreferredModeOfCommunication;
 import io.reactivestax.active.life.canada.exception.InvalidRequestException;
 import io.reactivestax.active.life.canada.exception.SomethingWentWrongException;
 import io.reactivestax.active.life.canada.model.EmsRequest;
 import io.reactivestax.active.life.canada.model.EmsVerify;
+import io.reactivestax.active.life.canada.repository.OfferedCourseWaitlistRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -23,12 +25,12 @@ import java.util.UUID;
 public class EmsService {
 
     private final RestTemplate restTemplate;
-    private final CourseRegistrationManagementService courseRegistrationManagementService;
+    private final OfferedCourseWaitlistRepository offeredCourseWaitlistRepository;
 
     public EmsService(RestTemplate restTemplate,
-                      CourseRegistrationManagementService courseRegistrationManagementService) {
+                      OfferedCourseWaitlistRepository offeredCourseWaitlistRepository) {
         this.restTemplate = restTemplate;
-        this.courseRegistrationManagementService = courseRegistrationManagementService;
+        this.offeredCourseWaitlistRepository = offeredCourseWaitlistRepository;
     }
 
     public void sendToEms(FamilyMember familyMember, String message) {
@@ -99,8 +101,9 @@ public class EmsService {
     }
 
     public void sendEmsNotificationToAllWaitlistedMembersByOfferedCourseId(UUID offeredCourseId, String courseName) {
-        List<FamilyMember> allTheWaitlistedMembersByOfferedCourseId = courseRegistrationManagementService
-                .getAllTheWaitlistedMembersByOfferedCourseId(offeredCourseId);
+        List<FamilyMember> allTheWaitlistedMembersByOfferedCourseId = offeredCourseWaitlistRepository
+                .findAllByOfferedCourse_OfferedCourseId(offeredCourseId).stream().map(OfferedCourseWaitlist::getFamilyMember)
+                .toList();
         allTheWaitlistedMembersByOfferedCourseId.forEach(familyMember -> sendToEms(familyMember,
                 MessageFormat.format(Message.SPOT_AVAILABLE_FOR_ENROLLMENT, familyMember.getName(), courseName)));
     }

@@ -158,9 +158,4 @@ public class CourseRegistrationManagementService {
         new Thread(() -> emsService.sendEmsNotificationToAllWaitlistedMembersByOfferedCourseId(offeredCourse.getOfferedCourseId(),
                 offeredCourse.getCourse().getName()));
     }
-
-    public List<FamilyMember> getAllTheWaitlistedMembersByOfferedCourseId(UUID offeredCourseId) {
-        return offeredCourseWaitlistRepository.findAllByOfferedCourseId(offeredCourseId)
-                .stream().map(OfferedCourseWaitlist::getFamilyMember).toList();
-    }
 }
