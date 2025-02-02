@@ -11,6 +11,7 @@ import io.reactivestax.active.life.canada.exception.SomethingWentWrongException;
 import io.reactivestax.active.life.canada.model.EmsRequest;
 import io.reactivestax.active.life.canada.model.EmsVerify;
 import io.reactivestax.active.life.canada.repository.OfferedCourseWaitlistRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -22,16 +23,11 @@ import java.util.UUID;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class EmsService {
 
     private final RestTemplate restTemplate;
     private final OfferedCourseWaitlistRepository offeredCourseWaitlistRepository;
-
-    public EmsService(RestTemplate restTemplate,
-                      OfferedCourseWaitlistRepository offeredCourseWaitlistRepository) {
-        this.restTemplate = restTemplate;
-        this.offeredCourseWaitlistRepository = offeredCourseWaitlistRepository;
-    }
 
     public void sendToEms(FamilyMember familyMember, String message) {
         EmsRequest emsRequest = prepareEmsRequest(familyMember, message);

@@ -16,6 +16,7 @@ import io.reactivestax.active.life.canada.repository.FamilyMemberRepository;
 import io.reactivestax.active.life.canada.repository.OfferedCourseRepository;
 import io.reactivestax.active.life.canada.repository.OfferedCourseWaitlistRepository;
 import io.reactivestax.active.life.canada.util.ActiveLifeUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class CourseRegistrationManagementService {
 
     private final FamilyCourseRegistrationRepository familyCourseRegistrationRepository;
@@ -33,24 +35,6 @@ public class CourseRegistrationManagementService {
     private final OfferedCourseWaitlistMapper offeredCourseWaitlistMapper;
     private final ActiveLifeUtil activeLifeUtil;
     private final EmsService emsService;
-
-    public CourseRegistrationManagementService(FamilyCourseRegistrationRepository familyCourseRegistrationRepository,
-                                               OfferedCourseRepository offeredCourseRepository,
-                                               FamilyMemberRepository familyMemberRepository,
-                                               OfferedCourseWaitlistRepository offeredCourseWaitlistRepository,
-                                               FamilyCourseRegistrationMapper familyCourseRegistrationMapper,
-                                               OfferedCourseWaitlistMapper offeredCourseWaitlistMapper,
-                                               ActiveLifeUtil activeLifeUtil,
-                                               EmsService emsService) {
-        this.familyCourseRegistrationRepository = familyCourseRegistrationRepository;
-        this.offeredCourseRepository = offeredCourseRepository;
-        this.familyMemberRepository = familyMemberRepository;
-        this.offeredCourseWaitlistRepository = offeredCourseWaitlistRepository;
-        this.familyCourseRegistrationMapper = familyCourseRegistrationMapper;
-        this.offeredCourseWaitlistMapper = offeredCourseWaitlistMapper;
-        this.activeLifeUtil = activeLifeUtil;
-        this.emsService = emsService;
-    }
 
     @Transactional
     public String enrollIntoOfferedCourse(String barCode, String memberLoginId, String loggedInMemberId) {

@@ -26,8 +26,8 @@ public class ActiveLifeUtil {
         long betweenDays = ChronoUnit.DAYS.between(date, LocalDate.now());
         long betweenMinutes = ChronoUnit.MINUTES.between(time, LocalTime.now());
 
-        if (betweenDays > 2) {
+        if (betweenDays > 1) {
             return true;
-        } else return betweenDays == 2 && betweenMinutes >= 1;
+        } else return betweenDays == 1 && betweenMinutes >= 1;
     }
 }

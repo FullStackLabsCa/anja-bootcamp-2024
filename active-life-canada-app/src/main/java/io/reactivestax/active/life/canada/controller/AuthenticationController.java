@@ -5,22 +5,18 @@ import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.dto.*;
 import io.reactivestax.active.life.canada.service.AuthenticationManagementService;
 import io.reactivestax.active.life.canada.service.FamilyManagementService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(Endpoints.BASE_ENDPOINT)
+@RequiredArgsConstructor
 public class AuthenticationController {
 
     private final FamilyManagementService familyManagementService;
     private final AuthenticationManagementService authenticationManagementService;
-
-    public AuthenticationController(FamilyManagementService familyManagementService,
-                                    AuthenticationManagementService authenticationManagementService) {
-        this.familyManagementService = familyManagementService;
-        this.authenticationManagementService = authenticationManagementService;
-    }
 
     @PostMapping(value = Endpoints.SIGNUP, produces = MediaType.APPLICATION_JSON_VALUE, consumes =
             MediaType.APPLICATION_JSON_VALUE)

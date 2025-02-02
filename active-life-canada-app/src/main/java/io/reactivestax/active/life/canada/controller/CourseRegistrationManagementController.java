@@ -10,6 +10,7 @@ import io.reactivestax.active.life.canada.dto.SuccessfulResponse;
 import io.reactivestax.active.life.canada.model.SecurityHeader;
 import io.reactivestax.active.life.canada.service.CourseRegistrationManagementService;
 import io.reactivestax.active.life.canada.util.ActiveLifeUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,16 +18,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping(Endpoints.BASE_ENDPOINT)
+@RequiredArgsConstructor
 public class CourseRegistrationManagementController {
 
     private final CourseRegistrationManagementService courseRegistrationManagementService;
     private final ActiveLifeUtil activeLifeUtil;
-
-    public CourseRegistrationManagementController(CourseRegistrationManagementService courseRegistrationManagementService,
-                                                  ActiveLifeUtil activeLifeUtil) {
-        this.courseRegistrationManagementService = courseRegistrationManagementService;
-        this.activeLifeUtil = activeLifeUtil;
-    }
 
     @PostMapping(Endpoints.ENROLL_COURSE)
     public ResponseEntity<SuccessfulResponse> enrollIntoCourse(@PathVariable String barCode,

@@ -1,9 +1,9 @@
 package io.reactivestax.active.life.canada.service;
 
 import io.reactivestax.active.life.canada.constant.ExceptionHandlerConst;
-import io.reactivestax.active.life.canada.dto.OfferedCourseDetailsResponse;
 import io.reactivestax.active.life.canada.dto.CourseUpdateRequest;
 import io.reactivestax.active.life.canada.dto.OfferCourseRequest;
+import io.reactivestax.active.life.canada.dto.OfferedCourseDetailsResponse;
 import io.reactivestax.active.life.canada.entity.Course;
 import io.reactivestax.active.life.canada.entity.Facility;
 import io.reactivestax.active.life.canada.entity.OfferedCourse;
@@ -15,7 +15,7 @@ import io.reactivestax.active.life.canada.repository.CourseRepository;
 import io.reactivestax.active.life.canada.repository.FacilityRepository;
 import io.reactivestax.active.life.canada.repository.OfferedCourseFeeRepository;
 import io.reactivestax.active.life.canada.repository.OfferedCourseRepository;
-import jakarta.persistence.criteria.CriteriaBuilder;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class ProgramManagementService {
 
     private final OfferCourseMapper offerCourseMapper;
@@ -32,20 +33,6 @@ public class ProgramManagementService {
     private final OfferedCourseRepository offeredCourseRepository;
     private final OfferedCourseFeeRepository offeredCourseFeeRepository;
     private final EmsService emsService;
-
-    public ProgramManagementService(OfferCourseMapper offerCourseMapper,
-                                    CourseRepository courseRepository,
-                                    FacilityRepository facilityRepository,
-                                    OfferedCourseRepository offeredCourseRepository,
-                                    OfferedCourseFeeRepository offeredCourseFeeRepository,
-                                    EmsService emsService) {
-        this.offerCourseMapper = offerCourseMapper;
-        this.courseRepository = courseRepository;
-        this.facilityRepository = facilityRepository;
-        this.offeredCourseRepository = offeredCourseRepository;
-        this.offeredCourseFeeRepository = offeredCourseFeeRepository;
-        this.emsService = emsService;
-    }
 
     @Transactional
     public void offerCourse(OfferCourseRequest offerCourseRequest) {
@@ -80,8 +67,8 @@ public class ProgramManagementService {
         new Thread(() -> sendEmsNotificationIfNumOfSpotsIncreased(noOfSpots, offeredCourse));
     }
 
-    private void sendEmsNotificationIfNumOfSpotsIncreased(Integer noOfSpots, OfferedCourse offeredCourse){
-        if(offeredCourse.getNoOfSpots() > noOfSpots) {
+    private void sendEmsNotificationIfNumOfSpotsIncreased(Integer noOfSpots, OfferedCourse offeredCourse) {
+        if (offeredCourse.getNoOfSpots() > noOfSpots) {
             emsService.sendEmsNotificationToAllWaitlistedMembersByOfferedCourseId(offeredCourse.getOfferedCourseId(),
                     offeredCourse.getCourse().getName());
         }

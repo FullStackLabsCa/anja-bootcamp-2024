@@ -8,6 +8,7 @@ import io.reactivestax.active.life.canada.dto.OfferedCourseWaitlistDto;
 import io.reactivestax.active.life.canada.model.SecurityHeader;
 import io.reactivestax.active.life.canada.service.CourseRegistrationManagementService;
 import io.reactivestax.active.life.canada.util.ActiveLifeUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -18,16 +19,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping(Endpoints.BASE_ENDPOINT + Endpoints.DASHBOARD)
+@RequiredArgsConstructor
 public class DashboardController {
 
     private final CourseRegistrationManagementService courseRegistrationManagementService;
     private final ActiveLifeUtil activeLifeUtil;
-
-    public DashboardController(CourseRegistrationManagementService courseRegistrationManagementService,
-                               ActiveLifeUtil activeLifeUtil) {
-        this.courseRegistrationManagementService = courseRegistrationManagementService;
-        this.activeLifeUtil = activeLifeUtil;
-    }
 
     @GetMapping
     public ResponseEntity<DashboardDto> dashboard(@RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson) {

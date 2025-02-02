@@ -4,6 +4,7 @@ import io.reactivestax.active.life.canada.entity.OfferedCourse;
 import io.reactivestax.active.life.canada.enums.AvailableForEnrollment;
 import io.reactivestax.active.life.canada.repository.OfferedCourseRepository;
 import io.reactivestax.active.life.canada.util.ActiveLifeUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -13,16 +14,11 @@ import java.util.List;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class DailyJobService {
 
     private final OfferedCourseRepository offeredCourseRepository;
     private final ActiveLifeUtil activeLifeUtil;
-
-    public DailyJobService(OfferedCourseRepository offeredCourseRepository,
-                           ActiveLifeUtil activeLifeUtil) {
-        this.offeredCourseRepository = offeredCourseRepository;
-        this.activeLifeUtil = activeLifeUtil;
-    }
 
     @Scheduled(cron = "0 1 0 * * *")
     public void markOfferedCourseNotAvailable() {

@@ -13,12 +13,14 @@ import io.reactivestax.active.life.canada.exception.SomethingWentWrongException;
 import io.reactivestax.active.life.canada.repository.AccountActivationRequestRepository;
 import io.reactivestax.active.life.canada.repository.FamilyMemberRepository;
 import io.reactivestax.active.life.canada.repository.LoginRequestRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class AuthenticationManagementService {
 
     private final FamilyMemberRepository familyMemberRepository;
@@ -26,18 +28,6 @@ public class AuthenticationManagementService {
     private final AccountActivationRequestRepository accountActivationRequestRepository;
     private final EmsService emsService;
     private final ActiveLifeCommonService activeLifeCommonService;
-
-    public AuthenticationManagementService(FamilyMemberRepository familyMemberRepository,
-                                           LoginRequestRepository loginRequestRepository,
-                                           AccountActivationRequestRepository accountActivationRequestRepository,
-                                           EmsService emsService,
-                                           ActiveLifeCommonService activeLifeCommonService) {
-        this.familyMemberRepository = familyMemberRepository;
-        this.loginRequestRepository = loginRequestRepository;
-        this.accountActivationRequestRepository = accountActivationRequestRepository;
-        this.emsService = emsService;
-        this.activeLifeCommonService = activeLifeCommonService;
-    }
 
     @Transactional
     public LoginResponse loginMember(LoginMemberRequest loginMemberRequest) {

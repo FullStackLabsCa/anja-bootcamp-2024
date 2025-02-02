@@ -10,22 +10,18 @@ import io.reactivestax.active.life.canada.dto.UpdateMemberRequest;
 import io.reactivestax.active.life.canada.model.SecurityHeader;
 import io.reactivestax.active.life.canada.service.FamilyManagementService;
 import io.reactivestax.active.life.canada.util.ActiveLifeUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(Endpoints.BASE_ENDPOINT + Endpoints.MEMBERS_BASE)
+@RequiredArgsConstructor
 public class FamilyManagementController {
 
     private final FamilyManagementService familyManagementService;
     private final ActiveLifeUtil activeLifeUtil;
-
-    public FamilyManagementController(FamilyManagementService familyManagementService,
-                                      ActiveLifeUtil activeLifeUtil) {
-        this.familyManagementService = familyManagementService;
-        this.activeLifeUtil = activeLifeUtil;
-    }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SuccessfulResponse> addMember(@RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson,

@@ -11,6 +11,7 @@ import io.reactivestax.active.life.canada.exception.UnauthorizedAccessException;
 import io.reactivestax.active.life.canada.mapper.FamilyMemberMapper;
 import io.reactivestax.active.life.canada.repository.FamilyGroupRepository;
 import io.reactivestax.active.life.canada.repository.FamilyMemberRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,22 +20,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class FamilyManagementService {
 
     private final FamilyMemberRepository familyMemberRepository;
     private final FamilyGroupRepository familyGroupRepository;
     private final FamilyMemberMapper familyMemberMapper;
     private final ActiveLifeCommonService activeLifeCommonService;
-
-    public FamilyManagementService(FamilyMemberRepository familyMemberRepository,
-                                   FamilyGroupRepository familyGroupRepository,
-                                   FamilyMemberMapper familyMemberMapper,
-                                   ActiveLifeCommonService activeLifeCommonService) {
-        this.familyMemberRepository = familyMemberRepository;
-        this.familyGroupRepository = familyGroupRepository;
-        this.familyMemberMapper = familyMemberMapper;
-        this.activeLifeCommonService = activeLifeCommonService;
-    }
 
     @Transactional
     public void createFamilyMember(CreateMemberRequest createMemberRequest, String loggedInMemberId, boolean isGroupAdmin) {

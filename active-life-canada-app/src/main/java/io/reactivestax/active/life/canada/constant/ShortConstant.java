@@ -12,6 +12,16 @@ public class ShortConstant {
     public static final String SECURITY_HEADER = "X-security-header";
     public static final String AVAILABLE_FOR_ENROLLMENT = "availableForEnrollment";
     public static final String BAR_CODE = "barCode";
+    public static final String COURSE = "course";
+    public static final String NAME = "name";
+    public static final String START_DATE = "startDate";
+    public static final String END_DATE = "endDate";
+    public static final String FACILITY = "facility";
+    public static final String CITY = "city";
+    public static final String PROVINCE = "province";
+    public static final String CATEGORY = "category";
+    public static final String SUB_CATEGORY = "subCategory";
+    public static final String AGE_GROUP = "ageGroup";
 
     public static final String ENUM_DESERIALIZER_REGEX = "[\\s-]";
     public static final String ENUM_DESERIALIZER_REPLACE = "_";
