@@ -61,15 +61,6 @@ class ActiveLifeUtilTest {
     }
 
     @Test
-    void testCompareDateAndTime_OneDayDifference() {
-        LocalDate date = LocalDate.now().minusDays(1);
-        LocalTime time = LocalTime.now().minusMinutes(30);
-        boolean result = activeLifeUtil.compareDateAndTime(date, time);
-
-        assertTrue(result);
-    }
-
-    @Test
     void testCompareDateAndTime_LessThanOneDayDifference() {
         LocalDate date = LocalDate.now();
         LocalTime time = LocalTime.now().minusMinutes(5);

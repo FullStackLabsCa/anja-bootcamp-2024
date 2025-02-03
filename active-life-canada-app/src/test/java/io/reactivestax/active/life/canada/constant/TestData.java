@@ -21,6 +21,7 @@ public class TestData {
     public static final UUID BAR_CODE_UUID = UUID.randomUUID();
     public static final String BAR_CODE_STRING = BAR_CODE_UUID.toString();
     public static final String MEMBER_LOGIN_ID = "member_login_id";
+    public static final String FAMILY_MEMBER_LOGIN_ID = "family_member_login_id";
     public static final String INVALID_TOKEN = "invalid_token";
     public static final String LOGGED_IN_MEMBER_NAME = "John Singh";
     public static final String MEMBER_NAME = "John Doe";

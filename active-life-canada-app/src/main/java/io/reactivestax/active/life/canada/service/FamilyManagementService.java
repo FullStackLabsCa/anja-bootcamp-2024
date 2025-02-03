@@ -61,7 +61,7 @@ public class FamilyManagementService {
     public void updateFamilyMember(String memberLoginId, UpdateMemberRequest updateMemberRequest, String loggedInMemberId) {
         FamilyMember loggedInMember = familyMemberRepository.findByFamilyMemberIdAndIsActive(UUID.fromString(loggedInMemberId), true)
                 .orElseThrow(() -> new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS));
-        if (memberLoginId.equals(loggedInMemberId)) {
+        if (memberLoginId.equals(loggedInMember.getMemberLoginId())) {
             convertToEntityAndUpdateFamilyMember(loggedInMember, updateMemberRequest);
         } else if (loggedInMember.isGroupAdmin()) {
             FamilyMember familyMember = familyMemberRepository.findByMemberLoginIdAndIsActiveAndFamilyGroup_FamilyGroupId
@@ -79,7 +79,7 @@ public class FamilyManagementService {
     public MemberDetails getFamilyMember(String memberLoginId, String loggedInMemberId) {
         FamilyMember loggedInMember = familyMemberRepository.findByFamilyMemberIdAndIsActive(UUID.fromString(loggedInMemberId), true)
                 .orElseThrow(() -> new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS));
-        if (memberLoginId.equals(loggedInMemberId)) {
+        if (memberLoginId.equals(loggedInMember.getMemberLoginId())) {
             return getMemberDetails(loggedInMember);
         } else if (loggedInMember.isGroupAdmin()) {
             FamilyMember familyMember = familyMemberRepository.findByMemberLoginIdAndIsActiveAndFamilyGroup_FamilyGroupId
@@ -100,12 +100,12 @@ public class FamilyManagementService {
     public void deactivateFamilyMember(String memberLoginId, String loggedInMemberId) {
         FamilyMember loggedInMember = familyMemberRepository.findByFamilyMemberIdAndIsActive(UUID.fromString(loggedInMemberId), true)
                 .orElseThrow(() -> new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS));
-        if (memberLoginId.equals(loggedInMemberId)) {
+        if (memberLoginId.equals(loggedInMember.getMemberLoginId())) {
             familyMemberRepository.updateIsActiveByFamilyMemberId(loggedInMember.getFamilyMemberId(), false);
         } else if (loggedInMember.isGroupAdmin()) {
             if (familyMemberRepository.existsByMemberLoginIdAndFamilyGroup_FamilyGroupId(memberLoginId, loggedInMember.getFamilyGroup().getFamilyGroupId())) {
                 familyMemberRepository.updateIsActiveByMemberLoginId(memberLoginId, false);
-            } else throw new UnauthorizedAccessException(ExceptionHandlerConst.INVALID_MEMBER_ID);
+            } else throw new InvalidRequestException(ExceptionHandlerConst.INVALID_MEMBER_ID);
         } else throw new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS);
     }
 }
