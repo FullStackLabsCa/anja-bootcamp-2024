@@ -17,7 +17,7 @@ public interface OfferedCourseMapper {
     OfferedCourse offerCourseRequestToOfferedCourse(OfferCourseRequest offerCourseRequest);
 
     @Mapping(source = "offeredCourseFees", target = "courseFee")
-    @Mapping(target = "barCode", expression = "java(offeredCourse.getBarCode().toString())")
+    @Mapping(target = ShortConstant.BAR_CODE, expression = "java(offeredCourse.getBarCode().toString())")
     OfferedCourseDetailsResponse toCourseDetailsResponse(OfferedCourse offeredCourse);
 
     @Mapping(target = "feeId", expression = "java(offeredCourseFee.getFeeId().toString())")
