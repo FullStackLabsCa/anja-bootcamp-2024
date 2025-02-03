@@ -31,9 +31,12 @@ public class TestData {
     public static final String PASSWORD = "1234";
     public static final String WRONG_PASSWORD = "wrong_password";
     public static final String OTP = "123456";
+    public static final String PHONE = "+12222222222";
+    public static final String EMAIL = "test@test.com";
     public static final String WRONG_OTP = "wrong_otp";
     public static final String CITY1 = "Mississauga";
     public static final String CITY2 = "Toronto";
+    public static final String MESSAGE = "message";
 
     public static final String SECURITY_HEADER_JSON = "{\"familyMemberId\": \"" + LOGGED_IN_MEMBER_ID_STRING + "\"}";
 }
