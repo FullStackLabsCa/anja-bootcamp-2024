@@ -58,7 +58,7 @@ public class AsyncJobsService {
     public void updateWithDrawnCreditsInFamilyGroup(FamilyCourseRegistration familyCourseRegistration) {
         Integer cost = familyCourseRegistration.getCost();
         long between = ChronoUnit.DAYS.between(familyCourseRegistration.getOfferedCourse().getStartDate(), LocalDate.now());
-        double withdrawnCredits = (double) cost / between;
+        double withdrawnCredits = ((double) cost / familyCourseRegistration.getOfferedCourse().getNoOfClassesOffered()) * between;
         FamilyGroup familyGroup = familyCourseRegistration.getFamilyMember().getFamilyGroup();
         familyGroup.setCredits(familyGroup.getCredits() + withdrawnCredits);
         familyGroupRepository.save(familyGroup);

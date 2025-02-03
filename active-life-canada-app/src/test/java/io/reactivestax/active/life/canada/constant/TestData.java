@@ -1,5 +1,7 @@
 package io.reactivestax.active.life.canada.constant;
 
+import org.hibernate.type.internal.UserTypeSqlTypeAdapter;
+
 import java.util.UUID;
 
 public class TestData {
@@ -36,6 +38,9 @@ public class TestData {
     public static final String WRONG_OTP = "wrong_otp";
     public static final String CITY1 = "Mississauga";
     public static final String CITY2 = "Toronto";
+    public static final String PROVINCE = "ON";
+    public static final String COUNTRY = "CA";
+    public static final String HOME_PHONE = "+12266985174";
     public static final String MESSAGE = "message";
 
     public static final String JSON_EXPRESSION_MESSAGE = "$.message";

@@ -101,6 +101,7 @@ class AsyncJobsServiceTest {
 
         OfferedCourse offeredCourse = new OfferedCourse();
         offeredCourse.setStartDate(LocalDate.now().minusDays(10));
+        offeredCourse.setNoOfClassesOffered(2);
 
         FamilyCourseRegistration familyCourseRegistration = new FamilyCourseRegistration();
         familyCourseRegistration.setFamilyMember(familyMember);
@@ -110,6 +111,7 @@ class AsyncJobsServiceTest {
         when(familyGroupRepository.save(any(FamilyGroup.class))).thenReturn(familyGroup);
         asyncJobsService.updateWithDrawnCreditsInFamilyGroup(familyCourseRegistration);
         verify(familyGroupRepository, times(1)).save(any(FamilyGroup.class));
-        assertEquals(150.0, familyGroup.getCredits());
+        System.out.println(familyGroup.getCredits());
+        assertEquals(2600.0, familyGroup.getCredits());
     }
 }
