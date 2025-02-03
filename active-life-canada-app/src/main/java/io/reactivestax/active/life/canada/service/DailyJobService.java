@@ -31,6 +31,6 @@ public class DailyJobService {
                 updatedOfferedCourses.add(offeredCourse);
             }
         });
-        offeredCourseRepository.saveAll(updatedOfferedCourses);
+        if (!updatedOfferedCourses.isEmpty()) offeredCourseRepository.saveAll(updatedOfferedCourses);
     }
 }

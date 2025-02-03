@@ -5,17 +5,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.reactivestax.active.life.canada.constant.ExceptionHandlerConst;
 import io.reactivestax.active.life.canada.exception.SomethingWentWrongException;
 import io.reactivestax.active.life.canada.model.SecurityHeader;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 
 @Component
+@RequiredArgsConstructor
 public class ActiveLifeUtil {
+
+    private final ObjectMapper objectMapper;
+
     public SecurityHeader getSecurityHeader(String securityHeaderJson) {
-        ObjectMapper objectMapper = new ObjectMapper();
         try {
             return objectMapper.readValue(securityHeaderJson, SecurityHeader.class);
         } catch (JsonProcessingException e) {

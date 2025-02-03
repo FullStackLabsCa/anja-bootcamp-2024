@@ -1,8 +1,12 @@
 package io.reactivestax.active.life.canada.model;
 
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class SecurityHeader {
     private String familyMemberId;
 }

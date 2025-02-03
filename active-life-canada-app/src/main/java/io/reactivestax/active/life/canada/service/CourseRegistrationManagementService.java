@@ -94,14 +94,19 @@ public class CourseRegistrationManagementService {
     }
 
     private OfferedCourseFee getFees(OfferedCourse offeredCourse, FamilyMember familyMember) {
+        FeeType feeType;
+        String exceptionMessage;
         if (offeredCourse.getFacility().getCity().equals(familyMember.getCity())) {
-            return offeredCourse.getOfferedCourseFees().stream()
-                    .filter(offeredCourseFee -> offeredCourseFee.getFeeType().equals(FeeType.RESIDENT))
-                    .findFirst().orElseThrow(() -> new InvalidRequestException(ExceptionHandlerConst.RESIDENT_COURSE_FEE_NOT_FOUND));
+            feeType = FeeType.RESIDENT;
+            exceptionMessage = ExceptionHandlerConst.RESIDENT_COURSE_FEE_NOT_FOUND;
+        } else {
+            feeType = FeeType.NON_RESIDENT;
+            exceptionMessage = ExceptionHandlerConst.NON_RESIDENT_COURSE_FEE_NOT_FOUND;
         }
+
         return offeredCourse.getOfferedCourseFees().stream()
-                .filter(offeredCourseFee -> offeredCourseFee.getFeeType().equals(FeeType.NON_RESIDENT))
-                .findFirst().orElseThrow(() -> new InvalidRequestException(ExceptionHandlerConst.NON_RESIDENT_COURSE_FEE_NOT_FOUND));
+                .filter(offeredCourseFee -> offeredCourseFee.getFeeType().equals(feeType))
+                .findFirst().orElseThrow(() -> new InvalidRequestException(exceptionMessage));
     }
 
     public List<FamilyCourseRegistrationDetails> getRegisteredCourses(String loggedInMemberId) {
