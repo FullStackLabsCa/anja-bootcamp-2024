@@ -143,6 +143,8 @@ class ProgramManagementServiceTest {
         List<OfferedCourse> offeredCourses = List.of(OfferedCourse.builder()
                 .barCode(TestData.BAR_CODE_UUID).build());
 
+        // TODO: Unchecked assignment: 'org. springframework. data. jpa. domain. Specification' to 'org. springframework.
+        //  data. jpa. domain. Specification<io. reactivestax. active. life. canada. entity. OfferedCourse>'
         when(offeredCourseRepository.findAll(any(Specification.class))).thenReturn(offeredCourses);
 
         List<OfferedCourseDetailsResponse> result = programManagementService.searchOfferedCourses(request);

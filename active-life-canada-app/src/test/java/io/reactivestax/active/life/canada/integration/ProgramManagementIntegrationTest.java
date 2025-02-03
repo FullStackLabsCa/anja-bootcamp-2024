@@ -22,9 +22,11 @@ import org.springframework.http.MediaType;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -52,6 +54,7 @@ class ProgramManagementIntegrationTest {
     void testProgramManagement() throws JsonProcessingException {
         testCreateOfferCourse();
         testUpdateOfferedCourse();
+        testGetOfferedCourses();
     }
 
     private void testCreateOfferCourse() throws JsonProcessingException {
@@ -109,5 +112,22 @@ class ProgramManagementIntegrationTest {
         SuccessfulResponse successfulResponse = response.as(SuccessfulResponse.class);
         assertThat(successfulResponse).isNotNull();
         assertThat(successfulResponse.getMessage()).isEqualTo(Message.OFFERED_COURSE_UPDATED);
+    }
+
+    private void testGetOfferedCourses() {
+        Response response = given()
+                .log().all()
+                .when()
+                .get(baseUrl + Endpoints.OFFERED_COURSES)
+                .then()
+                .log().all()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .response();
+
+        // TODO: Unchecked assignment: 'java. util. List' to 'java. util. List<io. reactivestax. active. life. canada. entity. OfferedCourse>'
+        List<OfferedCourse> offeredCourses = response.as(List.class);
+        assertThat(offeredCourses).isNotNull();
+        assertEquals(1, offeredCourses.size());
     }
 }
