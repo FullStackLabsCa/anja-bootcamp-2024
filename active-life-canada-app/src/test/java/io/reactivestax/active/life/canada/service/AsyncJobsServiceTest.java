@@ -7,6 +7,7 @@ import io.reactivestax.active.life.canada.repository.FamilyGroupRepository;
 import io.reactivestax.active.life.canada.repository.OfferedCourseWaitlistRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -21,6 +22,9 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 class AsyncJobsServiceTest {
 
+    @Autowired
+    private AsyncJobsService asyncJobsService;
+
     @MockitoBean
     private AccountActivationRequestRepository accountActivationRequestRepository;
 
@@ -32,8 +36,6 @@ class AsyncJobsServiceTest {
 
     @MockitoBean
     private EmsService emsService;
-
-    private AsyncJobsService asyncJobsService;
 
     @BeforeEach
     void setUp() {
