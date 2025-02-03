@@ -4,11 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.reactivestax.active.life.canada.constant.Endpoints;
 import io.reactivestax.active.life.canada.constant.Message;
-import io.reactivestax.active.life.canada.dto.CourseUpdateRequest;
-import io.reactivestax.active.life.canada.dto.OfferCourseRequest;
-import io.reactivestax.active.life.canada.dto.OfferedCourseSearchRequest;
-import io.reactivestax.active.life.canada.dto.SuccessfulResponse;
+import io.reactivestax.active.life.canada.constant.TestData;
+import io.reactivestax.active.life.canada.dto.*;
+import io.reactivestax.active.life.canada.entity.AccountActivationRequest;
 import io.reactivestax.active.life.canada.entity.OfferedCourse;
+import io.reactivestax.active.life.canada.enums.PreferredModeOfCommunication;
+import io.reactivestax.active.life.canada.repository.AccountActivationRequestRepository;
 import io.reactivestax.active.life.canada.repository.OfferedCourseRepository;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
@@ -18,8 +19,9 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -28,10 +30,12 @@ import java.util.List;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class ProgramManagementIntegrationTest {
+class ActiveLifeCanadaAppIntegrationTest {
 
     @LocalServerPort
     private int port;
@@ -43,6 +47,12 @@ class ProgramManagementIntegrationTest {
 
     @Autowired
     private OfferedCourseRepository offeredCourseRepository;
+
+    @Autowired
+    private AccountActivationRequestRepository accountActivationRequestRepository;
+
+    @MockitoBean
+    private RestTemplate restTemplate;
 
     @BeforeAll
     void setup() {
@@ -162,4 +172,89 @@ class ProgramManagementIntegrationTest {
         assertThat(offeredCourses).isNotNull();
         assertEquals(1, offeredCourses.size());
     }
+
+
+    @Test
+    void testActiveLifeCanadaApp() throws JsonProcessingException {
+        testSignUp();
+        testActivate();
+    }
+
+    private void testSignUp() throws JsonProcessingException {
+        CreateMemberRequest createMemberRequest = CreateMemberRequest.builder()
+                .name(TestData.MEMBER_NAME)
+                .username(TestData.MEMBER_LOGIN_ID)
+                .password(TestData.PASSWORD)
+                .dob(LocalDate.now())
+                .emailId(TestData.EMAIL)
+                .city(TestData.CITY1)
+                .province(TestData.PROVINCE)
+                .country(TestData.COUNTRY)
+                .homePhone(TestData.HOME_PHONE)
+                .preferredModeOfCommunication(PreferredModeOfCommunication.HOME_PHONE)
+                .build();
+
+        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), eq(String.class)))
+                .thenReturn(new ResponseEntity<>(HttpStatus.OK));
+
+        Response response = given()
+                .log().all()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(objectMapper.writeValueAsString(createMemberRequest))
+                .when()
+                .post(baseUrl + Endpoints.SIGNUP)
+                .then()
+                .log().all()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .response();
+
+        SuccessfulResponse successfulResponse = response.as(SuccessfulResponse.class);
+        assertThat(successfulResponse).isNotNull();
+        assertThat(successfulResponse.getMessage()).isEqualTo(Message.SIGNUP_SUCCESSFUL);
+    }
+
+    private void testActivate() {
+        AccountActivationRequest accountActivationRequest = accountActivationRequestRepository.findAll().get(0);
+
+        Response response = given()
+                .log().all()
+                .pathParam("activationId", accountActivationRequest.getToken().toString())
+                .when()
+                .get(baseUrl + Endpoints.ACTIVATION)
+                .then()
+                .log().all()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .response();
+
+        SuccessfulResponse successfulResponse = response.as(SuccessfulResponse.class);
+        assertThat(successfulResponse).isNotNull();
+        assertThat(successfulResponse.getMessage()).isEqualTo(Message.ACTIVATED_SUCCESSFULLY);
+    }
+
+//    @Test
+//    void testCourseRegistrationManagement(){
+//        testEnrollIntoCourse();
+//    }
+//
+//    private void testEnrollIntoCourse(){
+//
+//
+//        Response response = given()
+//                .log().all()
+//                .contentType(MediaType.APPLICATION_JSON_VALUE)
+//                .body(objectMapper.writeValueAsString(createMemberRequest))
+//                .when()
+//                .post(baseUrl + Endpoints.SIGNUP)
+//                .then()
+//                .log().all()
+//                .statusCode(HttpStatus.OK.value())
+//                .extract()
+//                .response();
+//
+//        SuccessfulResponse successfulResponse = response.as(SuccessfulResponse.class);
+//        assertThat(successfulResponse).isNotNull();
+//        assertThat(successfulResponse.getMessage()).isEqualTo(Message.SIGNUP_SUCCESSFUL);
+//    }
 }
