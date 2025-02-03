@@ -1,5 +1,8 @@
 package io.reactivestax.active.life.canada.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.reactivestax.active.life.canada.constant.ShortConstant;
 import io.reactivestax.active.life.canada.enums.AvailableForEnrollment;
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,6 +20,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OfferedCourse extends AuditTrail {
 
     @Id
@@ -25,12 +29,15 @@ public class OfferedCourse extends AuditTrail {
 
     @Column(unique = true, nullable = false)
     private UUID barCode;
+    @JsonFormat(pattern = ShortConstant.DATE_PATTERN)
     private LocalDate startDate;
+    @JsonFormat(pattern = ShortConstant.DATE_PATTERN)
     private LocalDate endDate;
     private Integer noOfClassesOffered;
     private LocalTime startTime;
     private LocalTime endTime;
     private Boolean isAllDayCourse;
+    @JsonFormat(pattern = ShortConstant.DATE_PATTERN)
     private LocalDate registrationStartDate;
     private Integer noOfSpots;
     @Enumerated(EnumType.STRING)

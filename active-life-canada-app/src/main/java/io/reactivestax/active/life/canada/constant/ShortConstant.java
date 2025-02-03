@@ -22,6 +22,7 @@ public class ShortConstant {
     public static final String CATEGORY = "category";
     public static final String SUB_CATEGORY = "subCategory";
     public static final String AGE_GROUP = "ageGroup";
+    public static final String SHORT_CODE = "shortCode";
 
     public static final String ENUM_DESERIALIZER_REGEX = "[\\s-]";
     public static final String ENUM_DESERIALIZER_REPLACE = "_";

@@ -65,7 +65,7 @@ public class OfferedCourseSpecification {
         return ((root, query, criteriaBuilder) -> ageGroup == null || ageGroup.isEmpty()
                 ? criteriaBuilder.conjunction() : criteriaBuilder.equal(
                 criteriaBuilder.lower(root.get(ShortConstant.COURSE).get(ShortConstant.AGE_GROUP)
-                        .get(ShortConstant.NAME)), ageGroup.toLowerCase()
+                        .get(ShortConstant.SHORT_CODE)), ageGroup.toLowerCase()
         ));
     }
 

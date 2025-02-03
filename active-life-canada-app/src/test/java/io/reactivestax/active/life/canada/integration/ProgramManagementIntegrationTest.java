@@ -6,6 +6,7 @@ import io.reactivestax.active.life.canada.constant.Endpoints;
 import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.dto.CourseUpdateRequest;
 import io.reactivestax.active.life.canada.dto.OfferCourseRequest;
+import io.reactivestax.active.life.canada.dto.OfferedCourseSearchRequest;
 import io.reactivestax.active.life.canada.dto.SuccessfulResponse;
 import io.reactivestax.active.life.canada.entity.OfferedCourse;
 import io.reactivestax.active.life.canada.repository.OfferedCourseRepository;
@@ -55,6 +56,7 @@ class ProgramManagementIntegrationTest {
         testCreateOfferCourse();
         testUpdateOfferedCourse();
         testGetOfferedCourses();
+        testSearchOfferedCourses();
     }
 
     private void testCreateOfferCourse() throws JsonProcessingException {
@@ -125,8 +127,38 @@ class ProgramManagementIntegrationTest {
                 .extract()
                 .response();
 
-        // TODO: Unchecked assignment: 'java. util. List' to 'java. util. List<io. reactivestax. active. life. canada. entity. OfferedCourse>'
-        List<OfferedCourse> offeredCourses = response.as(List.class);
+        List<OfferedCourse> offeredCourses = response.jsonPath().getList(".", OfferedCourse.class);
+        assertThat(offeredCourses).isNotNull();
+        assertEquals(1, offeredCourses.size());
+    }
+
+    private void testSearchOfferedCourses() throws JsonProcessingException {
+        OfferedCourse offeredCourse = offeredCourseRepository.findAll().get(0);
+
+        OfferedCourseSearchRequest offeredCourseSearchRequest = new OfferedCourseSearchRequest(
+                offeredCourse.getCourse().getName(),
+                offeredCourse.getStartDate(),
+                offeredCourse.getEndDate(),
+                offeredCourse.getFacility().getCity(),
+                offeredCourse.getFacility().getProvince(),
+                offeredCourse.getCourse().getSubCategory().getCategory().getName(),
+                offeredCourse.getCourse().getSubCategory().getName(),
+                offeredCourse.getCourse().getAgeGroup().getShortCode()
+        );
+
+        Response response = given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(objectMapper.writeValueAsString(offeredCourseSearchRequest))
+                .log().all()
+                .when()
+                .post(baseUrl + Endpoints.SEARCH_OFFERED_COURSES)
+                .then()
+                .log().all()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .response();
+
+        List<OfferedCourse> offeredCourses = response.jsonPath().getList(".", OfferedCourse.class);
         assertThat(offeredCourses).isNotNull();
         assertEquals(1, offeredCourses.size());
     }
