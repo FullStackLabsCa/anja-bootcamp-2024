@@ -1,7 +1,8 @@
 package io.reactivestax.active.life.canada.controller;
 
+import io.reactivestax.active.life.canada.constant.Endpoints;
+import io.reactivestax.active.life.canada.constant.ShortConstant;
 import io.reactivestax.active.life.canada.constant.TestData;
-import io.reactivestax.active.life.canada.dto.DashboardDto;
 import io.reactivestax.active.life.canada.dto.FamilyCourseRegistrationDetails;
 import io.reactivestax.active.life.canada.dto.OfferedCourseWaitlistDto;
 import io.reactivestax.active.life.canada.model.SecurityHeader;
@@ -10,20 +11,23 @@ import io.reactivestax.active.life.canada.util.ActiveLifeUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
-import java.util.Objects;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(DashboardController.class)
 class DashboardControllerTest {
 
     @Autowired
-    private DashboardController dashboardController;
+    private MockMvc mockMvc;
 
     @MockitoBean
     private CourseRegistrationManagementService courseRegistrationManagementService;
@@ -31,29 +35,23 @@ class DashboardControllerTest {
     @MockitoBean
     private ActiveLifeUtil activeLifeUtil;
 
-    private final String securityHeaderJson = TestData.SECURITY_HEADER_JSON;
-    private final String loggedInMemberId = TestData.LOGGED_IN_MEMBER_ID_STRING;
+    private static final String FAMILY_MEMBER_ID = TestData.LOGGED_IN_MEMBER_ID_STRING;
+    private static final String SECURITY_HEADER_JSON = TestData.SECURITY_HEADER_JSON;
 
     @Test
-    void testDashboard_Success() {
-        SecurityHeader securityHeader = new SecurityHeader();
-        securityHeader.setFamilyMemberId(loggedInMemberId);
+    void testDashboard_Success() throws Exception {
+        FamilyCourseRegistrationDetails courseDetails = new FamilyCourseRegistrationDetails();
+        OfferedCourseWaitlistDto waitlistDto = new OfferedCourseWaitlistDto();
 
-        List<FamilyCourseRegistrationDetails> registeredCourses = List.of(new FamilyCourseRegistrationDetails());
-        List<OfferedCourseWaitlistDto> waitlistedCourses = List.of(new OfferedCourseWaitlistDto());
+        when(activeLifeUtil.getSecurityHeader(anyString())).thenReturn(new SecurityHeader(FAMILY_MEMBER_ID));
+        when(courseRegistrationManagementService.getRegisteredCourses(FAMILY_MEMBER_ID)).thenReturn(List.of(courseDetails));
+        when(courseRegistrationManagementService.getWaitlistedCourses(FAMILY_MEMBER_ID)).thenReturn(List.of(waitlistDto));
 
-        when(activeLifeUtil.getSecurityHeader(securityHeaderJson)).thenReturn(securityHeader);
-        when(courseRegistrationManagementService.getRegisteredCourses(loggedInMemberId)).thenReturn(registeredCourses);
-        when(courseRegistrationManagementService.getWaitlistedCourses(loggedInMemberId)).thenReturn(waitlistedCourses);
-
-        ResponseEntity<DashboardDto> response = dashboardController.dashboard(securityHeaderJson);
-
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(registeredCourses, Objects.requireNonNull(response.getBody()).getRegisteredCourses());
-        assertEquals(waitlistedCourses, response.getBody().getWaitlistedCourses());
-
-        verify(activeLifeUtil, times(1)).getSecurityHeader(securityHeaderJson);
-        verify(courseRegistrationManagementService, times(1)).getRegisteredCourses(loggedInMemberId);
-        verify(courseRegistrationManagementService, times(1)).getWaitlistedCourses(loggedInMemberId);
+        mockMvc.perform(get(Endpoints.BASE_ENDPOINT + Endpoints.DASHBOARD)
+                        .header(ShortConstant.SECURITY_HEADER, SECURITY_HEADER_JSON)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.registeredCourses").isArray())
+                .andExpect(jsonPath("$.waitlistedCourses").isArray());
     }
 }

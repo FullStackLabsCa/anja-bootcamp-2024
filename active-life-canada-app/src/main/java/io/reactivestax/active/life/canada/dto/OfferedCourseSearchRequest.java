@@ -10,7 +10,6 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class OfferedCourseSearchRequest {
     private String courseName;
     private LocalDate startDate;

@@ -13,7 +13,6 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@SuperBuilder
 public class OfferedCourseDetailsResponse extends BaseCourseDto {
     private String barCode;
     private String availableForEnrollment;

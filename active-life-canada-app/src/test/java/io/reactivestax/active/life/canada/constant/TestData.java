@@ -39,6 +39,7 @@ public class TestData {
     public static final String MESSAGE = "message";
 
     public static final String JSON_EXPRESSION_MESSAGE = "$.message";
+    public static final String JSON_EXPRESSION_FIRST_INDEX = "$[0]";
 
     public static final String SECURITY_HEADER_JSON = "{\"familyMemberId\": \"" + LOGGED_IN_MEMBER_ID_STRING + "\"}";
 }

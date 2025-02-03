@@ -8,6 +8,5 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class UpdateMemberRequest extends MemberRequest {
 }
