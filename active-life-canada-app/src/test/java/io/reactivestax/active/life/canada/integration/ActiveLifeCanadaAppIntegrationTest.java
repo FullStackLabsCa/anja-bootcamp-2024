@@ -6,13 +6,15 @@ import io.reactivestax.active.life.canada.constant.Endpoints;
 import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.constant.TestData;
 import io.reactivestax.active.life.canada.dto.*;
-import io.reactivestax.active.life.canada.entity.AccountActivationRequest;
-import io.reactivestax.active.life.canada.entity.OfferedCourse;
+import io.reactivestax.active.life.canada.entity.*;
 import io.reactivestax.active.life.canada.enums.PreferredModeOfCommunication;
+import io.reactivestax.active.life.canada.model.SecurityHeader;
 import io.reactivestax.active.life.canada.repository.AccountActivationRequestRepository;
+import io.reactivestax.active.life.canada.repository.FamilyMemberRepository;
 import io.reactivestax.active.life.canada.repository.OfferedCourseRepository;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -51,8 +53,15 @@ class ActiveLifeCanadaAppIntegrationTest {
     @Autowired
     private AccountActivationRequestRepository accountActivationRequestRepository;
 
+    @Autowired
+    private FamilyMemberRepository familyMemberRepository;
+
     @MockitoBean
     private RestTemplate restTemplate;
+
+    private final String SECURITY_HEADER = "X-security-header";
+
+    private final SecurityHeader securityHeader = new SecurityHeader();
 
     @BeforeAll
     void setup() {
@@ -62,11 +71,72 @@ class ActiveLifeCanadaAppIntegrationTest {
     }
 
     @Test
-    void testProgramManagement() throws JsonProcessingException {
+    void testActiveLifeCanadaApp() throws JsonProcessingException {
+        testSignUp();
+        testActivate();
         testCreateOfferCourse();
         testUpdateOfferedCourse();
         testGetOfferedCourses();
         testSearchOfferedCourses();
+        testEnrollIntoCourse();
+        testGetRegisteredCourses();
+        testGetWaitlistedCourses();
+    }
+
+    private void testSignUp() throws JsonProcessingException {
+        CreateMemberRequest createMemberRequest = CreateMemberRequest.builder()
+                .name(TestData.MEMBER_NAME)
+                .username(TestData.MEMBER_LOGIN_ID)
+                .password(TestData.PASSWORD)
+                .dob(LocalDate.now())
+                .emailId(TestData.EMAIL)
+                .city(TestData.CITY1)
+                .province(TestData.PROVINCE)
+                .country(TestData.COUNTRY)
+                .homePhone(TestData.HOME_PHONE)
+                .preferredModeOfCommunication(PreferredModeOfCommunication.HOME_PHONE)
+                .build();
+
+        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), eq(String.class)))
+                .thenReturn(new ResponseEntity<>(HttpStatus.OK));
+
+        Response response = given()
+                .log().all()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(objectMapper.writeValueAsString(createMemberRequest))
+                .when()
+                .post(baseUrl + Endpoints.SIGNUP)
+                .then()
+                .log().all()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .response();
+
+        SuccessfulResponse successfulResponse = response.as(SuccessfulResponse.class);
+        assertThat(successfulResponse).isNotNull();
+        assertThat(successfulResponse.getMessage()).isEqualTo(Message.SIGNUP_SUCCESSFUL);
+    }
+
+    private void testActivate() {
+        AccountActivationRequest accountActivationRequest = accountActivationRequestRepository.findAll().get(0);
+
+        Response response = given()
+                .log().all()
+                .pathParam("activationId", accountActivationRequest.getToken().toString())
+                .when()
+                .get(baseUrl + Endpoints.ACTIVATION)
+                .then()
+                .log().all()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .response();
+
+        SuccessfulResponse successfulResponse = response.as(SuccessfulResponse.class);
+        assertThat(successfulResponse).isNotNull();
+        assertThat(successfulResponse.getMessage()).isEqualTo(Message.ACTIVATED_SUCCESSFULLY);
+
+        FamilyMember familyMember = familyMemberRepository.findAll().get(0);
+        securityHeader.setFamilyMemberId(familyMember.getFamilyMemberId().toString());
     }
 
     private void testCreateOfferCourse() throws JsonProcessingException {
@@ -173,36 +243,15 @@ class ActiveLifeCanadaAppIntegrationTest {
         assertEquals(1, offeredCourses.size());
     }
 
-
-    @Test
-    void testActiveLifeCanadaApp() throws JsonProcessingException {
-        testSignUp();
-        testActivate();
-    }
-
-    private void testSignUp() throws JsonProcessingException {
-        CreateMemberRequest createMemberRequest = CreateMemberRequest.builder()
-                .name(TestData.MEMBER_NAME)
-                .username(TestData.MEMBER_LOGIN_ID)
-                .password(TestData.PASSWORD)
-                .dob(LocalDate.now())
-                .emailId(TestData.EMAIL)
-                .city(TestData.CITY1)
-                .province(TestData.PROVINCE)
-                .country(TestData.COUNTRY)
-                .homePhone(TestData.HOME_PHONE)
-                .preferredModeOfCommunication(PreferredModeOfCommunication.HOME_PHONE)
-                .build();
-
-        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), eq(String.class)))
-                .thenReturn(new ResponseEntity<>(HttpStatus.OK));
-
+    private void testEnrollIntoCourse() throws JsonProcessingException {
+        OfferedCourse offeredCourse = offeredCourseRepository.findAll().get(0);
         Response response = given()
                 .log().all()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(objectMapper.writeValueAsString(createMemberRequest))
+                .header(SECURITY_HEADER, objectMapper.writeValueAsString(securityHeader))
+                .pathParams("barCode", offeredCourse.getBarCode().toString())
+                .pathParam("memberLoginId", TestData.MEMBER_LOGIN_ID)
                 .when()
-                .post(baseUrl + Endpoints.SIGNUP)
+                .post(baseUrl + Endpoints.ENROLL_COURSE)
                 .then()
                 .log().all()
                 .statusCode(HttpStatus.OK.value())
@@ -211,50 +260,40 @@ class ActiveLifeCanadaAppIntegrationTest {
 
         SuccessfulResponse successfulResponse = response.as(SuccessfulResponse.class);
         assertThat(successfulResponse).isNotNull();
-        assertThat(successfulResponse.getMessage()).isEqualTo(Message.SIGNUP_SUCCESSFUL);
+        assertThat(successfulResponse.getMessage()).isEqualTo(Message.ENROLLMENT_SUCCESSFUL);
     }
 
-    private void testActivate() {
-        AccountActivationRequest accountActivationRequest = accountActivationRequestRepository.findAll().get(0);
-
+    private void testGetRegisteredCourses(){
         Response response = given()
+                .header(SECURITY_HEADER, securityHeader)
                 .log().all()
-                .pathParam("activationId", accountActivationRequest.getToken().toString())
                 .when()
-                .get(baseUrl + Endpoints.ACTIVATION)
+                .get(Endpoints.BASE_ENDPOINT + Endpoints.REGISTERED_COURSES)
                 .then()
                 .log().all()
                 .statusCode(HttpStatus.OK.value())
                 .extract()
                 .response();
 
-        SuccessfulResponse successfulResponse = response.as(SuccessfulResponse.class);
-        assertThat(successfulResponse).isNotNull();
-        assertThat(successfulResponse.getMessage()).isEqualTo(Message.ACTIVATED_SUCCESSFULLY);
+        List<FamilyCourseRegistration> familyCourseRegistrationList = response.jsonPath().getList(".", FamilyCourseRegistration.class);
+        assertThat(familyCourseRegistrationList).isNotNull();
+        assertEquals(1, familyCourseRegistrationList.size());
     }
 
-//    @Test
-//    void testCourseRegistrationManagement(){
-//        testEnrollIntoCourse();
-//    }
-//
-//    private void testEnrollIntoCourse(){
-//
-//
-//        Response response = given()
-//                .log().all()
-//                .contentType(MediaType.APPLICATION_JSON_VALUE)
-//                .body(objectMapper.writeValueAsString(createMemberRequest))
-//                .when()
-//                .post(baseUrl + Endpoints.SIGNUP)
-//                .then()
-//                .log().all()
-//                .statusCode(HttpStatus.OK.value())
-//                .extract()
-//                .response();
-//
-//        SuccessfulResponse successfulResponse = response.as(SuccessfulResponse.class);
-//        assertThat(successfulResponse).isNotNull();
-//        assertThat(successfulResponse.getMessage()).isEqualTo(Message.SIGNUP_SUCCESSFUL);
-//    }
+    private void testGetWaitlistedCourses(){
+        Response response = given()
+                .header(SECURITY_HEADER, securityHeader)
+                .log().all()
+                .when()
+                .get(Endpoints.BASE_ENDPOINT + Endpoints.WAITLISTED_COURSES)
+                .then()
+                .log().all()
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .response();
+
+        List<OfferedCourseWaitlist> offeredCourseWaitlist = response.jsonPath().getList(".", OfferedCourseWaitlist.class);
+        assertThat(offeredCourseWaitlist).isNotNull();
+        assertEquals(0, offeredCourseWaitlist.size());
+    }
 }

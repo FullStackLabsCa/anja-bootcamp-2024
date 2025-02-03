@@ -1,5 +1,6 @@
 package io.reactivestax.active.life.canada.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.reactivestax.active.life.canada.enums.Gender;
 import io.reactivestax.active.life.canada.enums.PreferredModeOfCommunication;
 import jakarta.persistence.*;
@@ -17,6 +18,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class FamilyMember extends AuditTrail {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
