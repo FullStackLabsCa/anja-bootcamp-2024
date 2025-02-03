@@ -38,5 +38,7 @@ public class TestData {
     public static final String CITY2 = "Toronto";
     public static final String MESSAGE = "message";
 
+    public static final String JSON_EXPRESSION_MESSAGE = "$.message";
+
     public static final String SECURITY_HEADER_JSON = "{\"familyMemberId\": \"" + LOGGED_IN_MEMBER_ID_STRING + "\"}";
 }
