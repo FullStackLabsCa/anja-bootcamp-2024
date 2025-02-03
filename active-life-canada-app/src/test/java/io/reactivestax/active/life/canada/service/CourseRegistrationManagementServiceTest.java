@@ -4,6 +4,7 @@ import io.reactivestax.active.life.canada.constant.ExceptionHandlerConst;
 import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.constant.TestData;
 import io.reactivestax.active.life.canada.dto.FamilyCourseRegistrationDetails;
+import io.reactivestax.active.life.canada.dto.OfferedCourseWaitlistDto;
 import io.reactivestax.active.life.canada.entity.*;
 import io.reactivestax.active.life.canada.enums.AvailableForEnrollment;
 import io.reactivestax.active.life.canada.enums.FeeType;
@@ -90,7 +91,7 @@ class CourseRegistrationManagementServiceTest {
 
         OfferedCourseFee offeredCourseFeeNonResident = OfferedCourseFee.builder()
                 .feeId(TestData.UUID_ID)
-                .feeType(FeeType.RESIDENT)
+                .feeType(FeeType.NON_RESIDENT)
                 .courseFee(180)
                 .build();
 
@@ -122,7 +123,24 @@ class CourseRegistrationManagementServiceTest {
     }
 
     @Test
-    void testEnrollIntoAvailableCourse() {
+    void testEnrollIntoAvailableCourseForResident() {
+        when(familyMemberRepository.findByFamilyMemberIdAndIsActive(any(UUID.class), eq(true)))
+                .thenReturn(Optional.of(loggedInMember));
+        when(familyMemberRepository.findByMemberLoginIdAndIsActiveAndFamilyGroup_FamilyGroupId
+                (anyString(), eq(true), any(UUID.class))).thenReturn(Optional.of(familyMember));
+        when(offeredCourseRepository.findByBarCode(any(UUID.class))).thenReturn(Optional.of(offeredCourse));
+        when(familyCourseRegistrationRepository.existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseIdAndIsWithdrawn
+                (any(UUID.class), any(UUID.class), eq(false))).thenReturn(false);
+
+        String result = courseRegistrationManagementService.enrollIntoOfferedCourse
+                (TestData.BAR_CODE_STRING, TestData.MEMBER_LOGIN_ID, TestData.LOGGED_IN_MEMBER_ID_STRING);
+
+        assertEquals(Message.ENROLLMENT_SUCCESSFUL, result);
+    }
+
+    @Test
+    void testEnrollIntoAvailableCourseForNonResident() {
+        familyMember.setCity(TestData.CITY2);
         when(familyMemberRepository.findByFamilyMemberIdAndIsActive(any(UUID.class), eq(true)))
                 .thenReturn(Optional.of(loggedInMember));
         when(familyMemberRepository.findByMemberLoginIdAndIsActiveAndFamilyGroup_FamilyGroupId
@@ -209,6 +227,26 @@ class CourseRegistrationManagementServiceTest {
     }
 
     @Test
+    void testAddToWaitlistForLastSpot() {
+        offeredCourse.setAvailableForEnrollment(AvailableForEnrollment.WAITLIST_OPEN);
+        offeredCourse.setNoOfSpots(1);
+        when(familyMemberRepository.findByFamilyMemberIdAndIsActive(any(UUID.class), eq(true)))
+                .thenReturn(Optional.of(loggedInMember));
+        when(familyMemberRepository.findByMemberLoginIdAndIsActiveAndFamilyGroup_FamilyGroupId
+                (anyString(), eq(true), any(UUID.class))).thenReturn(Optional.of(familyMember));
+        when(offeredCourseRepository.findByBarCode(any(UUID.class))).thenReturn(Optional.of(offeredCourse));
+        when(familyCourseRegistrationRepository.existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseIdAndIsWithdrawn
+                (any(UUID.class), any(UUID.class), eq(false))).thenReturn(false);
+        when(offeredCourseWaitlistRepository.existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseId
+                (any(UUID.class), any(UUID.class))).thenReturn(false);
+
+        String result = courseRegistrationManagementService.enrollIntoOfferedCourse(TestData.BAR_CODE_STRING,
+                TestData.MEMBER_LOGIN_ID, TestData.LOGGED_IN_MEMBER_ID_STRING);
+
+        assertEquals(Message.ADDED_TO_WAITLIST, result);
+    }
+
+    @Test
     void testAddToWaitlist_AlreadyInWaitlist_ThrowsException(){
         offeredCourse.setAvailableForEnrollment(AvailableForEnrollment.WAITLIST_OPEN);
 
@@ -238,7 +276,18 @@ class CourseRegistrationManagementServiceTest {
         when(activeLifeUtil.compareDateAndTime(any(LocalDate.class), any(LocalTime.class))).thenReturn(false);
 
         courseRegistrationManagementService.withdrawFromCourse(TestData.STRING_ID, loggedInMember.getFamilyMemberId().toString());
+
         assertTrue(familyCourseRegistration.getIsWithdrawn());
+    }
+
+    @Test
+    void testWithdrawFromCourse_ForNonExistingOrInactiveMember_ThrowsException() {
+        when(familyMemberRepository.existsByFamilyMemberIdAndIsActive(any(UUID.class), eq(true))).thenReturn(false);
+
+        UnauthorizedAccessException unauthorizedAccessException = assertThrows(UnauthorizedAccessException.class, () -> courseRegistrationManagementService
+                .withdrawFromCourse(TestData.STRING_ID, TestData.LOGGED_IN_MEMBER_ID_STRING));
+
+        assertEquals(ExceptionHandlerConst.UNAUTHORIZED_ACCESS, unauthorizedAccessException.getMessage());
     }
 
     @Test
@@ -273,6 +322,28 @@ class CourseRegistrationManagementServiceTest {
 
         UnauthorizedAccessException thrown = assertThrows(UnauthorizedAccessException.class, () ->
                 courseRegistrationManagementService.getRegisteredCourses(TestData.LOGGED_IN_MEMBER_ID_STRING));
+        assertEquals(ExceptionHandlerConst.UNAUTHORIZED_ACCESS, thrown.getMessage());
+    }
+
+    @Test
+    void testGetWaitlistedCourses() {
+        when(familyMemberRepository.existsByFamilyMemberIdAndIsActive(any(UUID.class), eq(true))).thenReturn(true);
+        when(offeredCourseWaitlistRepository.findAllByEnrollmentActorIdOrFamilyMember_FamilyMemberId
+                (any(UUID.class), any(UUID.class))).thenReturn(List.of(new OfferedCourseWaitlist()));
+
+        List<OfferedCourseWaitlistDto> result = courseRegistrationManagementService.getWaitlistedCourses
+                (loggedInMember.getFamilyMemberId().toString());
+
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void testUnauthorizedAccessWhenGettingWaitlistedCourses() {
+        when(familyMemberRepository.existsByFamilyMemberIdAndIsActive(any(UUID.class), eq(true)))
+                .thenReturn(false);
+
+        UnauthorizedAccessException thrown = assertThrows(UnauthorizedAccessException.class, () ->
+                courseRegistrationManagementService.getWaitlistedCourses(TestData.LOGGED_IN_MEMBER_ID_STRING));
         assertEquals(ExceptionHandlerConst.UNAUTHORIZED_ACCESS, thrown.getMessage());
     }
 }

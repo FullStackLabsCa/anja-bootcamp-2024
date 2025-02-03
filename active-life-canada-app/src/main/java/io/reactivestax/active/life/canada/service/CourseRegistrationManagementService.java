@@ -115,8 +115,7 @@ public class CourseRegistrationManagementService {
             throw new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS);
         List<FamilyCourseRegistration> familyCourseRegistrationList = familyCourseRegistrationRepository
                 .findAllByEnrollmentActorIdOrFamilyMember_FamilyMemberId(loggedInMemberIdUUID, loggedInMemberIdUUID);
-        List<FamilyCourseRegistrationDetails> dtoList = familyCourseRegistrationMapper.toDtoList(familyCourseRegistrationList);
-        return dtoList;
+        return familyCourseRegistrationMapper.toDtoList(familyCourseRegistrationList);
     }
 
     public List<OfferedCourseWaitlistDto> getWaitlistedCourses(String loggedInMemberId) {
