@@ -12,7 +12,6 @@ import io.reactivestax.active.life.canada.model.SecurityHeader;
 import io.reactivestax.active.life.canada.service.FamilyManagementService;
 import io.reactivestax.active.life.canada.util.ActiveLifeUtil;
 import jakarta.validation.Valid;
-import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

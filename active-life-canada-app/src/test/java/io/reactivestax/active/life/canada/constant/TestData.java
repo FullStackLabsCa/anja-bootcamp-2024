@@ -1,7 +1,5 @@
 package io.reactivestax.active.life.canada.constant;
 
-import org.hibernate.type.internal.UserTypeSqlTypeAdapter;
-
 import java.util.UUID;
 
 public class TestData {
@@ -13,11 +11,9 @@ public class TestData {
     public static final UUID FAMILY_MEMBER_ID_UUID = UUID.randomUUID();
     public static final String FAMILY_MEMBER_ID_STRING = FAMILY_MEMBER_ID_UUID.toString();
     public static final UUID FAMILY_GROUP_ID_UUID = UUID.randomUUID();
-    public static final String FAMILY_GROUP_ID_STRING = FAMILY_GROUP_ID_UUID.toString();
     public static final UUID LOGGED_IN_MEMBER_ID_UUID = UUID.randomUUID();
     public static final String LOGGED_IN_MEMBER_ID_STRING = FAMILY_MEMBER_ID_UUID.toString();
     public static final UUID OFFERED_COURSE_ID_UUID = UUID.randomUUID();
-    public static final String OFFERED_COURSE_ID_STRING = OFFERED_COURSE_ID_UUID.toString();
     public static final UUID UUID_TOKEN = UUID.randomUUID();
     public static final String UUID_TOKEN_STRING = UUID_TOKEN.toString();
     public static final UUID BAR_CODE_UUID = UUID.randomUUID();
@@ -36,6 +32,8 @@ public class TestData {
     public static final String PHONE = "+12222222222";
     public static final String EMAIL = "test@test.com";
     public static final String WRONG_OTP = "wrong_otp";
+    public static final String STREET_NO = "123";
+    public static final String STREET_NAME = "Lester";
     public static final String CITY1 = "Mississauga";
     public static final String CITY2 = "Toronto";
     public static final String PROVINCE = "ON";
