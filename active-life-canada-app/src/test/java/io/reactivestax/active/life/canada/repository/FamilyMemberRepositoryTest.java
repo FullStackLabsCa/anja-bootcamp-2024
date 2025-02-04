@@ -4,12 +4,13 @@ import io.reactivestax.active.life.canada.constant.TestData;
 import io.reactivestax.active.life.canada.entity.FamilyGroup;
 import io.reactivestax.active.life.canada.entity.FamilyMember;
 import io.reactivestax.active.life.canada.enums.Status;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -28,6 +29,9 @@ class FamilyMemberRepositoryTest {
     private FamilyGroupRepository familyGroupRepository;
 
     private FamilyGroup familyGroup;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @BeforeAll
     void setUp() {
@@ -104,17 +108,22 @@ class FamilyMemberRepositoryTest {
     void testUpdateIsActiveByFamilyMemberId() {
         FamilyMember familyMember = saveFamilyMember();
         familyMemberRepository.updateIsActiveByFamilyMemberId(familyMember.getFamilyMemberId(), false);
+        entityManager.flush();
+        entityManager.clear();
+
         Optional<FamilyMember> familyMemberOptional = familyMemberRepository.findById(familyMember.getFamilyMemberId());
 
         assertThat(familyMemberOptional).isPresent();
         familyMemberOptional.ifPresent(familyMember1 -> assertFalse(familyMember1.isActive()));
     }
 
-    @Transactional
     @Test
     void testUpdateIsActiveByMemberLoginId() {
         FamilyMember familyMember = saveFamilyMember();
         familyMemberRepository.updateIsActiveByMemberLoginId(familyMember.getMemberLoginId(), false);
+        entityManager.flush();
+        entityManager.clear();
+
         Optional<FamilyMember> familyMemberOptional = familyMemberRepository.findById(familyMember.getFamilyMemberId());
 
         assertThat(familyMemberOptional).isPresent();
