@@ -30,7 +30,7 @@ public class TestData {
     public static final String COURSE_NAME = "Basketball";
     public static final String USERNAME = "user123";
     public static final String WRONG_USERNAME = "wrong_username";
-    public static final String PASSWORD = "1234";
+    public static final String PASSWORD = "12345";
     public static final String WRONG_PASSWORD = "wrong_password";
     public static final String OTP = "123456";
     public static final String PHONE = "+12222222222";

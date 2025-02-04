@@ -7,12 +7,16 @@ import io.reactivestax.active.life.canada.dto.CreateMemberRequest;
 import io.reactivestax.active.life.canada.dto.MemberDetails;
 import io.reactivestax.active.life.canada.dto.SuccessfulResponse;
 import io.reactivestax.active.life.canada.dto.UpdateMemberRequest;
+import io.reactivestax.active.life.canada.dto.group.CreateGroup;
 import io.reactivestax.active.life.canada.model.SecurityHeader;
 import io.reactivestax.active.life.canada.service.FamilyManagementService;
 import io.reactivestax.active.life.canada.util.ActiveLifeUtil;
+import jakarta.validation.Valid;
+import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,7 +29,7 @@ public class FamilyManagementController {
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SuccessfulResponse> addMember(@RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson,
-                                                        @RequestBody CreateMemberRequest createMemberRequest) {
+                                                        @Validated(CreateGroup.class) @RequestBody CreateMemberRequest createMemberRequest) {
         SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
         this.familyManagementService.createFamilyMember(createMemberRequest, securityHeader.getFamilyMemberId(), false);
 
@@ -35,7 +39,7 @@ public class FamilyManagementController {
     @PatchMapping(value = Endpoints.MEMBER_ID, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SuccessfulResponse> updateMember(@PathVariable String memberId,
                                                            @RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson,
-                                                           @RequestBody UpdateMemberRequest updateMemberRequest) {
+                                                           @Valid @RequestBody UpdateMemberRequest updateMemberRequest) {
         SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
         this.familyManagementService.updateFamilyMember(memberId, updateMemberRequest, securityHeader.getFamilyMemberId());
 

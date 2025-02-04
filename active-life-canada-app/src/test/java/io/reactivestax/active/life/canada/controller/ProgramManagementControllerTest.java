@@ -38,7 +38,15 @@ class ProgramManagementControllerTest {
 
     @Test
     void testOfferCourse_Success() throws Exception {
-        OfferCourseRequest request = new OfferCourseRequest();
+        OfferCourseRequest request = OfferCourseRequest.builder()
+                .courseId(1L)
+                .facilityId(1L)
+                .noOfSpots(10)
+                .noOfClassesOffered(10)
+                .isAllDayCourse(true)
+                .residentCourseFee(100)
+                .nonResidentCourseFee(180)
+                .build();
        doNothing().when(programManagementService).offerCourse(any(OfferCourseRequest.class));
 
         mockMvc.perform(post(Endpoints.BASE_ENDPOINT + Endpoints.OFFERED_COURSES)

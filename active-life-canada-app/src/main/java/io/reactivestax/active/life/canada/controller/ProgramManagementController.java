@@ -3,9 +3,13 @@ package io.reactivestax.active.life.canada.controller;
 import io.reactivestax.active.life.canada.constant.Endpoints;
 import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.dto.*;
+import io.reactivestax.active.life.canada.dto.group.CreateGroup;
 import io.reactivestax.active.life.canada.service.ProgramManagementService;
+import jakarta.validation.Valid;
+import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,7 +22,7 @@ public class ProgramManagementController {
     private final ProgramManagementService programManagementService;
 
     @PostMapping(Endpoints.OFFERED_COURSES)
-    public ResponseEntity<SuccessfulResponse> offerCourse(@RequestBody OfferCourseRequest offerCourseRequest) {
+    public ResponseEntity<SuccessfulResponse> offerCourse(@Validated({CreateGroup.class, Default.class}) @RequestBody OfferCourseRequest offerCourseRequest) {
         this.programManagementService.offerCourse(offerCourseRequest);
 
         return ResponseEntity.ok(SuccessfulResponse.builder().message(Message.OFFERED_COURSE_ADDED).build());

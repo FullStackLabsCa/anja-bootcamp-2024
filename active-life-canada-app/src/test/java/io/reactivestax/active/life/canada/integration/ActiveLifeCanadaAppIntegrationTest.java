@@ -109,7 +109,20 @@ class ActiveLifeCanadaAppIntegrationTest {
     }
 
     private void testSignUp() throws JsonProcessingException {
-        CreateMemberRequest createMemberRequest = CreateMemberRequest.builder().name(TestData.MEMBER_NAME).username(TestData.MEMBER_LOGIN_ID).password(TestData.PASSWORD).dob(LocalDate.now()).emailId(TestData.EMAIL).city(TestData.CITY1).province(TestData.PROVINCE).country(TestData.COUNTRY).homePhone(TestData.HOME_PHONE).preferredModeOfCommunication(PreferredModeOfCommunication.HOME_PHONE).build();
+        CreateMemberRequest createMemberRequest = CreateMemberRequest.builder()
+                .name(TestData.MEMBER_NAME)
+                .username(TestData.MEMBER_LOGIN_ID)
+                .password(TestData.PASSWORD)
+                .dob(LocalDate.now())
+                .emailId(TestData.EMAIL)
+                .streetNo("123")
+                .streetName("Lester")
+                .city(TestData.CITY1)
+                .province(TestData.PROVINCE)
+                .country(TestData.COUNTRY)
+                .homePhone(TestData.HOME_PHONE)
+                .preferredModeOfCommunication(PreferredModeOfCommunication.HOME_PHONE)
+                .build();
 
         when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), eq(String.class))).thenReturn(new ResponseEntity<>(HttpStatus.OK));
 
@@ -219,7 +232,18 @@ class ActiveLifeCanadaAppIntegrationTest {
     }
 
     private void testCreateMember() throws JsonProcessingException {
-        CreateMemberRequest createMemberRequest = CreateMemberRequest.builder().name(TestData.MEMBER_NAME).username(TestData.FAMILY_MEMBER_LOGIN_ID).password(TestData.PASSWORD).dob(LocalDate.now()).emailId(TestData.EMAIL).city(TestData.CITY1).province(TestData.PROVINCE).country(TestData.COUNTRY).homePhone(TestData.HOME_PHONE).preferredModeOfCommunication(PreferredModeOfCommunication.HOME_PHONE).build();
+        CreateMemberRequest createMemberRequest = CreateMemberRequest.builder()
+                .name(TestData.MEMBER_NAME)
+                .username(TestData.FAMILY_MEMBER_LOGIN_ID)
+                .password(TestData.PASSWORD).dob(LocalDate.now())
+                .emailId(TestData.EMAIL).city(TestData.CITY1)
+                .streetNo("123")
+                .streetName("Lester")
+                .province(TestData.PROVINCE)
+                .country(TestData.COUNTRY)
+                .homePhone(TestData.HOME_PHONE)
+                .preferredModeOfCommunication(PreferredModeOfCommunication.HOME_PHONE)
+                .build();
 
         when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), eq(String.class))).thenReturn(new ResponseEntity<>(HttpStatus.OK));
 

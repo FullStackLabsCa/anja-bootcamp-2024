@@ -31,4 +31,28 @@ public class ExceptionHandlerConst {
     public static final String ALREADY_ENROLLED = "Enrollment failed, already enrolled in this course.";
     public static final String ALREADY_WAITLISTED = "Adding to waitlist failed, already part of the waitlist.";
     public static final String TOKEN_EXPIRED = "Verification failed, token expired, please generate a new one.";
+
+    // Validation Constants
+    public static final String MIN_PASSWORD = "Password must be minimum of 5 characters.";
+    public static final String INVALID_EMAIL = "Invalid email Id.";
+    public static final String INVALID_HOME_PHONE = "Invalid home phone.";
+    public static final String INVALID_BUSINESS_PHONE = "Invalid business phone.";
+    public static final String EMPTY_COURSE_ID = "Course Id cannot be empty.";
+    public static final String EMPTY_FACILITY_ID = "Facility Id cannot be empty.";
+    public static final String EMPTY_NAME = "Name cannot be empty.";
+    public static final String EMPTY_USERNAME = "Username cannot be empty.";
+    public static final String EMPTY_PASSWORD = "Password cannot be empty.";
+    public static final String EMPTY_BAR_CODE = "Password cannot be empty.";
+    public static final String EMPTY_RESIDENT_FEE = "Resident fee cannot be empty.";
+    public static final String EMPTY_NON_RESIDENT_FEE = "Non resident fee cannot be empty.";
+    public static final String EMPTY_STREET_NO = "Street no cannot be empty.";
+    public static final String EMPTY_STREET_NAME = "Street name cannot be empty.";
+    public static final String EMPTY_CITY = "City cannot be empty.";
+    public static final String EMPTY_PROVINCE = "Province cannot be empty.";
+    public static final String EMPTY_COUNTRY = "Country cannot be empty.";
+    public static final String EMPTY_TOKEN = "Token cannot be empty.";
+    public static final String EMPTY_OTP = "Otp cannot be empty.";
+    public static final String NULL_NO_OF_CLASSES = "No of classes offered cannot be empty.";
+    public static final String NULL_IS_ALL_DAY_COURSE = "Is all day course cannot be empty.";
+    public static final String NULL_NO_OF_SPOTS = "No of spots cannot be empty.";
 }

@@ -42,7 +42,15 @@ class AuthenticationControllerTest {
 
     @Test
     void testSignUp_Success() throws Exception {
-        CreateMemberRequest request = new CreateMemberRequest();
+        CreateMemberRequest request = CreateMemberRequest.builder()
+                .name(TestData.MEMBER_NAME)
+                .username(TestData.USERNAME)
+                .streetNo("123")
+                .streetName("Lester")
+                .city(TestData.CITY1)
+                .province(TestData.PROVINCE)
+                .country(TestData.COUNTRY)
+                .build();
         doNothing().when(familyManagementService).createFamilyMember(any(CreateMemberRequest.class), anyString(), anyBoolean());
 
         mockMvc.perform(post(Endpoints.BASE_ENDPOINT + Endpoints.SIGNUP)
@@ -54,7 +62,7 @@ class AuthenticationControllerTest {
 
     @Test
     void testLogin_Success() throws Exception {
-        LoginMemberRequest request = new LoginMemberRequest();
+        LoginMemberRequest request = new LoginMemberRequest(TestData.USERNAME, TestData.PASSWORD);
         LoginResponse response = new LoginResponse();
         when(authenticationManagementService.loginMember(any(LoginMemberRequest.class))).thenReturn(response);
 
@@ -67,6 +75,8 @@ class AuthenticationControllerTest {
     @Test
     void testTwoFactorLogin_Success() throws Exception {
         TwoFactorLoginRequest request = new TwoFactorLoginRequest();
+        request.setToken(TestData.STRING_ID);
+        request.setOtp(TestData.OTP);
         LoginResponse response = new LoginResponse();
         when(authenticationManagementService.twoFactorLogin(any(TwoFactorLoginRequest.class))).thenReturn(response);
 

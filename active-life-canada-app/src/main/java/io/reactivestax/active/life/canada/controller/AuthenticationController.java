@@ -3,11 +3,15 @@ package io.reactivestax.active.life.canada.controller;
 import io.reactivestax.active.life.canada.constant.Endpoints;
 import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.dto.*;
+import io.reactivestax.active.life.canada.dto.group.CreateGroup;
 import io.reactivestax.active.life.canada.service.AuthenticationManagementService;
 import io.reactivestax.active.life.canada.service.FamilyManagementService;
+import jakarta.validation.Valid;
+import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,7 +24,7 @@ public class AuthenticationController {
 
     @PostMapping(value = Endpoints.SIGNUP, produces = MediaType.APPLICATION_JSON_VALUE, consumes =
             MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<SuccessfulResponse> signUp(@RequestBody CreateMemberRequest createMemberRequest) {
+    public ResponseEntity<SuccessfulResponse> signUp(@Validated({CreateGroup.class, Default.class}) @RequestBody CreateMemberRequest createMemberRequest) {
         this.familyManagementService.createFamilyMember(createMemberRequest, null, true);
 
         return ResponseEntity.ok(SuccessfulResponse.builder().message(Message.SIGNUP_SUCCESSFUL).build());
@@ -28,7 +32,7 @@ public class AuthenticationController {
 
     @PostMapping(value = Endpoints.LOGIN, produces = MediaType.APPLICATION_JSON_VALUE, consumes =
             MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginMemberRequest loginMemberRequest) {
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginMemberRequest loginMemberRequest) {
         LoginResponse loginResponse = authenticationManagementService.loginMember(loginMemberRequest);
 
         return ResponseEntity.ok(loginResponse);
@@ -36,7 +40,7 @@ public class AuthenticationController {
 
     @PostMapping(value = Endpoints.LOGIN_2FA, produces = MediaType.APPLICATION_JSON_VALUE, consumes =
             MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<LoginResponse> twoFactorLogin(@RequestBody TwoFactorLoginRequest twoFactorLoginRequest) {
+    public ResponseEntity<LoginResponse> twoFactorLogin(@Valid @RequestBody TwoFactorLoginRequest twoFactorLoginRequest) {
         LoginResponse loginResponse = authenticationManagementService.twoFactorLogin(twoFactorLoginRequest);
 
         return ResponseEntity.ok(loginResponse);

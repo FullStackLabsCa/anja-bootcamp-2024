@@ -6,6 +6,7 @@ import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.constant.ShortConstant;
 import io.reactivestax.active.life.canada.constant.TestData;
 import io.reactivestax.active.life.canada.dto.*;
+import io.reactivestax.active.life.canada.enums.Gender;
 import io.reactivestax.active.life.canada.model.SecurityHeader;
 import io.reactivestax.active.life.canada.service.FamilyManagementService;
 import io.reactivestax.active.life.canada.util.ActiveLifeUtil;
@@ -15,6 +16,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.LocalDate;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
@@ -44,7 +47,20 @@ class FamilyManagementControllerTest {
 
     @Test
     void testAddMember_Success() throws Exception {
-        CreateMemberRequest request = new CreateMemberRequest();
+        CreateMemberRequest request = CreateMemberRequest.builder()
+                .name(TestData.MEMBER_NAME)
+                .dob(LocalDate.now())
+                .gender(Gender.MALE)
+                .emailId(TestData.EMAIL)
+                .streetNo("123")
+                .streetName("Lester")
+                .city(TestData.CITY1)
+                .province(TestData.PROVINCE)
+                .homePhone(TestData.HOME_PHONE)
+                .username(TestData.USERNAME)
+                .country(TestData.COUNTRY)
+
+                .build();
         when(activeLifeUtil.getSecurityHeader(anyString())).thenReturn(new SecurityHeader(FAMILY_MEMBER_ID));
         doNothing().when(familyManagementService).createFamilyMember(any(CreateMemberRequest.class), anyString(), anyBoolean());
 
