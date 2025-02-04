@@ -11,8 +11,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.transaction.TestTransaction;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -104,6 +106,7 @@ class FamilyMemberRepositoryTest {
         assertTrue(exists);
     }
 
+    // Using entity manager to clear the persistent context to force fetch from the db
     @Test
     void testUpdateIsActiveByFamilyMemberId() {
         FamilyMember familyMember = saveFamilyMember();
@@ -117,12 +120,13 @@ class FamilyMemberRepositoryTest {
         familyMemberOptional.ifPresent(familyMember1 -> assertFalse(familyMember1.isActive()));
     }
 
+    // Using TestTransaction to commit the update query
     @Test
     void testUpdateIsActiveByMemberLoginId() {
         FamilyMember familyMember = saveFamilyMember();
         familyMemberRepository.updateIsActiveByMemberLoginId(familyMember.getMemberLoginId(), false);
-        entityManager.flush();
-        entityManager.clear();
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
 
         Optional<FamilyMember> familyMemberOptional = familyMemberRepository.findById(familyMember.getFamilyMemberId());
 
@@ -137,7 +141,7 @@ class FamilyMemberRepositoryTest {
 
     private FamilyMember getFamilyMember() {
         return FamilyMember.builder()
-                .memberLoginId(TestData.MEMBER_LOGIN_ID)
+                .memberLoginId(UUID.randomUUID().toString())
                 .name(TestData.MEMBER_NAME)
                 .familyGroup(familyGroup)
                 .isActive(true)

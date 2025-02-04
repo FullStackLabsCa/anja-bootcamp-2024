@@ -50,7 +50,7 @@ public class AsyncJobsService {
 
     @Async
     public void removeEntryFromWaitlistIfExists(UUID offeredCourseId, UUID familyMemberId) {
-        offeredCourseWaitlistRepository.deleteFromWaitlistByFamilyMemberIdAndOfferedCourseId(offeredCourseId, familyMemberId);
+        offeredCourseWaitlistRepository.deleteFromWaitlistByOfferedCourseIdAndFamilyMemberId(offeredCourseId, familyMemberId);
     }
 
     @Async

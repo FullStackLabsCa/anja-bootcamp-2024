@@ -19,5 +19,5 @@ public interface OfferedCourseWaitlistRepository extends JpaRepository<OfferedCo
     @Transactional
     @Modifying
     @Query("DELETE FROM OfferedCourseWaitlist wl WHERE wl.offeredCourse.offeredCourseId = ?1 AND wl.familyMember.familyMemberId = ?2")
-    void deleteFromWaitlistByFamilyMemberIdAndOfferedCourseId(UUID offeredCourseId, UUID familyMemberId);
+    void deleteFromWaitlistByOfferedCourseIdAndFamilyMemberId(UUID offeredCourseId, UUID familyMemberId);
 }

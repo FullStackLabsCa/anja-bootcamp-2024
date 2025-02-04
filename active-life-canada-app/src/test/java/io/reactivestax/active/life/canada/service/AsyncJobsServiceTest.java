@@ -86,7 +86,7 @@ class AsyncJobsServiceTest {
 
         asyncJobsService.removeEntryFromWaitlistIfExists(offeredCourseId, familyMemberId);
         verify(offeredCourseWaitlistRepository, times(1))
-                .deleteFromWaitlistByFamilyMemberIdAndOfferedCourseId(offeredCourseId, familyMemberId);
+                .deleteFromWaitlistByOfferedCourseIdAndFamilyMemberId(offeredCourseId, familyMemberId);
     }
 
     @Test
