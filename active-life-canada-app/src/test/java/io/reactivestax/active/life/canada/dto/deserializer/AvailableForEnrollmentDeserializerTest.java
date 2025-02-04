@@ -3,6 +3,7 @@ package io.reactivestax.active.life.canada.dto.deserializer;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import io.reactivestax.active.life.canada.enums.AvailableForEnrollment;
+import io.reactivestax.active.life.canada.enums.deserializer.AvailableForEnrollmentDeserializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,7 +1,7 @@
 package io.reactivestax.active.life.canada.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.reactivestax.active.life.canada.dto.deserializer.AvailableForEnrollmentDeserializer;
+import io.reactivestax.active.life.canada.enums.deserializer.AvailableForEnrollmentDeserializer;
 import io.reactivestax.active.life.canada.enums.AvailableForEnrollment;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
