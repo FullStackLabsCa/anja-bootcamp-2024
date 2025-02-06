@@ -100,8 +100,8 @@ class FamilyMemberRepositoryTest {
     @Test
     void testExistsByMemberLoginIdAndFamilyGroup_FamilyGroupId() {
         FamilyMember familyMember = saveFamilyMember();
-        boolean exists = familyMemberRepository.existsByMemberLoginIdAndFamilyGroup_FamilyGroupId(familyMember.getMemberLoginId(),
-                familyMember.getFamilyGroup().getFamilyGroupId());
+        boolean exists = familyMemberRepository.existsByMemberLoginIdAndIsActiveAndFamilyGroup_FamilyGroupId(familyMember.getMemberLoginId(),
+                true, familyMember.getFamilyGroup().getFamilyGroupId());
 
         assertTrue(exists);
     }

@@ -1,8 +1,11 @@
 package io.reactivestax.active.life.canada.service;
 
 import io.reactivestax.active.life.canada.constant.Endpoints;
+import io.reactivestax.active.life.canada.constant.ExceptionHandlerConst;
 import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.entity.*;
+import io.reactivestax.active.life.canada.enums.FeeType;
+import io.reactivestax.active.life.canada.exception.InvalidRequestException;
 import io.reactivestax.active.life.canada.repository.AccountActivationRequestRepository;
 import io.reactivestax.active.life.canada.repository.FamilyGroupRepository;
 import io.reactivestax.active.life.canada.repository.OfferedCourseWaitlistRepository;
@@ -25,6 +28,7 @@ public class AsyncJobsService {
     private final OfferedCourseWaitlistRepository offeredCourseWaitlistRepository;
     private final FamilyGroupRepository familyGroupRepository;
     private final EmsService emsService;
+    private final CacheService cacheService;
 
     @Async
     @Transactional
@@ -62,5 +66,35 @@ public class AsyncJobsService {
         FamilyGroup familyGroup = familyCourseRegistration.getFamilyMember().getFamilyGroup();
         familyGroup.setCredits(familyGroup.getCredits() + withdrawnCredits);
         familyGroupRepository.save(familyGroup);
+    }
+
+    @Async
+    public void addToCartCache(OfferedCourse offeredCourse, FamilyMember familyMember,
+                               String enrollmentActorID) {
+        FamilyCourseRegistration familyCourseRegistration = FamilyCourseRegistration.builder()
+                .offeredCourse(offeredCourse)
+                .familyMember(familyMember)
+                .cost(getFees(offeredCourse, familyMember).getCourseFee())
+                .isWithdrawn(false)
+                .withdrawnCredits(0)
+                .enrollmentActorId(UUID.fromString(enrollmentActorID))
+                .build();
+        cacheService.addToCache(enrollmentActorID, familyCourseRegistration);
+    }
+
+    private OfferedCourseFee getFees(OfferedCourse offeredCourse, FamilyMember familyMember) {
+        FeeType feeType;
+        String exceptionMessage;
+        if (offeredCourse.getFacility().getCity().equals(familyMember.getCity())) {
+            feeType = FeeType.RESIDENT;
+            exceptionMessage = ExceptionHandlerConst.RESIDENT_COURSE_FEE_NOT_FOUND;
+        } else {
+            feeType = FeeType.NON_RESIDENT;
+            exceptionMessage = ExceptionHandlerConst.NON_RESIDENT_COURSE_FEE_NOT_FOUND;
+        }
+
+        return offeredCourse.getOfferedCourseFees().stream()
+                .filter(offeredCourseFee -> offeredCourseFee.getFeeType().equals(feeType))
+                .findFirst().orElseThrow(() -> new InvalidRequestException(exceptionMessage));
     }
 }

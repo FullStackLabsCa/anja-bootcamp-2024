@@ -103,7 +103,8 @@ public class FamilyManagementService {
         if (memberLoginId.equals(loggedInMember.getMemberLoginId())) {
             familyMemberRepository.updateIsActiveByFamilyMemberId(loggedInMember.getFamilyMemberId(), false);
         } else if (loggedInMember.isGroupAdmin()) {
-            if (familyMemberRepository.existsByMemberLoginIdAndFamilyGroup_FamilyGroupId(memberLoginId, loggedInMember.getFamilyGroup().getFamilyGroupId())) {
+            if (familyMemberRepository.existsByMemberLoginIdAndIsActiveAndFamilyGroup_FamilyGroupId
+                    (memberLoginId, true,  loggedInMember.getFamilyGroup().getFamilyGroupId())) {
                 familyMemberRepository.updateIsActiveByMemberLoginId(memberLoginId, false);
             } else throw new InvalidRequestException(ExceptionHandlerConst.INVALID_MEMBER_ID);
         } else throw new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS);

@@ -37,12 +37,16 @@ class AsyncJobsServiceTest {
     @MockitoBean
     private EmsService emsService;
 
+    @MockitoBean
+    private CacheService cacheService;
+
     @BeforeEach
     void setUp() {
         asyncJobsService = new AsyncJobsService(accountActivationRequestRepository,
                 offeredCourseWaitlistRepository,
                 familyGroupRepository,
-                emsService);
+                emsService,
+                cacheService);
     }
 
     @Test

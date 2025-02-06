@@ -2,10 +2,13 @@ server.port: 8082
 spring:
   application:
     name: active-life-canada-app
+    cacheName: cartCache
   cache:
     type: caffeine
     caffeine:
-      spec: maximumSize=1000,expireAfterAccess=60s
+      spec: maximumSize=1000,expireAfterWrite=15m,refreshAfterWrite=15m
+      cache-names:
+        - cartCache
   datasource:
     url: jdbc:postgresql://localhost:5432/active_life_canada
     username: postgres
@@ -27,7 +30,7 @@ logging:
 ems:
   api:
     baseUrl: http://localhost:8080/api/v1
-stripe:
-  api:
-    baseUrl: https://api.stripe.com/v1
-    key: ${STRIPE_SECRET_KEY}
+#stripe:
+#  api:
+#    baseUrl: https://api.stripe.com/v1
+#    key: ${STRIPE_SECRET_KEY}

@@ -2,12 +2,14 @@ package io.reactivestax.active.life.canada.service;
 
 import io.reactivestax.active.life.canada.constant.ExceptionHandlerConst;
 import io.reactivestax.active.life.canada.constant.Message;
-import io.reactivestax.active.life.canada.dto.AddToCartDto;
+import io.reactivestax.active.life.canada.dto.CartDto;
 import io.reactivestax.active.life.canada.dto.FamilyCourseRegistrationDetails;
 import io.reactivestax.active.life.canada.dto.OfferedCourseWaitlistDto;
-import io.reactivestax.active.life.canada.entity.*;
+import io.reactivestax.active.life.canada.entity.FamilyCourseRegistration;
+import io.reactivestax.active.life.canada.entity.FamilyMember;
+import io.reactivestax.active.life.canada.entity.OfferedCourse;
+import io.reactivestax.active.life.canada.entity.OfferedCourseWaitlist;
 import io.reactivestax.active.life.canada.enums.AvailableForEnrollment;
-import io.reactivestax.active.life.canada.enums.FeeType;
 import io.reactivestax.active.life.canada.exception.InvalidRequestException;
 import io.reactivestax.active.life.canada.exception.UnauthorizedAccessException;
 import io.reactivestax.active.life.canada.mapper.FamilyCourseRegistrationMapper;
@@ -36,46 +38,27 @@ public class CourseRegistrationManagementService {
     private final OfferedCourseWaitlistMapper offeredCourseWaitlistMapper;
     private final ActiveLifeUtil activeLifeUtil;
     private final AsyncJobsService asyncJobsService;
+    private final CacheService cacheService;
 
     @Transactional
-    public String enrollIntoOfferedCourse(AddToCartDto addToCartDto, String loggedInMemberId) {
+    public void addToCart(CartDto cartDto, String loggedInMemberId) {
         FamilyMember loggedInMember = familyMemberRepository.findByFamilyMemberIdAndIsActive(UUID.fromString(loggedInMemberId), true)
                 .orElseThrow(() -> new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS));
         FamilyMember familyMember = familyMemberRepository.findByMemberLoginIdAndIsActiveAndFamilyGroup_FamilyGroupId
-                        (addToCartDto.getFamilyMemberLoginId(), true, loggedInMember.getFamilyGroup().getFamilyGroupId())
+                        (cartDto.getFamilyMemberLoginId(), true, loggedInMember.getFamilyGroup().getFamilyGroupId())
                 .orElseThrow(() -> new InvalidRequestException(ExceptionHandlerConst.INVALID_MEMBER_ID));
-        OfferedCourse offeredCourse = offeredCourseRepository.findByBarCode(UUID.fromString(addToCartDto.getOfferedCourseBarCode()))
+        OfferedCourse offeredCourse = offeredCourseRepository.findByBarCode(UUID.fromString(cartDto.getOfferedCourseBarCode()))
                 .orElseThrow(() -> new InvalidRequestException(ExceptionHandlerConst.INVALID_OFFERED_COURSE_ID));
         if (familyCourseRegistrationRepository.existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseIdAndIsWithdrawn
                 (familyMember.getFamilyMemberId(), offeredCourse.getOfferedCourseId(), false))
             throw new InvalidRequestException(ExceptionHandlerConst.ALREADY_ENROLLED);
-        return switch (offeredCourse.getAvailableForEnrollment()) {
-            case AVAILABLE ->
-                    enrollIntoAvailableCourse(offeredCourse, familyMember, loggedInMember.getFamilyMemberId());
-            case WAITLIST_OPEN -> addToWaitlist(offeredCourse, familyMember, loggedInMember.getFamilyMemberId());
-            case NOT_AVAILABLE -> throw new InvalidRequestException(ExceptionHandlerConst.COURSE_FULL);
-        };
+        switch (offeredCourse.getAvailableForEnrollment()) {
+            case AVAILABLE -> asyncJobsService.addToCartCache(offeredCourse, familyMember, loggedInMemberId);
+            case WAITLIST_OPEN -> throw new InvalidRequestException(ExceptionHandlerConst.ADD_TO_CART_FAILED_WAITLIST);
+            case NOT_AVAILABLE ->
+                    throw new InvalidRequestException(ExceptionHandlerConst.ADD_TO_CART_FAILED_NOT_AVAILABLE);
+        }
     }
-
-    private String enrollIntoAvailableCourse(OfferedCourse offeredCourse, FamilyMember familyMember, UUID enrollmentActorID) {
-        FamilyCourseRegistration familyCourseRegistration = FamilyCourseRegistration.builder()
-                .offeredCourse(offeredCourse)
-                .familyMember(familyMember)
-                .cost(getFees(offeredCourse, familyMember).getCourseFee())
-                .isWithdrawn(false)
-                .withdrawnCredits(0)
-                .enrollmentActorId(enrollmentActorID)
-                .build();
-        List<FamilyCourseRegistration> familyCourseRegistrations = offeredCourse.getFamilyCourseRegistrations();
-        //        familyCourseRegistrations.add(familyCourseRegistration);
-//        if (familyCourseRegistrations.size() == offeredCourse.getNoOfSpots())
-//            offeredCourse.setAvailableForEnrollment(AvailableForEnrollment.WAITLIST_OPEN);
-//        offeredCourseRepository.save(offeredCourse);
-//        asyncJobsService
-//                .removeEntryFromWaitlistIfExists(offeredCourse.getOfferedCourseId(), familyMember.getFamilyMemberId());
-        return Message.ENROLLMENT_SUCCESSFUL;
-    }
-
 
     private String addToWaitlist(OfferedCourse offeredCourse, FamilyMember familyMember, UUID enrollmentActorID) {
         if (offeredCourseWaitlistRepository.existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseId
@@ -92,22 +75,6 @@ public class CourseRegistrationManagementService {
             offeredCourse.setAvailableForEnrollment(AvailableForEnrollment.NOT_AVAILABLE);
         offeredCourseRepository.save(offeredCourse);
         return Message.ADDED_TO_WAITLIST;
-    }
-
-    private OfferedCourseFee getFees(OfferedCourse offeredCourse, FamilyMember familyMember) {
-        FeeType feeType;
-        String exceptionMessage;
-        if (offeredCourse.getFacility().getCity().equals(familyMember.getCity())) {
-            feeType = FeeType.RESIDENT;
-            exceptionMessage = ExceptionHandlerConst.RESIDENT_COURSE_FEE_NOT_FOUND;
-        } else {
-            feeType = FeeType.NON_RESIDENT;
-            exceptionMessage = ExceptionHandlerConst.NON_RESIDENT_COURSE_FEE_NOT_FOUND;
-        }
-
-        return offeredCourse.getOfferedCourseFees().stream()
-                .filter(offeredCourseFee -> offeredCourseFee.getFeeType().equals(feeType))
-                .findFirst().orElseThrow(() -> new InvalidRequestException(exceptionMessage));
     }
 
     public List<FamilyCourseRegistrationDetails> getRegisteredCourses(String loggedInMemberId) {

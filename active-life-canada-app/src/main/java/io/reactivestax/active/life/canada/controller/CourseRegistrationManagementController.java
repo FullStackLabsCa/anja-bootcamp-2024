@@ -4,7 +4,7 @@ package io.reactivestax.active.life.canada.controller;
 import io.reactivestax.active.life.canada.constant.Endpoints;
 import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.constant.ShortConstant;
-import io.reactivestax.active.life.canada.dto.AddToCartDto;
+import io.reactivestax.active.life.canada.dto.CartDto;
 import io.reactivestax.active.life.canada.dto.FamilyCourseRegistrationDetails;
 import io.reactivestax.active.life.canada.dto.OfferedCourseWaitlistDto;
 import io.reactivestax.active.life.canada.dto.SuccessfulResponse;
@@ -28,23 +28,12 @@ public class CourseRegistrationManagementController {
     @PostMapping(Endpoints.OFFERED_COURSE_CART)
     public ResponseEntity<SuccessfulResponse> addToCart
             (@RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson,
-             @RequestBody AddToCartDto addToCartDto) {
+             @RequestBody CartDto cartDto) {
         SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
-        String message = courseRegistrationManagementService.enrollIntoOfferedCourse
-                (addToCartDto, securityHeader.getFamilyMemberId());
+        courseRegistrationManagementService.addToCart(cartDto, securityHeader.getFamilyMemberId());
 
-        return ResponseEntity.ok(SuccessfulResponse.builder().message(message).build());
+        return ResponseEntity.ok(SuccessfulResponse.builder().message(Message.ADDED_TO_CART).build());
     }
-
-//    @PostMapping(Endpoints.CART_PAYMENT)
-//    public ResponseEntity<SuccessfulResponse> courseRegistrationPay
-//            (@RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson) {
-//        SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
-//        String message = courseRegistrationManagementService.enrollIntoOfferedCourse(barCode, memberLoginId,
-//                securityHeader.getFamilyMemberId());
-//
-//        return ResponseEntity.ok(SuccessfulResponse.builder().message(message).build());
-//    }
 
     @GetMapping(Endpoints.REGISTERED_COURSES)
     public ResponseEntity<List<FamilyCourseRegistrationDetails>> registeredCourses(@RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson) {

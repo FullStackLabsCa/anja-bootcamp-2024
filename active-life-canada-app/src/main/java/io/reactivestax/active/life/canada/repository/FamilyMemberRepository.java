@@ -20,7 +20,7 @@ public interface FamilyMemberRepository extends JpaRepository<FamilyMember, UUID
     Optional<FamilyMember> findByMemberLoginIdAndIsActiveAndFamilyGroup_FamilyGroupId
             (String memberLoginId, boolean isActive, UUID familyGroupId);
 
-    boolean existsByMemberLoginIdAndFamilyGroup_FamilyGroupId(String memberLoginId, UUID familyGroupId);
+    boolean existsByMemberLoginIdAndIsActiveAndFamilyGroup_FamilyGroupId(String memberLoginId, boolean isActive, UUID familyGroupId);
 
     @Modifying
     @Query("UPDATE FamilyMember fm SET fm.isActive = ?2 WHERE fm.familyMemberId = ?1")

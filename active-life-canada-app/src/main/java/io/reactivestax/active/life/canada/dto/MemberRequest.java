@@ -57,6 +57,7 @@ public class MemberRequest {
     @Pattern(groups = CreateGroup.class, regexp = ValidationRegexPattern.PHONE_REGEX, message = ExceptionHandlerConst.INVALID_HOME_PHONE)
     private String homePhone;
 
+    @Pattern(groups = CreateGroup.class, regexp = ValidationRegexPattern.PHONE_REGEX, message = ExceptionHandlerConst.INVALID_BUSINESS_PHONE)
     private String businessPhone;
     private String language;
 

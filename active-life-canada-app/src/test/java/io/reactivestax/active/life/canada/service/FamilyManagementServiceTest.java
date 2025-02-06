@@ -269,7 +269,7 @@ class FamilyManagementServiceTest {
     void testDeactivateFamilyMember_Success_AdminLoggedInChildDeactivate() {
         when(familyMemberRepository.findByFamilyMemberIdAndIsActive(any(UUID.class), anyBoolean()))
                 .thenReturn(Optional.of(loggedInMember));
-        when(familyMemberRepository.existsByMemberLoginIdAndFamilyGroup_FamilyGroupId(anyString(), any(UUID.class)))
+        when(familyMemberRepository.existsByMemberLoginIdAndIsActiveAndFamilyGroup_FamilyGroupId(anyString(), true, any(UUID.class)))
                 .thenReturn(true);
 
         familyManagementService.deactivateFamilyMember(TestData.FAMILY_MEMBER_LOGIN_ID, TestData.LOGGED_IN_MEMBER_ID_STRING);
@@ -281,7 +281,7 @@ class FamilyManagementServiceTest {
     void testDeactivateFamilyMember_Fails_AdminLoggedInInvalidFamilyMemberId() {
         when(familyMemberRepository.findByFamilyMemberIdAndIsActive(any(UUID.class), anyBoolean()))
                 .thenReturn(Optional.of(loggedInMember));
-        when(familyMemberRepository.existsByMemberLoginIdAndFamilyGroup_FamilyGroupId(anyString(), any(UUID.class)))
+        when(familyMemberRepository.existsByMemberLoginIdAndIsActiveAndFamilyGroup_FamilyGroupId(anyString(), true, any(UUID.class)))
                 .thenReturn(false);
 
 
