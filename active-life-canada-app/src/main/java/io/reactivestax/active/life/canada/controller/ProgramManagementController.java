@@ -5,7 +5,6 @@ import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.dto.*;
 import io.reactivestax.active.life.canada.dto.group.CreateGroup;
 import io.reactivestax.active.life.canada.service.ProgramManagementService;
-import jakarta.validation.Valid;
 import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -21,12 +21,6 @@ public class Endpoints {
     public static final String OFFERED_COURSE_CART = OFFERED_COURSES + "/addToCart";
     public static final String CART_PAYMENT = "/cart/payment";
 
-    // stripe end points
-    public static final String STRIPE_PAYMENT_INTENTS = "/payment_intents";
-    public static final String STRIPE_PAYMENT_METHODS = "/payment_methods";
-    public static final String STRIPE_PAYMENT_INTENTS_CONFIRM = "/payment_intents/{paymentIntentId}/confirm";
-
-
     // ENS endpoints
     public static final String ENS_SMS = "/ems/sms";
     public static final String ENS_EMAIL = "/ems/email";

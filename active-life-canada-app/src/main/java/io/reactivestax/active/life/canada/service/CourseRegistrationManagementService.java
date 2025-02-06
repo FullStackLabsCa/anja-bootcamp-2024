@@ -2,6 +2,7 @@ package io.reactivestax.active.life.canada.service;
 
 import io.reactivestax.active.life.canada.constant.ExceptionHandlerConst;
 import io.reactivestax.active.life.canada.constant.Message;
+import io.reactivestax.active.life.canada.dto.AddToCartDto;
 import io.reactivestax.active.life.canada.dto.FamilyCourseRegistrationDetails;
 import io.reactivestax.active.life.canada.dto.OfferedCourseWaitlistDto;
 import io.reactivestax.active.life.canada.entity.*;
@@ -35,16 +36,15 @@ public class CourseRegistrationManagementService {
     private final OfferedCourseWaitlistMapper offeredCourseWaitlistMapper;
     private final ActiveLifeUtil activeLifeUtil;
     private final AsyncJobsService asyncJobsService;
-    private final PaymentService paymentService;
 
     @Transactional
-    public String enrollIntoOfferedCourse(String barCode, String memberLoginId, String loggedInMemberId) {
+    public String enrollIntoOfferedCourse(AddToCartDto addToCartDto, String loggedInMemberId) {
         FamilyMember loggedInMember = familyMemberRepository.findByFamilyMemberIdAndIsActive(UUID.fromString(loggedInMemberId), true)
                 .orElseThrow(() -> new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS));
         FamilyMember familyMember = familyMemberRepository.findByMemberLoginIdAndIsActiveAndFamilyGroup_FamilyGroupId
-                        (memberLoginId, true, loggedInMember.getFamilyGroup().getFamilyGroupId())
+                        (addToCartDto.getFamilyMemberLoginId(), true, loggedInMember.getFamilyGroup().getFamilyGroupId())
                 .orElseThrow(() -> new InvalidRequestException(ExceptionHandlerConst.INVALID_MEMBER_ID));
-        OfferedCourse offeredCourse = offeredCourseRepository.findByBarCode(UUID.fromString(barCode))
+        OfferedCourse offeredCourse = offeredCourseRepository.findByBarCode(UUID.fromString(addToCartDto.getOfferedCourseBarCode()))
                 .orElseThrow(() -> new InvalidRequestException(ExceptionHandlerConst.INVALID_OFFERED_COURSE_ID));
         if (familyCourseRegistrationRepository.existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseIdAndIsWithdrawn
                 (familyMember.getFamilyMemberId(), offeredCourse.getOfferedCourseId(), false))

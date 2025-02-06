@@ -2,6 +2,10 @@ server.port: 8082
 spring:
   application:
     name: active-life-canada-app
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterAccess=60s
   datasource:
     url: jdbc:postgresql://localhost:5432/active_life_canada
     username: postgres
