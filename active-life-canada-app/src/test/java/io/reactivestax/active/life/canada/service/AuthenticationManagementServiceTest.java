@@ -3,7 +3,7 @@ package io.reactivestax.active.life.canada.service;
 import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.constant.TestData;
 import io.reactivestax.active.life.canada.dto.LoginMemberRequest;
-import io.reactivestax.active.life.canada.dto.LoginResponse;
+import io.reactivestax.active.life.canada.dto.TokenResponseDto;
 import io.reactivestax.active.life.canada.dto.TwoFactorLoginRequest;
 import io.reactivestax.active.life.canada.entity.AccountActivationRequest;
 import io.reactivestax.active.life.canada.entity.FamilyGroup;
@@ -66,7 +66,7 @@ class AuthenticationManagementServiceTest {
         LoginMemberRequest request = new LoginMemberRequest(TestData.USERNAME, TestData.PASSWORD);
         when(familyMemberRepository.findByMemberLoginId(TestData.USERNAME)).thenReturn(Optional.of(familyMember));
 
-        LoginResponse response = authenticationManagementService.loginMember(request);
+        TokenResponseDto response = authenticationManagementService.loginMember(request);
 
         assertNotNull(response.getToken());
         assertEquals(Message.SUCCESSFUL_LOGIN, response.getMessage());
@@ -99,7 +99,7 @@ class AuthenticationManagementServiceTest {
 
         when(familyMemberRepository.findByMemberLoginId(TestData.USERNAME)).thenReturn(Optional.of(familyMember));
 
-        LoginResponse response = authenticationManagementService.loginMember(request);
+        TokenResponseDto response = authenticationManagementService.loginMember(request);
 
         assertEquals(Message.LOGIN_INACTIVE_MEMBER, response.getMessage());
         verify(asyncJobsService, times(1)).createAccountActivationRequestEntryAndSendToEms(familyMember);
@@ -116,7 +116,7 @@ class AuthenticationManagementServiceTest {
         when(loginRequestRepository.findByLoginToken(TestData.UUID_TOKEN_STRING)).thenReturn(Optional.of(loginRequest));
         when(emsService.sendToEmsForVerification(TestData.FAMILY_MEMBER_ID_STRING, TestData.OTP)).thenReturn(true);
 
-        LoginResponse response = authenticationManagementService.twoFactorLogin(request);
+        TokenResponseDto response = authenticationManagementService.twoFactorLogin(request);
 
         assertEquals(TestData.FAMILY_MEMBER_ID_STRING, response.getToken());
         assertEquals(Message.SUCCESSFUL_LOGIN_VERIFICATION, response.getMessage());

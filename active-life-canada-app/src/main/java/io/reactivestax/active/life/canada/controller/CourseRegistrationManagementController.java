@@ -7,6 +7,7 @@ import io.reactivestax.active.life.canada.constant.ShortConstant;
 import io.reactivestax.active.life.canada.dto.FamilyCourseRegistrationDetails;
 import io.reactivestax.active.life.canada.dto.OfferedCourseWaitlistDto;
 import io.reactivestax.active.life.canada.dto.SuccessfulResponse;
+import io.reactivestax.active.life.canada.dto.TokenResponseDto;
 import io.reactivestax.active.life.canada.model.SecurityHeader;
 import io.reactivestax.active.life.canada.service.CourseRegistrationManagementService;
 import io.reactivestax.active.life.canada.util.ActiveLifeUtil;
@@ -28,6 +29,28 @@ public class CourseRegistrationManagementController {
     public ResponseEntity<SuccessfulResponse> enrollIntoCourse(@PathVariable String barCode,
                                                                @PathVariable String memberLoginId,
                                                                @RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson) {
+        SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
+        String message = courseRegistrationManagementService.enrollIntoOfferedCourse(barCode, memberLoginId,
+                securityHeader.getFamilyMemberId());
+
+        return ResponseEntity.ok(SuccessfulResponse.builder().message(message).build());
+    }
+
+    @PostMapping(Endpoints.OFFERED_COURSE_CART)
+    public ResponseEntity<SuccessfulResponse> addToCart(@PathVariable String barCode,
+                                                                  @PathVariable String memberLoginId,
+                                                                  @RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson) {
+        SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
+        String message = courseRegistrationManagementService.enrollIntoOfferedCourse(barCode, memberLoginId,
+                securityHeader.getFamilyMemberId());
+
+        return ResponseEntity.ok(SuccessfulResponse.builder().message(message).build());
+    }
+
+    @PostMapping(Endpoints.CART_PAYMENT)
+    public ResponseEntity<SuccessfulResponse> courseRegistrationPay(@PathVariable String barCode,
+                                                             @PathVariable String memberLoginId,
+                                                             @RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson) {
         SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
         String message = courseRegistrationManagementService.enrollIntoOfferedCourse(barCode, memberLoginId,
                 securityHeader.getFamilyMemberId());

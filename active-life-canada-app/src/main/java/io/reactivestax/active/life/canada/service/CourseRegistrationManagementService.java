@@ -35,6 +35,7 @@ public class CourseRegistrationManagementService {
     private final OfferedCourseWaitlistMapper offeredCourseWaitlistMapper;
     private final ActiveLifeUtil activeLifeUtil;
     private final AsyncJobsService asyncJobsService;
+    private final PaymentService paymentService;
 
     @Transactional
     public String enrollIntoOfferedCourse(String barCode, String memberLoginId, String loggedInMemberId) {
@@ -66,12 +67,12 @@ public class CourseRegistrationManagementService {
                 .enrollmentActorId(enrollmentActorID)
                 .build();
         List<FamilyCourseRegistration> familyCourseRegistrations = offeredCourse.getFamilyCourseRegistrations();
-        familyCourseRegistrations.add(familyCourseRegistration);
-        if (familyCourseRegistrations.size() == offeredCourse.getNoOfSpots())
-            offeredCourse.setAvailableForEnrollment(AvailableForEnrollment.WAITLIST_OPEN);
-        offeredCourseRepository.save(offeredCourse);
-        asyncJobsService
-                .removeEntryFromWaitlistIfExists(offeredCourse.getOfferedCourseId(), familyMember.getFamilyMemberId());
+        //        familyCourseRegistrations.add(familyCourseRegistration);
+//        if (familyCourseRegistrations.size() == offeredCourse.getNoOfSpots())
+//            offeredCourse.setAvailableForEnrollment(AvailableForEnrollment.WAITLIST_OPEN);
+//        offeredCourseRepository.save(offeredCourse);
+//        asyncJobsService
+//                .removeEntryFromWaitlistIfExists(offeredCourse.getOfferedCourseId(), familyMember.getFamilyMemberId());
         return Message.ENROLLMENT_SUCCESSFUL;
     }
 

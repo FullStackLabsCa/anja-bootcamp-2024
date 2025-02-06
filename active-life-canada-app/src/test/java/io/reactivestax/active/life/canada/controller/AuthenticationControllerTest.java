@@ -6,7 +6,7 @@ import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.constant.TestData;
 import io.reactivestax.active.life.canada.dto.CreateMemberRequest;
 import io.reactivestax.active.life.canada.dto.LoginMemberRequest;
-import io.reactivestax.active.life.canada.dto.LoginResponse;
+import io.reactivestax.active.life.canada.dto.TokenResponseDto;
 import io.reactivestax.active.life.canada.dto.TwoFactorLoginRequest;
 import io.reactivestax.active.life.canada.service.AuthenticationManagementService;
 import io.reactivestax.active.life.canada.service.FamilyManagementService;
@@ -63,7 +63,7 @@ class AuthenticationControllerTest {
     @Test
     void testLogin_Success() throws Exception {
         LoginMemberRequest request = new LoginMemberRequest(TestData.USERNAME, TestData.PASSWORD);
-        LoginResponse response = new LoginResponse();
+        TokenResponseDto response = new TokenResponseDto();
         when(authenticationManagementService.loginMember(any(LoginMemberRequest.class))).thenReturn(response);
 
         mockMvc.perform(post(Endpoints.BASE_ENDPOINT + Endpoints.LOGIN)
@@ -77,7 +77,7 @@ class AuthenticationControllerTest {
         TwoFactorLoginRequest request = new TwoFactorLoginRequest();
         request.setToken(TestData.STRING_ID);
         request.setOtp(TestData.OTP);
-        LoginResponse response = new LoginResponse();
+        TokenResponseDto response = new TokenResponseDto();
         when(authenticationManagementService.twoFactorLogin(any(TwoFactorLoginRequest.class))).thenReturn(response);
 
         mockMvc.perform(post(Endpoints.BASE_ENDPOINT + Endpoints.LOGIN_2FA)

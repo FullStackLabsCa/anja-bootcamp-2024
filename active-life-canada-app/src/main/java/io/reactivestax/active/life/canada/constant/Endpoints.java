@@ -18,11 +18,20 @@ public class Endpoints {
     public static final String ENROLL_COURSE = OFFERED_COURSES + "/{barCode}/enrollments/{memberLoginId}";
     public static final String WITHDRAW_FROM_COURSE = "/enrollments/{enrollmentId}";
     public static final String SEARCH_OFFERED_COURSES = OFFERED_COURSES + "/search";
+    public static final String OFFERED_COURSE_CART = OFFERED_COURSES + "/addToCart";
+    public static final String CART_PAYMENT = "/cart/payment";
 
-    public static final String ENS_SMS = "http://localhost:8080/api/v1/ems/sms";
-    public static final String ENS_EMAIL = "http://localhost:8080/api/v1/ems/email";
-    public static final String ENS_SMS_OTP = "http://localhost:8080/api/v1/otp/sms";
-    public static final String ENS_EMAIL_OTP = "http://localhost:8080/api/v1/otp/email";
-    public static final String ENS_VERIFY_OTP = "http://localhost:8080/api/v1/otp/verify";
+    // stripe end points
+    public static final String STRIPE_PAYMENT_INTENTS = "/payment_intents";
+    public static final String STRIPE_PAYMENT_METHODS = "/payment_methods";
+    public static final String STRIPE_PAYMENT_INTENTS_CONFIRM = "/payment_intents/{paymentIntentId}/confirm";
+
+
+    // ENS endpoints
+    public static final String ENS_SMS = "/ems/sms";
+    public static final String ENS_EMAIL = "/ems/email";
+    public static final String ENS_SMS_OTP = "/otp/sms";
+    public static final String ENS_EMAIL_OTP = "/otp/email";
+    public static final String ENS_VERIFY_OTP = "/otp/verify";
     public static final String ACTIVATION_LINK_URL = "http://localhost:8082/api/v1/activate/{0}";
 }

@@ -32,18 +32,18 @@ public class AuthenticationController {
 
     @PostMapping(value = Endpoints.LOGIN, produces = MediaType.APPLICATION_JSON_VALUE, consumes =
             MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginMemberRequest loginMemberRequest) {
-        LoginResponse loginResponse = authenticationManagementService.loginMember(loginMemberRequest);
+    public ResponseEntity<TokenResponseDto> login(@Valid @RequestBody LoginMemberRequest loginMemberRequest) {
+        TokenResponseDto tokenResponseDto = authenticationManagementService.loginMember(loginMemberRequest);
 
-        return ResponseEntity.ok(loginResponse);
+        return ResponseEntity.ok(tokenResponseDto);
     }
 
     @PostMapping(value = Endpoints.LOGIN_2FA, produces = MediaType.APPLICATION_JSON_VALUE, consumes =
             MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<LoginResponse> twoFactorLogin(@Valid @RequestBody TwoFactorLoginRequest twoFactorLoginRequest) {
-        LoginResponse loginResponse = authenticationManagementService.twoFactorLogin(twoFactorLoginRequest);
+    public ResponseEntity<TokenResponseDto> twoFactorLogin(@Valid @RequestBody TwoFactorLoginRequest twoFactorLoginRequest) {
+        TokenResponseDto tokenResponseDto = authenticationManagementService.twoFactorLogin(twoFactorLoginRequest);
 
-        return ResponseEntity.ok(loginResponse);
+        return ResponseEntity.ok(tokenResponseDto);
     }
 
     @GetMapping(value = Endpoints.ACTIVATION, produces = MediaType.APPLICATION_JSON_VALUE)

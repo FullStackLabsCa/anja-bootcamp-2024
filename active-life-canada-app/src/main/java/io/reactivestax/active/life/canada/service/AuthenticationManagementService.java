@@ -3,7 +3,7 @@ package io.reactivestax.active.life.canada.service;
 import io.reactivestax.active.life.canada.constant.ExceptionHandlerConst;
 import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.dto.LoginMemberRequest;
-import io.reactivestax.active.life.canada.dto.LoginResponse;
+import io.reactivestax.active.life.canada.dto.TokenResponseDto;
 import io.reactivestax.active.life.canada.dto.TwoFactorLoginRequest;
 import io.reactivestax.active.life.canada.entity.AccountActivationRequest;
 import io.reactivestax.active.life.canada.entity.FamilyMember;
@@ -32,7 +32,7 @@ public class AuthenticationManagementService {
     private final AsyncJobsService asyncJobsService;
 
     @Transactional
-    public LoginResponse loginMember(LoginMemberRequest loginMemberRequest) {
+    public TokenResponseDto loginMember(LoginMemberRequest loginMemberRequest) {
         String token;
         String message;
         FamilyMember familyMember = familyMemberRepository.findByMemberLoginId(loginMemberRequest.getUsername())
@@ -53,15 +53,15 @@ public class AuthenticationManagementService {
                 asyncJobsService.createAccountActivationRequestEntryAndSendToEms(familyMember);
             }
         } else throw new InvalidRequestException(ExceptionHandlerConst.INCORRECT_USERNAME_PASSWORD);
-        return LoginResponse.builder().token(token).message(message).build();
+        return TokenResponseDto.builder().token(token).message(message).build();
     }
 
-    public LoginResponse twoFactorLogin(TwoFactorLoginRequest twoFactorLoginRequest) {
+    public TokenResponseDto twoFactorLogin(TwoFactorLoginRequest twoFactorLoginRequest) {
         LoginRequest loginRequest = loginRequestRepository.findByLoginToken(twoFactorLoginRequest.getToken())
                 .orElseThrow(() -> new InvalidRequestException(ExceptionHandlerConst.INCORRECT_TOKEN_OTP));
         checkTokenForExpiry(loginRequest.getCreatedTs());
         if (emsService.sendToEmsForVerification(loginRequest.getFamilyMemberId().toString(), twoFactorLoginRequest.getOtp())) {
-            return LoginResponse.builder().token(loginRequest.getFamilyMemberId().toString())
+            return TokenResponseDto.builder().token(loginRequest.getFamilyMemberId().toString())
                     .message(Message.SUCCESSFUL_LOGIN_VERIFICATION).build();
         }
         throw new SomethingWentWrongException(ExceptionHandlerConst.VERIFICATION_FAILED);

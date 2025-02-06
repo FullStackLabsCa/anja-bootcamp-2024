@@ -10,6 +10,7 @@ import io.reactivestax.active.life.canada.model.EmsRequest;
 import io.reactivestax.active.life.canada.model.EmsVerify;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,9 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class EmsService {
 
+    @Value("${ems.api.baseUrl}")
+    private String emsBaseUrl;
+
     private final RestTemplate restTemplate;
 
     @Async
@@ -29,8 +33,7 @@ public class EmsService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<EmsRequest> request = new HttpEntity<>(emsRequest, headers);
-        ResponseEntity<String> response = restTemplate.exchange(getEnsEndpoint(familyMember.getPreferredModeOfCommunication()), HttpMethod.POST, request,
-                String.class);
+        ResponseEntity<String> response = restTemplate.exchange(getEnsEndpoint(familyMember.getPreferredModeOfCommunication()), HttpMethod.POST, request, String.class);
         logResponseFromEms(response.getStatusCode());
         validateResponseCode(response.getStatusCode(), ExceptionHandlerConst.EMS_SEND_REQUEST_FAILED);
     }
@@ -51,7 +54,7 @@ public class EmsService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<EmsVerify> request = new HttpEntity<>(emsVerify, headers);
-        ResponseEntity<String> response = restTemplate.exchange(Endpoints.ENS_VERIFY_OTP, HttpMethod.PUT, request, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(emsBaseUrl + Endpoints.ENS_VERIFY_OTP, HttpMethod.PUT, request, String.class);
         logResponseFromEms(response.getStatusCode());
         return validateResponseCode(response.getStatusCode(), ExceptionHandlerConst.VERIFICATION_FAILED);
     }
@@ -69,10 +72,7 @@ public class EmsService {
     }
 
     private EmsRequest prepareEmsRequest(FamilyMember familyMember, String message) {
-        EmsRequest emsRequest = EmsRequest.builder()
-                .customerId(familyMember.getFamilyMemberId().toString())
-                .message(message)
-                .build();
+        EmsRequest emsRequest = EmsRequest.builder().customerId(familyMember.getFamilyMemberId().toString()).message(message).build();
         switch (familyMember.getPreferredModeOfCommunication()) {
             case HOME_PHONE -> emsRequest.setPhoneNumber(familyMember.getHomePhone());
             case BUSINESS_PHONE -> emsRequest.setPhoneNumber(familyMember.getBusinessPhone());
@@ -83,12 +83,16 @@ public class EmsService {
     }
 
     private String getEnsEndpoint(PreferredModeOfCommunication preferredModeOfCommunication) {
-        if (preferredModeOfCommunication.equals(PreferredModeOfCommunication.EMAIL)) return Endpoints.ENS_EMAIL;
-        return Endpoints.ENS_SMS;
+        if (preferredModeOfCommunication.equals(PreferredModeOfCommunication.EMAIL))
+            return emsBaseUrl + Endpoints.ENS_EMAIL;
+
+        return emsBaseUrl + Endpoints.ENS_SMS;
     }
 
     private String getEnsOtpEndpoint(PreferredModeOfCommunication preferredModeOfCommunication) {
-        if (preferredModeOfCommunication.equals(PreferredModeOfCommunication.EMAIL)) return Endpoints.ENS_EMAIL_OTP;
-        return Endpoints.ENS_SMS_OTP;
+        if (preferredModeOfCommunication.equals(PreferredModeOfCommunication.EMAIL))
+            return emsBaseUrl + Endpoints.ENS_EMAIL_OTP;
+
+        return emsBaseUrl + Endpoints.ENS_SMS_OTP;
     }
 }

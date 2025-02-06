@@ -12,7 +12,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginResponse extends SuccessfulResponse {
+public class TokenResponseDto extends SuccessfulResponse {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String token;
 }

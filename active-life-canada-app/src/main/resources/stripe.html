@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Stripe Payment</title>
+        <script src="https://js.stripe.com/v3/"></script>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                text-align: center;
+                padding: 50px;
+                }
+
+            #card-element {
+                border: 1px solid #ccc;
+                padding: 10px;
+                border-radius: 5px;
+                }
+
+            #submit {
+                margin-top: 10px;
+                padding: 10px 20px;
+                background-color: #28a745;
+                color: white;
+                border: none;
+                cursor: pointer;
+                }
+
+            #submit:disabled {
+                background-color: #ccc;
+                cursor: not-allowed;
+                }
+        </style>
+    </head>
+    <body>
+        <h2>Stripe Payment</h2>
+        <div id="card-element"></div>
+        <button id="submit">Pay</button>
+        <p id="message"></p>
+        <script src="stripe.js"></script>
+    </body>
+</html>
