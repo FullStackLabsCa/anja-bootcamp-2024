@@ -25,6 +25,10 @@ public class PaymentService {
 
     }
 
+    public void confirmPaymentIntent(String paymentMethodId) {
+
+    }
+
     public void createPaymentLink(Long amount, String courseName) {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set("Authorization", "Bearer " + apiKey);

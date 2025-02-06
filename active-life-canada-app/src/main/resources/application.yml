@@ -26,4 +26,4 @@ ems:
 stripe:
   api:
     baseUrl: https://api.stripe.com/v1
-    key: sk_test_51QosuERuekHGJW01QQFINcmun1KyOzJ6teYpKZoHERmspFnMOqg2gIYBY87iRMi2zXxd4BxgcMGjLVPd6YzD7PJq004pYaSyjz
+    key: ${STRIPE_SECRET_KEY}
