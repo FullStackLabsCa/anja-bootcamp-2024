@@ -1,14 +1,12 @@
 server.port: 8082
 spring:
-  application:
-    name: active-life-canada-app
-    cacheName: cartCache
   cache:
     type: caffeine
+    cache-names: cartCache
     caffeine:
-      spec: maximumSize=1000,expireAfterWrite=15m,refreshAfterWrite=15m
-      cache-names:
-        - cartCache
+      spec: maximumSize=1000,expireAfterWrite=15m
+  application:
+    name: active-life-canada-app
   datasource:
     url: jdbc:postgresql://localhost:5432/active_life_canada
     username: postgres

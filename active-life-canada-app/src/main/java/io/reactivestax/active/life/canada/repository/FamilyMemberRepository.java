@@ -13,6 +13,8 @@ public interface FamilyMemberRepository extends JpaRepository<FamilyMember, UUID
 
     Optional<FamilyMember> findByMemberLoginId(String memberLoginId);
 
+    Optional<FamilyMember> findByMemberLoginIdAndIsActive(String memberLoginId, boolean isActive);
+
     boolean existsByFamilyMemberIdAndIsActive(UUID familyMemberId, boolean isActive);
 
     boolean existsByMemberLoginId(String memberLoginId);

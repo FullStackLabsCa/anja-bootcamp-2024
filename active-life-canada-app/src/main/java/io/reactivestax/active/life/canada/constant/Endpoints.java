@@ -18,8 +18,8 @@ public class Endpoints {
     public static final String ENROLL_COURSE = OFFERED_COURSES + "/{barCode}/enrollments/{memberLoginId}";
     public static final String WITHDRAW_FROM_COURSE = "/enrollments/{enrollmentId}";
     public static final String SEARCH_OFFERED_COURSES = OFFERED_COURSES + "/search";
-    public static final String OFFERED_COURSE_CART = OFFERED_COURSES + "/addToCart";
-    public static final String CART_PAYMENT = "/cart/payment";
+    public static final String OFFERED_COURSE_CART = OFFERED_COURSES + "/cart";
+    public static final String CART_PAYMENT = OFFERED_COURSE_CART + "/pay";
 
     // ENS endpoints
     public static final String ENS_SMS = "/ems/sms";

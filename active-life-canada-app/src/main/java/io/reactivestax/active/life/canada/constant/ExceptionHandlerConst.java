@@ -32,7 +32,9 @@ public class ExceptionHandlerConst {
     public static final String ALREADY_WAITLISTED = "Adding to waitlist failed, already part of the waitlist.";
     public static final String TOKEN_EXPIRED = "Verification failed, token expired, please generate a new one.";
     public static final String ADD_TO_CART_FAILED_WAITLIST = "Course cannot be added to cart, course is in waitlist.";
-    public static final String ADD_TO_CART_FAILED_NOT_AVAILABLE = "Course cannot be added to cart, course is not availble.";
+    public static final String ADD_TO_CART_FAILED_NOT_AVAILABLE = "Course cannot be added to cart, course is not available.";
+    public static final String ADD_TO_CART_FAILED_ALREADY_IN_CART = "Course cannot be added to cart, it is already present in your cart.";
+    public static final String EMPTY_CART = "Cart is empty.";
 
     // Validation Constants
     public static final String MIN_PASSWORD = "Password must be minimum of 5 characters.";

@@ -4,10 +4,7 @@ package io.reactivestax.active.life.canada.controller;
 import io.reactivestax.active.life.canada.constant.Endpoints;
 import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.constant.ShortConstant;
-import io.reactivestax.active.life.canada.dto.CartDto;
-import io.reactivestax.active.life.canada.dto.FamilyCourseRegistrationDetails;
-import io.reactivestax.active.life.canada.dto.OfferedCourseWaitlistDto;
-import io.reactivestax.active.life.canada.dto.SuccessfulResponse;
+import io.reactivestax.active.life.canada.dto.*;
 import io.reactivestax.active.life.canada.model.SecurityHeader;
 import io.reactivestax.active.life.canada.service.CourseRegistrationManagementService;
 import io.reactivestax.active.life.canada.util.ActiveLifeUtil;
@@ -31,6 +28,22 @@ public class CourseRegistrationManagementController {
              @RequestBody CartDto cartDto) {
         SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
         courseRegistrationManagementService.addToCart(cartDto, securityHeader.getFamilyMemberId());
+
+        return ResponseEntity.ok(SuccessfulResponse.builder().message(Message.ADDED_TO_CART).build());
+    }
+
+    @GetMapping(Endpoints.OFFERED_COURSE_CART)
+    public ResponseEntity<List<CartResponse>> getCart(@RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson) {
+        SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
+        List<CartResponse> cart = courseRegistrationManagementService.getCart(securityHeader.getFamilyMemberId());
+
+        return ResponseEntity.ok(cart);
+    }
+
+    @GetMapping(Endpoints.CART_PAYMENT)
+    public ResponseEntity<SuccessfulResponse> payForCart(@RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson) {
+        SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
+      courseRegistrationManagementService.payForCart(securityHeader.getFamilyMemberId());
 
         return ResponseEntity.ok(SuccessfulResponse.builder().message(Message.ADDED_TO_CART).build());
     }
