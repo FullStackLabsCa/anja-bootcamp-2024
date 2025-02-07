@@ -1,13 +1,12 @@
 package io.reactivestax.active.life.canada.service;
 
 import io.reactivestax.active.life.canada.constant.Endpoints;
-import io.reactivestax.active.life.canada.constant.ExceptionHandlerConst;
 import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.entity.*;
-import io.reactivestax.active.life.canada.enums.FeeType;
-import io.reactivestax.active.life.canada.exception.InvalidRequestException;
+import io.reactivestax.active.life.canada.enums.AvailableForEnrollment;
 import io.reactivestax.active.life.canada.repository.AccountActivationRequestRepository;
 import io.reactivestax.active.life.canada.repository.FamilyGroupRepository;
+import io.reactivestax.active.life.canada.repository.OfferedCourseRepository;
 import io.reactivestax.active.life.canada.repository.OfferedCourseWaitlistRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
@@ -25,6 +24,7 @@ import java.util.UUID;
 public class AsyncJobsService {
 
     private final AccountActivationRequestRepository accountActivationRequestRepository;
+    private final OfferedCourseRepository offeredCourseRepository;
     private final OfferedCourseWaitlistRepository offeredCourseWaitlistRepository;
     private final FamilyGroupRepository familyGroupRepository;
     private final EmsService emsService;
@@ -40,6 +40,14 @@ public class AsyncJobsService {
         String activationLink = MessageFormat.format(Endpoints.ACTIVATION_LINK_URL, savedAccountActivationRequest.getToken());
         String message = MessageFormat.format(Message.ACTIVATION_LINK_MESSAGE, familyMember.getName(), activationLink);
         emsService.sendToEms(familyMember, message);
+    }
+
+    @Async
+    public void checkAndUpdateCourseAvailability(OfferedCourse offeredCourse) {
+        if (offeredCourse.getNoOfSpots() - 1 == offeredCourse.getFamilyCourseRegistrations().stream()
+                .filter(familyCourseRegistration -> !familyCourseRegistration.getIsWithdrawn()).toList().size())
+            offeredCourse.setAvailableForEnrollment(AvailableForEnrollment.WAITLIST_OPEN);
+        offeredCourseRepository.save(offeredCourse);
     }
 
     @Async

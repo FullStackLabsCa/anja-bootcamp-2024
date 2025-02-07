@@ -25,7 +25,7 @@ public class CourseRegistrationManagementController {
     @PostMapping(Endpoints.OFFERED_COURSE_CART)
     public ResponseEntity<SuccessfulResponse> addToCart
             (@RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson,
-             @RequestBody CartDto cartDto) {
+             @RequestBody CourseEnrollmentWaitlistDto cartDto) {
         SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
         courseRegistrationManagementService.addToCart(cartDto, securityHeader.getFamilyMemberId());
 
@@ -40,12 +40,12 @@ public class CourseRegistrationManagementController {
         return ResponseEntity.ok(cart);
     }
 
-    @GetMapping(Endpoints.CART_PAYMENT)
+    @PostMapping(Endpoints.CART_PAYMENT)
     public ResponseEntity<SuccessfulResponse> payForCart(@RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson) {
         SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
       courseRegistrationManagementService.payForCart(securityHeader.getFamilyMemberId());
 
-        return ResponseEntity.ok(SuccessfulResponse.builder().message(Message.ADDED_TO_CART).build());
+        return ResponseEntity.ok(SuccessfulResponse.builder().message(Message.PAID_FOR_CART).build());
     }
 
     @GetMapping(Endpoints.REGISTERED_COURSES)
@@ -54,6 +54,16 @@ public class CourseRegistrationManagementController {
         List<FamilyCourseRegistrationDetails> familyCourseRegistrationDetailsList = this.courseRegistrationManagementService.getRegisteredCourses(securityHeader.getFamilyMemberId());
 
         return ResponseEntity.ok(familyCourseRegistrationDetailsList);
+    }
+
+    @PostMapping(Endpoints.WAITLISTED_COURSES)
+    public ResponseEntity<SuccessfulResponse> addToWaitList
+            (@RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson,
+             @RequestBody CourseEnrollmentWaitlistDto waitlistDto) {
+        SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
+        this.courseRegistrationManagementService.addToWaitlist(securityHeader.getFamilyMemberId(), waitlistDto);
+
+        return ResponseEntity.ok(SuccessfulResponse.builder().message(Message.WITHDRAWN_SUCCESSFUL).build());
     }
 
     @GetMapping(Endpoints.WAITLISTED_COURSES)

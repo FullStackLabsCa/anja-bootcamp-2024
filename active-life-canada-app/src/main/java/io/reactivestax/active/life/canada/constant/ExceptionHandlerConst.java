@@ -11,6 +11,7 @@ public class ExceptionHandlerConst {
     public static final String TIMESTAMP = "timestamp";
 
     public static final String MEMBER_ALREADY_EXISTS = "Username already exists, please try with a different username.";
+    public static final String MEMBER_INACTIVE = "Member is no longer active.";
     public static final String INVALID_ACTIVATION_LINK = "Invalid account activation link.";
     public static final String UNAUTHORIZED_ACCESS = "Unauthorized access.";
     public static final String VERIFICATION_FAILED = "Otp verification failed.";
@@ -27,9 +28,11 @@ public class ExceptionHandlerConst {
     public static final String RESIDENT_COURSE_FEE_NOT_FOUND = "Course not available for residents.";
     public static final String NON_RESIDENT_COURSE_FEE_NOT_FOUND = "Course not available for non-residents.";
     public static final String WITHDRAW_NOT_ALLOWED = "Withdraw from the course is not allowed.";
-    public static final String COURSE_FULL = "Course spots and waitlist full.";
+    public static final String COURSE_NO_LONGER_AVAILABLE = "Course with barCode: {0} is no longer available.";
     public static final String ALREADY_ENROLLED = "Enrollment failed, already enrolled in this course.";
     public static final String ALREADY_WAITLISTED = "Adding to waitlist failed, already part of the waitlist.";
+    public static final String WAITLIST_ADD_FAILED_ALREADY_ENROLLED = "Adding to waitlist failed, already enrolled in the course.";
+    public static final String WAITLIST_FULL = "Cannot add to waitlist, waitlist is full.";
     public static final String TOKEN_EXPIRED = "Verification failed, token expired, please generate a new one.";
     public static final String ADD_TO_CART_FAILED_WAITLIST = "Course cannot be added to cart, course is in waitlist.";
     public static final String ADD_TO_CART_FAILED_NOT_AVAILABLE = "Course cannot be added to cart, course is not available.";

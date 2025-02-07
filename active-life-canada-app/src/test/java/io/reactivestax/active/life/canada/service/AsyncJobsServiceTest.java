@@ -4,8 +4,8 @@ import io.reactivestax.active.life.canada.constant.TestData;
 import io.reactivestax.active.life.canada.entity.*;
 import io.reactivestax.active.life.canada.repository.AccountActivationRequestRepository;
 import io.reactivestax.active.life.canada.repository.FamilyGroupRepository;
+import io.reactivestax.active.life.canada.repository.OfferedCourseRepository;
 import io.reactivestax.active.life.canada.repository.OfferedCourseWaitlistRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,6 +29,9 @@ class AsyncJobsServiceTest {
     private AccountActivationRequestRepository accountActivationRequestRepository;
 
     @MockitoBean
+    private OfferedCourseRepository offeredCourseRepository;
+
+    @MockitoBean
     private OfferedCourseWaitlistRepository offeredCourseWaitlistRepository;
 
     @MockitoBean
@@ -39,15 +42,6 @@ class AsyncJobsServiceTest {
 
     @MockitoBean
     private CacheService cacheService;
-
-    @BeforeEach
-    void setUp() {
-        asyncJobsService = new AsyncJobsService(accountActivationRequestRepository,
-                offeredCourseWaitlistRepository,
-                familyGroupRepository,
-                emsService,
-                cacheService);
-    }
 
     @Test
     void testCreateAccountActivationRequestEntryAndSendToEms() {

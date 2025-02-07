@@ -1,7 +1,7 @@
 package io.reactivestax.active.life.canada.service;
 
 import io.reactivestax.active.life.canada.constant.ExceptionHandlerConst;
-import io.reactivestax.active.life.canada.dto.CartDto;
+import io.reactivestax.active.life.canada.dto.CourseEnrollmentWaitlistDto;
 import io.reactivestax.active.life.canada.exception.InvalidRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +23,9 @@ public class CacheService {
     @Value("${spring.cache.cache-names}")
     private String cacheName;
 
-    public List<CartDto> getCart(String loggedInMemberId) {
+    public List<CourseEnrollmentWaitlistDto> getCart(String loggedInMemberId) {
         Cache cache = cacheManager.getCache(cacheName);
-        List<CartDto> cart = new ArrayList<>();
+        List<CourseEnrollmentWaitlistDto> cart = new ArrayList<>();
         if (cache != null) {
             cart = cache.get(loggedInMemberId, List.class);
             if (cart == null) cart = new ArrayList<>();
@@ -33,9 +33,9 @@ public class CacheService {
         return cart;
     }
 
-    public List<CartDto> addToCache(String loggedInMemberId, CartDto cartDto) {
+    public List<CourseEnrollmentWaitlistDto> addToCache(String loggedInMemberId, CourseEnrollmentWaitlistDto cartDto) {
         Cache cache = cacheManager.getCache(cacheName);
-        List<CartDto> cartDtoList = getCart(loggedInMemberId);
+        List<CourseEnrollmentWaitlistDto> cartDtoList = getCart(loggedInMemberId);
         if (!cartDtoList.contains(cartDto) && cache != null) {
             cartDtoList.add(cartDto);
             cache.put(loggedInMemberId, cartDtoList);

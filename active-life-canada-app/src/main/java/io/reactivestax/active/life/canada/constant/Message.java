@@ -11,6 +11,7 @@ public class Message {
     public static final String ENROLLMENT_SUCCESSFUL = "Enrollment successful.";
     public static final String ADDED_TO_WAITLIST = "Spots full, added to waitlist.";
     public static final String ADDED_TO_CART = "Successfully added to cart.";
+    public static final String PAID_FOR_CART = "Successfully paid for cart.";
     public static final String WITHDRAWN_SUCCESSFUL = "Withdrawn successful.";
     public static final String SUCCESSFUL_LOGIN = "Credentials verified successfully, an otp is sent to your preferred mode of communication for verification.";
     public static final String SUCCESSFUL_LOGIN_VERIFICATION = "Login verification successful.";
