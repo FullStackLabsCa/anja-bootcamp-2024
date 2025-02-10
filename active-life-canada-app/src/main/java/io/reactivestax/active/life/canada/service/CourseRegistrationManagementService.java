@@ -1,10 +1,7 @@
 package io.reactivestax.active.life.canada.service;
 
 import io.reactivestax.active.life.canada.constant.ExceptionHandlerConst;
-import io.reactivestax.active.life.canada.dto.CartResponse;
-import io.reactivestax.active.life.canada.dto.CourseEnrollmentWaitlistDto;
-import io.reactivestax.active.life.canada.dto.FamilyCourseRegistrationDetails;
-import io.reactivestax.active.life.canada.dto.OfferedCourseWaitlistDto;
+import io.reactivestax.active.life.canada.dto.*;
 import io.reactivestax.active.life.canada.entity.*;
 import io.reactivestax.active.life.canada.enums.AvailableForEnrollment;
 import io.reactivestax.active.life.canada.enums.FeeType;
@@ -41,6 +38,7 @@ public class CourseRegistrationManagementService {
     private final ActiveLifeUtil activeLifeUtil;
     private final AsyncJobsService asyncJobsService;
     private final CacheService cacheService;
+    private final PaymentService paymentService;
 
     @Transactional
     public void addToCart(CourseEnrollmentWaitlistDto cartDto, String loggedInMemberId) {
@@ -97,7 +95,7 @@ public class CourseRegistrationManagementService {
                 .findFirst().orElseThrow(() -> new InvalidRequestException(exceptionMessage));
     }
 
-    public void payForCart(String loggedInMemberId) {
+    public void payForCart(String loggedInMemberId, PaymentDto paymentDto) {
         checkUnauthorizedAccess(UUID.fromString(loggedInMemberId));
         List<CourseEnrollmentWaitlistDto> cart = cacheService.getCart(loggedInMemberId);
         if (!cart.isEmpty()) {
@@ -120,10 +118,14 @@ public class CourseRegistrationManagementService {
                         .withdrawnCredits(0)
                         .isWithdrawn(false)
                         .build();
-                asyncJobsService.checkAndUpdateCourseAvailability(offeredCourse);
+                asyncJobsService.checkAndUpdateCourseAvailabilityToWaitlist(offeredCourse);
                 asyncJobsService.removeEntryFromWaitlistIfExists(offeredCourse.getOfferedCourseId(), familyMember.getFamilyMemberId());
                 return familyCourseRegistration;
             }).toList();
+            int totalCost = familyCourseRegistrationList.stream()
+                    .mapToInt(FamilyCourseRegistration::getCost)
+                    .sum();
+            paymentService.createPaymentIntentAndConfirm(totalCost, paymentDto.getPaymentMethodId());
             familyCourseRegistrationRepository.saveAll(familyCourseRegistrationList);
             cacheService.clearCart(loggedInMemberId);
         } else throw new InvalidRequestException(ExceptionHandlerConst.EMPTY_CART);
@@ -150,6 +152,7 @@ public class CourseRegistrationManagementService {
                 .enrollmentActorId(loggedInMember.getFamilyMemberId())
                 .build();
         offeredCourseWaitlistRepository.save(courseWaitlist);
+        asyncJobsService.checkAndUpdateCourseAvailabilityToNotAvailable(offeredCourse);
     }
 
     public List<FamilyCourseRegistrationDetails> getRegisteredCourses(String loggedInMemberId) {

@@ -58,6 +58,7 @@ class CourseRegistrationManagementServiceTest {
     private FamilyMember familyMember;
     private OfferedCourse offeredCourse;
     private FamilyCourseRegistration familyCourseRegistration;
+    private CourseEnrollmentWaitlistDto courseEnrollmentWaitlistDto;
 
     @BeforeEach
     void setUp() {
@@ -123,6 +124,10 @@ class CourseRegistrationManagementServiceTest {
                 .isWithdrawn(false)
                 .withdrawnCredits(0)
                 .build();
+
+        courseEnrollmentWaitlistDto = CourseEnrollmentWaitlistDto.builder()
+                .familyMemberLoginId(TestData.MEMBER_LOGIN_ID)
+                .offeredCourseBarCode(TestData.BAR_CODE_STRING).build();
     }
 
     @Test
@@ -224,21 +229,19 @@ class CourseRegistrationManagementServiceTest {
     }
 
     @Test
-    void testGetCart_Success(){
+    void testGetCart_Success() {
         when(familyMemberRepository.findByFamilyMemberIdAndIsActive(any(UUID.class), anyBoolean())).thenReturn(Optional.of(loggedInMember));
-        when(cacheService.getCart(anyString())).thenReturn(List.of(CourseEnrollmentWaitlistDto.builder()
-                .familyMemberLoginId(TestData.MEMBER_LOGIN_ID)
-                .offeredCourseBarCode(TestData.BAR_CODE_STRING).build()));
+        when(cacheService.getCart(anyString())).thenReturn(List.of(courseEnrollmentWaitlistDto));
         when(offeredCourseRepository.findByBarCode(any(UUID.class))).thenReturn(Optional.of(offeredCourse));
         when(familyMemberRepository.findByMemberLoginId(anyString())).thenReturn(Optional.of(familyMember));
 
         List<CartResponse> cart = courseRegistrationManagementService.getCart(TestData.LOGGED_IN_MEMBER_ID_STRING);
 
-        assertEquals(cart.size(), 1);
+        assertEquals(1, cart.size());
     }
 
     @Test
-    void testGetCartNonResidentFees_Success(){
+    void testGetCartNonResidentFees_Success() {
         familyMember.setCity(TestData.CITY2);
         when(familyMemberRepository.findByFamilyMemberIdAndIsActive(any(UUID.class), anyBoolean())).thenReturn(Optional.of(loggedInMember));
         when(cacheService.getCart(anyString())).thenReturn(List.of(CourseEnrollmentWaitlistDto.builder()
@@ -249,13 +252,86 @@ class CourseRegistrationManagementServiceTest {
 
         List<CartResponse> cart = courseRegistrationManagementService.getCart(TestData.LOGGED_IN_MEMBER_ID_STRING);
 
-        assertEquals(cart.size(), 1);
+        assertEquals(1, cart.size());
     }
 
-//    @Test
-//    void testGetFees(){
-//        courseRegistrationManagementService.
-//    }
+    @Test
+    void testAddToWaitlist_Failed_InvalidBarCode() {
+        when(familyMemberRepository.findByFamilyMemberIdAndIsActive(any(UUID.class), anyBoolean()))
+                .thenReturn(Optional.of(loggedInMember));
+        when(familyMemberRepository.findByMemberLoginIdAndIsActive(anyString(), anyBoolean())).thenReturn(Optional.of(familyMember));
+        when(offeredCourseRepository.findByBarCodeAndAvailableForEnrollment(any(UUID.class), any(AvailableForEnrollment.class)))
+                .thenReturn(Optional.empty());
+
+        assertThrows(InvalidRequestException.class, () ->
+                courseRegistrationManagementService.addToWaitlist(TestData.LOGGED_IN_MEMBER_ID_STRING, courseEnrollmentWaitlistDto));
+    }
+
+    @Test
+    void testAddToWaitlist_Failed_AlreadyWaitlisted() {
+        when(familyMemberRepository.findByFamilyMemberIdAndIsActive(any(UUID.class), anyBoolean()))
+                .thenReturn(Optional.of(loggedInMember));
+        when(familyMemberRepository.findByMemberLoginIdAndIsActive(anyString(), anyBoolean())).thenReturn(Optional.of(familyMember));
+        when(offeredCourseRepository.findByBarCodeAndAvailableForEnrollment(any(UUID.class), any(AvailableForEnrollment.class)))
+                .thenReturn(Optional.of(offeredCourse));
+        when(offeredCourseWaitlistRepository.existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseId
+                (any(UUID.class), any(UUID.class))).thenReturn(true);
+
+        assertThrows(InvalidRequestException.class, () ->
+                courseRegistrationManagementService.addToWaitlist(TestData.LOGGED_IN_MEMBER_ID_STRING, courseEnrollmentWaitlistDto));
+    }
+
+    @Test
+    void testAddToWaitlist_Failed_AlreadyEnrolled() {
+        when(familyMemberRepository.findByFamilyMemberIdAndIsActive(any(UUID.class), anyBoolean()))
+                .thenReturn(Optional.of(loggedInMember));
+        when(familyMemberRepository.findByMemberLoginIdAndIsActive(anyString(), anyBoolean())).thenReturn(Optional.of(familyMember));
+        when(offeredCourseRepository.findByBarCodeAndAvailableForEnrollment(any(UUID.class), any(AvailableForEnrollment.class)))
+                .thenReturn(Optional.of(offeredCourse));
+        when(offeredCourseWaitlistRepository.existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseId
+                (any(UUID.class), any(UUID.class))).thenReturn(false);
+        when(familyCourseRegistrationRepository.existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseIdAndIsWithdrawn
+                (any(UUID.class), any(UUID.class), anyBoolean())).thenReturn(true);
+
+        assertThrows(InvalidRequestException.class, () ->
+                courseRegistrationManagementService.addToWaitlist(TestData.LOGGED_IN_MEMBER_ID_STRING, courseEnrollmentWaitlistDto));
+    }
+
+    @Test
+    void testAddToWaitlist_Failed_WaitlistFull() {
+        offeredCourse.setNoOfSpots(0);
+        when(familyMemberRepository.findByFamilyMemberIdAndIsActive(any(UUID.class), anyBoolean()))
+                .thenReturn(Optional.of(loggedInMember));
+        when(familyMemberRepository.findByMemberLoginIdAndIsActive(anyString(), anyBoolean())).thenReturn(Optional.of(familyMember));
+        when(offeredCourseRepository.findByBarCodeAndAvailableForEnrollment(any(UUID.class), any(AvailableForEnrollment.class)))
+                .thenReturn(Optional.of(offeredCourse));
+        when(offeredCourseWaitlistRepository.existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseId
+                (any(UUID.class), any(UUID.class))).thenReturn(false);
+        when(familyCourseRegistrationRepository.existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseIdAndIsWithdrawn
+                (any(UUID.class), any(UUID.class), anyBoolean())).thenReturn(false);
+
+        assertThrows(InvalidRequestException.class, () ->
+                courseRegistrationManagementService.addToWaitlist(TestData.LOGGED_IN_MEMBER_ID_STRING, courseEnrollmentWaitlistDto));
+    }
+
+    @Test
+    void testAddToWaitlist_Success() {
+        when(familyMemberRepository.findByFamilyMemberIdAndIsActive(any(UUID.class), anyBoolean()))
+                .thenReturn(Optional.of(loggedInMember));
+        when(familyMemberRepository.findByMemberLoginIdAndIsActive(anyString(), anyBoolean())).thenReturn(Optional.of(familyMember));
+        when(offeredCourseRepository.findByBarCodeAndAvailableForEnrollment(any(UUID.class), any(AvailableForEnrollment.class)))
+                .thenReturn(Optional.of(offeredCourse));
+        when(offeredCourseWaitlistRepository.existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseId
+                (any(UUID.class), any(UUID.class))).thenReturn(false);
+        when(familyCourseRegistrationRepository.existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseIdAndIsWithdrawn
+                (any(UUID.class), any(UUID.class), anyBoolean())).thenReturn(false);
+        when(offeredCourseWaitlistRepository.save(any(OfferedCourseWaitlist.class))).thenReturn(new OfferedCourseWaitlist());
+        doNothing().when(asyncJobsService).checkAndUpdateCourseAvailabilityToNotAvailable(any(OfferedCourse.class));
+
+        courseRegistrationManagementService.addToWaitlist(TestData.LOGGED_IN_MEMBER_ID_STRING,
+                courseEnrollmentWaitlistDto);
+        verify(offeredCourseWaitlistRepository, times(1)).save(any(OfferedCourseWaitlist.class));
+    }
 
     @Test
     void testWithdrawFromCourse() {

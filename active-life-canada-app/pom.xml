@@ -82,11 +82,11 @@
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.stripe</groupId>-->
-<!--            <artifactId>stripe-java</artifactId>-->
-<!--            <version>20.110.0</version> &lt;!&ndash; Use the latest version &ndash;&gt;-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>com.stripe</groupId>
+            <artifactId>stripe-java</artifactId>
+            <version>20.110.0</version> <!-- Use the latest version -->
+        </dependency>
     </dependencies>
 
     <build>

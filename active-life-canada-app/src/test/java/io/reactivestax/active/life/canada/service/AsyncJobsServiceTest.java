@@ -61,13 +61,24 @@ class AsyncJobsServiceTest {
     }
 
     @Test
-    void testCheckAndUpdateCourseAvailability(){
+    void testCheckAndUpdateCourseAvailabilityToWaitlist(){
         OfferedCourse offeredCourse = OfferedCourse.builder()
                 .noOfSpots(2)
                 .familyCourseRegistrations(List.of(FamilyCourseRegistration.builder().isWithdrawn(false).build()))
                 .build();
         doReturn(new OfferedCourse()).when(offeredCourseRepository).save(offeredCourse);
-        asyncJobsService.checkAndUpdateCourseAvailability(offeredCourse);
+        asyncJobsService.checkAndUpdateCourseAvailabilityToWaitlist(offeredCourse);
+        verify(offeredCourseRepository, timeout(100)).save(any(OfferedCourse.class));
+    }
+
+    @Test
+    void testCheckAndUpdateCourseAvailabilityToNotAvailable(){
+        OfferedCourse offeredCourse = OfferedCourse.builder()
+                .noOfSpots(2)
+                .offeredCourseWaitlist(List.of(new OfferedCourseWaitlist()))
+                .build();
+        doReturn(new OfferedCourse()).when(offeredCourseRepository).save(offeredCourse);
+        asyncJobsService.checkAndUpdateCourseAvailabilityToNotAvailable(offeredCourse);
         verify(offeredCourseRepository, timeout(100)).save(any(OfferedCourse.class));
     }
 

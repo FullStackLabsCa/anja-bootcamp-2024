@@ -15,11 +15,13 @@ public class Endpoints {
     public static final String REGISTERED_COURSES = "/registeredCourses";
     public static final String WAITLISTED_COURSES = "/waitlistedCourses";
     public static final String OFFERED_COURSES = "/offeredCourses";
-    public static final String ENROLL_COURSE = OFFERED_COURSES + "/{barCode}/enrollments/{memberLoginId}";
     public static final String WITHDRAW_FROM_COURSE = "/enrollments/{enrollmentId}";
     public static final String SEARCH_OFFERED_COURSES = OFFERED_COURSES + "/search";
     public static final String OFFERED_COURSE_CART = OFFERED_COURSES + "/cart";
     public static final String CART_PAYMENT = OFFERED_COURSE_CART + "/pay";
+
+    // stripe end points
+    public static final String STRIPE_PAYMENT_INTENTS = "/payment_intents";
 
     // ENS endpoints
     public static final String ENS_SMS = "/ems/sms";

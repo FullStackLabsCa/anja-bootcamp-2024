@@ -30,3 +30,7 @@ ems:
 logging:
   level:
     root: INFO
+stripe:
+  api:
+    baseUrl: https://api.stripe.com/v1
+    key: ${STRIPE_SECRET_KEY}

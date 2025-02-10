@@ -41,9 +41,10 @@ public class CourseRegistrationManagementController {
     }
 
     @PostMapping(Endpoints.CART_PAYMENT)
-    public ResponseEntity<SuccessfulResponse> payForCart(@RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson) {
+    public ResponseEntity<SuccessfulResponse> payForCart(@RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson,
+                                                         @RequestBody PaymentDto paymentDto) {
         SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
-      courseRegistrationManagementService.payForCart(securityHeader.getFamilyMemberId());
+      courseRegistrationManagementService.payForCart(securityHeader.getFamilyMemberId(), paymentDto);
 
         return ResponseEntity.ok(SuccessfulResponse.builder().message(Message.PAID_FOR_CART).build());
     }

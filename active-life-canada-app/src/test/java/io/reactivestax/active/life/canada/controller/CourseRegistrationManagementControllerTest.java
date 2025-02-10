@@ -5,10 +5,7 @@ import io.reactivestax.active.life.canada.constant.Endpoints;
 import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.constant.ShortConstant;
 import io.reactivestax.active.life.canada.constant.TestData;
-import io.reactivestax.active.life.canada.dto.CartResponse;
-import io.reactivestax.active.life.canada.dto.CourseEnrollmentWaitlistDto;
-import io.reactivestax.active.life.canada.dto.FamilyCourseRegistrationDetails;
-import io.reactivestax.active.life.canada.dto.OfferedCourseWaitlistDto;
+import io.reactivestax.active.life.canada.dto.*;
 import io.reactivestax.active.life.canada.model.SecurityHeader;
 import io.reactivestax.active.life.canada.service.CourseRegistrationManagementService;
 import io.reactivestax.active.life.canada.util.ActiveLifeUtil;
@@ -75,11 +72,12 @@ class CourseRegistrationManagementControllerTest {
     @Test
     void testPayForCart_Success() throws Exception {
         when(activeLifeUtil.getSecurityHeader(anyString())).thenReturn(new SecurityHeader(FAMILY_MEMBER_ID));
-        doNothing().when(courseRegistrationManagementService).payForCart(anyString());
+        doNothing().when(courseRegistrationManagementService).payForCart(anyString(), any(PaymentDto.class));
 
         mockMvc.perform(post(Endpoints.BASE_ENDPOINT + Endpoints.CART_PAYMENT)
                         .header(ShortConstant.SECURITY_HEADER, SECURITY_HEADER_JSON)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new PaymentDto(""))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(TestData.JSON_EXPRESSION_MESSAGE).value(Message.PAID_FOR_CART));
     }

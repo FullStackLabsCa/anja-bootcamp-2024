@@ -43,10 +43,17 @@ public class AsyncJobsService {
     }
 
     @Async
-    public void checkAndUpdateCourseAvailability(OfferedCourse offeredCourse) {
+    public void checkAndUpdateCourseAvailabilityToWaitlist(OfferedCourse offeredCourse) {
         if (offeredCourse.getNoOfSpots() - 1 == offeredCourse.getFamilyCourseRegistrations().stream()
                 .filter(familyCourseRegistration -> !familyCourseRegistration.getIsWithdrawn()).toList().size())
             offeredCourse.setAvailableForEnrollment(AvailableForEnrollment.WAITLIST_OPEN);
+        offeredCourseRepository.save(offeredCourse);
+    }
+
+    @Async
+    public void checkAndUpdateCourseAvailabilityToNotAvailable(OfferedCourse offeredCourse) {
+        if (offeredCourse.getNoOfSpots() - 1 == offeredCourse.getOfferedCourseWaitlist().size())
+            offeredCourse.setAvailableForEnrollment(AvailableForEnrollment.NOT_AVAILABLE);
         offeredCourseRepository.save(offeredCourse);
     }
 
