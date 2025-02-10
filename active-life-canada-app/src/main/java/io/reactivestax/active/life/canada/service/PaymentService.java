@@ -37,7 +37,7 @@ public class PaymentService {
         httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         Map<String, String> requestBody = new HashMap<>();
-        requestBody.put("amount", amount.toString());
+        requestBody.put("amount", amount.toString() + "00");
         requestBody.put("currency", "CAD");
         requestBody.put("confirm", "true");
         requestBody.put("automatic_payment_methods[enabled]", "true");
@@ -55,6 +55,7 @@ public class PaymentService {
             ResponseEntity<String> stringResponseEntity = restTemplate.postForEntity((baseUrl + Endpoints.STRIPE_PAYMENT_INTENTS), requestEntity, String.class);
             log.info(String.valueOf(stringResponseEntity));
         } catch (RestClientException ex) {
+            log.info(ex.toString());
             throw new InvalidRequestException(ExceptionHandlerConst.PAYMENT_FAILED);
         }
     }
