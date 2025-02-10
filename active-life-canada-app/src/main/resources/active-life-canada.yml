@@ -359,7 +359,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponse'
-  /registeredCourses/{memberId}:
+  /registeredCourses:
     get:
       tags:
         - course registration management
@@ -367,12 +367,15 @@ paths:
       description: Find registered courses by member id
       operationId: registeredCourseByMemberId
       parameters:
-        - name: memberId
-          in: path
-          description: Member Id
+        - name: X-security-header
+          in: header
+          description: Group Id for authentication
           required: true
           schema:
-            type: string
+            type: object
+            properties:
+              familyMemberId:
+                type: string
       responses:
         '200':
           description: Registered courses
@@ -394,7 +397,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponse'
-  /waitlistedCourses/{memberId}:
+  /waitlistedCourses:
+    post:
+      tags:
+        - course registration management
+      summary: Add to waitlist
+      description: Add to waitlist
+      operationId: addToWaitlist
+      parameters:
+        - name: X-security-header
+          in: header
+          description: Group Id for authentication
+          required: true
+          schema:
+            type: object
+            properties:
+              familyMemberId:
+                type: string
+      responses:
+        '200':
+          description: Waitlisted courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseDetailsResponse'
+        '404':
+          description: Member not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
     get:
       tags:
         - course registration management
@@ -402,12 +442,6 @@ paths:
       description: Find waitlistedCourses courses by member id
       operationId: waitlistedCoursesByMemberId
       parameters:
-        - name: memberId
-          in: path
-          description: Member Id
-          required: true
-          schema:
-            type: string
         - name: X-security-header
           in: header
           description: Group Id for authentication
@@ -530,26 +564,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponse'
-  /offeredCourses/{barCode}/enrollments/{memberLoginId}:
+  /offeredCourses/cart:
     post:
       tags:
         - course registration management
-      summary: Enroll into a course
-      description: Enroll into a course
-      operationId: registerForCourse
+      summary: Add course to cart
+      description: Add course to cart
+      operationId: addToCart
       parameters:
-        - name: barCode
-          in: path
-          description: Bar code of the offered course to enroll into
-          required: true
-          schema:
-            type: string
-        - name: memberLoginId
-          in: path
-          description:  member login Id to enroll into the course
-          required: true
-          schema:
-            type: string
         - name: X-security-header
           in: header
           description: Group Id for authentication
@@ -561,7 +583,7 @@ paths:
                 type: string
       responses:
         '200':
-          description: Enrollment successful
+          description: Successfully added to cart
           content:
             application/json:
               schema:
@@ -578,7 +600,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponse'
-  /courseRegistrations/payment:
+    get:
+      tags:
+        - course registration management
+      summary: Get all courses in cart
+      operationId: getCart
+      parameters:
+        - name: X-security-header
+          in: header
+          description: Group Id for authentication
+          required: true
+          schema:
+            type: object
+            properties:
+              familyMemberId:
+                type: string
+      responses:
+        '200':
+          description: Successfully added to cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessfulResponse'
+        '404':
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  /offeredCourses/cart/pay:
     post:
       tags:
         - course registration management
