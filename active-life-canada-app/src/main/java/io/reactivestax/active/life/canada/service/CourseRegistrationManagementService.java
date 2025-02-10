@@ -71,13 +71,12 @@ public class CourseRegistrationManagementService {
         List<CourseEnrollmentWaitlistDto> cart = cacheService.getCart(loggedInMemberId);
         return cart.stream().map(cartDto -> {
             CartResponse cartResponse = new CartResponse();
-            offeredCourseRepository.findByBarCode(UUID.fromString(cartDto.getOfferedCourseBarCode())).ifPresent(offeredCourse -> {
-                familyMemberRepository.findByMemberLoginId(cartDto.getFamilyMemberLoginId()).ifPresent(familyMember -> {
-                    cartResponse.setCourseName(offeredCourse.getCourse().getName());
-                    cartResponse.setStatus(offeredCourse.getAvailableForEnrollment());
-                    cartResponse.setFee(getFees(offeredCourse, familyMember).getCourseFee());
-                });
-            });
+            offeredCourseRepository.findByBarCode(UUID.fromString(cartDto.getOfferedCourseBarCode())).ifPresent(offeredCourse ->
+                    familyMemberRepository.findByMemberLoginId(cartDto.getFamilyMemberLoginId()).ifPresent(familyMember -> {
+                        cartResponse.setCourseName(offeredCourse.getCourse().getName());
+                        cartResponse.setStatus(offeredCourse.getAvailableForEnrollment());
+                        cartResponse.setFee(getFees(offeredCourse, familyMember).getCourseFee());
+                    }));
             return cartResponse;
         }).toList();
     }

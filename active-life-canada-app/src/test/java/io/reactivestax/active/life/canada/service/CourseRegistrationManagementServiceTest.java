@@ -2,6 +2,7 @@ package io.reactivestax.active.life.canada.service;
 
 import io.reactivestax.active.life.canada.constant.ExceptionHandlerConst;
 import io.reactivestax.active.life.canada.constant.TestData;
+import io.reactivestax.active.life.canada.dto.CartResponse;
 import io.reactivestax.active.life.canada.dto.CourseEnrollmentWaitlistDto;
 import io.reactivestax.active.life.canada.dto.FamilyCourseRegistrationDetails;
 import io.reactivestax.active.life.canada.dto.OfferedCourseWaitlistDto;
@@ -50,6 +51,8 @@ class CourseRegistrationManagementServiceTest {
     private OfferedCourseWaitlistRepository offeredCourseWaitlistRepository;
     @MockitoBean
     private AsyncJobsService asyncJobsService;
+    @MockitoBean
+    private CacheService cacheService;
 
     private FamilyMember loggedInMember;
     private FamilyMember familyMember;
@@ -219,6 +222,40 @@ class CourseRegistrationManagementServiceTest {
         assertThrows(InvalidRequestException.class, () -> courseRegistrationManagementService.addToCart(cartDto,
                 TestData.LOGGED_IN_MEMBER_ID_STRING));
     }
+
+    @Test
+    void testGetCart_Success(){
+        when(familyMemberRepository.findByFamilyMemberIdAndIsActive(any(UUID.class), anyBoolean())).thenReturn(Optional.of(loggedInMember));
+        when(cacheService.getCart(anyString())).thenReturn(List.of(CourseEnrollmentWaitlistDto.builder()
+                .familyMemberLoginId(TestData.MEMBER_LOGIN_ID)
+                .offeredCourseBarCode(TestData.BAR_CODE_STRING).build()));
+        when(offeredCourseRepository.findByBarCode(any(UUID.class))).thenReturn(Optional.of(offeredCourse));
+        when(familyMemberRepository.findByMemberLoginId(anyString())).thenReturn(Optional.of(familyMember));
+
+        List<CartResponse> cart = courseRegistrationManagementService.getCart(TestData.LOGGED_IN_MEMBER_ID_STRING);
+
+        assertEquals(cart.size(), 1);
+    }
+
+    @Test
+    void testGetCartNonResidentFees_Success(){
+        familyMember.setCity(TestData.CITY2);
+        when(familyMemberRepository.findByFamilyMemberIdAndIsActive(any(UUID.class), anyBoolean())).thenReturn(Optional.of(loggedInMember));
+        when(cacheService.getCart(anyString())).thenReturn(List.of(CourseEnrollmentWaitlistDto.builder()
+                .familyMemberLoginId(TestData.MEMBER_LOGIN_ID)
+                .offeredCourseBarCode(TestData.BAR_CODE_STRING).build()));
+        when(offeredCourseRepository.findByBarCode(any(UUID.class))).thenReturn(Optional.of(offeredCourse));
+        when(familyMemberRepository.findByMemberLoginId(anyString())).thenReturn(Optional.of(familyMember));
+
+        List<CartResponse> cart = courseRegistrationManagementService.getCart(TestData.LOGGED_IN_MEMBER_ID_STRING);
+
+        assertEquals(cart.size(), 1);
+    }
+
+//    @Test
+//    void testGetFees(){
+//        courseRegistrationManagementService.
+//    }
 
     @Test
     void testWithdrawFromCourse() {
