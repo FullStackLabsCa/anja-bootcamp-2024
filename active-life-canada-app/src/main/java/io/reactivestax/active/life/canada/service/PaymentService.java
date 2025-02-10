@@ -57,6 +57,5 @@ public class PaymentService {
         } catch (HttpClientErrorException ex) {
             throw new InvalidRequestException(ExceptionHandlerConst.PAYMENT_FAILED);
         }
-
     }
 }

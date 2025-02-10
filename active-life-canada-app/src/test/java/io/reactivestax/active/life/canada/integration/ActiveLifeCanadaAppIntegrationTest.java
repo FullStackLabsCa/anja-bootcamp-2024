@@ -7,6 +7,7 @@ import io.reactivestax.active.life.canada.constant.Message;
 import io.reactivestax.active.life.canada.constant.TestData;
 import io.reactivestax.active.life.canada.dto.*;
 import io.reactivestax.active.life.canada.entity.*;
+import io.reactivestax.active.life.canada.enums.AvailableForEnrollment;
 import io.reactivestax.active.life.canada.enums.PreferredModeOfCommunication;
 import io.reactivestax.active.life.canada.model.SecurityHeader;
 import io.reactivestax.active.life.canada.repository.AccountActivationRequestRepository;
@@ -96,6 +97,7 @@ class ActiveLifeCanadaAppIntegrationTest {
     private void testCourseRegistrationManagement() throws JsonProcessingException {
         testAddToCart();
         testPayForCart();
+        testAddToWaitlist();
         testGetRegisteredCourses();
         testGetWaitlistedCourses();
         testGetDashboard();
@@ -230,6 +232,31 @@ class ActiveLifeCanadaAppIntegrationTest {
         assertThat(successfulResponse.getMessage()).isEqualTo(Message.PAID_FOR_CART);
     }
 
+    private void testAddToWaitlist() throws JsonProcessingException {
+        FamilyMember familyMember = familyMemberRepository.findAll().get(0);
+        OfferedCourse offeredCourse = offeredCourseRepository.findAll().get(0);
+        offeredCourse.setAvailableForEnrollment(AvailableForEnrollment.WAITLIST_OPEN);
+       offeredCourseRepository.save(offeredCourse);
+
+        CourseEnrollmentWaitlistDto courseEnrollmentWaitlistDto = CourseEnrollmentWaitlistDto.builder()
+                .familyMemberLoginId(familyMember.getMemberLoginId())
+                .offeredCourseBarCode(offeredCourse.getBarCode().toString())
+                .build();
+
+        Response response = given().log().all()
+                .header(securityHeader, objectMapper.writeValueAsString(securityHeaderObject))
+                .body(courseEnrollmentWaitlistDto)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .post(baseUrl + Endpoints.WAITLISTED_COURSES)
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .extract().response();
+
+        SuccessfulResponse successfulResponse = response.as(SuccessfulResponse.class);
+        assertThat(successfulResponse).isNotNull();
+        assertThat(successfulResponse.getMessage()).isEqualTo(Message.ADDED_TO_WAITLIST);
+    }
+
     private void testGetRegisteredCourses() {
         Response response = given().header(securityHeader, securityHeaderObject).log().all().when().get(Endpoints.BASE_ENDPOINT + Endpoints.REGISTERED_COURSES).then().log().all().statusCode(HttpStatus.OK.value()).extract().response();
 
@@ -243,7 +270,7 @@ class ActiveLifeCanadaAppIntegrationTest {
 
         List<OfferedCourseWaitlist> offeredCourseWaitlist = response.jsonPath().getList(".", OfferedCourseWaitlist.class);
         assertThat(offeredCourseWaitlist).isNotNull();
-        assertEquals(0, offeredCourseWaitlist.size());
+        assertEquals(1, offeredCourseWaitlist.size());
     }
 
     private void testGetDashboard() {
@@ -252,7 +279,7 @@ class ActiveLifeCanadaAppIntegrationTest {
         DashboardDto dashboardDto = response.as(DashboardDto.class);
         assertThat(dashboardDto).isNotNull();
         assertEquals(1, dashboardDto.getRegisteredCourses().size());
-        assertEquals(0, dashboardDto.getWaitlistedCourses().size());
+        assertEquals(1, dashboardDto.getWaitlistedCourses().size());
     }
 
     private void testWithdrawFromCourse() {
