@@ -24,12 +24,12 @@ public class PaymentService {
     private String baseUrl;
 
     private final String apiKey;
+    private final RestTemplate restTemplate;
 
-    public PaymentService(@Value("${stripe.api.key}") String apiKey) {
+    public PaymentService(@Value("${stripe.api.key}") String apiKey, RestTemplate restTemplate) {
         this.apiKey = apiKey;
+        this.restTemplate = restTemplate;
     }
-
-    private final RestTemplate restTemplate = new RestTemplate();
 
     public void createPaymentIntentAndConfirm(Integer amount, String paymentMethod) {
         HttpHeaders httpHeaders = new HttpHeaders();

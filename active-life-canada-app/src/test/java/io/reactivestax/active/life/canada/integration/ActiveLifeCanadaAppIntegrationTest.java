@@ -77,8 +77,8 @@ class ActiveLifeCanadaAppIntegrationTest {
     void testActiveLifeCanadaApp() throws JsonProcessingException {
         testAuthenticationManagement();
         testProgramManagement();
-//        testCourseRegistrationManagement();
-//        testFamilyManagement();
+        testCourseRegistrationManagement();
+        testFamilyManagement();
     }
 
     private void testAuthenticationManagement() throws JsonProcessingException {
@@ -94,7 +94,8 @@ class ActiveLifeCanadaAppIntegrationTest {
     }
 
     private void testCourseRegistrationManagement() throws JsonProcessingException {
-//        testEnrollIntoCourse();
+        testAddToCart();
+        testPayForCart();
         testGetRegisteredCourses();
         testGetWaitlistedCourses();
         testGetDashboard();
@@ -188,14 +189,46 @@ class ActiveLifeCanadaAppIntegrationTest {
         assertEquals(1, offeredCourses.size());
     }
 
-//    private void testEnrollIntoCourse() throws JsonProcessingException {
-//        OfferedCourse offeredCourse = offeredCourseRepository.findAll().get(0);
-//        Response response = given().log().all().header(securityHeader, objectMapper.writeValueAsString(securityHeaderObject)).pathParams("barCode", offeredCourse.getBarCode().toString()).pathParam("memberLoginId", TestData.MEMBER_LOGIN_ID).when().post(baseUrl + Endpoints.ENROLL_COURSE).then().log().all().statusCode(HttpStatus.OK.value()).extract().response();
-//
-//        SuccessfulResponse successfulResponse = response.as(SuccessfulResponse.class);
-//        assertThat(successfulResponse).isNotNull();
-//        assertThat(successfulResponse.getMessage()).isEqualTo(Message.ENROLLMENT_SUCCESSFUL);
-//    }
+    private void testAddToCart() throws JsonProcessingException {
+        OfferedCourse offeredCourse = offeredCourseRepository.findAll().get(0);
+        FamilyMember familyMember = familyMemberRepository.findAll().get(0);
+
+        CourseEnrollmentWaitlistDto courseEnrollmentWaitlistDto = CourseEnrollmentWaitlistDto.builder()
+                .offeredCourseBarCode(offeredCourse.getBarCode().toString())
+                .familyMemberLoginId(familyMember.getMemberLoginId()).build();
+
+        Response response = given().log().all()
+                .header(securityHeader, objectMapper.writeValueAsString(securityHeaderObject))
+                .body(courseEnrollmentWaitlistDto)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .post(baseUrl + Endpoints.OFFERED_COURSE_CART)
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .extract().response();
+
+        SuccessfulResponse successfulResponse = response.as(SuccessfulResponse.class);
+        assertThat(successfulResponse).isNotNull();
+        assertThat(successfulResponse.getMessage()).isEqualTo(Message.ADDED_TO_CART);
+    }
+
+    private void testPayForCart() throws JsonProcessingException {
+        PaymentDto paymentDto = new PaymentDto("");
+        when(restTemplate.postForEntity(any(), any(HttpEntity.class), eq(String.class)))
+                .thenReturn(new ResponseEntity<>("", HttpStatus.OK));
+
+        Response response = given().log().all()
+                .header(securityHeader, objectMapper.writeValueAsString(securityHeaderObject))
+                .body(paymentDto)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .post(baseUrl + Endpoints.CART_PAYMENT)
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .extract().response();
+
+        SuccessfulResponse successfulResponse = response.as(SuccessfulResponse.class);
+        assertThat(successfulResponse).isNotNull();
+        assertThat(successfulResponse.getMessage()).isEqualTo(Message.PAID_FOR_CART);
+    }
 
     private void testGetRegisteredCourses() {
         Response response = given().header(securityHeader, securityHeaderObject).log().all().when().get(Endpoints.BASE_ENDPOINT + Endpoints.REGISTERED_COURSES).then().log().all().statusCode(HttpStatus.OK.value()).extract().response();

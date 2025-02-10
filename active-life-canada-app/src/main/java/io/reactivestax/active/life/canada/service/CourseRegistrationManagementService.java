@@ -106,29 +106,38 @@ public class CourseRegistrationManagementService {
                                 (UUID.fromString(cartDto.getOfferedCourseBarCode()), AvailableForEnrollment.AVAILABLE)
                         .orElseThrow(() -> new InvalidRequestException
                                 (MessageFormat.format(ExceptionHandlerConst.COURSE_NO_LONGER_AVAILABLE, cartDto.getOfferedCourseBarCode())));
-                if (familyCourseRegistrationRepository.existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseIdAndIsWithdrawn
-                        (offeredCourse.getOfferedCourseId(), familyMember.getFamilyMemberId(), false))
-                    throw new InvalidRequestException(ExceptionHandlerConst.ALREADY_ENROLLED);
-                FamilyCourseRegistration familyCourseRegistration = FamilyCourseRegistration.builder()
-                        .enrollmentDate(LocalDate.now())
-                        .cost(getFees(offeredCourse, familyMember).getCourseFee())
-                        .offeredCourse(offeredCourse)
-                        .familyMember(familyMember)
-                        .enrollmentActorId(UUID.fromString(loggedInMemberId))
-                        .withdrawnCredits(0)
-                        .isWithdrawn(false)
-                        .build();
+                checkIfRegistrationExists(offeredCourse, familyMember);
+                FamilyCourseRegistration familyCourseRegistration = getFamilyCourseRegistrationEntity
+                        (offeredCourse, familyMember, loggedInMemberId);
                 asyncJobsService.checkAndUpdateCourseAvailabilityToWaitlist(offeredCourse);
                 asyncJobsService.removeEntryFromWaitlistIfExists(offeredCourse.getOfferedCourseId(), familyMember.getFamilyMemberId());
                 return familyCourseRegistration;
             }).toList();
             int totalCost = familyCourseRegistrationList.stream()
-                    .mapToInt(FamilyCourseRegistration::getCost)
-                    .sum();
+                    .mapToInt(FamilyCourseRegistration::getCost).sum();
             paymentService.createPaymentIntentAndConfirm(totalCost, paymentDto.getPaymentMethodId());
             familyCourseRegistrationRepository.saveAll(familyCourseRegistrationList);
             cacheService.clearCart(loggedInMemberId);
         } else throw new InvalidRequestException(ExceptionHandlerConst.EMPTY_CART);
+    }
+
+    private void checkIfRegistrationExists(OfferedCourse offeredCourse, FamilyMember familyMember) {
+        if (familyCourseRegistrationRepository.existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseIdAndIsWithdrawn
+                (offeredCourse.getOfferedCourseId(), familyMember.getFamilyMemberId(), false))
+            throw new InvalidRequestException(ExceptionHandlerConst.ALREADY_ENROLLED);
+    }
+
+    private FamilyCourseRegistration getFamilyCourseRegistrationEntity
+            (OfferedCourse offeredCourse, FamilyMember familyMember, String loggedInMemberId) {
+        return FamilyCourseRegistration.builder()
+                .enrollmentDate(LocalDate.now())
+                .cost(getFees(offeredCourse, familyMember).getCourseFee())
+                .offeredCourse(offeredCourse)
+                .familyMember(familyMember)
+                .enrollmentActorId(UUID.fromString(loggedInMemberId))
+                .withdrawnCredits(0)
+                .isWithdrawn(false)
+                .build();
     }
 
     public void addToWaitlist(String loggedInMemberId, CourseEnrollmentWaitlistDto waitlistDto) {
