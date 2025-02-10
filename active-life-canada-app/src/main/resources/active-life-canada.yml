@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Enterprise Messaging Service
+  title: Active Life Canada
   description: |-
     
     Cities across Canada manage a variety of recreational facilities, such as community centers, sports complexes, and swimming pools, each offering programs tailored to their unique capabilities and resources. These programs, ranging from swimming and skating to fitness, dance, and cooking & nutrition, are designed to serve diverse age groups, from children and youth to seniors.
@@ -578,6 +578,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponse'
+  /courseRegistrations/payment:
+    post:
+      tags:
+        - course registration management
+      summary: Pay for enrolling into the course
+      description: Pay for course
+      operationId: payCourseRegistration
+      responses:
+        '200':
+          description: Payment successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessfulResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
   /enrollments/{enrollmentId}:
     delete:
       tags:
@@ -894,6 +914,15 @@ components:
     SearchRequest:
       type: object
       properties:
+        courseNane:
+          type: string
+          example: basketball
+        startDate:
+          type: string
+          example: 10/01/2023
+        endDate:
+          type: string
+          example: basketball
         city:
           type: string
           example: mississauga
@@ -906,17 +935,6 @@ components:
           type: string
         ageGroup:
           type: string
-        skillLevel:
-          type: string
-        programType:
-          type: string
-        schedulePreferences:
-          type: array
-          xml:
-            name: schedulePreferences
-            wrapped: true
-          items:
-            type: string
       xml:
         name: '##default'
     CourseRequest1:
