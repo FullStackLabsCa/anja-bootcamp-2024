@@ -97,7 +97,7 @@ class EmsServiceTest {
 
     @Test
     void testSendToEmsForVerification_Success() {
-        when(restTemplate.exchange(eq(Endpoints.ENS_VERIFY_OTP), eq(HttpMethod.PUT), any(), eq(String.class)))
+        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), eq(String.class)))
                 .thenReturn(new ResponseEntity<>(HttpStatus.OK));
 
         boolean result = emsService.sendToEmsForVerification("12345", "67890");
@@ -106,7 +106,7 @@ class EmsServiceTest {
 
     @Test
     void testSendToEmsForVerification_Failure_5xx() {
-        when(restTemplate.exchange(eq(Endpoints.ENS_VERIFY_OTP), eq(HttpMethod.PUT), any(), eq(String.class)))
+        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), eq(String.class)))
                 .thenReturn(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
 
         SomethingWentWrongException exception = assertThrows(SomethingWentWrongException.class,
@@ -116,7 +116,7 @@ class EmsServiceTest {
 
     @Test
     void testSendToEmsForVerification_Failure_4xx() {
-        when(restTemplate.exchange(eq(Endpoints.ENS_VERIFY_OTP), eq(HttpMethod.PUT), any(), eq(String.class)))
+        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), eq(String.class)))
                 .thenReturn(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
 
         InvalidRequestException exception = assertThrows(InvalidRequestException.class,

@@ -21,7 +21,7 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class EmsService {
 
-    @Value("${ems.api.baseUrl}")
+    @Value("${ems.api.base-url}")
     private String emsBaseUrl;
 
     private final RestTemplate restTemplate;

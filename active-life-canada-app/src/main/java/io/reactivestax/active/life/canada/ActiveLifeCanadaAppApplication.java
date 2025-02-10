@@ -9,5 +9,4 @@ public class ActiveLifeCanadaAppApplication {
     public static void main(String[] args) {
         SpringApplication.run(ActiveLifeCanadaAppApplication.class, args);
     }
-
 }

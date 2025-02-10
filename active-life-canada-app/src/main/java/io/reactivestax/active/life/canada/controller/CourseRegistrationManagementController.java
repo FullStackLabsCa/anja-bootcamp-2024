@@ -63,7 +63,7 @@ public class CourseRegistrationManagementController {
         SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
         this.courseRegistrationManagementService.addToWaitlist(securityHeader.getFamilyMemberId(), waitlistDto);
 
-        return ResponseEntity.ok(SuccessfulResponse.builder().message(Message.WITHDRAWN_SUCCESSFUL).build());
+        return ResponseEntity.ok(SuccessfulResponse.builder().message(Message.ADDED_TO_WAITLIST).build());
     }
 
     @GetMapping(Endpoints.WAITLISTED_COURSES)

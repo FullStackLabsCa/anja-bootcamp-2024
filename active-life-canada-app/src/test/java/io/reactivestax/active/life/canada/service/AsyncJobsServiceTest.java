@@ -56,8 +56,19 @@ class AsyncJobsServiceTest {
 
         when(accountActivationRequestRepository.save(any(AccountActivationRequest.class))).thenReturn(request);
         asyncJobsService.createAccountActivationRequestEntryAndSendToEms(familyMember);
-        verify(accountActivationRequestRepository, times(1)).save(any(AccountActivationRequest.class));
+        verify(accountActivationRequestRepository, timeout(100)).save(any(AccountActivationRequest.class));
         verify(emsService, times(1)).sendToEms(any(FamilyMember.class), anyString());
+    }
+
+    @Test
+    void testCheckAndUpdateCourseAvailability(){
+        OfferedCourse offeredCourse = OfferedCourse.builder()
+                .noOfSpots(2)
+                .familyCourseRegistrations(List.of(FamilyCourseRegistration.builder().isWithdrawn(false).build()))
+                .build();
+        doReturn(new OfferedCourse()).when(offeredCourseRepository).save(offeredCourse);
+        asyncJobsService.checkAndUpdateCourseAvailability(offeredCourse);
+        verify(offeredCourseRepository, timeout(100)).save(any(OfferedCourse.class));
     }
 
     @Test
@@ -74,7 +85,7 @@ class AsyncJobsServiceTest {
         when(offeredCourseWaitlistRepository.findAllByOfferedCourse_OfferedCourseId(offeredCourseId))
                 .thenReturn(List.of(waitlist));
         asyncJobsService.getAllWaitlistedMembersByOfferedCourseIdAndSendToEms(offeredCourseId, courseName);
-        verify(emsService, times(1)).sendToEms(any(FamilyMember.class), anyString());
+        verify(emsService, timeout(100)).sendToEms(any(FamilyMember.class), anyString());
     }
 
     @Test
@@ -83,7 +94,7 @@ class AsyncJobsServiceTest {
         UUID familyMemberId = TestData.FAMILY_MEMBER_ID_UUID;
 
         asyncJobsService.removeEntryFromWaitlistIfExists(offeredCourseId, familyMemberId);
-        verify(offeredCourseWaitlistRepository, times(1))
+        verify(offeredCourseWaitlistRepository, timeout(100))
                 .deleteFromWaitlistByOfferedCourseIdAndFamilyMemberId(offeredCourseId, familyMemberId);
     }
 
@@ -108,7 +119,7 @@ class AsyncJobsServiceTest {
 
         when(familyGroupRepository.save(any(FamilyGroup.class))).thenReturn(familyGroup);
         asyncJobsService.updateWithDrawnCreditsInFamilyGroup(familyCourseRegistration);
-        verify(familyGroupRepository, times(1)).save(any(FamilyGroup.class));
+        verify(familyGroupRepository, timeout(100)).save(any(FamilyGroup.class));
         System.out.println(familyGroup.getCredits());
         assertEquals(2600.0, familyGroup.getCredits());
     }

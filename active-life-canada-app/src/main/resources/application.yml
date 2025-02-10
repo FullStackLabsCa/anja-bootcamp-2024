@@ -1,4 +1,5 @@
-server.port: 8082
+server:
+  port: 8082
 spring:
   cache:
     type: caffeine
@@ -17,18 +18,15 @@ spring:
       idle-timeout: 30000
       connection-timeout: 20000
   jpa:
-    hibernate.ddl-auto: update
+    hibernate:
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
-        format_sql=true:
+        format_sql: true
+ems:
+  api:
+    base-url: http://localhost:8080/api/v1
 logging:
   level:
     root: INFO
-ems:
-  api:
-    baseUrl: http://localhost:8080/api/v1
-#stripe:
-#  api:
-#    baseUrl: https://api.stripe.com/v1
-#    key: ${STRIPE_SECRET_KEY}
