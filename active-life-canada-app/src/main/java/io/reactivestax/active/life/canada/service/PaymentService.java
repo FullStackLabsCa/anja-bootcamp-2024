@@ -10,7 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
@@ -54,7 +54,7 @@ public class PaymentService {
         try {
             ResponseEntity<String> stringResponseEntity = restTemplate.postForEntity((baseUrl + Endpoints.STRIPE_PAYMENT_INTENTS), requestEntity, String.class);
             log.info(String.valueOf(stringResponseEntity));
-        } catch (HttpClientErrorException ex) {
+        } catch (RestClientException ex) {
             throw new InvalidRequestException(ExceptionHandlerConst.PAYMENT_FAILED);
         }
     }

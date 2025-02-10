@@ -2,10 +2,7 @@ package io.reactivestax.active.life.canada.service;
 
 import io.reactivestax.active.life.canada.constant.ExceptionHandlerConst;
 import io.reactivestax.active.life.canada.constant.TestData;
-import io.reactivestax.active.life.canada.dto.CartResponse;
-import io.reactivestax.active.life.canada.dto.CourseEnrollmentWaitlistDto;
-import io.reactivestax.active.life.canada.dto.FamilyCourseRegistrationDetails;
-import io.reactivestax.active.life.canada.dto.OfferedCourseWaitlistDto;
+import io.reactivestax.active.life.canada.dto.*;
 import io.reactivestax.active.life.canada.entity.*;
 import io.reactivestax.active.life.canada.enums.AvailableForEnrollment;
 import io.reactivestax.active.life.canada.enums.FeeType;
@@ -53,6 +50,8 @@ class CourseRegistrationManagementServiceTest {
     private AsyncJobsService asyncJobsService;
     @MockitoBean
     private CacheService cacheService;
+    @MockitoBean
+    private PaymentService paymentService;
 
     private FamilyMember loggedInMember;
     private FamilyMember familyMember;
@@ -253,6 +252,86 @@ class CourseRegistrationManagementServiceTest {
         List<CartResponse> cart = courseRegistrationManagementService.getCart(TestData.LOGGED_IN_MEMBER_ID_STRING);
 
         assertEquals(1, cart.size());
+    }
+
+    @Test
+    void testPayForCart_Fail_EmptyCart() {
+        PaymentDto paymentDto = new PaymentDto("");
+
+        when(familyMemberRepository.findByFamilyMemberIdAndIsActive(any(UUID.class), anyBoolean()))
+                .thenReturn(Optional.of(loggedInMember));
+        when(cacheService.getCart(TestData.LOGGED_IN_MEMBER_ID_STRING)).thenReturn(List.of());
+
+        assertThrows(InvalidRequestException.class, () -> courseRegistrationManagementService
+                .payForCart(TestData.LOGGED_IN_MEMBER_ID_STRING, paymentDto));
+    }
+
+    @Test
+    void testPayForCart_Fail_CourseNotAvailable() {
+        CourseEnrollmentWaitlistDto enrollmentWaitlistDto = CourseEnrollmentWaitlistDto.builder()
+                .offeredCourseBarCode(TestData.BAR_CODE_STRING)
+                .familyMemberLoginId(TestData.MEMBER_LOGIN_ID)
+                .build();
+        PaymentDto paymentDto = new PaymentDto("");
+
+        when(familyMemberRepository.findByFamilyMemberIdAndIsActive(any(UUID.class), anyBoolean()))
+                .thenReturn(Optional.of(loggedInMember));
+        when(cacheService.getCart(TestData.LOGGED_IN_MEMBER_ID_STRING)).thenReturn(List.of(enrollmentWaitlistDto));
+        when(familyMemberRepository.findByMemberLoginIdAndIsActive(anyString(), anyBoolean()))
+                .thenReturn(Optional.of(familyMember));
+        when(offeredCourseRepository.findByBarCodeAndAvailableForEnrollment(any(UUID.class),
+                any(AvailableForEnrollment.class))).thenReturn(Optional.empty());
+
+        assertThrows(InvalidRequestException.class, () -> courseRegistrationManagementService
+                .payForCart(TestData.LOGGED_IN_MEMBER_ID_STRING, paymentDto));
+    }
+
+    @Test
+    void testPayForCart_Fail_RegistrationAlreadyExists() {
+        CourseEnrollmentWaitlistDto enrollmentWaitlistDto = CourseEnrollmentWaitlistDto.builder()
+                .offeredCourseBarCode(TestData.BAR_CODE_STRING)
+                .familyMemberLoginId(TestData.MEMBER_LOGIN_ID)
+                .build();
+        PaymentDto paymentDto = new PaymentDto("");
+
+        when(familyMemberRepository.findByFamilyMemberIdAndIsActive(any(UUID.class), anyBoolean()))
+                .thenReturn(Optional.of(loggedInMember));
+        when(cacheService.getCart(TestData.LOGGED_IN_MEMBER_ID_STRING)).thenReturn(List.of(enrollmentWaitlistDto));
+        when(familyMemberRepository.findByMemberLoginIdAndIsActive(anyString(), anyBoolean()))
+                .thenReturn(Optional.of(familyMember));
+        when(offeredCourseRepository.findByBarCodeAndAvailableForEnrollment(any(UUID.class),
+                any(AvailableForEnrollment.class))).thenReturn(Optional.of(offeredCourse));
+        when(familyCourseRegistrationRepository.existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseIdAndIsWithdrawn
+                (any(UUID.class), any(UUID.class), anyBoolean())).thenReturn(true);
+
+        assertThrows(InvalidRequestException.class, () -> courseRegistrationManagementService
+                .payForCart(TestData.LOGGED_IN_MEMBER_ID_STRING, paymentDto));
+    }
+
+    @Test
+    void testPayForCart_Success() {
+        CourseEnrollmentWaitlistDto enrollmentWaitlistDto = CourseEnrollmentWaitlistDto.builder()
+                .offeredCourseBarCode(TestData.BAR_CODE_STRING)
+                .familyMemberLoginId(TestData.MEMBER_LOGIN_ID)
+                .build();
+        PaymentDto paymentDto = new PaymentDto("");
+
+        when(familyMemberRepository.findByFamilyMemberIdAndIsActive(any(UUID.class), anyBoolean()))
+                .thenReturn(Optional.of(loggedInMember));
+        when(cacheService.getCart(TestData.LOGGED_IN_MEMBER_ID_STRING)).thenReturn(List.of(enrollmentWaitlistDto));
+        when(familyMemberRepository.findByMemberLoginIdAndIsActive(anyString(), anyBoolean()))
+                .thenReturn(Optional.of(familyMember));
+        when(offeredCourseRepository.findByBarCodeAndAvailableForEnrollment(any(UUID.class),
+                any(AvailableForEnrollment.class))).thenReturn(Optional.of(offeredCourse));
+        when(familyCourseRegistrationRepository.existsByFamilyMember_FamilyMemberIdAndOfferedCourse_OfferedCourseIdAndIsWithdrawn
+                (any(UUID.class), any(UUID.class), anyBoolean())).thenReturn(false);
+        doNothing().when(asyncJobsService).checkAndUpdateCourseAvailabilityToWaitlist(any(OfferedCourse.class));
+        doNothing().when(asyncJobsService).removeEntryFromWaitlistIfExists(any(UUID.class), any(UUID.class));
+        doNothing().when(paymentService).createPaymentIntentAndConfirm(anyInt(), anyString());
+        doReturn(List.of()).when(familyCourseRegistrationRepository).saveAll(any());
+        doNothing().when(cacheService).clearCart(anyString());
+
+        courseRegistrationManagementService.payForCart(TestData.LOGGED_IN_MEMBER_ID_STRING, paymentDto);
     }
 
     @Test
