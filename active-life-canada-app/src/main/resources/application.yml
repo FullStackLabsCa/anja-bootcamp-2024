@@ -1,6 +1,26 @@
 server:
   port: 8082
+  ssl:
+    enabled: true
+    key-store: classpath:keystore.p12
+    key-store-password: changeit
+    trust-store: classpath:truststore.p12
+    trust-store-password: changeit
+    client-auth: need
+  http2:
+    enabled: true
+springdoc:
+  show-actuator: true
+management:
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
 spring:
+  security:
+    user:
+      name: admin
+      password: password
   cache:
     type: caffeine
     cache-names: cartCache
@@ -29,7 +49,9 @@ ems:
     base-url: http://localhost:8080/api/v1
 logging:
   level:
-    root: INFO
+    root: error
+    org.springframework: info
+    org.springframework.security: trace
 stripe:
   api:
     baseUrl: https://api.stripe.com/v1
