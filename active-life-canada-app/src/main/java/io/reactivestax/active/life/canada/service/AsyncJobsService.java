@@ -9,6 +9,7 @@ import io.reactivestax.active.life.canada.repository.FamilyGroupRepository;
 import io.reactivestax.active.life.canada.repository.OfferedCourseRepository;
 import io.reactivestax.active.life.canada.repository.OfferedCourseWaitlistRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AsyncJobsService {
@@ -39,6 +41,7 @@ public class AsyncJobsService {
         AccountActivationRequest savedAccountActivationRequest = accountActivationRequestRepository.save(accountActivationRequest);
         String activationLink = MessageFormat.format(Endpoints.ACTIVATION_LINK_URL, savedAccountActivationRequest.getToken());
         String message = MessageFormat.format(Message.ACTIVATION_LINK_MESSAGE, familyMember.getName(), activationLink);
+        log.info("Activation Link: {}", message);
         emsService.sendToEms(familyMember, message);
     }
 

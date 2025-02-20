@@ -10,10 +10,14 @@ import io.reactivestax.active.life.canada.entity.FamilyMember;
 import io.reactivestax.active.life.canada.entity.LoginRequest;
 import io.reactivestax.active.life.canada.exception.InvalidRequestException;
 import io.reactivestax.active.life.canada.exception.SomethingWentWrongException;
+import io.reactivestax.active.life.canada.exception.UnauthorizedAccessException;
 import io.reactivestax.active.life.canada.repository.AccountActivationRequestRepository;
 import io.reactivestax.active.life.canada.repository.FamilyMemberRepository;
 import io.reactivestax.active.life.canada.repository.LoginRequestRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,9 +34,20 @@ public class AuthenticationManagementService {
     private final AccountActivationRequestRepository accountActivationRequestRepository;
     private final EmsService emsService;
     private final AsyncJobsService asyncJobsService;
+    private final AuthenticationManager authenticationManager;
+
+    private void authenticateFamilyMember(LoginMemberRequest loginMemberRequest) {
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken
+                    (loginMemberRequest.getUsername(), loginMemberRequest.getPassword()));
+        } catch (BadCredentialsException e) {
+            throw new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS);
+        }
+    }
 
     @Transactional
     public TokenResponseDto loginMember(LoginMemberRequest loginMemberRequest) {
+        authenticateFamilyMember(loginMemberRequest);
         String token;
         String message;
         FamilyMember familyMember = familyMemberRepository.findByMemberLoginId(loginMemberRequest.getUsername())

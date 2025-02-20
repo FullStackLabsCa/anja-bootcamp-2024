@@ -1,12 +1,12 @@
 server:
-  port: 8082
+  port: 40004
   ssl:
     enabled: true
     key-store: classpath:keystore.p12
     key-store-password: changeit
-    trust-store: classpath:truststore.p12
-    trust-store-password: changeit
-    client-auth: need
+#    trust-store: classpath:truststore.p12
+#    trust-store-password: changeit
+#    client-auth: need
   http2:
     enabled: true
 springdoc:
