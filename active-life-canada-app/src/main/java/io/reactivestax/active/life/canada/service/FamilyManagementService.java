@@ -12,6 +12,7 @@ import io.reactivestax.active.life.canada.mapper.FamilyMemberMapper;
 import io.reactivestax.active.life.canada.repository.FamilyGroupRepository;
 import io.reactivestax.active.life.canada.repository.FamilyMemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,7 @@ public class FamilyManagementService {
     private final FamilyGroupRepository familyGroupRepository;
     private final FamilyMemberMapper familyMemberMapper;
     private final AsyncJobsService asyncJobsService;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public void createFamilyMember(CreateMemberRequest createMemberRequest, String loggedInMemberId, boolean isGroupAdmin) {
@@ -35,7 +37,8 @@ public class FamilyManagementService {
         familyMember.setGroupAdmin(isGroupAdmin);
         if (isGroupAdmin) {
             FamilyGroup familyGroup = new FamilyGroup();
-            familyGroup.setFamilyPin(createMemberRequest.getPassword());
+            String encodedPassword = passwordEncoder.encode(createMemberRequest.getPassword());
+            familyGroup.setFamilyPin(encodedPassword);
             saveFamilyMemberAndSendToEms(familyMember, familyGroup);
         } else {
             FamilyMember loggedInMember =

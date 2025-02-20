@@ -9,11 +9,13 @@ import io.reactivestax.active.life.canada.service.FamilyManagementService;
 import jakarta.validation.Valid;
 import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping(Endpoints.BASE_ENDPOINT)
 @RequiredArgsConstructor

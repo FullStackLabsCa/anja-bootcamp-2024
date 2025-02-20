@@ -15,6 +15,7 @@ import io.reactivestax.active.life.canada.repository.AccountActivationRequestRep
 import io.reactivestax.active.life.canada.repository.FamilyMemberRepository;
 import io.reactivestax.active.life.canada.repository.LoginRequestRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthenticationManagementService {
@@ -51,23 +53,21 @@ public class AuthenticationManagementService {
         String token;
         String message;
         FamilyMember familyMember = familyMemberRepository.findByMemberLoginId(loginMemberRequest.getUsername())
-                .orElseThrow(() -> new InvalidRequestException(ExceptionHandlerConst.INCORRECT_USERNAME_PASSWORD));
-        String familyPin = familyMember.getFamilyGroup().getFamilyPin();
-        if (loginMemberRequest.getPassword().equals(familyPin)) {
-            token = UUID.randomUUID().toString();
-            if (familyMember.isActive()) {
-                LoginRequest loginRequest = LoginRequest.builder()
-                        .familyMemberId(familyMember.getFamilyMemberId())
-                        .loginToken(token)
-                        .build();
-                loginRequestRepository.save(loginRequest);
-                emsService.sendToEmsOtp(familyMember);
-                message = Message.SUCCESSFUL_LOGIN;
-            } else {
-                message = Message.LOGIN_INACTIVE_MEMBER;
-                asyncJobsService.createAccountActivationRequestEntryAndSendToEms(familyMember);
-            }
-        } else throw new InvalidRequestException(ExceptionHandlerConst.INCORRECT_USERNAME_PASSWORD);
+                .orElseThrow();
+        token = UUID.randomUUID().toString();
+        if (familyMember.isActive()) {
+            LoginRequest loginRequest = LoginRequest.builder()
+                    .familyMemberId(familyMember.getFamilyMemberId())
+                    .loginToken(token)
+                    .build();
+            loginRequestRepository.save(loginRequest);
+            emsService.sendToEmsOtp(familyMember);
+            message = Message.SUCCESSFUL_LOGIN;
+        } else {
+            message = Message.LOGIN_INACTIVE_MEMBER;
+            asyncJobsService.createAccountActivationRequestEntryAndSendToEms(familyMember);
+        }
+
         return TokenResponseDto.builder().token(token).message(message).build();
     }
 

@@ -29,5 +29,5 @@ public class Endpoints {
     public static final String ENS_SMS_OTP = "/otp/sms";
     public static final String ENS_EMAIL_OTP = "/otp/email";
     public static final String ENS_VERIFY_OTP = "/otp/verify";
-    public static final String ACTIVATION_LINK_URL = "http://localhost:8082/api/v1/activate/{0}";
+    public static final String ACTIVATION_LINK_URL = "https://www.infinityjain.dev:40004/api/v1/activate/{0}";
 }

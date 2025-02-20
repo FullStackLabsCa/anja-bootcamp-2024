@@ -52,6 +52,7 @@ logging:
     root: error
     org.springframework: info
     org.springframework.security: trace
+    io.reactivestax.active.life.canada: info
 stripe:
   api:
     baseUrl: https://api.stripe.com/v1
