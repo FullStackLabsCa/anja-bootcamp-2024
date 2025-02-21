@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.util.List;
 
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
+
     public JwtAuthorizationFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
     }
@@ -31,8 +33,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         }
 
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = getAuthentication(request);
-        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-
+        SecurityContext context = SecurityContextHolder.getContext();
+        context.setAuthentication(usernamePasswordAuthenticationToken);
         chain.doFilter(request, response);
     }
 

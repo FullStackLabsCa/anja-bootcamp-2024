@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,11 +46,11 @@ public class FamilyManagementController {
         return ResponseEntity.ok(SuccessfulResponse.builder().message(Message.MEMBER_UPDATED).build());
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping(value = Endpoints.MEMBER_ID, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MemberDetails> getMember(@PathVariable String memberId,
-                                                   @RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson) {
-        SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
-        MemberDetails memberDetails = this.familyManagementService.getFamilyMember(memberId, securityHeader.getFamilyMemberId());
+    public ResponseEntity<MemberDetails> getMember(@PathVariable String memberId) {
+//        SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
+        MemberDetails memberDetails = this.familyManagementService.getFamilyMember(memberId, "example36");
 
         return ResponseEntity.ok(memberDetails);
     }

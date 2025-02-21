@@ -8,6 +8,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -19,6 +20,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class AppSecurityConfig {
 
     @Bean
@@ -40,6 +42,7 @@ public class AppSecurityConfig {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests.requestMatchers(HttpMethod.PUT,
                                 Endpoints.BASE_ENDPOINT + Endpoints.OFFERED_COURSES).permitAll())
+                .authorizeHttpRequests(authorizeRequests -> authorizeRequests.anyRequest().authenticated())
                 .addFilter(new JwtAuthorizationFilter(authenticationManager))
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));

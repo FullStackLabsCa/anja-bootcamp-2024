@@ -9,7 +9,6 @@ import io.reactivestax.active.life.canada.entity.AccountActivationRequest;
 import io.reactivestax.active.life.canada.entity.FamilyMember;
 import io.reactivestax.active.life.canada.entity.LoginRequest;
 import io.reactivestax.active.life.canada.exception.InvalidRequestException;
-import io.reactivestax.active.life.canada.exception.SomethingWentWrongException;
 import io.reactivestax.active.life.canada.exception.UnauthorizedAccessException;
 import io.reactivestax.active.life.canada.repository.AccountActivationRequestRepository;
 import io.reactivestax.active.life.canada.repository.FamilyMemberRepository;
@@ -19,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +38,7 @@ public class AuthenticationManagementService {
     private final EmsService emsService;
     private final AsyncJobsService asyncJobsService;
     private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
     private void authenticateFamilyMember(LoginMemberRequest loginMemberRequest) {
         try {
@@ -75,11 +77,13 @@ public class AuthenticationManagementService {
         LoginRequest loginRequest = loginRequestRepository.findByLoginToken(twoFactorLoginRequest.getToken())
                 .orElseThrow(() -> new InvalidRequestException(ExceptionHandlerConst.INCORRECT_TOKEN_OTP));
         checkTokenForExpiry(loginRequest.getCreatedTs());
-        if (emsService.sendToEmsForVerification(loginRequest.getFamilyMemberId().toString(), twoFactorLoginRequest.getOtp())) {
-            return TokenResponseDto.builder().token(loginRequest.getFamilyMemberId().toString())
-                    .message(Message.SUCCESSFUL_LOGIN_VERIFICATION).build();
-        }
-        throw new SomethingWentWrongException(ExceptionHandlerConst.VERIFICATION_FAILED);
+//        if (emsService.sendToEmsForVerification(loginRequest.getFamilyMemberId().toString(), twoFactorLoginRequest.getOtp())) {
+        FamilyMember familyMember = familyMemberRepository.findByFamilyMemberIdAndIsActive(loginRequest.getFamilyMemberId(), true).orElseThrow();
+        String token = jwtService.generateTokenAndSetSecurityContext(familyMember.getMemberLoginId());
+        return TokenResponseDto.builder().token(token)
+                .message(Message.SUCCESSFUL_LOGIN_VERIFICATION).build();
+//        }
+//        throw new SomethingWentWrongException(ExceptionHandlerConst.VERIFICATION_FAILED);
     }
 
     @Transactional
@@ -94,5 +98,12 @@ public class AuthenticationManagementService {
     private void checkTokenForExpiry(LocalDateTime creationDateTime) {
         if (ChronoUnit.MINUTES.between(creationDateTime, LocalDateTime.now()) > 2)
             throw new InvalidRequestException(ExceptionHandlerConst.TOKEN_EXPIRED);
+    }
+
+    public String getLoggedInMemberUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) return authentication.getName();
+
+        return null;
     }
 }
