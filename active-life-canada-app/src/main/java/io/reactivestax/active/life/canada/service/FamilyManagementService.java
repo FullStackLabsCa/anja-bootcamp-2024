@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +41,7 @@ public class FamilyManagementService {
             saveFamilyMemberAndSendToEms(familyMember, familyGroup);
         } else {
             FamilyMember loggedInMember =
-                    familyMemberRepository.findByFamilyMemberIdAndIsActive(UUID.fromString(loggedInMemberId), true)
+                    familyMemberRepository.findByMemberLoginIdAndIsActive(loggedInMemberId, true)
                             .orElseThrow(() -> new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS));
             if (loggedInMember.isGroupAdmin()) {
                 FamilyGroup familyGroup = loggedInMember.getFamilyGroup();
@@ -62,7 +61,7 @@ public class FamilyManagementService {
 
     @Transactional
     public void updateFamilyMember(String memberLoginId, UpdateMemberRequest updateMemberRequest, String loggedInMemberId) {
-        FamilyMember loggedInMember = familyMemberRepository.findByFamilyMemberIdAndIsActive(UUID.fromString(loggedInMemberId), true)
+        FamilyMember loggedInMember = familyMemberRepository.findByMemberLoginIdAndIsActive(loggedInMemberId, true)
                 .orElseThrow(() -> new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS));
         if (memberLoginId.equals(loggedInMember.getMemberLoginId())) {
             convertToEntityAndUpdateFamilyMember(loggedInMember, updateMemberRequest);
@@ -80,7 +79,7 @@ public class FamilyManagementService {
     }
 
     public MemberDetails getFamilyMember(String memberLoginId, String loggedInMemberId) {
-        FamilyMember loggedInMember = familyMemberRepository.findByFamilyMemberIdAndIsActive(UUID.fromString(loggedInMemberId), true)
+        FamilyMember loggedInMember = familyMemberRepository.findByMemberLoginIdAndIsActive(loggedInMemberId, true)
                 .orElseThrow(() -> new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS));
         if (memberLoginId.equals(loggedInMember.getMemberLoginId())) {
             return getMemberDetails(loggedInMember);
@@ -101,13 +100,13 @@ public class FamilyManagementService {
 
     @Transactional
     public void deactivateFamilyMember(String memberLoginId, String loggedInMemberId) {
-        FamilyMember loggedInMember = familyMemberRepository.findByFamilyMemberIdAndIsActive(UUID.fromString(loggedInMemberId), true)
+        FamilyMember loggedInMember = familyMemberRepository.findByMemberLoginIdAndIsActive(loggedInMemberId, true)
                 .orElseThrow(() -> new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS));
         if (memberLoginId.equals(loggedInMember.getMemberLoginId())) {
             familyMemberRepository.updateIsActiveByFamilyMemberId(loggedInMember.getFamilyMemberId(), false);
         } else if (loggedInMember.isGroupAdmin()) {
             if (familyMemberRepository.existsByMemberLoginIdAndIsActiveAndFamilyGroup_FamilyGroupId
-                    (memberLoginId, true,  loggedInMember.getFamilyGroup().getFamilyGroupId())) {
+                    (memberLoginId, true, loggedInMember.getFamilyGroup().getFamilyGroupId())) {
                 familyMemberRepository.updateIsActiveByMemberLoginId(memberLoginId, false);
             } else throw new InvalidRequestException(ExceptionHandlerConst.INVALID_MEMBER_ID);
         } else throw new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS);

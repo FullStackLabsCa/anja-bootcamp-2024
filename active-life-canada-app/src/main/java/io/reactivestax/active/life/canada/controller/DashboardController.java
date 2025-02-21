@@ -1,17 +1,14 @@
 package io.reactivestax.active.life.canada.controller;
 
 import io.reactivestax.active.life.canada.constant.Endpoints;
-import io.reactivestax.active.life.canada.constant.ShortConstant;
 import io.reactivestax.active.life.canada.dto.DashboardDto;
 import io.reactivestax.active.life.canada.dto.FamilyCourseRegistrationDetails;
 import io.reactivestax.active.life.canada.dto.OfferedCourseWaitlistDto;
-import io.reactivestax.active.life.canada.model.SecurityHeader;
+import io.reactivestax.active.life.canada.service.AuthenticationManagementService;
 import io.reactivestax.active.life.canada.service.CourseRegistrationManagementService;
-import io.reactivestax.active.life.canada.util.ActiveLifeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,12 +20,11 @@ import java.util.List;
 public class DashboardController {
 
     private final CourseRegistrationManagementService courseRegistrationManagementService;
-    private final ActiveLifeUtil activeLifeUtil;
+    private final AuthenticationManagementService authenticationManagementService;
 
     @GetMapping
-    public ResponseEntity<DashboardDto> dashboard(@RequestHeader(name = ShortConstant.SECURITY_HEADER) String securityHeaderJson) {
-        SecurityHeader securityHeader = activeLifeUtil.getSecurityHeader(securityHeaderJson);
-        String loggedInMemberId = securityHeader.getFamilyMemberId();
+    public ResponseEntity<DashboardDto> dashboard() {
+        String loggedInMemberId = authenticationManagementService.getLoggedInMemberUsername();
         List<FamilyCourseRegistrationDetails> registeredCourses = courseRegistrationManagementService.getRegisteredCourses(loggedInMemberId);
         List<OfferedCourseWaitlistDto> waitlistedCourses = courseRegistrationManagementService.getWaitlistedCourses(loggedInMemberId);
 

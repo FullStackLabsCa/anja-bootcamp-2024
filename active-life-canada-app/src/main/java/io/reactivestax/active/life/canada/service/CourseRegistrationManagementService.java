@@ -42,7 +42,7 @@ public class CourseRegistrationManagementService {
 
     @Transactional
     public void addToCart(CourseEnrollmentWaitlistDto cartDto, String loggedInMemberId) {
-        FamilyMember loggedInMember = checkUnauthorizedAccess(UUID.fromString(loggedInMemberId));
+        FamilyMember loggedInMember = checkUnauthorizedAccess(loggedInMemberId);
         FamilyMember familyMember = familyMemberRepository.findByMemberLoginIdAndIsActiveAndFamilyGroup_FamilyGroupId
                         (cartDto.getFamilyMemberLoginId(), true, loggedInMember.getFamilyGroup().getFamilyGroupId())
                 .orElseThrow(() -> new InvalidRequestException(ExceptionHandlerConst.INVALID_MEMBER_ID));
@@ -52,7 +52,7 @@ public class CourseRegistrationManagementService {
                 (familyMember.getFamilyMemberId(), offeredCourse.getOfferedCourseId(), false))
             throw new InvalidRequestException(ExceptionHandlerConst.ALREADY_ENROLLED);
         switch (offeredCourse.getAvailableForEnrollment()) {
-            case AVAILABLE -> addToCartCache(loggedInMemberId, cartDto);
+            case AVAILABLE -> addToCartCache(loggedInMember.getFamilyMemberId().toString(), cartDto);
             case WAITLIST_OPEN -> throw new InvalidRequestException(ExceptionHandlerConst.ADD_TO_CART_FAILED_WAITLIST);
             case NOT_AVAILABLE ->
                     throw new InvalidRequestException(ExceptionHandlerConst.ADD_TO_CART_FAILED_NOT_AVAILABLE);
@@ -64,8 +64,9 @@ public class CourseRegistrationManagementService {
         log.info("Cache size for member - {} is {}", enrollmentActorID, cartDtoList.size());
     }
 
-    public List<CartResponse> getCart(String loggedInMemberId) {
-        checkUnauthorizedAccess(UUID.fromString(loggedInMemberId));
+    public List<CartResponse> getCart(String loggedInMemberLoginId) {
+        FamilyMember loggedInFamilyMember = checkUnauthorizedAccess(loggedInMemberLoginId);
+        String loggedInMemberId = loggedInFamilyMember.getFamilyMemberId().toString();
         List<CourseEnrollmentWaitlistDto> cart = cacheService.getCart(loggedInMemberId);
         return cart.stream().map(cartDto -> {
             CartResponse cartResponse = new CartResponse();
@@ -95,8 +96,9 @@ public class CourseRegistrationManagementService {
                 .findFirst().orElseThrow(() -> new InvalidRequestException(exceptionMessage));
     }
 
-    public void payForCart(String loggedInMemberId, PaymentDto paymentDto) {
-        checkUnauthorizedAccess(UUID.fromString(loggedInMemberId));
+    public void payForCart(String loggedInMemberLoginId, PaymentDto paymentDto) {
+        FamilyMember loggedInFamilyMember = checkUnauthorizedAccess(loggedInMemberLoginId);
+        String loggedInMemberId = loggedInFamilyMember.getFamilyMemberId().toString();
         List<CourseEnrollmentWaitlistDto> cart = cacheService.getCart(loggedInMemberId);
         if (!cart.isEmpty()) {
             List<FamilyCourseRegistration> familyCourseRegistrationList = cart.stream().map(cartDto -> {
@@ -141,7 +143,7 @@ public class CourseRegistrationManagementService {
     }
 
     public void addToWaitlist(String loggedInMemberId, CourseEnrollmentWaitlistDto waitlistDto) {
-        FamilyMember loggedInMember = checkUnauthorizedAccess(UUID.fromString(loggedInMemberId));
+        FamilyMember loggedInMember = checkUnauthorizedAccess(loggedInMemberId);
         FamilyMember familyMember = familyMemberRepository.findByMemberLoginIdAndIsActive
                 (waitlistDto.getFamilyMemberLoginId(), true).orElseThrow();
         OfferedCourse offeredCourse = offeredCourseRepository.findByBarCodeAndAvailableForEnrollment
@@ -165,16 +167,16 @@ public class CourseRegistrationManagementService {
     }
 
     public List<FamilyCourseRegistrationDetails> getRegisteredCourses(String loggedInMemberId) {
-        UUID loggedInMemberIdUUID = UUID.fromString(loggedInMemberId);
-        checkUnauthorizedAccess(loggedInMemberIdUUID);
+        FamilyMember loggedInFamilyMember = checkUnauthorizedAccess(loggedInMemberId);
+        UUID loggedInMemberIdUUID = loggedInFamilyMember.getFamilyMemberId();
         List<FamilyCourseRegistration> familyCourseRegistrationList = familyCourseRegistrationRepository
                 .findAllByEnrollmentActorIdOrFamilyMember_FamilyMemberId(loggedInMemberIdUUID, loggedInMemberIdUUID);
         return familyCourseRegistrationMapper.toDtoList(familyCourseRegistrationList);
     }
 
     public List<OfferedCourseWaitlistDto> getWaitlistedCourses(String loggedInMemberId) {
-        UUID loggedInMemberIdUUID = UUID.fromString(loggedInMemberId);
-        checkUnauthorizedAccess(loggedInMemberIdUUID);
+        FamilyMember loggedInFamilyMember = checkUnauthorizedAccess(loggedInMemberId);
+        UUID loggedInMemberIdUUID = loggedInFamilyMember.getFamilyMemberId();
         List<OfferedCourseWaitlist> offeredCourseWaitlist = offeredCourseWaitlistRepository
                 .findAllByEnrollmentActorIdOrFamilyMember_FamilyMemberId(loggedInMemberIdUUID, loggedInMemberIdUUID);
         return offeredCourseWaitlistMapper.toDtoList(offeredCourseWaitlist);
@@ -182,8 +184,8 @@ public class CourseRegistrationManagementService {
 
     @Transactional
     public void withdrawFromCourse(String familyCourseRegistrationId, String loggedInMemberId) {
-        UUID loggedInMemberIdUUID = UUID.fromString(loggedInMemberId);
-        checkUnauthorizedAccess(loggedInMemberIdUUID);
+        FamilyMember loggedInFamilyMember = checkUnauthorizedAccess(loggedInMemberId);
+        UUID loggedInMemberIdUUID = loggedInFamilyMember.getFamilyMemberId();
         FamilyCourseRegistration familyCourseRegistration = familyCourseRegistrationRepository
                 .findByFamilyCourseRegistrationIdAndIsWithdrawnFalseAndEnrollmentActorIdOrFamilyMember_FamilyMemberId(
                         UUID.fromString(familyCourseRegistrationId), loggedInMemberIdUUID, loggedInMemberIdUUID)
@@ -198,8 +200,8 @@ public class CourseRegistrationManagementService {
                 offeredCourse.getCourse().getName());
     }
 
-    private FamilyMember checkUnauthorizedAccess(UUID loggedInMemberIdUUID) {
-        return familyMemberRepository.findByFamilyMemberIdAndIsActive(loggedInMemberIdUUID, true)
+    private FamilyMember checkUnauthorizedAccess(String loggedInMemberId) {
+        return familyMemberRepository.findByMemberLoginIdAndIsActive(loggedInMemberId, true)
                 .orElseThrow(() -> new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS));
     }
 }

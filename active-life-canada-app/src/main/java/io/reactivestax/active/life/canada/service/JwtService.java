@@ -21,7 +21,7 @@ public class JwtService {
     private final UserService userService;
 
     private static final Function<GrantedAuthority, String> authToRoleFn =
-            authority -> authority.getAuthority().replace("ROLE_", "").toLowerCase();
+            authority -> authority.getAuthority().replace(SecurityConstants.ROLE_PREFIX, "").toLowerCase();
 
     public String generateToken(String username) {
         UserDetails userDetails = userService.loadUserByUsername(username);

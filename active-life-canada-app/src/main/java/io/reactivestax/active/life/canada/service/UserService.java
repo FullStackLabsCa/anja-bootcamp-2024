@@ -18,7 +18,9 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return familyMemberRepository.findByMemberLoginId(username)
                 .stream().map(familyMember -> User.withUsername(familyMember.getMemberLoginId())
-                        .authorities("ROLE_ADMIN")
+                        .username(familyMember.getMemberLoginId())
+                        .disabled(!familyMember.isActive())
+                        .authorities(familyMember.isGroupAdmin() ? "ROLE_ADMIN" : "ROLE_USER")
                         .password(familyMember.getFamilyGroup().getFamilyPin()).build())
                 .findFirst().orElse(null);
     }
