@@ -79,7 +79,7 @@ public class AuthenticationManagementService {
         checkTokenForExpiry(loginRequest.getCreatedTs());
 //        if (emsService.sendToEmsForVerification(loginRequest.getFamilyMemberId().toString(), twoFactorLoginRequest.getOtp())) {
         FamilyMember familyMember = familyMemberRepository.findByFamilyMemberIdAndIsActive(loginRequest.getFamilyMemberId(), true).orElseThrow();
-        String token = jwtService.generateTokenAndSetSecurityContext(familyMember.getMemberLoginId());
+        String token = jwtService.generateToken(familyMember.getMemberLoginId());
         return TokenResponseDto.builder().token(token)
                 .message(Message.SUCCESSFUL_LOGIN_VERIFICATION).build();
 //        }
