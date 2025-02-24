@@ -4,7 +4,6 @@ import io.reactivestax.ems.constant.Endpoints;
 import io.reactivestax.ems.constant.SuccessMessage;
 import io.reactivestax.ems.dto.BaseDTO;
 import io.reactivestax.ems.dto.SuccessfulResponse;
-import io.reactivestax.ems.dto.ValidatedOtpDTO;
 import io.reactivestax.ems.dto.VerifyOtpDTO;
 import io.reactivestax.ems.enums.NotificationMethod;
 import io.reactivestax.ems.service.OtpService;
@@ -60,12 +59,5 @@ public class OtpController {
         this.otpService.verifyOtp(verifyOtpDTO);
 
         return ResponseEntity.ok(SuccessfulResponse.builder().message(SuccessMessage.SUCCESS_OTP_VERIFICATION).build());
-    }
-
-    @GetMapping(value = Endpoints.STATUS_BY_CUSTOMER_ID, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ValidatedOtpDTO> statusOtp(@PathVariable String customerId) {
-        ValidatedOtpDTO validatedOtpDTO = this.otpService.status(customerId);
-
-        return ResponseEntity.ok(validatedOtpDTO);
     }
 }
