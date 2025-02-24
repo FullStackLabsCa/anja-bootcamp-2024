@@ -46,7 +46,7 @@ spring:
         format_sql: true
 ems:
   api:
-    base-url: http://localhost:8080/api/v1
+    base-url: https://localhost:8080/api/v1
 logging:
   level:
     root: error
