@@ -26,11 +26,7 @@ spring:
     password: artemis
     ens-queue: ens_active_life_queue
     otp-queue: otp_active_life_queue
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: https://dev-37986354.okta.com/oauth2/ausnnzdxqjh4t3iwt5d7/v1/keys
+  security.oauth2.resourceserver.jwt.jwk-set-uri: ${JWK_URI}
 application:
   properties:
     otp:

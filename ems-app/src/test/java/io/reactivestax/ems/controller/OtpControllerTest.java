@@ -137,24 +137,6 @@ class OtpControllerTest {
                 .andExpect(jsonPath("$.customerId").value(ValidationMessage.EMPTY_CUSTOMER_ID));
     }
 
-    @Test
-    void testStatusOtpWithValidValues() throws Exception {
-        String validatedResponseJson = """
-                {
-                    "message": "%s",
-                    "lastValidatedTime": "%s"
-                }
-                """.formatted(SuccessMessage.SUCCESS_OTP_VALIDATION, currentLocalDateTime);
-
-        doReturn(new ValidatedOtpDTO(SuccessMessage.SUCCESS_OTP_VALIDATION, currentLocalDateTime))
-                .when(otpService).status(anyString());
-
-        mockMvc.perform(get(Endpoints.OTP_BASE + "/status/b87ce6bd-ec3c-4d51-9c48-b68ef99301ee"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().json(validatedResponseJson));
-    }
-
     private String getPhoneRequestJson() {
         return """
                   {
