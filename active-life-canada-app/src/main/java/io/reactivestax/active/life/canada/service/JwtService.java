@@ -8,9 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -24,7 +24,7 @@ import java.util.function.Function;
 public class JwtService {
 
     private final UserService userService;
-    private final AuthorizedClientServiceOAuth2AuthorizedClientManager authorizedClientServiceOAuth2AuthorizedClientManager;
+    private final OAuth2AuthorizedClientManager authorizedClientManager;
 
     private static final Function<GrantedAuthority, String> authToRoleFn =
             authority -> authority.getAuthority().replace(SecurityConstants.ROLE_PREFIX, "").toLowerCase();
@@ -45,7 +45,7 @@ public class JwtService {
 
     public String getAccessToken() {
         Optional<OAuth2AuthorizedClient> oAuth2AuthorizedClientOptional =
-                Optional.ofNullable(authorizedClientServiceOAuth2AuthorizedClientManager.authorize(
+                Optional.ofNullable(authorizedClientManager.authorize(
                         OAuth2AuthorizeRequest.withClientRegistrationId(ShortConstant.OKTA)
                                 .principal(ShortConstant.CLIENT).build()
                 ));
