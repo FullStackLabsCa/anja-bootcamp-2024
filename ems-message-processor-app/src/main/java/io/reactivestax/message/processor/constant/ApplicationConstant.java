@@ -4,5 +4,5 @@ public class ApplicationConstant {
     private ApplicationConstant() {
     }
 
-    public static final String OTP_MESSAGE = "Hello, your scotia bank otp is: ";
+    public static final String OTP_MESSAGE = "Hello, your otp active life login otp is: ";
 }
