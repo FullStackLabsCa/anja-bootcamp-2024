@@ -9,6 +9,7 @@ import io.reactivestax.active.life.canada.entity.AccountActivationRequest;
 import io.reactivestax.active.life.canada.entity.FamilyMember;
 import io.reactivestax.active.life.canada.entity.LoginRequest;
 import io.reactivestax.active.life.canada.exception.InvalidRequestException;
+import io.reactivestax.active.life.canada.exception.SomethingWentWrongException;
 import io.reactivestax.active.life.canada.exception.UnauthorizedAccessException;
 import io.reactivestax.active.life.canada.repository.AccountActivationRequestRepository;
 import io.reactivestax.active.life.canada.repository.FamilyMemberRepository;
@@ -42,8 +43,7 @@ public class AuthenticationManagementService {
 
     private void authenticateFamilyMember(LoginMemberRequest loginMemberRequest) {
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken
-                    (loginMemberRequest.getUsername(), loginMemberRequest.getPassword()));
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginMemberRequest.getUsername(), loginMemberRequest.getPassword()));
         } catch (BadCredentialsException e) {
             throw new UnauthorizedAccessException(ExceptionHandlerConst.UNAUTHORIZED_ACCESS);
         }
@@ -54,14 +54,10 @@ public class AuthenticationManagementService {
         authenticateFamilyMember(loginMemberRequest);
         String token;
         String message;
-        FamilyMember familyMember = familyMemberRepository.findByMemberLoginId(loginMemberRequest.getUsername())
-                .orElseThrow();
+        FamilyMember familyMember = familyMemberRepository.findByMemberLoginId(loginMemberRequest.getUsername()).orElseThrow();
         token = UUID.randomUUID().toString();
         if (familyMember.isActive()) {
-            LoginRequest loginRequest = LoginRequest.builder()
-                    .familyMemberId(familyMember.getFamilyMemberId())
-                    .loginToken(token)
-                    .build();
+            LoginRequest loginRequest = LoginRequest.builder().familyMemberId(familyMember.getFamilyMemberId()).loginToken(token).build();
             loginRequestRepository.save(loginRequest);
             emsService.sendToEmsOtp(familyMember);
             message = Message.SUCCESSFUL_LOGIN;
@@ -74,23 +70,19 @@ public class AuthenticationManagementService {
     }
 
     public TokenResponseDto twoFactorLogin(TwoFactorLoginRequest twoFactorLoginRequest) {
-        LoginRequest loginRequest = loginRequestRepository.findByLoginToken(twoFactorLoginRequest.getToken())
-                .orElseThrow(() -> new InvalidRequestException(ExceptionHandlerConst.INCORRECT_TOKEN_OTP));
+        LoginRequest loginRequest = loginRequestRepository.findByLoginToken(twoFactorLoginRequest.getToken()).orElseThrow(() -> new InvalidRequestException(ExceptionHandlerConst.INCORRECT_TOKEN_OTP));
         checkTokenForExpiry(loginRequest.getCreatedTs());
-//        if (emsService.sendToEmsForVerification(loginRequest.getFamilyMemberId().toString(), twoFactorLoginRequest.getOtp())) {
-        FamilyMember familyMember = familyMemberRepository.findByFamilyMemberIdAndIsActive(loginRequest.getFamilyMemberId(), true).orElseThrow();
-        String token = jwtService.generateToken(familyMember.getMemberLoginId());
-        return TokenResponseDto.builder().token(token)
-                .message(Message.SUCCESSFUL_LOGIN_VERIFICATION).build();
-//        }
-//        throw new SomethingWentWrongException(ExceptionHandlerConst.VERIFICATION_FAILED);
+        if (emsService.sendToEmsForVerification(loginRequest.getFamilyMemberId().toString(), twoFactorLoginRequest.getOtp())) {
+            FamilyMember familyMember = familyMemberRepository.findByFamilyMemberIdAndIsActive(loginRequest.getFamilyMemberId(), true).orElseThrow();
+            String token = jwtService.generateToken(familyMember.getMemberLoginId());
+            return TokenResponseDto.builder().token(token).message(Message.SUCCESSFUL_LOGIN_VERIFICATION).build();
+        }
+        throw new SomethingWentWrongException(ExceptionHandlerConst.VERIFICATION_FAILED);
     }
 
     @Transactional
     public void activateMemberAccount(String activationToken) {
-        AccountActivationRequest accountActivationRequest = accountActivationRequestRepository.
-                findByToken(UUID.fromString(activationToken))
-                .orElseThrow(() -> new InvalidRequestException(ExceptionHandlerConst.INVALID_ACTIVATION_LINK));
+        AccountActivationRequest accountActivationRequest = accountActivationRequestRepository.findByToken(UUID.fromString(activationToken)).orElseThrow(() -> new InvalidRequestException(ExceptionHandlerConst.INVALID_ACTIVATION_LINK));
         checkTokenForExpiry(accountActivationRequest.getCreatedTs());
         familyMemberRepository.updateIsActiveByFamilyMemberId(accountActivationRequest.getFamilyMemberId(), true);
     }
