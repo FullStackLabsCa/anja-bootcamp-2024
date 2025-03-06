@@ -22,11 +22,11 @@ public class EnsMessageService {
     }
 
     public void processEnsMessage(String message) {
-        Optional<EnsMessage> ensMessageOptional = ensMessageRepository.findById(UUID.fromString(message));
-        ensMessageOptional.ifPresent(ensMessage ->
-                twilioService.sendToTwilio(ensMessage.getNotificationMethod(),
-                        ensMessage.getMessage(),
-                        ensMessage.getNotificationMethod() == NotificationMethod.EMAIL
-                                ? ensMessage.getEmail() : ensMessage.getPhone()));
+//        Optional<EnsMessage> ensMessageOptional = ensMessageRepository.findById(UUID.fromString(message));
+//        ensMessageOptional.ifPresent(ensMessage ->
+//                twilioService.sendToTwilio(ensMessage.getNotificationMethod(),
+//                        ensMessage.getMessage(),
+//                        ensMessage.getNotificationMethod() == NotificationMethod.EMAIL
+//                                ? ensMessage.getEmail() : ensMessage.getPhone()));
     }
 }

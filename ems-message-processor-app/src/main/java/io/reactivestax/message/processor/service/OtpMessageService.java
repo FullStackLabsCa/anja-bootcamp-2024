@@ -23,9 +23,9 @@ public class OtpMessageService {
 
     public void processOtpMessage(String message) {
         Optional<OtpMessage> otpMessageOptional = otpMessageRepository.findById(UUID.fromString(message));
-        otpMessageOptional.ifPresent(otpMessage -> twilioService.sendToTwilio(otpMessage.getNotificationMethod(),
-                prepareOtpMessage(otpMessage.getOtp()),
-                otpMessage.getNotificationMethod() == NotificationMethod.EMAIL ? otpMessage.getEmail() : otpMessage.getPhone()));
+//        otpMessageOptional.ifPresent(otpMessage -> twilioService.sendToTwilio(otpMessage.getNotificationMethod(),
+//                prepareOtpMessage(otpMessage.getOtp()),
+//                otpMessage.getNotificationMethod() == NotificationMethod.EMAIL ? otpMessage.getEmail() : otpMessage.getPhone()));
     }
 
     private String prepareOtpMessage(String otp) {
