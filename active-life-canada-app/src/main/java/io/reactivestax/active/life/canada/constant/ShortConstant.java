@@ -23,6 +23,10 @@ public class ShortConstant {
     public static final String SUB_CATEGORY = "subCategory";
     public static final String AGE_GROUP = "ageGroup";
     public static final String SHORT_CODE = "shortCode";
+    public static final String OKTA = "okta";
+    public static final String AUTHORIZATION = "Authorization";
+    public static final String BEARER = "Bearer ";
+    public static final String CLIENT = "Client";
 
     public static final String ENUM_DESERIALIZER_REGEX = "[\\s-]";
     public static final String ENUM_DESERIALIZER_REPLACE = "_";

@@ -2,6 +2,7 @@ package io.reactivestax.active.life.canada.service;
 
 import io.reactivestax.active.life.canada.constant.Endpoints;
 import io.reactivestax.active.life.canada.constant.ExceptionHandlerConst;
+import io.reactivestax.active.life.canada.constant.ShortConstant;
 import io.reactivestax.active.life.canada.entity.FamilyMember;
 import io.reactivestax.active.life.canada.enums.PreferredModeOfCommunication;
 import io.reactivestax.active.life.canada.exception.InvalidRequestException;
@@ -25,6 +26,7 @@ public class EmsService {
     private String emsBaseUrl;
 
     private final RestTemplate restTemplate;
+    private final JwtService jwtService;
 
     @Async
     public void sendToEms(FamilyMember familyMember, String message) {
@@ -32,6 +34,7 @@ public class EmsService {
         EmsRequest emsRequest = prepareEmsRequest(familyMember, message);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set(ShortConstant.AUTHORIZATION, jwtService.getAccessToken());
         HttpEntity<EmsRequest> request = new HttpEntity<>(emsRequest, headers);
         ResponseEntity<String> response = restTemplate.exchange(getEnsEndpoint(familyMember.getPreferredModeOfCommunication()), HttpMethod.POST, request, String.class);
         logResponseFromEms(response.getStatusCode());
@@ -43,6 +46,7 @@ public class EmsService {
         EmsRequest emsOtpRequest = prepareEmsRequest(familyMember, "");
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set(ShortConstant.AUTHORIZATION, jwtService.getAccessToken());
         HttpEntity<EmsRequest> request = new HttpEntity<>(emsOtpRequest, headers);
         ResponseEntity<String> response = restTemplate.exchange(getEnsOtpEndpoint(familyMember.getPreferredModeOfCommunication()), HttpMethod.POST, request, String.class);
         logResponseFromEms(response.getStatusCode());
@@ -53,6 +57,7 @@ public class EmsService {
         EmsVerify emsVerify = EmsVerify.builder().customerId(memberId).otp(otp).build();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set(ShortConstant.AUTHORIZATION, jwtService.getAccessToken());
         HttpEntity<EmsVerify> request = new HttpEntity<>(emsVerify, headers);
         ResponseEntity<String> response = restTemplate.exchange(emsBaseUrl + Endpoints.ENS_VERIFY_OTP, HttpMethod.PUT, request, String.class);
         logResponseFromEms(response.getStatusCode());

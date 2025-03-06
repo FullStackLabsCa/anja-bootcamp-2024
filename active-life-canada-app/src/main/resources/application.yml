@@ -4,9 +4,9 @@ server:
     enabled: true
     key-store: classpath:keystore.p12
     key-store-password: changeit
-#    trust-store: classpath:truststore.p12
-#    trust-store-password: changeit
-#    client-auth: need
+  #    trust-store: classpath:truststore.p12
+  #    trust-store-password: changeit
+  #    client-auth: need
   http2:
     enabled: true
 springdoc:
@@ -18,9 +18,18 @@ management:
       show-components: always
 spring:
   security:
-    user:
-      name: admin
-      password: password
+    oauth2:
+      client:
+        provider:
+          okta:
+            token-uri: ${TOKEN_URI}
+        registration:
+          okta:
+            authorization-grant-type: client_credentials
+            client-id: ${CLIENT_ID}
+            client-name: okta-client
+            client-secret: ${CLIENT_SECRET}
+            scope: ems.call, ems.sms, ems.email
   cache:
     type: caffeine
     cache-names: cartCache

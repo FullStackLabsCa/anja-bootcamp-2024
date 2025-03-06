@@ -42,7 +42,7 @@ public class AsyncJobsService {
         String activationLink = MessageFormat.format(Endpoints.ACTIVATION_LINK_URL, savedAccountActivationRequest.getToken());
         String message = MessageFormat.format(Message.ACTIVATION_LINK_MESSAGE, familyMember.getName(), activationLink);
         log.info("Activation Link: {}", message);
-//        emsService.sendToEms(familyMember, message);
+        emsService.sendToEms(familyMember, message);
     }
 
     @Async
