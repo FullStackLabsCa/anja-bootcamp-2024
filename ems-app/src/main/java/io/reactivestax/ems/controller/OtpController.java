@@ -15,6 +15,7 @@ import jakarta.validation.groups.Default;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +32,7 @@ public class OtpController {
 
     @PostMapping(value = Endpoints.SMS, produces = MediaType.APPLICATION_JSON_VALUE, consumes =
             MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('SCOPE_ems.sms')")
     public ResponseEntity<SuccessfulResponse> smsOtp(@Validated({SmsGroup.class, Default.class}) @RequestBody BaseDTO otpDTO) {
         this.otpService.save(otpDTO, NotificationMethod.SMS);
 
@@ -39,6 +41,7 @@ public class OtpController {
 
     @PostMapping(value = Endpoints.CALL, produces = MediaType.APPLICATION_JSON_VALUE, consumes =
             MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('SCOPE_ems.call')")
     public ResponseEntity<SuccessfulResponse> callOtp(@Validated({CallGroup.class, Default.class}) @RequestBody BaseDTO otpDTO) {
         this.otpService.save(otpDTO, NotificationMethod.CALL);
 
@@ -47,6 +50,7 @@ public class OtpController {
 
     @PostMapping(value = Endpoints.EMAIL, produces = MediaType.APPLICATION_JSON_VALUE, consumes =
             MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('SCOPE_ems.email')")
     public ResponseEntity<SuccessfulResponse> emailOtp(@Validated({EmailGroup.class, Default.class}) @RequestBody BaseDTO otpDTO) {
         this.otpService.save(otpDTO, NotificationMethod.EMAIL);
 
@@ -55,6 +59,7 @@ public class OtpController {
 
     @PutMapping(value = Endpoints.VERIFY, produces = MediaType.APPLICATION_JSON_VALUE, consumes =
             MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('SCOPE_ems.verify')")
     public ResponseEntity<SuccessfulResponse> verifyOtp(@Valid @RequestBody VerifyOtpDTO verifyOtpDTO) {
         this.otpService.verifyOtp(verifyOtpDTO);
 

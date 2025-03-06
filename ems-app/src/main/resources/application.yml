@@ -26,6 +26,11 @@ spring:
     password: artemis
     ens-queue: ens_active_life_queue
     otp-queue: otp_active_life_queue
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://dev-37986354.okta.com/oauth2/ausnnzdxqjh4t3iwt5d7/v1/keys
 application:
   properties:
     otp:
@@ -35,3 +40,9 @@ application:
       attempt-lock-period-minutes: 480
       expire-minutes: 10
       try-unlock-seconds: 10
+logging:
+  level:
+    root: error
+    org.springframework: info
+    org.springframework.security: trace
+    io.reactivestax.ems: info
