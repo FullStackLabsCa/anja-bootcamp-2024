@@ -21,7 +21,7 @@ public class RemoveDuplicates {
 
         StringBuilder stringBuilder = new StringBuilder();
         for (String st: stArray) {
-            if(!stringList.contains(st)) {
+            if(!stringList.contains(st.replaceAll("[^a-z]", ""))) {
                 stringList.add(st);
                 stringBuilder.append(st).append(" ");
             }
