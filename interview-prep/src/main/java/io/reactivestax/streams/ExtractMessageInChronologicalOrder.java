@@ -13,6 +13,5 @@ public class ExtractMessageInChronologicalOrder {
         );
 
         System.out.println(stringList.stream().sorted().map(s -> s.split(":", 4)[3]).toList());
-
     }
 }
