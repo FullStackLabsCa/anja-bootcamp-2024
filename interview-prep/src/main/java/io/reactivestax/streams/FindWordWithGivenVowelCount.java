@@ -3,6 +3,7 @@ package io.reactivestax.streams;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -29,7 +30,8 @@ public class FindWordWithGivenVowelCount {
 //                .toList());
 
         System.out.println(Arrays.stream(str.split(" "))
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.summingInt(s -> s.chars().filter(ch -> characters.contains((char) ch)).toArray().length))));
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.summingInt(s -> s.chars().filter(ch -> characters.contains((char) ch)).toArray().length)))
+                .entrySet().stream().filter(entry -> entry.getValue() == vowelCount).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
 
 }

@@ -18,6 +18,9 @@ public class SortMapByValueDesc {
         LinkedHashMap<String, Integer> collect = map.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                 .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue(), (key1, key2) -> key1, LinkedHashMap::new));
 
+        map.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (k1, k2) -> k1, LinkedHashMap::new));
+
         System.out.println(collect);
     }
 }

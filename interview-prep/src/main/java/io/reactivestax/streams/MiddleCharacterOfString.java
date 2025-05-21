@@ -5,7 +5,7 @@ import java.util.stream.IntStream;
 
 public class MiddleCharacterOfString {
     public static void main(String[] args) {
-        String s = "Education";
+        String s = "Educaation";
 //        String s = "Travel";
 
         System.out.println(IntStream.range(0, s.length()).filter(index -> s.length() % 2 == 0 ?
