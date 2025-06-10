@@ -40,25 +40,14 @@ public class TaskService {
     }
 
     public static Map<String, LocalDate> busiestDayPerDepartment(List<Task> tasks) {
-        Map<String, Map<LocalDate, Long>> grouped = tasks.stream()
-                .collect(Collectors.groupingBy(Task::getDepartment,
-                        Collectors.groupingBy(Task::getCompletedDate, Collectors.counting())));
-
-        Map<String, LocalDate> result = new HashMap<>();
-
-        for (Map.Entry<String, Map<LocalDate, Long>> entry : grouped.entrySet()) {
-            LocalDate busiestDate = entry.getValue().entrySet().stream()
-                    .max(Comparator.comparing(Map.Entry<LocalDate, Long>::getValue)
-                            .thenComparing(Map.Entry.<LocalDate, Long>comparingByKey().reversed()))
-                    .get()
-                    .getKey();
-
-            result.put(entry.getKey(), busiestDate);
-        }
-
-        return result;
+        return tasks.stream()
+                .collect(Collectors.groupingBy(Task::getDepartment, Collectors.groupingBy(Task::getCompletedDate, Collectors.counting())))
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().entrySet().stream()
+                .max(Comparator.comparing(Map.Entry<LocalDate, Long>::getValue)
+                        .thenComparing(Map.Entry.<LocalDate, Long>comparingByKey().reversed()))
+                .get()
+                .getKey()));
     }
-
-
-
 }

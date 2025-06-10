@@ -12,7 +12,7 @@ class TaskServiceTest {
     private List<Task> tasks;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         tasks = Arrays.asList(
                 new Task("T1", "E1", "HR", LocalDate.of(2023, 1, 1), 30, TaskStatus.COMPLETED),
                 new Task("T2", "E1", "HR", LocalDate.of(2023, 1, 2), 40, TaskStatus.CANCELLED),
