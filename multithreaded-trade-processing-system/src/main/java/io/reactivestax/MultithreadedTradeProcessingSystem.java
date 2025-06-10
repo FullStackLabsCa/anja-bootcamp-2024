@@ -168,7 +168,7 @@ public class MultithreadedTradeProcessingSystem {
                 }
             } else {
                 System.out.println("At t = " + schedulerRunCount * 3 + "s");
-                aggregationMap.entrySet().stream().forEach(entry -> System.out.println(entry.getKey() + " -> " + entry.getValue()));
+                aggregationMap.forEach((key, value) -> System.out.println(key + " -> " + value));
                 schedulerRunCount++;
             }
         }
