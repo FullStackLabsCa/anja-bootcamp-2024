@@ -41,12 +41,11 @@ public class TaskService {
 
     public static Map<String, LocalDate> busiestDayPerDepartment(List<Task> tasks) {
         return tasks.stream()
-                .collect(Collectors.groupingBy(Task::getDepartment, Collectors.groupingBy(Task::getCompletedDate, Collectors.counting())))
+                .collect(Collectors.groupingBy(Task::getDepartment, Collectors.groupingBy(Task::getCompletedDate, Collectors.summingInt(Task::getDurationInMinutes))))
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().entrySet().stream()
-                .max(Comparator.comparing(Map.Entry<LocalDate, Long>::getValue)
-                        .thenComparing(Map.Entry.<LocalDate, Long>comparingByKey().reversed()))
+                .max(Comparator.comparing(Map.Entry<LocalDate, Integer>::getValue))
                 .get()
                 .getKey()));
     }

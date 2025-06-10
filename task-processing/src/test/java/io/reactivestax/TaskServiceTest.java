@@ -59,7 +59,7 @@ class TaskServiceTest {
     void testBusiestDayPerDepartment() {
         Map<String, LocalDate> result = TaskService.busiestDayPerDepartment(tasks);
         System.out.println(result);
-        assertEquals(LocalDate.of(2023, 1, 1), result.get("Engineering")); // T5 only
-        assertEquals(LocalDate.of(2023, 1, 1), result.get("HR"));
+        assertEquals(LocalDate.of(2023, 1, 2), result.get("Engineering")); // T5 only
+        assertEquals(LocalDate.of(2023, 1, 2), result.get("HR"));
     }
 }
